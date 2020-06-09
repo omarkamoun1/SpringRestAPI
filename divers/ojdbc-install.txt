@@ -1,0 +1,17 @@
+mvn install:install-file -Dfile=lib\ojdbc7.jar  -DgroupId=com.oracle -DartifactId=ojdbc7 -Dversion=12.1.0.1 -Dpackaging=jar
+
+
+
+mvn install:install-file -Dfile=lib\ojdbc8.jar  -DgroupId=com.oracle -DartifactId=ojdbc8 -Dversion=19.3 -Dpackaging=jar
+
+ 
+ 
+ mvn install:install-file -Dfile=libs/oci-java-sdk-full-shaded-1.5.0.jar -DgroupId=com.oracle.oci -DartifactId=oci-java-sdk -Dversion=1.5.0 -Dpackaging=jar
+ 
+ 
+mvn install:install-file -DlocalRepositoryPath=repo -DcreateChecksum=true -Dpackaging=jar -Dfile=lib/shared_data.jar -DgroupId=com.jobdiva.shared -DartifactId=jobdiva -Dversion=1.0
+
+mvn install:install-file -DcreateChecksum=true -Dpackaging=jar -Dfile=lib/shared_data.jar -DgroupId=com.jobdiva.shared -DartifactId=shared_data -Dversion=1.0
+
+
+mvn install:install-file -DcreateChecksum=true -Dpackaging=jar -Dfile=lib/robot.jar -DgroupId=com.axelon.robot -DartifactId=robot -Dversion=1.0
