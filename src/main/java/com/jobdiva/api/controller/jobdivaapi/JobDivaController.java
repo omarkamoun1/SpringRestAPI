@@ -12,6 +12,7 @@ import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.service.JobService;
 import com.jobdiva.api.service.ResumeService;
+import com.jobdiva.api.service.ProxyAPIService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -28,6 +29,9 @@ public class JobDivaController extends AbstractJobDivaController {
 	//
 	@Autowired
 	JobService		jobService;
+	//
+	@Autowired
+	ProxyAPIService	proxyAPIService;
 	
 	@RequestMapping(value = "/uploadResume", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Upload Resume")
@@ -121,4 +125,39 @@ public class JobDivaController extends AbstractJobDivaController {
 		return jobService.createJobApplication(jobDivaSession, candidateid, jobid, dateapplied, resumesource, globalid);
 		//
 	}
+	
+	
+	@ApiImplicitParams({ @ApiImplicitParam(name = "headers", required = false, allowMultiple = true, dataType = "ProxyHeader"), //
+			@ApiImplicitParam(name = "parameters", required = false, allowMultiple = true, dataType = "ProxyParameter") //
+	})
+	@RequestMapping(value = "/proxyAPI", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Proxy API")
+	public Response proxyAPI( //
+			//
+			@ApiParam(value = "Method", required = true) //
+			@RequestParam(required = true) String method, //
+			//
+			@ApiParam(value = "Url", required = true) //
+			@RequestParam(required = true) String url, //
+			//
+			@ApiParam(value = "Headers", required = false, type = "ProxyHeader", allowMultiple = true) //
+			@RequestParam(required = false) ProxyHeader[] headers, //
+			//
+			@ApiParam(value = "Parameters", required = false, type = "ProxyParameter", allowMultiple = true) //
+			@RequestParam(required = false) ProxyParameter[] parameters, //
+			//
+			//
+			@ApiParam(value = "Body", required = false) //
+			@RequestParam(required = false) String body //
+	//
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		return proxyAPIService.proxyAPI(jobDivaSession, method, url, headers, parameters, body);
+		//
+	}
+	
+	
 }
