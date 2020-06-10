@@ -103,13 +103,13 @@ public class JobController extends AbstractJobDivaController {
 			@ApiParam(value = "Ending Start date Format [MM/dd/yyyy HH:mm:ss]", required = false) //
 			@RequestParam(required = false) Date startdateto, //
 			//
-			@ApiParam(value = "zipcode", required = false) //
+			@ApiParam(value = "Zipcode", required = false) //
 			@RequestParam(required = false) String zipcode, //
 			//
-			@ApiParam(value = "zipcoderadius", required = false) //
+			@ApiParam(value = "Zipcode Radius", required = false) //
 			@RequestParam(required = false) Integer zipcodeRadius, //
 			//
-			@ApiParam(value = "countryid", required = false) //
+			@ApiParam(value = "Country ID", required = false) //
 			@RequestParam(required = false) String countryId //
 	) throws Exception {
 		//
