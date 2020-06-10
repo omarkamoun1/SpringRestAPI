@@ -24,6 +24,8 @@ import com.jobdiva.api.convertor.JsonToFrequencyTypeConverter;
 import com.jobdiva.api.convertor.JsonToGroupInvoiceByTypeConverter;
 import com.jobdiva.api.convertor.JsonToOwnerConverter;
 import com.jobdiva.api.convertor.JsonToPhoneConverter;
+import com.jobdiva.api.convertor.JsonToProxyHeaderConverter;
+import com.jobdiva.api.convertor.JsonToProxyParameterConverter;
 import com.jobdiva.api.convertor.JsonToQualificationTypeConverter;
 import com.jobdiva.api.convertor.JsonToShowOnInvoiceTypeConverter;
 import com.jobdiva.api.convertor.JsonToSkillConverter;
@@ -103,6 +105,9 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
 		registry.addConverter(new JsonToUserRoleConverter());
 		registry.addConverter(new JsonToSkillConverter());
 		registry.addConverter(new JsonToAttachmentConverter());
+		//
+		registry.addConverter(new JsonToProxyHeaderConverter());
+		registry.addConverter(new JsonToProxyParameterConverter());
 	}
 	
 	private ApiInfo metaData() {
