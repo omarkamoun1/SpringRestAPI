@@ -101,12 +101,23 @@ public class JobController extends AbstractJobDivaController {
 			@RequestParam(required = false) Date startdatefrom, //
 			//
 			@ApiParam(value = "Ending Start date Format [MM/dd/yyyy HH:mm:ss]", required = false) //
-			@RequestParam(required = false) Date startdateto //
+			@RequestParam(required = false) Date startdateto, //
+			//
+			@ApiParam(value = "zipcode", required = false) //
+			@RequestParam(required = false) String zipcode, //
+			//
+			@ApiParam(value = "zipcoderadius", required = false) //
+			@RequestParam(required = false) Integer zipcodeRadius, //
+			//
+			@ApiParam(value = "countryid", required = false) //
+			@RequestParam(required = false) String countryId //
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return jobService.searchJobs(jobDivaSession, jobId, jobdivaref, optionalref, city, state, title, contactid, companyId, companyname, status, jobtype, issuedatefrom, issuedateto, startdatefrom, startdateto);
+		return jobService.searchJobs(jobDivaSession, jobId, jobdivaref, optionalref, city, state, title, contactid, companyId, 
+				companyname, status, jobtype, issuedatefrom, issuedateto, startdatefrom, startdateto, zipcode, zipcodeRadius,
+				countryId);
 		//
 	}
 	

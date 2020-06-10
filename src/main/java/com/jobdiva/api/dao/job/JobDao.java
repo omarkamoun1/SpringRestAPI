@@ -41,6 +41,7 @@ import com.jobdiva.api.model.Skill;
 import com.jobdiva.api.model.UserRole;
 import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
+import com.jobdiva.api.model.ZipInfo;
 import com.jobdiva.api.utils.StringUtils;
 
 @Component
@@ -120,6 +121,32 @@ public class JobDao extends AbstractActivityDao {
 			}
 		});
 		return list;
+	}
+	
+	private ZipInfo getZipInfo(String zipcode, String countryId) throws Exception {
+		/* Query tzipinfo to get latitude and longitude; in order to search job by radius */
+		if (!isNotEmpty(countryId)) throw new Exception("Country ID is required when searching by zipcode.");
+		switch (countryId.trim().toUpperCase()) {
+		case "US": {
+			if (zipcode.trim().length() < 5) throw new Exception("US zipcode should have at least five digits.");
+			zipcode = zipcode.substring(0, 5);
+			break;
+		}
+		case "UK": {
+			if (zipcode.contains(" ")) zipcode = zipcode.substring(0, zipcode.indexOf(" "));
+			break;
+		}
+		case "CA": {
+			if (zipcode.trim().length() < 7) throw new Exception("CA zipcode should have at least seven digits.");
+			zipcode = zipcode.substring(0, 7);
+			break;
+		}
+		default: throw new Exception("Error: Country ID only supports US, UK, CA at the moment.");
+		}
+		String sql = "SELECT latitude, longitude FROM tzipinfo WHERE zipcode = ?";
+		Object[] params = new Object[] { zipcode };
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		return jdbcTemplate.queryForObject(sql, params, new ZipInfoRowMapper());
 	}
 	
 	private void checkJobStatus(Long teamId, Integer jobStatus) throws Exception {
@@ -243,13 +270,21 @@ public class JobDao extends AbstractActivityDao {
 	public List<Job> searchJobs(JobDivaSession jobDivaSession, Long jobId, String jobdivaref, String optionalref, String city, String[] states, String title, //
 			Long contactid, Long companyId, String companyname, Integer status, String[] jobTypes, Date issuedatefrom, //
 			Date issuedateto, Date startdatefrom, Date startdateto, //
-			String department, String skill) {
+			String department, String skill, String zipcode, Integer zipcodeRadius, String countryId) {
 		//
 		//
 		try {
+			JdbcTemplate jdbcTemplate = getJdbcTemplate();
 			/* Check if status is user-defined status in this team */
-			if (status != null)
-				checkJobStatus(jobDivaSession.getTeamId(), status);
+			if (status != null) checkJobStatus(jobDivaSession.getTeamId(), status);
+			/* If zipcode and radius exist, get longitude and latitude for search by zipcode radius */
+			String latitude = null;
+            String longitude = null;
+			if (isNotEmpty(zipcode) && zipcodeRadius != null && zipcodeRadius > 0) {
+				ZipInfo zipInfo = getZipInfo(zipcode, countryId);
+				latitude = zipInfo.getLatitude();
+				longitude = zipInfo.getLongitude();
+			}
 			//
 			//
 			ArrayList<Object> paramList = new ArrayList<Object>();
@@ -399,6 +434,28 @@ public class JobDao extends AbstractActivityDao {
 					paramList.add(Arrays.toString(contract).replaceAll("\\[|\\]| ", ""));
 				}
 			}
+			/* Search by zipcode radius */
+			if (isNotEmpty(zipcode)) {
+				if (zipcodeRadius != null && zipcodeRadius > 0 && isNotEmpty(latitude) && isNotEmpty(longitude)) {
+					// search by radius
+					sql_buff.append(" AND zip_lat BETWEEN ? - (? / 111.045) AND ?  + (? / 111.045) AND "
+							+ " zip_lon BETWEEN ? - (? / (111.045 * COS(0.0174532925 * (?)))) AND ? + (? / (111.045 * COS(0.0174532925 * (?)))) ");
+					paramList.add(latitude);
+					paramList.add(zipcodeRadius);
+					paramList.add(latitude);
+					paramList.add(zipcodeRadius);
+					paramList.add(longitude);
+					paramList.add(zipcodeRadius);
+					paramList.add(latitude);
+					paramList.add(longitude);
+					paramList.add(zipcodeRadius);
+					paramList.add(latitude);
+				} else {
+					sql_buff.append(" AND nls_upper(zipcode) like ? ");
+					paramList.add(zipcode.toUpperCase() + "%");
+				}
+			}
+			
 			sql_buff.append(" AND ROWNUM <= 10");
 			sql_buff.append(" order by dateissued desc");
 			//
@@ -406,8 +463,6 @@ public class JobDao extends AbstractActivityDao {
 			//
 			//
 			Object[] params = paramList.toArray();
-			//
-			JdbcTemplate jdbcTemplate = getJdbcTemplate();
 			//
 			List<Job> list = jdbcTemplate.query(queryString, params, new JobRowMapper());
 			//
@@ -1577,7 +1632,8 @@ public class JobDao extends AbstractActivityDao {
 			checkJobPriority(jobDivaSession, priority, priority_id);
 		}
 		/* Update Job */
-		List<Job> jobs = searchJobs(jobDivaSession, jobid, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+		List<Job> jobs = searchJobs(jobDivaSession, jobid, 
+				null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 		if (jobs == null || jobs.size() == 0) {
 			throw new Exception("Error: Job " + jobid + " is not found.");
 		} else {

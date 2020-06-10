@@ -243,7 +243,8 @@ public class CandidateNoteDao extends AbstractJobDivaDao {
 		// verify job id and set rfqid
 		if (link2AnOpenJob != null) {
 			//
-			List<Job> searchJobs = jobDao.searchJobs(jobDivaSession, link2AnOpenJob, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+			List<Job> searchJobs = jobDao.searchJobs(jobDivaSession, link2AnOpenJob, 
+					null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 			Job job = searchJobs != null && searchJobs.size() > 0 ? searchJobs.get(0) : null;
 			//
 			if (job == null || job.getTeamid() != jobDivaSession.getTeamId())
