@@ -10,11 +10,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
+import com.jobdiva.api.model.proxy.ProxyHeader;
+import com.jobdiva.api.model.proxy.ProxyParameter;
+import com.jobdiva.api.model.proxy.Response;
 import com.jobdiva.api.service.JobService;
-import com.jobdiva.api.service.ResumeService;
 import com.jobdiva.api.service.ProxyAPIService;
+import com.jobdiva.api.service.ResumeService;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 

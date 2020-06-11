@@ -1,27 +1,23 @@
 package com.jobdiva.api.model;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-
 @SuppressWarnings("serial")
 public class ZipInfo implements java.io.Serializable {
 	
-	private String					city;
-	private String					country;
-	private String					latitude;
-	private String					longitude;
-	private String					state;
-	private String					stateName;
-	private String					states100Mile;
-	private String					states10Mile;
-	private String					states20Mile;
-	private String					states30Mile;
-	private String					states40Mile;
-	private String					states50Mile;
-	private String					states5Mile;
-	private String					states75Mile;
-	private String					zipcode;
+	private String	city;
+	private String	country;
+	private String	latitude;
+	private String	longitude;
+	private String	state;
+	private String	stateName;
+	private String	states100Mile;
+	private String	states10Mile;
+	private String	states20Mile;
+	private String	states30Mile;
+	private String	states40Mile;
+	private String	states50Mile;
+	private String	states5Mile;
+	private String	states75Mile;
+	private String	zipcode;
 	
 	//
 	public String getCity() {
