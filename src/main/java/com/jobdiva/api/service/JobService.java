@@ -61,6 +61,7 @@ public class JobService {
 			return jobs;
 			//
 		} catch (Exception e) {
+			e.printStackTrace();
 			//
 			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "searchJobs", "Search Failed, " + e.getMessage());
 			//

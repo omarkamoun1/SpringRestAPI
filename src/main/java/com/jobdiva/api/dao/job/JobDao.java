@@ -143,7 +143,7 @@ public class JobDao extends AbstractActivityDao {
 		}
 		default: throw new Exception("Error: Country ID only supports US, UK, CA at the moment.");
 		}
-		String sql = "SELECT latitude, longitude FROM tzipinfo WHERE zipcode = ?";
+		String sql = "SELECT * FROM tzipinfo WHERE zipcode = ?";
 		Object[] params = new Object[] { zipcode };
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		return jdbcTemplate.queryForObject(sql, params, new ZipInfoRowMapper());
@@ -270,208 +270,200 @@ public class JobDao extends AbstractActivityDao {
 	public List<Job> searchJobs(JobDivaSession jobDivaSession, Long jobId, String jobdivaref, String optionalref, String city, String[] states, String title, //
 			Long contactid, Long companyId, String companyname, Integer status, String[] jobTypes, Date issuedatefrom, //
 			Date issuedateto, Date startdatefrom, Date startdateto, //
-			String department, String skill, String zipcode, Integer zipcodeRadius, String countryId) {
+			String department, String skill, String zipcode, Integer zipcodeRadius, String countryId) throws Exception {
 		//
-		//
-		try {
-			JdbcTemplate jdbcTemplate = getJdbcTemplate();
-			/* Check if status is user-defined status in this team */
-			if (status != null) checkJobStatus(jobDivaSession.getTeamId(), status);
-			/* If zipcode and radius exist, get longitude and latitude for search by zipcode radius */
-			String latitude = null;
-            String longitude = null;
-			if (isNotEmpty(zipcode) && zipcodeRadius != null && zipcodeRadius > 0) {
-				ZipInfo zipInfo = getZipInfo(zipcode, countryId);
-				latitude = zipInfo.getLatitude();
-				longitude = zipInfo.getLongitude();
-			}
-			//
-			//
-			ArrayList<Object> paramList = new ArrayList<Object>();
-			StringBuilder sql_buff = new StringBuilder();
-			sql_buff.append("select * from trfq where teamid = ? ");
-			paramList.add(jobDivaSession.getTeamId());
-			//
-			if (jobId != null) {
-				sql_buff.append(" and id = ? ");
-				paramList.add(jobId);
-			}
-			//
-			if (contactid != null) {
-				sql_buff.append(" and customerid = ? ");
-				paramList.add(contactid);
-			}
-			//
-			if (companyId != null) {
-				sql_buff.append(" and companyid = ? ");
-				paramList.add(companyId);
-			} else if (isNotEmpty(companyname)) {
-				List<Long> companies = getCompanyIdsByName(jobDivaSession.getTeamId(), companyname);
-				if (companies != null) {
-					if (companies.size() == 1) {
-						sql_buff.append(" and companyid = ? ");
-						paramList.add(companies.get(0));
-					} else if (companies.size() > 1) {
-						sql_buff.append(" and companyid in( ? ) ");
-						paramList.add(companies);
-					}
-				}
-			}
-			//
-			if (isNotEmpty(optionalref)) {
-				sql_buff.append(" and rfqno_team like ? "); // == -> like
-				paramList.add(optionalref + "%");
-			}
-			//
-			if (isNotEmpty(jobdivaref)) {
-				sql_buff.append(" and upper(rfqrefno) like upper(?) ");
-				paramList.add(jobdivaref + "%");
-			}
-			//
-			if (isNotEmpty(department)) {
-				sql_buff.append(" and upper(department) like upper(?) ");
-				paramList.add(department + "%");
-			}
-			//
-			if (isNotEmpty(title)) {
-				sql_buff.append(" and nls_upper(rfqtitle) like ? ");
-				paramList.add(title.toUpperCase() + "%");
-			}
-			//
-			if (isNotEmpty(city)) {
-				sql_buff.append(" and NLS_UPPER(city) like NLS_UPPER(?)||'%'");
-				paramList.add(city);
-			}
-			//
-			if (isNotEmpty(skill)) {
-				sql_buff.append(" and NLS_UPPER(SKILLS) like NLS_UPPER(?)||'%'");
-				paramList.add(skill);
-			}
-			//
-			if (states != null) {
-				if (states.length == 1) {
-					sql_buff.append(" and upper(state) = ? ");
-					String state = lookupState(states[0], "US");
-					if (state != null)
-						states[0] = state; // set as it is, if state
-											// abbreviation not found along with
-											// "US"
-					paramList.add(states[0].toUpperCase());
-				} else {
-					for (int i = 0; i < states.length; i++) {
-						String state = lookupState(states[i], "US");
-						if (state != null)
-							states[i] = state; // set as it is, if state
-												// abbreviation not found along
-												// with "US"
-						// else throw new Exception("Error: State ("+
-						// jobObj.getState() +") can not be updated due to the
-						// mapping unfound.(with countryid(US)) \r\n");
-					}
-					sql_buff.append(" and upper(state) in (select /*+ cardinality(10) */ * from THE (select cast(sf_inlist(?) as sf_inlist_table_type ) from dual ))");
-					paramList.add(Arrays.toString(states).replaceAll("\\[|\\]| ", "").toUpperCase());
-				}
-			}
-			//
-			if (isNotEmpty(city)) {
-				sql_buff.append(" and nls_upper(city) like ? ");
-				paramList.add(city.toUpperCase() + "%");
-			}
-			if (issuedatefrom != null) {
-				sql_buff.append(" and dateissued >= ?  ");
-				paramList.add(issuedatefrom);
-			}
-			if (issuedateto != null) {
-				sql_buff.append(" and dateissued <= ? ");
-				paramList.add(issuedateto);
-			}
-			if (startdatefrom != null) {
-				sql_buff.append(" and startdate >= ? ");
-				paramList.add(startdatefrom);
-			}
-			if (startdateto != null) {
-				sql_buff.append(" and startdate <= ? ");
-				paramList.add(startdateto);
-			}
-			if (status != null) {
-				sql_buff.append(" and jobstatus = ? ");
-				paramList.add(status);
-			}
-			/* Get default and user-defined position type */
-			HashMap<String, Integer> positionTypeIdMap = new HashMap<String, Integer>();
-			HashMap<Integer, String> idPositionTypeMap = new HashMap<Integer, String>();
-			//
-			assignUserDefinedPositionType(jobDivaSession.getTeamId(), positionTypeIdMap, idPositionTypeMap);
-			//
-			if (jobTypes != null) {
-				Integer[] contract = new Integer[jobTypes.length];
-				for (int i = 0; i < jobTypes.length; i++) {
-					if (jobTypes[i] != null) {
-						String jobType = jobTypes[i].toLowerCase();
-						Integer jobTypeInt = null;
-						try {
-							jobTypeInt = Integer.parseInt(jobType);
-						} catch (Exception e) {
-						}
-						if (jobTypeInt == null) {
-							if (positionTypeIdMap.containsKey(jobType))
-								contract[i] = positionTypeIdMap.get(jobType);
-							else
-								throw new Exception(String.format("Error: Position Type(%s) is invalid", jobTypes[i]));
-						} else {
-							if (idPositionTypeMap.containsKey(jobTypeInt))
-								contract[i] = jobTypeInt;
-							else
-								throw new Exception(String.format("Error: Position Type(%s) is invalid", jobTypes[i]));
-						}
-					}
-				}
-				if (jobTypes.length == 1) {
-					sql_buff.append(" and contract = ? ");
-					paramList.add(contract[0]);
-				} else {
-					sql_buff.append("and contract in (select /*+ cardinality(10) */ * from THE (select cast(sf_inlist(?) as sf_inlist_table_type ) from dual)) ");
-					paramList.add(Arrays.toString(contract).replaceAll("\\[|\\]| ", ""));
-				}
-			}
-			/* Search by zipcode radius */
-			if (isNotEmpty(zipcode)) {
-				if (zipcodeRadius != null && zipcodeRadius > 0 && isNotEmpty(latitude) && isNotEmpty(longitude)) {
-					// search by radius
-					sql_buff.append(" AND zip_lat BETWEEN ? - (? / 111.045) AND ?  + (? / 111.045) AND "
-							+ " zip_lon BETWEEN ? - (? / (111.045 * COS(0.0174532925 * (?)))) AND ? + (? / (111.045 * COS(0.0174532925 * (?)))) ");
-					paramList.add(latitude);
-					paramList.add(zipcodeRadius);
-					paramList.add(latitude);
-					paramList.add(zipcodeRadius);
-					paramList.add(longitude);
-					paramList.add(zipcodeRadius);
-					paramList.add(latitude);
-					paramList.add(longitude);
-					paramList.add(zipcodeRadius);
-					paramList.add(latitude);
-				} else {
-					sql_buff.append(" AND nls_upper(zipcode) like ? ");
-					paramList.add(zipcode.toUpperCase() + "%");
-				}
-			}
-			
-			sql_buff.append(" AND ROWNUM <= 10");
-			sql_buff.append(" order by dateissued desc");
-			//
-			String queryString = sql_buff.toString();
-			//
-			//
-			Object[] params = paramList.toArray();
-			//
-			List<Job> list = jdbcTemplate.query(queryString, params, new JobRowMapper());
-			//
-			return list;
-			//
-		} catch (Exception e) {
-			System.out.println(e);
+		List<Job> list = null;
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		/* Check if status is user-defined status in this team */
+		if (status != null) checkJobStatus(jobDivaSession.getTeamId(), status);
+		/* If zipcode and radius exist, get longitude and latitude for search by zipcode radius */
+		String latitude = null;
+        String longitude = null;
+		if (isNotEmpty(zipcode) && zipcodeRadius != null && zipcodeRadius > 0) {
+			ZipInfo zipInfo = getZipInfo(zipcode, countryId);
+			latitude = zipInfo.getLatitude();
+			longitude = zipInfo.getLongitude();
 		}
-		return null;
+		//
+		//
+		ArrayList<Object> paramList = new ArrayList<Object>();
+		StringBuilder sql_buff = new StringBuilder();
+		sql_buff.append("select * from trfq where teamid = ? ");
+		paramList.add(jobDivaSession.getTeamId());
+		//
+		if (jobId != null) {
+			sql_buff.append(" and id = ? ");
+			paramList.add(jobId);
+		}
+		//
+		if (contactid != null) {
+			sql_buff.append(" and customerid = ? ");
+			paramList.add(contactid);
+		}
+		//
+		if (companyId != null) {
+			sql_buff.append(" and companyid = ? ");
+			paramList.add(companyId);
+		} else if (isNotEmpty(companyname)) {
+			List<Long> companies = getCompanyIdsByName(jobDivaSession.getTeamId(), companyname);
+			if (companies != null) {
+				if (companies.size() == 1) {
+					sql_buff.append(" and companyid = ? ");
+					paramList.add(companies.get(0));
+				} else if (companies.size() > 1) {
+					sql_buff.append(" and companyid in( ? ) ");
+					paramList.add(companies);
+				}
+			}
+		}
+		//
+		if (isNotEmpty(optionalref)) {
+			sql_buff.append(" and rfqno_team like ? "); // == -> like
+			paramList.add(optionalref + "%");
+		}
+		//
+		if (isNotEmpty(jobdivaref)) {
+			sql_buff.append(" and upper(rfqrefno) like upper(?) ");
+			paramList.add(jobdivaref + "%");
+		}
+		//
+		if (isNotEmpty(department)) {
+			sql_buff.append(" and upper(department) like upper(?) ");
+			paramList.add(department + "%");
+		}
+		//
+		if (isNotEmpty(title)) {
+			sql_buff.append(" and nls_upper(rfqtitle) like ? ");
+			paramList.add(title.toUpperCase() + "%");
+		}
+		//
+		if (isNotEmpty(city)) {
+			sql_buff.append(" and NLS_UPPER(city) like NLS_UPPER(?)||'%'");
+			paramList.add(city);
+		}
+		//
+		if (isNotEmpty(skill)) {
+			sql_buff.append(" and NLS_UPPER(SKILLS) like NLS_UPPER(?)||'%'");
+			paramList.add(skill);
+		}
+		//
+		if (states != null) {
+			if (states.length == 1) {
+				sql_buff.append(" and upper(state) = ? ");
+				String state = lookupState(states[0], "US");
+				if (state != null)
+					states[0] = state; // set as it is, if state
+										// abbreviation not found along with
+										// "US"
+				paramList.add(states[0].toUpperCase());
+			} else {
+				for (int i = 0; i < states.length; i++) {
+					String state = lookupState(states[i], "US");
+					if (state != null)
+						states[i] = state; // set as it is, if state
+											// abbreviation not found along
+											// with "US"
+					// else throw new Exception("Error: State ("+
+					// jobObj.getState() +") can not be updated due to the
+					// mapping unfound.(with countryid(US)) \r\n");
+				}
+				sql_buff.append(" and upper(state) in (select /*+ cardinality(10) */ * from THE (select cast(sf_inlist(?) as sf_inlist_table_type ) from dual ))");
+				paramList.add(Arrays.toString(states).replaceAll("\\[|\\]| ", "").toUpperCase());
+			}
+		}
+		//
+		if (isNotEmpty(city)) {
+			sql_buff.append(" and nls_upper(city) like ? ");
+			paramList.add(city.toUpperCase() + "%");
+		}
+		if (issuedatefrom != null) {
+			sql_buff.append(" and dateissued >= ?  ");
+			paramList.add(issuedatefrom);
+		}
+		if (issuedateto != null) {
+			sql_buff.append(" and dateissued <= ? ");
+			paramList.add(issuedateto);
+		}
+		if (startdatefrom != null) {
+			sql_buff.append(" and startdate >= ? ");
+			paramList.add(startdatefrom);
+		}
+		if (startdateto != null) {
+			sql_buff.append(" and startdate <= ? ");
+			paramList.add(startdateto);
+		}
+		if (status != null) {
+			sql_buff.append(" and jobstatus = ? ");
+			paramList.add(status);
+		}
+		/* Get default and user-defined position type */
+		HashMap<String, Integer> positionTypeIdMap = new HashMap<String, Integer>();
+		HashMap<Integer, String> idPositionTypeMap = new HashMap<Integer, String>();
+		//
+		assignUserDefinedPositionType(jobDivaSession.getTeamId(), positionTypeIdMap, idPositionTypeMap);
+		//
+		if (jobTypes != null) {
+			Integer[] contract = new Integer[jobTypes.length];
+			for (int i = 0; i < jobTypes.length; i++) {
+				if (jobTypes[i] != null) {
+					String jobType = jobTypes[i].toLowerCase();
+					Integer jobTypeInt = null;
+					try {
+						jobTypeInt = Integer.parseInt(jobType);
+					} catch (Exception e) {
+					}
+					if (jobTypeInt == null) {
+						if (positionTypeIdMap.containsKey(jobType))
+							contract[i] = positionTypeIdMap.get(jobType);
+						else
+							throw new Exception(String.format("Error: Position Type(%s) is invalid", jobTypes[i]));
+					} else {
+						if (idPositionTypeMap.containsKey(jobTypeInt))
+							contract[i] = jobTypeInt;
+						else
+							throw new Exception(String.format("Error: Position Type(%s) is invalid", jobTypes[i]));
+					}
+				}
+			}
+			if (jobTypes.length == 1) {
+				sql_buff.append(" and contract = ? ");
+				paramList.add(contract[0]);
+			} else {
+				sql_buff.append("and contract in (select /*+ cardinality(10) */ * from THE (select cast(sf_inlist(?) as sf_inlist_table_type ) from dual)) ");
+				paramList.add(Arrays.toString(contract).replaceAll("\\[|\\]| ", ""));
+			}
+		}
+		/* Search by zipcode radius */
+		if (isNotEmpty(zipcode)) {
+			if (zipcodeRadius != null && zipcodeRadius > 0 && isNotEmpty(latitude) && isNotEmpty(longitude)) {
+				// search by radius
+				sql_buff.append(" AND zip_lat BETWEEN ? - (? / 111.045) AND ?  + (? / 111.045) AND "
+						+ " zip_lon BETWEEN ? - (? / (111.045 * COS(0.0174532925 * (?)))) AND ? + (? / (111.045 * COS(0.0174532925 * (?)))) ");
+				paramList.add(latitude);
+				paramList.add(zipcodeRadius);
+				paramList.add(latitude);
+				paramList.add(zipcodeRadius);
+				paramList.add(longitude);
+				paramList.add(zipcodeRadius);
+				paramList.add(latitude);
+				paramList.add(longitude);
+				paramList.add(zipcodeRadius);
+				paramList.add(latitude);
+			} else {
+				sql_buff.append(" AND nls_upper(zipcode) like ? ");
+				paramList.add(zipcode.toUpperCase() + "%");
+			}
+		}
+		
+		sql_buff.append(" AND ROWNUM <= 10");
+		sql_buff.append(" order by dateissued desc");
+		//
+		String queryString = sql_buff.toString();
+		Object[] params = paramList.toArray();
+		list = jdbcTemplate.query(queryString, params, new JobRowMapper());
+		//
+		//
+		return list;
 	}
 	
 	private List<UserRoleDef> gettUsersRoleDef(UserRole[] users) throws Exception {
