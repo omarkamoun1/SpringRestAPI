@@ -27,7 +27,9 @@ public class JobDivaAuthenticateDao extends AbstractJobDivaDao {
 	public static final int		AUTHENTICATION_FAILED		= 1;
 	public static final int		ERROR						= 2;
 	//
-	public static final Long	CONTROLLER_API_CLIENT_ID	= -2020L;;
+	public static final Long	CONTROLLER_API_CLIENT_ID	= -2020L;
+	public static final String	ATS_USERNAME				= "api.ts.user@jobdiva.com";
+	public static final String	ATS_PASSWORD				= "api.ts.password";
 	//
 	@Autowired
 	AppProperties				appProperties;
@@ -63,7 +65,19 @@ public class JobDivaAuthenticateDao extends AbstractJobDivaDao {
 		//
 		JdbcTemplate jdbcTemplate = null;
 		//
-		if (CONTROLLER_API_CLIENT_ID.equals(clientid)) {
+		if (ATS_USERNAME.equals(username) && ATS_PASSWORD.equals(password)) {
+			//
+			//
+			Integer env = 0;
+			env = getEnv(clientid);
+			if (env == 0) {
+				throw new Error("Invalid username/password");
+			}
+			//
+			return new JobDivaSession(clientid, username, password, env, 0, 0);
+			//
+			//
+		} else if (CONTROLLER_API_CLIENT_ID.equals(clientid)) {
 			//
 			Long teamId = usersTeamId.get(username);
 			if (teamId == null) {
