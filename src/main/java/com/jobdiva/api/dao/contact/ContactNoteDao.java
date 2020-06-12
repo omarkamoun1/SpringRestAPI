@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -17,12 +18,26 @@ import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.stereotype.Component;
 
 import com.jobdiva.api.dao.AbstractJobDivaDao;
+import com.jobdiva.api.dao.candidate.CandidateDao;
+import com.jobdiva.api.dao.job.JobDao;
+import com.jobdiva.api.model.Candidate;
+import com.jobdiva.api.model.Contact;
 import com.jobdiva.api.model.ContactNote;
+import com.jobdiva.api.model.Job;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.sql.JobDivaSqlLobValue;
 
 @Component
 public class ContactNoteDao extends AbstractJobDivaDao {
+	
+	@Autowired
+	ContactDao		contactDao;
+	//
+	@Autowired
+	JobDao			jobDao;
+	//
+	@Autowired
+	CandidateDao	candidateDao;
 	
 	public List<ContactNote> getContactNotes(long contactId) {
 		String sql = " Select "//
@@ -171,9 +186,35 @@ public class ContactNoteDao extends AbstractJobDivaDao {
 	public Boolean createContactNote(JobDivaSession jobDivaSession, Long contactid, String note, Long recruiterid, String action, Date actionDate, Long link2AnOpenJob, Long link2aCandidate) throws Exception {
 		//
 		//
+		//
+		Contact contact = contactDao.getContact(jobDivaSession, contactid);
+		if (contact == null)
+			throw new Exception("Error: Contact " + contactid + " is not found.");
+		//
+		//
+		//
 		if (isEmpty(action) && actionDate != null) {
 			throw new Exception("Error: 'actionDate' is invalid unless 'action' is set.");
 		}
+		//
+		if (link2AnOpenJob != null) {
+			//
+			Job job = jobDao.getJob(jobDivaSession, link2AnOpenJob);
+			//
+			if (job == null || !job.getTeamid().equals(jobDivaSession.getTeamId())) {
+				throw new Exception("Error: Invalid Job Id(" + link2AnOpenJob + ").");
+			}
+			//
+			if (job.getJobStatus() != 0)
+				throw new Exception("Error: This job(" + link2AnOpenJob + ") is no longer open.");
+		}
+		//
+		if (link2aCandidate != null) {
+			Candidate candidate = candidateDao.getCandidate(jobDivaSession, link2aCandidate);
+			if (candidate == null)
+				throw new Exception("Error: Invalid Candidate Id(" + link2aCandidate + ").");
+		}
+		//
 		//
 		LinkedHashMap<String, String> fields = new LinkedHashMap<String, String>();
 		MapSqlParameterSource parameterSource = new MapSqlParameterSource();
@@ -243,6 +284,16 @@ public class ContactNoteDao extends AbstractJobDivaDao {
 			parameterSource.addValue("datecreated", new Timestamp(System.currentTimeMillis()));
 		}
 		//
+		if (link2AnOpenJob != null) {
+			fields.put("RFQID", "rfqid");
+			parameterSource.addValue("rfqid", link2AnOpenJob);
+		}
+		//
+		if (link2aCandidate != null) {
+			fields.put("CANDIDATEID", "candidateid");
+			parameterSource.addValue("candidateid", link2aCandidate);
+		}
+		//
 		String sqlInsert = "INSERT INTO TCUSTOMERNOTES (NOTEID," + sqlInsertFields(new ArrayList<String>(fields.keySet())) + ") VALUES (CUSTOMERNOTEID.nextval ," + sqlInsertValues(fields) + ") ";
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
@@ -251,5 +302,48 @@ public class ContactNoteDao extends AbstractJobDivaDao {
 		jdbcTemplateObject.update(sqlInsert, parameterSource);
 		//
 		return true;
+	}
+	
+	public static boolean updateLatestNotes(JobDivaSession jobDivaSession, JdbcTemplate jdbcTemplate, long teamid, long contactid, Timestamp dateCreated) throws Exception {
+		String sql = "SELECT NOTEID, DATECREATED " //
+				+ " from TCUSTOMERNOTES " //
+				+ " where RECRUITER_TEAMID = ? " //
+				+ " and CUSTOMERID = ? " //
+				+ " and latestNotes = 1 " //
+				+ " order by datecreated desc ";
+		Object[] params = new Object[] { teamid, contactid };
+		List<ContactNote> latestNotesList = jdbcTemplate.query(sql, params, new RowMapper<ContactNote>() {
+			
+			@Override
+			public ContactNote mapRow(ResultSet rs, int rowNum) throws SQLException {
+				ContactNote contactNote = new ContactNote();
+				contactNote.setId(rs.getLong("NOTEID"));
+				contactNote.setDateCreated(rs.getDate("DATECREATED"));
+				//
+				//
+				//
+				return contactNote;
+			}
+		});
+		if (latestNotesList.size() >= 3) { // update latestNotes flag if
+											// there're already 3 notes
+			boolean updatedL = false;
+			for (int i = 2; i < latestNotesList.size(); i++) {
+				if (i == 2) {
+					if (latestNotesList.get(i).getDateCreated().before(dateCreated)) {
+						String sqlUpdate = "UPDATE TCUSTOMERNOTES set latestNotes = 0 where recruiterTeamid = ? and customerid = ? and id = ? ";
+						params = new Object[] { teamid, contactid, latestNotesList.get(i).getId() };
+						jdbcTemplate.update(sqlUpdate, params);
+						updatedL = true;
+					}
+				} else { // fix up if there are more than 3 latestNotes
+					String sqlUpdate = "UPDATE TCUSTOMERNOTES set latestNotes = 0 where recruiterTeamid = ? and customerid = ? and id = ? ";
+					params = new Object[] { teamid, contactid, latestNotesList.get(i).getId() };
+					jdbcTemplate.update(sqlUpdate, params);
+				}
+			}
+			return updatedL;
+		} else
+			return true;
 	}
 }

@@ -134,13 +134,10 @@ public class ContactDao extends AbstractJobDivaDao {
 				+ " a.reportsto " //
 				+ " from ";
 		//
-		sql += " TCUSTOMER a, TCUSTOMERADDRESS ca";
+		sql += " TCUSTOMER a  left join  TCUSTOMERADDRESS ca on a.teamid = ca.teamid and a.id = ca.contactid and ca.DEFAULT_ADDRESS = 1  and ca.deleted = 0";
 		//
 		sql += " where a.teamid = ? AND a.ID = ?  " //
-				+ " and a.teamid = ca.teamid "//
-				+ " and ca.DEFAULT_ADDRESS = 1 "//
-				+ " and ca.deleted = 0 "//
-				+ " and a.id = ca.contactid";
+		;
 		//
 		ArrayList<Object> paramList = new ArrayList<Object>();
 		paramList.add(jobDivaSession.getTeamId());

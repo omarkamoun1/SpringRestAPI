@@ -8,8 +8,10 @@ import io.swagger.annotations.ApiModelProperty;
 public class CompanyAddress implements java.io.Serializable {
 	
 	//
+	@ApiModelProperty(required = false, hidden = true)
 	private Long	companyId;
 	//
+	@ApiModelProperty(required = false, hidden = true)
 	private Long	teamid;
 	//
 	@ApiModelProperty(required = false, position = 0)
