@@ -43,9 +43,12 @@ public class AbstractJobDivaController {
 		if (!(authentication instanceof AnonymousAuthenticationToken)) {
 			JobDivaSession jobDivaSession = (JobDivaSession) authentication.getPrincipal();
 			if (jobDivaSession.isAccountNonExpired()) {
-				if (!checkAccountAbuse(jobDivaSession)) {
-					throw new Error("API call blocked due to excessive calls!!!");
-				}
+				//
+				// remove temporary the checkAccountAbuse
+				// if (!checkAccountAbuse(jobDivaSession)) {
+				// throw new Error("API call blocked due to excessive
+				// calls!!!");
+				// }
 				return jobDivaSession;
 			}
 		}
@@ -105,7 +108,7 @@ public class AbstractJobDivaController {
 		}
 	}
 	
-	private Boolean checkAccountAbuse(JobDivaSession jobDivaSession) {
+	protected Boolean checkAccountAbuse(JobDivaSession jobDivaSession) {
 		long leader = jobDivaSession.getLeader();
 		long teamid = jobDivaSession.getTeamId();
 		//

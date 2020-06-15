@@ -9,11 +9,6 @@ import com.jobdiva.api.model.ZipInfo;
 
 public class ZipInfoRowMapper implements RowMapper<ZipInfo> {
 	
-	private Short getShort(ResultSet rs, String fieldName) throws SQLException {
-		Integer value = rs.getInt(fieldName);
-		return value != null ? value.shortValue() : null;
-	}
-	
 	@Override
 	public ZipInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
 		ZipInfo zipInfo = new ZipInfo();
