@@ -413,7 +413,7 @@ public class ContactDao extends AbstractJobDivaDao {
 		Timestamp datecreated = new Timestamp(System.currentTimeMillis());
 		//
 		if (isNotEmpty(company)) {
-			List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, null, company, null, null, null, null, null, null, null, null, null, null, null, null, null);
+			List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, null, company, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 			if (companies.size() > 0) {
 				//
 				Company companyObj = companies.get(0);
@@ -1070,7 +1070,7 @@ public class ContactDao extends AbstractJobDivaDao {
 		}
 		//
 		if (companyid != null) {
-			List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, companyid, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+			List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, companyid, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 			//
 			if (companies.size() == 0 || companies.get(0).getTeamid().equals(jobDivaSession.getTeamId())) {
 				throw new Exception("Error: Company " + companyid + " is not found");

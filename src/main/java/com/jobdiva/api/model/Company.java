@@ -7,92 +7,141 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @SuppressWarnings("serial")
 public class Company implements java.io.Serializable {
 	
 	//
+	@JsonProperty(value = "id", index = 0)
 	private Long					id;
 	//
+	@JsonIgnore
 	private Long					teamid;
 	//
+	@JsonProperty(value = "name", index = 1)
 	private String					name;
 	//
+	@JsonProperty(value = "address1", index = 2)
 	private String					address1;
 	//
+	@JsonProperty(value = "address2", index = 3)
 	private String					address2;
 	//
+	@JsonProperty(value = "city", index = 4)
 	private String					city;
 	//
+	@JsonProperty(value = "state", index = 5)
 	private String					state;
 	//
+	@JsonProperty(value = "zipcode", index = 6)
 	private String					zipcode;
 	//
-	private String					nameIndex;
-	//
-	private String					phone;
-	//
-	private String					fax;
-	//
-	private String					url;
-	//
-	private String					email;
-	//
-	private transient Clob			submittalInstr;
-	//
-	private BigDecimal				discount;
-	//
-	private BigDecimal				discountpct;
-	//
-	private Byte					discountType;
-	//
-	private Date					dateentered;
-	//
-	private Long					parentCompanyid;
-	//
-	private String					parentCompanyName;
-	//
-	private transient Blob			logo;
-	//
-	private Boolean					refcheck;
-	//
-	private Boolean					drugtest;
-	//
-	private Boolean					backcheck;
-	//
-	private Short					maxsubmitals;
-	//
-	private Boolean					secclearance;
-	//
-	private Boolean					supplier;
-	//
-	private Long					recruiterid;
-	//
-	private String					companyType;
-	//
-	private Boolean					invoiceContactPreference;
-	//
-	private Boolean					pipelineUrlExpired;
-	//
-	private Long					paymentterms;
-	//
+	@JsonProperty(value = "country", index = 7)
 	private String					countryid;
 	//
-	private Long					compPortalid;
+	@JsonProperty(value = "phone", index = 8)
+	private String					phone;
 	//
-	private String					portalApplyemail;
+	@JsonProperty(value = "fax", index = 9)
+	private String					fax;
 	//
-	private String					compPortalname;
+	@JsonProperty(value = "email", index = 10)
+	private String					email;
 	//
-	private String					parentpath;
+	@JsonProperty(value = "url", index = 11)
+	private String					url;
 	//
+	@JsonProperty(value = "parent company id", index = 12)
+	private Long					parentCompanyid;
+	//
+	@JsonProperty(value = "parent company name", index = 13)
+	private String					parentCompanyName;
+	//
+	@JsonProperty(value = "company types", index = 14)
+	private String					companyType;
+	//
+	@JsonProperty(value = "company owners", index = 15)
 	private String					owners;
 	//
+	@JsonProperty(value = "primary contacts", index = 16)
 	private String					primaryContacts;
 	//
+	@JsonProperty(value = "sales pipeline", index = 17)
+	private String					nameIndex;
+	//
+	@JsonIgnore
+	private Short					pipelineId;
+	//
+	@JsonIgnore
+	private transient Clob			submittalInstr;
+	//
+	@JsonIgnore
+	private BigDecimal				discount;
+	//
+	@JsonIgnore
+	private BigDecimal				discountpct;
+	//
+	@JsonIgnore
+	private Byte					discountType;
+	//
+	@JsonIgnore
+	private Date					dateentered;
+	//
+	@JsonIgnore
+	private transient Blob			logo;
+	//
+	@JsonIgnore
+	private Boolean					refcheck;
+	//
+	@JsonIgnore
+	private Boolean					drugtest;
+	//
+	@JsonIgnore
+	private Boolean					backcheck;
+	//
+	@JsonIgnore
+	private Short					maxsubmitals;
+	//
+	@JsonIgnore
+	private Boolean					secclearance;
+	//
+	@JsonIgnore
+	private Boolean					supplier;
+	//
+	@JsonIgnore
+	private Long					recruiterid;
+	//
+	@JsonIgnore
+	private Boolean					invoiceContactPreference;
+	//
+	@JsonIgnore
+	private Boolean					pipelineUrlExpired;
+	//
+	@JsonIgnore
+	private Long					paymentterms;
+	//
+	//
+	@JsonIgnore
+	private Long					compPortalid;
+	//
+	@JsonIgnore
+	private String					portalApplyemail;
+	//
+	@JsonIgnore
+	private String					compPortalname;
+	//
+	@JsonIgnore
+	private String					parentpath;
+	//
+	@JsonIgnore
 	private List<CompanyAddress>	companyAddresses	= new ArrayList<CompanyAddress>();
 	//
+	@JsonIgnore
 	private List<CompanyUDF>		companyUDFs			= new ArrayList<CompanyUDF>();
 	//
+	@JsonIgnore
 	private List<FinancialsType>	financialsTypes;
 	
 	public Long getId() {
@@ -165,6 +214,14 @@ public class Company implements java.io.Serializable {
 	
 	public void setNameIndex(String nameIndex) {
 		this.nameIndex = nameIndex;
+	}
+	
+	public Short getPipelineId() {
+		return pipelineId;
+	}
+	
+	public void setPipelineId(Short pipelineId) {
+		this.pipelineId = pipelineId;
 	}
 	
 	public String getPhone() {

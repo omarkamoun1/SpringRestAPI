@@ -14,7 +14,6 @@ import com.jobdiva.api.dao.company.SearchCompanyUDFDao;
 import com.jobdiva.api.dao.company.UpdateCompanyDao;
 import com.jobdiva.api.model.Company;
 import com.jobdiva.api.model.CompanyAddress;
-import com.jobdiva.api.model.CompanyUDF;
 import com.jobdiva.api.model.FinancialsType;
 import com.jobdiva.api.model.Owner;
 import com.jobdiva.api.model.Userfield;
@@ -39,22 +38,25 @@ public class CompanyService {
 	UpdateCompanyDao	updateCompanyDao;
 	
 	public List<Company> searchForCompany(JobDivaSession jobDivaSession, Long companyId, String company, String address, String city, String state, String zip, String country, String phone, String fax, String url, String parentCompany,
-			Boolean showAll, String[] types, Long ownerIds, String division) throws Exception {
+			Boolean showAll, String[] types, Long ownerIds, String division, String salespipeline) throws Exception {
 		//
 		//
 		try {
-			List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, companyId, company, address, city, state, zip, country, phone, fax, url, parentCompany, showAll, types, ownerIds, division);
-			if (companies != null) {
-				//
-				for (Company cp : companies) {
-					List<CompanyAddress> companyAddresses = companyAddressDao.getCompanyAddresses(cp.getId(), cp.getTeamid());
-					cp.setCompanyAddresses(companyAddresses);
-					//
-					List<CompanyUDF> companyUdfs = companyUDFDao.getCompanyUDF(cp.getId(), cp.getTeamid());
-					cp.setCompanyUDFs(companyUdfs);
-				}
-				//
-			}
+			List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, companyId, company, address, city, state, zip, country, phone, fax, url, parentCompany, showAll, types, ownerIds, division, salespipeline);
+			// if (companies != null) {
+			// //
+			// for (Company cp : companies) {
+			// List<CompanyAddress> companyAddresses =
+			// companyAddressDao.getCompanyAddresses(cp.getId(),
+			// cp.getTeamid());
+			// cp.setCompanyAddresses(companyAddresses);
+			// //
+			// List<CompanyUDF> companyUdfs =
+			// companyUDFDao.getCompanyUDF(cp.getId(), cp.getTeamid());
+			// cp.setCompanyUDFs(companyUdfs);
+			// }
+			// //
+			// }
 			//
 			searchCompanyDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "searchCompany", "Search Successful ");
 			//

@@ -28,6 +28,7 @@ public class CompanyRowMapper implements RowMapper<Company> {
 		company.setUrl(rs.getString("url"));
 		company.setParentCompanyid(rs.getLong("PARENT_COMPANYID"));
 		company.setParentCompanyName(rs.getString("PARENT_COMPANY_NAME"));
+		company.setPipelineId(rs.getShort("PIPELINE_ID"));
 		//
 		//
 		return company;

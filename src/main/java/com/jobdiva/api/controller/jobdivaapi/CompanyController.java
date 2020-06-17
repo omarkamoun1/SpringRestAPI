@@ -81,14 +81,17 @@ public class CompanyController extends AbstractJobDivaController {
 			@RequestParam(required = false) Long ownerids, //
 			//
 			@ApiParam(value = "Valid values can be found through “Leader Tools” → “My Team” → “Manage Divisions”.", required = false) //
-			@RequestParam(required = false) String division//
+			@RequestParam(required = false) String division, //
+			//
+			@ApiParam(value = "Sales pipeline", required = false) //
+			@RequestParam(required = false) String salespipeline //
 	//
 	//
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return companyService.searchForCompany(jobDivaSession, companyid, company, address, city, state, zip, country, phone, fax, url, parentcompany, showall, types, ownerids, division);
+		return companyService.searchForCompany(jobDivaSession, companyid, company, address, city, state, zip, country, phone, fax, url, parentcompany, showall, types, ownerids, division,salespipeline);
 		//
 	}
 	

@@ -100,6 +100,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				antMatchers("/api/controller/saveMachineId").permitAll().//
 				antMatchers("/api/controller/getCoddlers").permitAll().//
 				antMatchers("/api/controller/getConfiguration").permitAll().//
+				antMatchers("/api/jobdiva/proxyAPI").permitAll().//
 				antMatchers(AUTH_WHITELIST).permitAll().
 				// antMatchers("/api/bi/*").hasRole("BAR").
 				// all other requests need to be authenticated

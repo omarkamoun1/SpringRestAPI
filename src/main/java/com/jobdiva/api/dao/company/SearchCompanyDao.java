@@ -2,8 +2,10 @@ package com.jobdiva.api.dao.company;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -108,7 +110,7 @@ public class SearchCompanyDao extends AbstractJobDivaDao {
 	
 	public List<Company> searchForCompany(JobDivaSession jobDivaSession, Long companyId, String company, String address, String city, String state, String zip, String country, //
 			String phone, String fax, String url, String parentCompany, Boolean showAll, //
-			String[] types, Long ownerIds, String division) throws Exception {
+			String[] types, Long ownerIds, String division, String nameIndex) throws Exception {
 		//
 		try {
 			StringBuffer errors = new StringBuffer();
@@ -209,6 +211,43 @@ public class SearchCompanyDao extends AbstractJobDivaDao {
 			if (errors.length() > 0) {
 				throw new Exception("Parameter Check Failed \r\n " + errors.toString());
 			}
+			//
+			//
+			//
+			//
+			Map<Short, String> pipelineIdNameMap = new HashMap<Short, String>();
+			Map<String, Short> pipelineNameIdMap = new HashMap<String, Short>();
+			// Pull sales pipeline values for the team
+			String sql = "SELECT id, upper(name) as name " //
+					+ " FROM tsalespipeline " //
+					+ " WHERE teamid = ? " //
+					+ " AND is_active = 1";
+			//
+			Object[] parameters = new Object[] { jobDivaSession.getTeamId() };
+			//
+			getJdbcTemplate().query(sql, parameters, new RowMapper<Boolean>() {
+				
+				@Override
+				public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
+					//
+					Short pipelineId = rs.getShort("id");
+					String pipelineName = rs.getString("name");
+					pipelineIdNameMap.put(pipelineId, pipelineName);
+					pipelineNameIdMap.put(pipelineName, pipelineId);
+					return null;
+				}
+			});
+			if (nameIndex != null && nameIndex.length() > 0) {
+				// Sales pipeline is in placeholder NameIndex; not related with
+				// name index
+				if (!pipelineNameIdMap.containsKey(nameIndex.toUpperCase()))
+					throw new Exception("Error: invalid sales pipeline " + nameIndex);
+			}
+			//
+			//
+			//
+			//
+			//
 			// Build the query
 			String select = null;
 			StringBuffer tables = new StringBuffer();
@@ -216,7 +255,7 @@ public class SearchCompanyDao extends AbstractJobDivaDao {
 			Hashtable<String, Object> params = new Hashtable<String, Object>();
 			//
 			select = "select distinct a.id, a.teamid, a.name, b.address1, b.address2, b.city, b.state, b.zipcode, b.countryid, b.phone, b.fax, " //
-					+ "b.email, b.url, a.PARENT_COMPANYID, a.PARENT_COMPANY_NAME from";
+					+ "b.email, b.url, a.PARENT_COMPANYID, a.PARENT_COMPANY_NAME , a.PIPELINE_ID from";
 			//
 			tables.append(" TCUSTOMERCOMPANY a, TCUSTOMERCOMPANYADDRESSES b");
 			//
@@ -320,6 +359,12 @@ public class SearchCompanyDao extends AbstractJobDivaDao {
 				constrains.append(")");
 			}
 			//
+			if (nameIndex != null) { // search by sales pipeline
+				Short pipelineId = pipelineNameIdMap.get(nameIndex.toUpperCase());
+				constrains.append(" AND a.PIPELINE_ID = :pipelineid ");
+				params.put("pipelineid", pipelineId);
+			}
+			//
 			constrains.append(" AND ROWNUM <= 201 ");
 			//
 			String queryString = select + tables + constrains + "  order by upper(a.name)";
@@ -330,6 +375,10 @@ public class SearchCompanyDao extends AbstractJobDivaDao {
 			//
 			if (list != null) {
 				for (Company lcalCompany : list) {
+					//
+					String pipelineName = pipelineIdNameMap.get(lcalCompany.getPipelineId());
+					lcalCompany.setNameIndex(pipelineName);
+					// company types
 					//
 					assignCompanyTypes(jobDivaSession, lcalCompany);
 					//

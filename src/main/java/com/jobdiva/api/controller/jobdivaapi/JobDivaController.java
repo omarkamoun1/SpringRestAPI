@@ -131,7 +131,6 @@ public class JobDivaController extends AbstractJobDivaController {
 		//
 	}
 	
-	
 	@ApiImplicitParams({ @ApiImplicitParam(name = "headers", required = false, allowMultiple = true, dataType = "ProxyHeader"), //
 			@ApiImplicitParam(name = "parameters", required = false, allowMultiple = true, dataType = "ProxyParameter") //
 	})
@@ -158,11 +157,7 @@ public class JobDivaController extends AbstractJobDivaController {
 	//
 	) throws Exception {
 		//
-		JobDivaSession jobDivaSession = getJobDivaSession();
-		//
-		return proxyAPIService.proxyAPI(jobDivaSession, method, url, headers, parameters, body);
+		return proxyAPIService.proxyAPI(method, url, headers, parameters, body);
 		//
 	}
-	
-	
 }

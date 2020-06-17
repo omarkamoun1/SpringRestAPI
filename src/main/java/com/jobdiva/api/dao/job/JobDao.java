@@ -124,24 +124,32 @@ public class JobDao extends AbstractActivityDao {
 	}
 	
 	private ZipInfo getZipInfo(String zipcode, String countryId) throws Exception {
-		/* Query tzipinfo to get latitude and longitude; in order to search job by radius */
-		if (!isNotEmpty(countryId)) throw new Exception("Country ID is required when searching by zipcode.");
+		/*
+		 * Query tzipinfo to get latitude and longitude; in order to search job
+		 * by radius
+		 */
+		if (!isNotEmpty(countryId))
+			throw new Exception("Country ID is required when searching by zipcode.");
 		switch (countryId.trim().toUpperCase()) {
-		case "US": {
-			if (zipcode.trim().length() < 5) throw new Exception("US zipcode should have at least five digits.");
-			zipcode = zipcode.substring(0, 5);
-			break;
-		}
-		case "UK": {
-			if (zipcode.contains(" ")) zipcode = zipcode.substring(0, zipcode.indexOf(" "));
-			break;
-		}
-		case "CA": {
-			if (zipcode.trim().length() < 7) throw new Exception("CA zipcode should have at least seven digits.");
-			zipcode = zipcode.substring(0, 7);
-			break;
-		}
-		default: throw new Exception("Error: Country ID only supports US, UK, CA at the moment.");
+			case "US": {
+				if (zipcode.trim().length() < 5)
+					throw new Exception("US zipcode should have at least five digits.");
+				zipcode = zipcode.substring(0, 5);
+				break;
+			}
+			case "UK": {
+				if (zipcode.contains(" "))
+					zipcode = zipcode.substring(0, zipcode.indexOf(" "));
+				break;
+			}
+			case "CA": {
+				if (zipcode.trim().length() < 7)
+					throw new Exception("CA zipcode should have at least seven digits.");
+				zipcode = zipcode.substring(0, 7);
+				break;
+			}
+			default:
+				throw new Exception("Error: Country ID only supports US, UK, CA at the moment.");
 		}
 		String sql = "SELECT * FROM tzipinfo WHERE zipcode = ?";
 		Object[] params = new Object[] { zipcode };
@@ -275,10 +283,14 @@ public class JobDao extends AbstractActivityDao {
 		List<Job> list = null;
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		/* Check if status is user-defined status in this team */
-		if (status != null) checkJobStatus(jobDivaSession.getTeamId(), status);
-		/* If zipcode and radius exist, get longitude and latitude for search by zipcode radius */
+		if (status != null)
+			checkJobStatus(jobDivaSession.getTeamId(), status);
+		/*
+		 * If zipcode and radius exist, get longitude and latitude for search by
+		 * zipcode radius
+		 */
 		String latitude = null;
-        String longitude = null;
+		String longitude = null;
 		if (isNotEmpty(zipcode) && zipcodeRadius != null && zipcodeRadius > 0) {
 			ZipInfo zipInfo = getZipInfo(zipcode, countryId);
 			latitude = zipInfo.getLatitude();
@@ -437,8 +449,7 @@ public class JobDao extends AbstractActivityDao {
 		if (isNotEmpty(zipcode)) {
 			if (zipcodeRadius != null && zipcodeRadius > 0 && isNotEmpty(latitude) && isNotEmpty(longitude)) {
 				// search by radius
-				sql_buff.append(" AND zip_lat BETWEEN ? - (? / 111.045) AND ?  + (? / 111.045) AND "
-						+ " zip_lon BETWEEN ? - (? / (111.045 * COS(0.0174532925 * (?)))) AND ? + (? / (111.045 * COS(0.0174532925 * (?)))) ");
+				sql_buff.append(" AND zip_lat BETWEEN ? - (? / 111.045) AND ?  + (? / 111.045) AND " + " zip_lon BETWEEN ? - (? / (111.045 * COS(0.0174532925 * (?)))) AND ? + (? / (111.045 * COS(0.0174532925 * (?)))) ");
 				paramList.add(latitude);
 				paramList.add(zipcodeRadius);
 				paramList.add(latitude);
@@ -454,7 +465,6 @@ public class JobDao extends AbstractActivityDao {
 				paramList.add(zipcode.toUpperCase() + "%");
 			}
 		}
-		
 		sql_buff.append(" AND ROWNUM <= 10");
 		sql_buff.append(" order by dateissued desc");
 		//
@@ -990,7 +1000,7 @@ public class JobDao extends AbstractActivityDao {
 		}
 		//
 		if (companyid != null) {
-			List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, companyid, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+			List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, companyid, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 			if (companies == null || companies.size() == 0)
 				message.append("Warning: The companyid is invalid.");
 			else {
@@ -1624,8 +1634,7 @@ public class JobDao extends AbstractActivityDao {
 			checkJobPriority(jobDivaSession, priority, priority_id);
 		}
 		/* Update Job */
-		List<Job> jobs = searchJobs(jobDivaSession, jobid, 
-				null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+		List<Job> jobs = searchJobs(jobDivaSession, jobid, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 		if (jobs == null || jobs.size() == 0) {
 			throw new Exception("Error: Job " + jobid + " is not found.");
 		} else {
@@ -2008,7 +2017,7 @@ public class JobDao extends AbstractActivityDao {
 		// update companyid, if there is a contact, it will be updated
 		// based on contact
 		if (companyid != null) {
-			List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, companyid, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+			List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, companyid, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 			if (companies == null || companies.size() == 0) {
 				// message.append("Warning: The companyid is invalid.");
 			} else {

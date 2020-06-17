@@ -1,32 +1,28 @@
 package com.jobdiva.api.dao.proxy;
 
-import static java.net.URLEncoder.encode;
+import static java.net.URLDecoder.decode;
+import static java.util.Collections.emptyMap;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.util.zip.GZIPInputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpMessage;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Component;
 
 import com.jobdiva.api.dao.AbstractJobDivaDao;
-import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.proxy.ProxyHeader;
 import com.jobdiva.api.model.proxy.ProxyParameter;
 import com.jobdiva.api.model.proxy.Response;
@@ -36,139 +32,116 @@ public class ProxyAPIDao extends AbstractJobDivaDao {
 	
 	public static final String ENCODING_CHARSET = "UTF-8";
 	
-	private String urlEncode(String string) {
+	public static String urlDecode(String string) {
 		if (string == null) {
 			return null;
 		}
 		try {
-			return encode(string, ENCODING_CHARSET);
+			return decode(string, ENCODING_CHARSET);
 		} catch (UnsupportedEncodingException e) {
 			throw new IllegalStateException("Platform doesn't support " + ENCODING_CHARSET, e);
 		}
 	}
 	
-	private String toParameterString(ProxyParameter[] parameters) {
-		//
-		if (parameters == null || parameters.length == 0)
-			return "";
-		//
-		StringBuilder parameterStringBuilder = new StringBuilder();
-		for (int i = 0; i < parameters.length; i++) {
-			ProxyParameter proxyParameter = parameters[i];
-			if (i > 0) {
-				parameterStringBuilder.append("&");
-			}
-			parameterStringBuilder.append(urlEncode(proxyParameter.getName()));
-			parameterStringBuilder.append("=");
-			parameterStringBuilder.append(urlEncode(proxyParameter.getValue()));
+	public static Map<String, List<String>> extractParametersFromUrl(String url) {
+		if (url == null) {
+			return emptyMap();
 		}
-		return parameterStringBuilder.toString();
+		Map<String, List<String>> parameters = new HashMap<>();
+		String query = url;
+		for (String param : query.split("&")) {
+			String[] pair = param.split("=");
+			String key = urlDecode(pair[0]);
+			String value = "";
+			if (pair.length > 1) {
+				value = urlDecode(pair[1]);
+			}
+			List<String> values = parameters.computeIfAbsent(key, k -> new ArrayList<>());
+			values.add(value);
+		}
+		return parameters;
 	}
 	
-	public Response proxyAPI(JobDivaSession jobDivaSession, String method, String urlApi, ProxyHeader[] headers, ProxyParameter[] parameters, String body) throws NoSuchAlgorithmException, KeyManagementException, MalformedURLException, Exception {
+	public Response proxyAPI(String method, String urlApi, ProxyHeader[] headers, ProxyParameter[] parameters, String body) throws Exception {
 		//
 		//
-		String parameterString = toParameterString(parameters);
-		String finalParameterString = StringUtils.isBlank(parameterString) ? "" : ("?" + parameterString);
+		HttpClient httpclient = HttpClientBuilder.create().build();
 		//
-		urlApi += finalParameterString;
-		//
-		//
-		String rsp = "";
-		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-			
-			@Override
-			public void checkClientTrusted(java.security.cert.X509Certificate[] arg0, String arg1) throws CertificateException {
-			}
-			
-			@Override
-			public void checkServerTrusted(java.security.cert.X509Certificate[] arg0, String arg1) throws CertificateException {
-			}
-			
-			@Override
-			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-				return null;
-			}
-		} };
-		//
-		//
-		// Install the all-trusting trust manager
-		SSLContext sc = SSLContext.getInstance("SSL");
-		sc.init(null, trustAllCerts, new java.security.SecureRandom());
-		HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-		// Create all-trusting host name verifier
-		HostnameVerifier allHostsValid = new HostnameVerifier() {
-			
-			public boolean verify(String hostname, SSLSession session) {
-				return true;
-			}
-		};
-		// Install the all-trusting host verifier
-		HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
-		HttpsURLConnection.setFollowRedirects(true);
-		HttpsURLConnection request = (HttpsURLConnection) (new URL(urlApi)).openConnection();
-		//
-		//
-		//
-		request.setUseCaches(false);
-		request.setDoOutput(true);
-		request.setDoInput(true);
-		//
-		//
-		request.setInstanceFollowRedirects(true);
-		request.setRequestProperty("Content-length", body != null ? String.valueOf(body.length()) : "0");
-		request.setRequestProperty("Accept-Encoding", "gzip, deflate, br");
-		request.setRequestProperty("Accept", "*/*");
-		//
-		if (headers != null) {
-			for (int i = 0; i < headers.length; i++) {
-				ProxyHeader proxyHeader = headers[i];
-				request.setRequestProperty(proxyHeader.getName(), proxyHeader.getValue());
-			}
-		}
-		//
-		request.setRequestMethod(method);
-		//
-		//
-		OutputStreamWriter post = new OutputStreamWriter(request.getOutputStream());
-		if (body != null)
-			post.write(body);
-		post.flush();
-		//
-		int returnCode = request.getResponseCode();
-		//
-		String encoding = request.getContentEncoding();
-		//
-		InputStream is = null;
-		if (returnCode < 400) {
-			is = request.getInputStream();
-		} else {
-			is = request.getErrorStream();
-		}
-		//
-		if (is != null) {
-			if (encoding == null || encoding.indexOf("gzip") == -1) {
-				BufferedReader in = new BufferedReader(new InputStreamReader(is));
-				StringBuilder content = new StringBuilder();
-				String inputLine;
-				while ((inputLine = in.readLine()) != null) {
-					content.append(inputLine);
-				}
-				in.close();
-				rsp = content.toString();
+		try {
+			//
+			HttpResponse httpResponse = null;
+			//
+			HttpMessage httpMessage = null;
+			if ("POST".equals(method)) {
+				httpMessage = new HttpPost(urlApi);
 			} else {
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				InputStream zipis = new GZIPInputStream(is);
-				byte[] buf = new byte[0xFFFF];
-				for (int len = zipis.read(buf); len != -1; len = zipis.read(buf)) {
-					baos.write(buf, 0, len);
-				}
-				rsp = new String(baos.toByteArray());
+				String url = body != null && !body.trim().isEmpty() ? urlApi + "?" + body : urlApi;
+				httpMessage = new HttpGet(url);
 			}
+			//
+			//
+			if (headers != null) {
+				for (int i = 0; i < headers.length; i++) {
+					ProxyHeader proxyHeader = headers[i];
+					httpMessage.setHeader(proxyHeader.getName(), proxyHeader.getValue());
+				}
+			}
+			//
+			//
+			//
+			//
+			List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+			if (parameters != null) {
+				logger.info("Parameters------------------");
+				for (int i = 0; i < parameters.length; i++) {
+					ProxyParameter proxyParameter = parameters[i];
+					logger.info(proxyParameter.getName() + "-->" + proxyParameter.getValue());
+					nvps.add(new BasicNameValuePair(proxyParameter.getName(), proxyParameter.getValue()));
+				}
+				logger.info("------------------");
+			}
+			//
+			//
+			if (body != null) {
+				logger.info("BODY -- Params------------------");
+				Map<String, List<String>> extractParametersFromUrl = extractParametersFromUrl(body);
+				for (Map.Entry<String, List<String>> entry : extractParametersFromUrl.entrySet()) {
+					logger.info(entry.getKey() + "-->" + entry.getValue().get(0));
+					nvps.add(new BasicNameValuePair(entry.getKey(), entry.getValue().get(0)));
+				}
+				logger.info("------------------");
+			}
+			//
+			//
+			if ("POST".equals(method)) {
+				//
+				((HttpPost) httpMessage).setEntity(new UrlEncodedFormEntity(nvps));
+				//
+				httpResponse = httpclient.execute((HttpPost) httpMessage);
+			} else {
+				httpResponse = httpclient.execute((HttpGet) httpMessage);
+			}
+			//
+			//
+			//
+			int statusCode = httpResponse.getStatusLine().getStatusCode();
+			if (statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_CREATED) {
+				//
+				String strResponse = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
+				//
+				Response response = new Response(httpResponse.getStatusLine().getStatusCode(), strResponse);
+				//
+				return response;
+			} else {
+				//
+				String strResponse = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
+				//
+				logger.warn("Register message sent failed. [Reason] : " + strResponse);
+				//
+				Response response = new Response(statusCode, strResponse);
+				return response;
+			}
+		} finally {
 		}
-		//
-		Response response = new Response(returnCode, rsp);
-		//
-		return response;
 	}
 }
