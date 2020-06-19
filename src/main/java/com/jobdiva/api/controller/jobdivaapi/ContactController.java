@@ -55,20 +55,17 @@ public class ContactController extends AbstractJobDivaController {
 			@ApiParam(value = "Last Name", required = false) //
 			@RequestParam(required = false) String lastname, //
 			//
+			@ApiParam(value = "Company", required = false) //
+			@RequestParam(required = false) String company, //
+			//
 			@ApiParam(value = "Email", required = false) //
 			@RequestParam(required = false) String email, //
 			//
 			@ApiParam(value = "Title", required = false) //
 			@RequestParam(required = false) String title, //
 			//
-			@ApiParam(value = "Phone", required = false) //
-			@RequestParam(required = false) String phone, //
-			//
 			@ApiParam(value = "Address", required = false) //
 			@RequestParam(required = false) String address, //
-			//
-			@ApiParam(value = "Company", required = false) //
-			@RequestParam(required = false) String company, //
 			//
 			@ApiParam(value = "City", required = false) //
 			@RequestParam(required = false) String city, //
@@ -82,20 +79,20 @@ public class ContactController extends AbstractJobDivaController {
 			@ApiParam(value = "Country", required = false) //
 			@RequestParam(required = false) String country, //
 			//
-			@ApiParam(value = "Types", required = false) //
-			@RequestParam(required = false) String[] types, //
-			//
-			@ApiParam(value = "Owner Ids", required = false) //
-			@RequestParam(required = false) Long ownerIds, //
+			@ApiParam(value = "Phone", required = false) //
+			@RequestParam(required = false) String phone, //
 			//
 			@ApiParam(value = "Division", required = false) //
 			@RequestParam(required = false) String division, //
 			//
-			// @RequestParam(value = "onlyMyContacts", required = false) Boolean
-			// onlyMyContacts, //
+			@ApiParam(value = "Types", required = false) //
+			@RequestParam(required = false) String[] types, //
 			//
 			@ApiParam(value = "Show Primary", required = false) //
 			@RequestParam(required = false) Boolean showPrimary, //
+			//
+			@ApiParam(value = "Owner Ids", required = false) //
+			@RequestParam(required = false) Long ownerIds, //
 			//
 			@ApiParam(value = "Show Inactive", required = false) //
 			@RequestParam(required = false) Boolean showInactive //

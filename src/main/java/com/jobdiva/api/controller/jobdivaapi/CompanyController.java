@@ -91,7 +91,7 @@ public class CompanyController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return companyService.searchForCompany(jobDivaSession, companyid, company, address, city, state, zip, country, phone, fax, url, parentcompany, showall, types, ownerids, division,salespipeline);
+		return companyService.searchForCompany(jobDivaSession, companyid, company, address, city, state, zip, country, phone, fax, url, parentcompany, showall, types, ownerids, division, salespipeline);
 		//
 	}
 	
@@ -142,13 +142,16 @@ public class CompanyController extends AbstractJobDivaController {
 			@RequestParam(required = false) String[] companytypes, //
 			//
 			@ApiParam(required = false, type = "Owner", allowMultiple = true) //
-			@RequestParam(required = false) Owner[] owners //
+			@RequestParam(required = false) Owner[] owners, //
+			//
+			@ApiParam(value = "Sales pipeline", required = false) //
+			@RequestParam(required = false) String salespipeline //
 	//
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return companyService.createCompany(jobDivaSession, companyname, address1, address2, city, state, zipcode, country, phone, fax, email, url, parentcompany, companytypes, owners);
+		return companyService.createCompany(jobDivaSession, companyname, address1, address2, city, state, zipcode, country, phone, fax, email, url, parentcompany, companytypes, owners, salespipeline);
 		//
 	} //
 	
@@ -208,14 +211,17 @@ public class CompanyController extends AbstractJobDivaController {
 			@RequestParam(required = false) FinancialsType financials, //
 			//
 			@ApiParam(required = false, type = "Owner", allowMultiple = true) //
-			@RequestParam(required = false) Owner[] owners //
+			@RequestParam(required = false) Owner[] owners, //
+			//
+			@ApiParam(value = "Sales pipeline", required = false) //
+			@RequestParam(required = false) String salespipeline //
 	//
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		return companyService.updateCompany(jobDivaSession, companyid, name, parentcompanyid, addresses, subguidelines, maxsubmittals, references, drugtest, backgroundcheck, securityclearance, Userfields, discount, discountper, percentagediscount,
-				financials, owners);
+				financials, owners, salespipeline);
 		//
 	}
 }

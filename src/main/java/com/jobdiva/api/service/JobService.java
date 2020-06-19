@@ -15,7 +15,6 @@ import com.jobdiva.api.dao.job.JobUserDao;
 import com.jobdiva.api.model.Attachment;
 import com.jobdiva.api.model.ContactRoleType;
 import com.jobdiva.api.model.Job;
-import com.jobdiva.api.model.JobUser;
 import com.jobdiva.api.model.Skill;
 import com.jobdiva.api.model.UserRole;
 import com.jobdiva.api.model.Userfield;
@@ -36,25 +35,23 @@ public class JobService {
 	@Autowired
 	JobApplicationDao	jobApplicationDao;
 	
-	public List<Job> searchJobs(JobDivaSession jobDivaSession, Long jobId, String jobdivaref, String optionalref, String city, 
-			String[] state, String title, Long contactid, Long companyId, String companyname, Integer status, String[] jobtype,
-			Date issuedatefrom, Date issuedateto, Date startdatefrom, Date startdateto, String zipcode, Integer zipcodeRadius, 
-			String countryId) throws Exception {
+	public List<Job> searchJobs(JobDivaSession jobDivaSession, Long jobId, String jobdivaref, String optionalref, String city, String[] state, String title, Long contactid, Long companyId, String companyname, Integer status, String[] jobtype,
+			Date issuedatefrom, Date issuedateto, Date startdatefrom, Date startdateto, String zipcode, Integer zipcodeRadius, String countryId) throws Exception {
 		//
 		try {
-			List<Job> jobs = jobDao.searchJobs(jobDivaSession, jobId, jobdivaref, optionalref, city, state, title, contactid, 
-					companyId, companyname, status, jobtype, issuedatefrom, issuedateto, startdatefrom, startdateto, null, null,
-					zipcode, zipcodeRadius, countryId);
+			List<Job> jobs = jobDao.searchJobs(jobDivaSession, jobId, jobdivaref, optionalref, city, state, title, contactid, companyId, companyname, status, jobtype, issuedatefrom, issuedateto, startdatefrom, startdateto, null, null, zipcode,
+					zipcodeRadius, countryId);
 			//
 			//
-			if (jobs != null) {
-				for (Job job : jobs) {
-					//
-					List<JobUser> jobUsers = jobUserDao.getJobUsers(job.getId(), jobDivaSession.getTeamId());
-					job.setJobUsers(jobUsers);
-					//
-				}
-			}
+			// if (jobs != null) {
+			// for (Job job : jobs) {
+			// //
+			// List<JobUser> jobUsers = jobUserDao.getJobUsers(job.getId(),
+			// jobDivaSession.getTeamId());
+			// job.setJobUsers(jobUsers);
+			// //
+			// }
+			// }
 			//
 			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "searchJobs", "Search Successful");
 			//

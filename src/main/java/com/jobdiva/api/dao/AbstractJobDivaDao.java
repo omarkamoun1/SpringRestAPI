@@ -1095,4 +1095,32 @@ public class AbstractJobDivaDao {
 			}
 		}
 	}
+	
+	protected Short checkNameIndex(JobDivaSession jobDivaSession, String nameIndex, JdbcTemplate jdbcTemplate) throws Exception {
+		Short pipelineId = null;
+		if (isNotEmpty(nameIndex)) {
+			String sql = "SELECT id " //
+					+ " FROM tsalespipeline " //
+					+ " WHERE nls_upper(name) = nls_upper(?) " //
+					+ " AND teamid = ? " //
+					+ " AND is_active = 1";
+			//
+			Object[] params = new Object[] { nameIndex, jobDivaSession.getTeamId() };
+			//
+			List<Short> listLong = jdbcTemplate.query(sql, params, new RowMapper<Short>() {
+				
+				@Override
+				public Short mapRow(ResultSet rs, int rowNum) throws SQLException {
+					return rs.getShort("id");
+				}
+			});
+			//
+			if (listLong != null && listLong.size() > 0) {
+				pipelineId = listLong.get(0);
+			} else {
+				throw new Exception("Error: invalid sales pipeline " + nameIndex);
+			}
+		}
+		return pipelineId;
+	}
 }

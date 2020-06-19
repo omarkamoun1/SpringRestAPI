@@ -28835,6 +28835,9 @@
                         _ = t.getIn(["tagDetails", "externalDocs", "url"]),
                         b = ["operations-tag", (0, f.createDeepLinkPath)(n)],
                         x = i.isShown(b, "full" === c || "list" === c);
+                        // To hide The Hiddent Controller Joseph Chidiac 
+                        if(g == "Hidden") 
+                        	return u.default.createElement("small", null) ;
                     return u.default.createElement("div", {
                         className: x ? "opblock-tag-section is-open" : "opblock-tag-section"
                     }, u.default.createElement("h4", {

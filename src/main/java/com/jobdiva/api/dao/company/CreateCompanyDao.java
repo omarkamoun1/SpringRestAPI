@@ -271,7 +271,7 @@ public class CreateCompanyDao extends AbstractJobDivaDao {
 	}
 	
 	public Long createCompany(JobDivaSession jobDivaSession, String companyname, String address1, String address2, String city, String state, String zipcode, String country, //
-			String phone, String fax, String email, String url, String parentcompany, String[] companytypes, Owner[] owners) throws Exception {
+			String phone, String fax, String email, String url, String parentcompany, String[] companytypes, Owner[] owners, String nameIndex) throws Exception {
 		//
 		StringBuffer message = new StringBuffer();
 		//
@@ -379,11 +379,17 @@ public class CreateCompanyDao extends AbstractJobDivaDao {
 		//
 		checkExistingCompanyWithSameName(companyname);
 		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		//
+		Short pipelineId = checkNameIndex(jobDivaSession, nameIndex, jdbcTemplate);
+		//
+		//
+		//
 		java.sql.Date currentDt = new java.sql.Date(System.currentTimeMillis());
 		//
 		Long companyId = null;
 		//
-		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
 		String sql = "SELECT CUSTOMERCOMPANYID.nextval AS companyId FROM dual";
 		List<Long> listLong = jdbcTemplate.query(sql, new RowMapper<Long>() {
@@ -396,8 +402,9 @@ public class CreateCompanyDao extends AbstractJobDivaDao {
 		if (listLong != null && listLong.size() > 0) {
 			companyId = listLong.get(0);
 		}
+		Short finalPiplineId = pipelineId;
 		// this is the key holder
-		String insertSql = "INSERT INTO TCUSTOMERCOMPANY(ID,TEAMID, NAME,NAME_INDEX, DATEENTERED, RECRUITERID ) VALUES(" + companyId + ",? , ?, ? ,? ,? ) ";
+		String insertSql = "INSERT INTO TCUSTOMERCOMPANY(ID,TEAMID, NAME,NAME_INDEX, DATEENTERED, RECRUITERID, PIPELINE_ID ) VALUES(" + companyId + ",? , ?, ? ,? ,?, ? ) ";
 		jdbcTemplate.update(connection -> {
 			PreparedStatement ps = connection.prepareStatement(insertSql, new String[] { "ID" });
 			ps.setLong(1, jobDivaSession.getTeamId());
@@ -405,6 +412,7 @@ public class CreateCompanyDao extends AbstractJobDivaDao {
 			ps.setString(3, companyname.toUpperCase());
 			ps.setDate(4, currentDt);
 			ps.setLong(5, jobDivaSession.getRecruiterId());
+			ps.setShort(6, finalPiplineId);
 			return ps;
 		});
 		//

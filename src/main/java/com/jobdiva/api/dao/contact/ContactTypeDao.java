@@ -15,14 +15,14 @@ import com.jobdiva.api.model.authenticate.JobDivaSession;
 @Component
 public class ContactTypeDao extends AbstractJobDivaDao {
 	
-	public List<ContactType> getContactTypes(long contactId) {
+	public List<ContactType> getContactTypes(Long contactId, Long teamId) {
 		//
 		String sql = " Select DISTINCT a.TYPEID, b.TYPENAME, b.ISDELETED  "//
 				+ " FROM TCUSTOMER_TYPE a ,  tcustomertype b " //
 				+ " WHERE a.TYPEID = b.TYPEID " //
-				+ " and a.CUSTOMERID = ? "; //
+				+ " and a.CUSTOMERID = ? and a.teamid = ?"; //
 		//
-		Object[] params = new Object[] { contactId };
+		Object[] params = new Object[] { contactId, teamId };
 		//
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();

@@ -14,7 +14,6 @@ import com.jobdiva.api.dao.contact.ContactNoteDao;
 import com.jobdiva.api.dao.contact.ContactUDFDao;
 import com.jobdiva.api.model.Contact;
 import com.jobdiva.api.model.ContactAddress;
-import com.jobdiva.api.model.ContactUDF;
 import com.jobdiva.api.model.Owner;
 import com.jobdiva.api.model.PhoneType;
 import com.jobdiva.api.model.Userfield;
@@ -44,16 +43,18 @@ public class ContactService {
 			List<Contact> contactList = contactDao.searchContacts(jobDivaSession, teamId, contactId, firstname, lastname, email, title, phone, company, address, city, state, zipCode, country, //
 					onlyMyContacts, types, ownerIds, division, showPrimary, showInactive);
 			//
-			if (contactList != null) {
-				for (Contact contact : contactList) {
-					//
-					List<ContactAddress> contactAddresses = contactAddressDao.getContactAddresses(contact.getId(), teamId);
-					contact.setContactAddresses(contactAddresses);
-					//
-					List<ContactUDF> contactUDFs = contactUDFDao.getContactUDF(contact.getId(), teamId);
-					contact.setContactUDFs(contactUDFs);
-				}
-			}
+			// if (contactList != null) {
+			// for (Contact contact : contactList) {
+			// //
+			// List<ContactAddress> contactAddresses =
+			// contactAddressDao.getContactAddresses(contact.getId(), teamId);
+			// contact.setContactAddresses(contactAddresses);
+			// //
+			// List<ContactUDF> contactUDFs =
+			// contactUDFDao.getContactUDF(contact.getId(), teamId);
+			// contact.setContactUDFs(contactUDFs);
+			// }
+			// }
 			//
 			contactDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "searchContacts", "Search Successful");
 			//

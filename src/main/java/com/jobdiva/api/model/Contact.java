@@ -3,46 +3,140 @@ package com.jobdiva.api.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @SuppressWarnings("serial")
 public class Contact implements java.io.Serializable {
 	
+	@JsonProperty(value = "id", index = 0)
 	private Long					id;
+	//
+	@JsonIgnore
 	private Long					teamId;
-	private String					firstName;
+	//
+	@JsonProperty(value = "last name", index = 0)
 	private String					lastName;
+	//
+	@JsonProperty(value = "first name", index = 0)
+	private String					firstName;
+	//
+	@JsonProperty(value = "company name", index = 0)
 	private String					companyName;
-	private String					departmentName;
-	private String					workPhone;
-	private String					workphoneExt;
-	private String					homePhone;
-	private String					homePhoneExt;
-	private String					email;
-	private Long					companyId;
+	//
+	@JsonProperty(value = "title", index = 0)
 	private String					title;
-	private String					cellPhone;
-	private String					cellPhoneExt;
-	private String					contactFax;
-	private String					contactFaxExt;
-	private String					phoneTypes;
+	//
+	@JsonProperty(value = "department name", index = 0)
+	private String					departmentName;
+	//
+	@JsonProperty(value = "phone 1", index = 0)
+	private String					phone1;
+	//
+	@JsonProperty(value = "phone 2", index = 0)
+	private String					phone2;
+	//
+	@JsonProperty(value = "phone 3", index = 0)
+	private String					phone3;
+	//
+	@JsonProperty(value = "phone 4", index = 0)
+	private String					phone4;
+	//
+	@JsonProperty(value = "address 1", index = 0)
 	private String					address1;
+	//
+	@JsonProperty(value = "address 2", index = 0)
 	private String					address2;
+	//
+	@JsonProperty(value = "city", index = 0)
 	private String					city;
+	//
+	@JsonProperty(value = "state", index = 0)
 	private String					state;
+	//
+	@JsonProperty(value = "zip code", index = 0)
 	private String					zipcode;
+	//
+	@JsonProperty(value = "country", index = 0)
 	private String					country;
+	//
+	@JsonProperty(value = "reports to", index = 0)
+	private String					reportsToName;
+	//
+	@JsonProperty(value = "email", index = 0)
+	private String					email;
+	//
+	@JsonProperty(value = "alternate email", index = 0)
 	private String					alternateEmail;
+	//
+	@JsonProperty(value = "assistant name", index = 0)
 	private String					assistantName;
+	//
+	@JsonProperty(value = "assistant email", index = 0)
 	private String					assistantEmail;
+	//
+	@JsonProperty(value = "assistant phone", index = 0)
 	private String					assistantPhone;
+	//
+	@JsonProperty(value = "contact type", index = 0)
+	private String					contactType;
+	//
+	@JsonIgnore
 	private String					assistantPhoneExt;
+	//
+	@JsonIgnore
+	private String					phoneTypes;
+	//
+	@JsonIgnore
 	private Long					reportsto;
 	//
+	@JsonIgnore
+	private Long					companyId;
+	//
+	@JsonIgnore
+	private String					workPhone;
+	//
+	@JsonIgnore
+	private String					workphoneExt;
+	//
+	@JsonIgnore
+	private String					homePhone;
+	//
+	@JsonIgnore
+	private String					homePhoneExt;
+	//
+	@JsonIgnore
+	private String					cellPhone;
+	//
+	@JsonIgnore
+	private String					cellPhoneExt;
+	//
+	@JsonIgnore
+	private String					contactFax;
+	//
+	@JsonIgnore
+	private String					contactFaxExt;
+	//
+	//
+	@JsonIgnore
 	private List<ContactAddress>	contactAddresses	= new ArrayList<ContactAddress>();
+	//
+	@JsonIgnore
 	private List<ContactUDF>		contactUDFs			= new ArrayList<ContactUDF>();
+	//
+	@JsonIgnore
 	private List<PhoneType>			phones				= new ArrayList<PhoneType>();
+	//
+	@JsonIgnore
 	private List<Owner>				owners				= new ArrayList<Owner>();
+	//
+	@JsonIgnore
 	private List<Skill>				skills;
+	//
+	@JsonIgnore
 	private List<ContactRoleType>	contactRoleTypes;
+	//
+	@JsonIgnore
 	private List<UserRole>			userRoles;
 	
 	//
@@ -84,6 +178,38 @@ public class Contact implements java.io.Serializable {
 	
 	public void setCompanyName(String companyName) {
 		this.companyName = companyName;
+	}
+	
+	public String getPhone1() {
+		return phone1;
+	}
+	
+	public void setPhone1(String phone1) {
+		this.phone1 = phone1;
+	}
+	
+	public String getPhone2() {
+		return phone2;
+	}
+	
+	public void setPhone2(String phone2) {
+		this.phone2 = phone2;
+	}
+	
+	public String getPhone3() {
+		return phone3;
+	}
+	
+	public void setPhone3(String phone3) {
+		this.phone3 = phone3;
+	}
+	
+	public String getPhone4() {
+		return phone4;
+	}
+	
+	public void setPhone4(String phone4) {
+		this.phone4 = phone4;
 	}
 	
 	public String getDepartmentName() {
@@ -340,5 +466,21 @@ public class Contact implements java.io.Serializable {
 	
 	public void setUserRoles(List<UserRole> userRoles) {
 		this.userRoles = userRoles;
+	}
+	
+	public String getContactType() {
+		return contactType;
+	}
+	
+	public void setContactType(String contactType) {
+		this.contactType = contactType;
+	}
+	
+	public String getReportsToName() {
+		return reportsToName;
+	}
+	
+	public void setReportsToName(String reportsToName) {
+		this.reportsToName = reportsToName;
 	}
 }

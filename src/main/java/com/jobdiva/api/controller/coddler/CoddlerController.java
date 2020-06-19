@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.controller.Coddler;
-import com.jobdiva.api.model.controller.Machine;
 import com.jobdiva.api.model.controller.Configuration;
+import com.jobdiva.api.model.controller.Machine;
 import com.jobdiva.api.service.CoddlerService;
 
 import springfox.documentation.annotations.ApiIgnore;

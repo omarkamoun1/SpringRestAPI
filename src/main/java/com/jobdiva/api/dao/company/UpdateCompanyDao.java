@@ -512,7 +512,7 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 	
 	public Boolean updateCompany(JobDivaSession jobDivaSession, Long companyid, String name, Long parentcompanyid, CompanyAddress[] addresses, String subguidelines, //
 			Integer maxsubmittals, Boolean references, Boolean drugtest, Boolean backgroundcheck, Boolean securityclearance, Userfield[] userfields, //
-			Double discount, String discountper, Double percentagediscount, FinancialsType financials, Owner[] owners) throws Exception {
+			Double discount, String discountper, Double percentagediscount, FinancialsType financials, Owner[] owners, String nameIndex) throws Exception {
 		//
 		StringBuffer message = new StringBuffer();
 		//
@@ -572,8 +572,11 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 			throw new Exception("Parameter Check Failed  " + message.toString());
 		}
 		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
 		checkAddresses(addresses);
 		checkCompanyOwners(owners);
+		//
 		//
 		LinkedHashMap<String, String> fields = new LinkedHashMap<String, String>();
 		MapSqlParameterSource parameterSource = new MapSqlParameterSource();
@@ -696,6 +699,13 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 			//
 		}
 		//
+		//
+		Short pipelineId = checkNameIndex(jobDivaSession, nameIndex, jdbcTemplate);
+		if (pipelineId != null) {
+			fields.put("PIPELINE_ID", "pipelineId");
+			parameterSource.addValue("pipelineId", pipelineId);
+		}
+		//
 		updateCompanyAddress(jobDivaSession, companyid, addresses);
 		//
 		updateCompanyUserFields(jobDivaSession, companyid, userfields);
@@ -705,7 +715,6 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 		String sqlUpdate = " UPDATE TCUSTOMERCOMPANY SET " + sqlUpdateFields(fields) + " WHERE ID = :companyId ";
 		parameterSource.addValue("companyId", companyid);
 		//
-		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
 		NamedParameterJdbcTemplate jdbcTemplateObject = new NamedParameterJdbcTemplate(jdbcTemplate.getDataSource());
 		jdbcTemplateObject.update(sqlUpdate, parameterSource);

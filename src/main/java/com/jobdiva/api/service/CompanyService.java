@@ -73,11 +73,11 @@ public class CompanyService {
 	
 	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
 	public Long createCompany(JobDivaSession jobDivaSession, String companyname, String address1, String address2, String city, String state, String zipcode, String country, String phone, String fax, String email, String url, String parentcompany,
-			String[] companytypes, Owner[] owners) throws Exception {
+			String[] companytypes, Owner[] owners, String salespipeline) throws Exception {
 		//
 		try {
 			//
-			Long newCompanyId = createCompanyDao.createCompany(jobDivaSession, companyname, address1, address2, city, state, zipcode, country, phone, fax, email, url, parentcompany, companytypes, owners);
+			Long newCompanyId = createCompanyDao.createCompany(jobDivaSession, companyname, address1, address2, city, state, zipcode, country, phone, fax, email, url, parentcompany, companytypes, owners, salespipeline);
 			//
 			createCompanyDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "createCompany", "Create Successful");
 			//
@@ -92,11 +92,11 @@ public class CompanyService {
 	
 	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
 	public Boolean updateCompany(JobDivaSession jobDivaSession, Long companyid, String name, Long parentcompanyid, CompanyAddress[] addresses, String subguidelines, Integer maxsubmittals, Boolean references, Boolean drugtest, Boolean backgroundcheck,
-			Boolean securityclearance, Userfield[] userfields, Double discount, String discountper, Double percentagediscount, FinancialsType financials, Owner[] owners) throws Exception {
+			Boolean securityclearance, Userfield[] userfields, Double discount, String discountper, Double percentagediscount, FinancialsType financials, Owner[] owners, String salespipeline) throws Exception {
 		//
 		try {
 			Boolean sucess = updateCompanyDao.updateCompany(jobDivaSession, companyid, name, parentcompanyid, addresses, subguidelines, maxsubmittals, references, drugtest, backgroundcheck, securityclearance, userfields, discount, discountper,
-					percentagediscount, financials, owners);
+					percentagediscount, financials, owners, salespipeline);
 			//
 			updateCompanyDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateCompany", "Update Successful");
 			//

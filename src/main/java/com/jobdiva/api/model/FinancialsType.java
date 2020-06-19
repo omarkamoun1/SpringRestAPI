@@ -1,5 +1,8 @@
 package com.jobdiva.api.model;
 
+import io.swagger.annotations.ApiModel;
+
+@ApiModel()
 @SuppressWarnings("serial")
 public class FinancialsType implements java.io.Serializable {
 	

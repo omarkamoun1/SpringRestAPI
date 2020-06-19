@@ -29,6 +29,7 @@ import com.jobdiva.api.model.Contact;
 import com.jobdiva.api.model.ContactAddress;
 import com.jobdiva.api.model.ContactNote;
 import com.jobdiva.api.model.ContactOwner;
+import com.jobdiva.api.model.ContactType;
 import com.jobdiva.api.model.Owner;
 import com.jobdiva.api.model.PhoneType;
 import com.jobdiva.api.model.Userfield;
@@ -54,6 +55,7 @@ public class ContactDao extends AbstractJobDivaDao {
 	//
 	@Autowired
 	ContactOwnerDao		contactOwnerDao;
+	//
 	
 	private Map<String, Long> getTypeMap(Long teamId) {
 		//
@@ -368,6 +370,103 @@ public class ContactDao extends AbstractJobDivaDao {
 		//
 		List<Contact> list = namedParameterJdbcTemplate.query(queryString, params, new ContactRowMapper());
 		//
+		if (list != null) {
+			for (Contact contact : list) {
+				//
+				String typenames = "";
+				List<ContactType> contactTypes = contactTypeDao.getContactTypes(contact.getId(), jobDivaSession.getTeamId());
+				for (ContactType contactType : contactTypes) {
+					long typeid = contactType.getId();
+					for (Map.Entry<String, Long> entry : typeMap.entrySet()) {
+						if (typeid == entry.getValue().longValue())
+							typenames += entry.getKey() + "|";
+					}
+				}
+				contact.setContactType(typenames);
+				//
+				//
+				String sql = "select firstname, lastname from TCUSTOMER where teamid = ? and id = ? ";
+				Object[] parameters = new Object[] { teamId, contact.getId() };
+				//
+				JdbcTemplate jdbcTemplate = getJdbcTemplate();
+				//
+				List<String> reportToList = jdbcTemplate.query(sql, parameters, new RowMapper<String>() {
+					
+					@Override
+					public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+						//
+						//
+						String firstName = rs.getString("firstname");
+						String lastName = rs.getString("lastname");
+						//
+						String name = firstName;
+						if (lastName != null)
+							name += " " + lastName;
+						return name;
+					}
+				});
+				if (reportToList != null && reportToList.size() > 0) {
+					contact.setReportsToName(reportToList.get(0));
+				}
+				//
+				String phonetype = contact.getPhoneTypes();// .substring(0, 4);
+				for (int j = 0; j < 4; j++) {
+					if (phonetype == null)
+						phonetype = "WCHF";
+					else if (phonetype.length() < 4)
+						break;
+					String strPhone = "";
+					char t = phonetype.charAt(j);
+					switch (t) { // take care of space!
+						case 'W':
+							strPhone = "Work Phone: ";
+							break;
+						case 'C':
+							strPhone = "Mobile Phone: ";
+							break;
+						case 'H':
+							strPhone = "Home Phone: ";
+							break;
+						case 'F':
+							strPhone = "Work Fax: ";
+							break;
+						case 'P':
+							strPhone = "Pager: ";
+							break;
+						case 'M':
+							strPhone = "Main Phone: ";
+							break;
+						case 'X':
+							strPhone = "Home Fax: ";
+							break;
+						case 'D':
+							strPhone = "Direct Phone: ";
+							break;
+						case 'O':
+							strPhone = "Other Phone: ";
+							break;
+					}
+					switch (j) {
+						case 0:
+							strPhone += (contact.getWorkPhone() == null ? "" : (contact.getWorkPhone()) + (contact.getWorkphoneExt() == null ? "" : " ext(" + contact.getWorkphoneExt() + ")"));
+							contact.setPhone1(strPhone);
+							break;
+						case 1:
+							strPhone += (contact.getCellPhone() == null ? "" : (contact.getCellPhone()) + (contact.getCellPhoneExt() == null ? "" : " ext(" + contact.getCellPhoneExt() + ")"));
+							contact.setPhone2(strPhone);
+							break;
+						case 2:
+							strPhone += (contact.getHomePhone() == null ? "" : (contact.getHomePhone()) + (contact.getHomePhoneExt() == null ? "" : " ext(" + contact.getHomePhoneExt() + ")"));
+							contact.setPhone3(strPhone);
+							break;
+						case 3:
+							strPhone += (contact.getContactFax() == null ? "" : (contact.getHomePhone()) + (contact.getContactFaxExt() == null ? "" : " ext(" + contact.getContactFaxExt() + ")"));
+							contact.setPhone4(strPhone);
+							break;
+					}
+				}
+			}
+		}
 		return list;
 		//
 	}

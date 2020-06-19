@@ -4,132 +4,398 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @SuppressWarnings("serial")
 public class Job implements java.io.Serializable {
 	
+	//
+	@JsonProperty(value = "id", index = 0)
 	private Long					id;
-	private Long					recruiterId;
-	private String					department;
-	private String					address1;
-	private String					address2;
-	private String					city;
-	private String					state;
-	private String					zipcode;
-	private String					province;
-	private Date					dateIssued;
-	private Date					deadLine;
-	private Date					startDate;
-	private Date					endDate;
-	private Short					positions;
-	private Boolean					travel;
-	private Boolean					overtime;
-	private BigDecimal				rateMin;
-	private BigDecimal				rateMax;
-	private Character				rateper;
-	private String					rateUnit;
-	private String					rfqTitle;
-	private Integer					experience;
-	private String					jobDescription;
-	private Integer					jobStatus;
-	private String					url;
-	private String					rfqRefNo;
-	private Boolean					privateAddress;
-	private Boolean					privateCompanyName;
-	private Boolean					privateExpiryDate;
-	private Boolean					privateJobStartDate;
-	private Boolean					privateJobEndDate;
-	private Boolean					privateSalary;
-	private Long					customerId;				// contactid
-	private String					firstName;
-	private String					lastName;
-	private String					skills;
-	private Long					teamid;
-	private String					rfqNoTeam;
-	private Boolean					criteriaChanged;
-	private String					criteriaState;
-	private String					criteriaAreacode;
-	private String					criteriaMajor;
-	private BigDecimal				criteriaSalaryFrom;
-	private BigDecimal				criteriaSalaryTo;
-	private String					criteriaSalaryPer;
-	private String					criteriaDegree;
-	private Date					dateLastUpdated;
-	private Date					dateStatusUpdated;
-	private Boolean					syncRequired;
-	private String					notSkills;
-	private String					notCriteriaState;
-	private String					notCriteriaAreacode;
-	private String					notCriteriaDegree;
-	private String					notCriteriaMajor;
-	private BigDecimal				notCriteriaSalaryFrom;
-	private BigDecimal				notCriteriaSalaryTo;
-	private String					notCriteriaSalaryPer;
-	private String					criteriaCategories;
-	private String					notCriteriaCategories;
-	private Boolean					privateMyCompanyName;
-	private String					externalJobId;
-	private Date					datePriorityUpdated;
-	private Short					resumesNo;
-	private Short					maxResumesNo;
-	private Integer					contract;
-	private String					priority;
-	private Boolean					jobdivaPost;
-	private Boolean					harvestEnable;
-	private Integer					jobPriority;
-	private BigDecimal				billRateMin;
-	private BigDecimal				billRateMax;
-	private Long					divisionId;
-	private String					division;
-	private String					instruction;
-	private String					criteriaAttributes;
-	private Long					searchId;
-	private String					criteriaZipCode;
-	private Short					criteriaZipCodeMiles;
-	private String					postingTitle;
-	private String					postingDescription;
-	private Character				billRatePer;
-	private String					billRateUnit;
-	private Short					fills;
-	private Long					jobCatalogid;
-	private Boolean					criteriaSubmitted;
-	private Boolean					refCheck;
-	private Boolean					drugTest;
-	private Boolean					backCheck;
-	private Short					maxSubmitals;
-	private Short					curSubmittals;
-	private String					criteriaCity;
-	private String					notCriteriaCity;
-	private Boolean					secClearance;
-	private Long					scheduleFacilityid;
-	private String					scheduleColor;
-	private BigDecimal				suppPayRateMin;
-	private BigDecimal				suppPayRateMax;
-	private String					suppPayRatePer;
-	private String					suppComments;
-	private Boolean					approvedStatus;
-	private String					subInstruction;
-	private Date					dateApproved;
-	private String					country;
-	private Date					jobdivaPostDate;
-	private Integer					billrateCurrency;
-	private Integer					payrateCurrency;
-	private Boolean					suppSubGuideline;
+	//
+	@JsonProperty(value = "contact id", index = 1)
+	private Long					customerId;
+	//
+	@JsonProperty(value = "company id", index = 2)
 	private Long					companyId;
+	//
+	@JsonProperty(value = "company", index = 3)
+	private String					company;
+	//
+	@JsonProperty(value = "reference #", index = 4)
+	private String					rfqNoTeam;
+	//
+	@JsonProperty(value = "optional reference", index = 5)
+	private String					rfqRefNo;
+	//
+	@JsonProperty(value = "job title", index = 6)
+	private String					rfqTitle;
+	//
+	@JsonProperty(value = "address1", index = 7)
+	private String					address1;
+	//
+	@JsonProperty(value = "address2", index = 8)
+	private String					address2;
+	//
+	@JsonProperty(value = "city", index = 9)
+	private String					city;
+	//
+	@JsonProperty(value = "state", index = 10)
+	private String					state;
+	//
+	@JsonProperty(value = "country", index = 11)
+	private String					country;
+	//
+	@JsonProperty(value = "zipcode", index = 12)
+	private String					zipcode;
+	//
+	@JsonProperty(value = "first name", index = 13)
+	private String					firstName;
+	//
+	@JsonProperty(value = "last name", index = 14)
+	private String					lastName;
+	//
+	@JsonProperty(value = "department", index = 15)
+	private String					department;
+	//
+	@JsonProperty(value = "job status", index = 16)
+	private String					strJobStatus;
+	//
+	@JsonProperty(value = "job type", index = 17)
+	private String					jobType;
+	//
+	@JsonProperty(value = "issue date", index = 18)
+	private Date					dateIssued;
+	//
+	@JsonProperty(value = "start date", index = 19)
+	private Date					startDate;
+	//
+	@JsonProperty(value = "end date", index = 20)
+	private Date					endDate;
+	//
+	@JsonProperty(value = "minimum rate", index = 21)
+	private BigDecimal				rateMin;
+	//
+	@JsonProperty(value = "maximum rate", index = 22)
+	private BigDecimal				rateMax;
+	//
+	@JsonProperty(value = "minimum bill rate", index = 23)
+	private BigDecimal				billRateMin;
+	//
+	@JsonProperty(value = "maximum bill rate", index = 24)
+	private BigDecimal				billRateMax;
+	//
+	@JsonProperty(value = "users(last name | first name | role(s))", index = 25)
+	private String					usersNameRole;
+	//
+	//
+	//
+	//
+	//
+	//
+	@JsonIgnore
+	private Long					recruiterId;
+	//
+	@JsonIgnore
+	private String					province;
+	//
+	@JsonIgnore
+	private Date					deadLine;
+	//
+	@JsonIgnore
+	private Short					positions;
+	//
+	@JsonIgnore
+	private Boolean					travel;
+	//
+	@JsonIgnore
+	private Boolean					overtime;
+	//
+	@JsonIgnore
+	private Character				rateper;
+	//
+	@JsonIgnore
+	private String					rateUnit;
+	//
+	@JsonIgnore
+	private Integer					experience;
+	//
+	@JsonIgnore
+	private String					jobDescription;
+	//
+	@JsonIgnore
+	private Integer					jobStatus;
+	//
+	@JsonIgnore
+	private String					url;
+	//
+	@JsonIgnore
+	private Boolean					privateAddress;
+	//
+	@JsonIgnore
+	private Boolean					privateCompanyName;
+	//
+	@JsonIgnore
+	private Boolean					privateExpiryDate;
+	//
+	@JsonIgnore
+	private Boolean					privateJobStartDate;
+	//
+	@JsonIgnore
+	private Boolean					privateJobEndDate;
+	//
+	@JsonIgnore
+	private Boolean					privateSalary;
+	//
+	@JsonIgnore
+	private String					skills;
+	//
+	@JsonIgnore
+	private Long					teamid;
+	//
+	@JsonIgnore
+	private Boolean					criteriaChanged;
+	//
+	@JsonIgnore
+	private String					criteriaState;
+	//
+	@JsonIgnore
+	private String					criteriaAreacode;
+	//
+	@JsonIgnore
+	private String					criteriaMajor;
+	//
+	@JsonIgnore
+	private BigDecimal				criteriaSalaryFrom;
+	//
+	@JsonIgnore
+	private BigDecimal				criteriaSalaryTo;
+	//
+	@JsonIgnore
+	private String					criteriaSalaryPer;
+	//
+	@JsonIgnore
+	private String					criteriaDegree;
+	//
+	@JsonIgnore
+	private Date					dateLastUpdated;
+	//
+	@JsonIgnore
+	private Date					dateStatusUpdated;
+	//
+	@JsonIgnore
+	private Boolean					syncRequired;
+	//
+	@JsonIgnore
+	private String					notSkills;
+	//
+	@JsonIgnore
+	private String					notCriteriaState;
+	//
+	@JsonIgnore
+	private String					notCriteriaAreacode;
+	//
+	@JsonIgnore
+	private String					notCriteriaDegree;
+	//
+	@JsonIgnore
+	private String					notCriteriaMajor;
+	//
+	@JsonIgnore
+	private BigDecimal				notCriteriaSalaryFrom;
+	//
+	@JsonIgnore
+	private BigDecimal				notCriteriaSalaryTo;
+	//
+	@JsonIgnore
+	private String					notCriteriaSalaryPer;
+	//
+	@JsonIgnore
+	private String					criteriaCategories;
+	//
+	@JsonIgnore
+	private String					notCriteriaCategories;
+	//
+	@JsonIgnore
+	private Boolean					privateMyCompanyName;
+	//
+	@JsonIgnore
+	private String					externalJobId;
+	//
+	@JsonIgnore
+	private Date					datePriorityUpdated;
+	//
+	@JsonIgnore
+	private Short					resumesNo;
+	//
+	@JsonIgnore
+	private Short					maxResumesNo;
+	//
+	@JsonIgnore
+	private Integer					contract;
+	//
+	@JsonIgnore
+	private String					priority;
+	//
+	@JsonIgnore
+	private Boolean					jobdivaPost;
+	//
+	@JsonIgnore
+	private Boolean					harvestEnable;
+	//
+	@JsonIgnore
+	private Integer					jobPriority;
+	//
+	@JsonIgnore
+	private Long					divisionId;
+	//
+	@JsonIgnore
+	private String					division;
+	//
+	@JsonIgnore
+	private String					instruction;
+	//
+	@JsonIgnore
+	private String					criteriaAttributes;
+	//
+	@JsonIgnore
+	private Long					searchId;
+	//
+	@JsonIgnore
+	private String					criteriaZipCode;
+	//
+	@JsonIgnore
+	private Short					criteriaZipCodeMiles;
+	//
+	@JsonIgnore
+	private String					postingTitle;
+	//
+	@JsonIgnore
+	private String					postingDescription;
+	//
+	@JsonIgnore
+	private Character				billRatePer;
+	//
+	@JsonIgnore
+	private String					billRateUnit;
+	//
+	@JsonIgnore
+	private Short					fills;
+	//
+	@JsonIgnore
+	private Long					jobCatalogid;
+	//
+	@JsonIgnore
+	private Boolean					criteriaSubmitted;
+	//
+	@JsonIgnore
+	private Boolean					refCheck;
+	//
+	@JsonIgnore
+	private Boolean					drugTest;
+	//
+	@JsonIgnore
+	private Boolean					backCheck;
+	//
+	@JsonIgnore
+	private Short					maxSubmitals;
+	//
+	@JsonIgnore
+	private Short					curSubmittals;
+	//
+	@JsonIgnore
+	private String					criteriaCity;
+	//
+	@JsonIgnore
+	private String					notCriteriaCity;
+	//
+	@JsonIgnore
+	private Boolean					secClearance;
+	//
+	@JsonIgnore
+	private Long					scheduleFacilityid;
+	//
+	@JsonIgnore
+	private String					scheduleColor;
+	//
+	@JsonIgnore
+	private BigDecimal				suppPayRateMin;
+	//
+	@JsonIgnore
+	private BigDecimal				suppPayRateMax;
+	//
+	@JsonIgnore
+	private String					suppPayRatePer;
+	//
+	@JsonIgnore
+	private String					suppComments;
+	//
+	@JsonIgnore
+	private Boolean					approvedStatus;
+	//
+	@JsonIgnore
+	private String					subInstruction;
+	//
+	@JsonIgnore
+	private Date					dateApproved;
+	//
+	@JsonIgnore
+	private Date					jobdivaPostDate;
+	//
+	@JsonIgnore
+	private Integer					billrateCurrency;
+	//
+	@JsonIgnore
+	private Integer					payrateCurrency;
+	//
+	@JsonIgnore
+	private Boolean					suppSubGuideline;
+	//
+	@JsonIgnore
 	private String					criteriaTitles;
+	//
+	@JsonIgnore
 	private Boolean					myFlag;
+	//
+	@JsonIgnore
 	private Date					dimDateIssued;
+	//
+	@JsonIgnore
 	private Date					postingDate;
+	//
+	@JsonIgnore
 	private Date					portaldate;
+	//
+	@JsonIgnore
 	private Boolean					showPayRate;
+	//
+	@JsonIgnore
 	private Short					portalJobCatId;
 	//
+	//
+	@JsonIgnore
 	private List<JobUDF>			jobUDFs;
+	//
+	@JsonIgnore
 	private List<JobContact>		jobContacts;
+	//
+	@JsonIgnore
 	private List<JobUser>			jobUsers;
+	//
+	@JsonIgnore
 	private List<Attachment>		attachments;
+	//
+	@JsonIgnore
 	private List<CandidateNote>		candidateNotes;
+	//
+	@JsonIgnore
 	private List<JobNote>			notes;
+	//
+	@JsonIgnore
 	private List<TimesheetEntry>	timesheetEntries;
+	//
+	@JsonIgnore
 	private List<ExpenseEntry>		expenseEntries;
 	
 	//
@@ -1115,5 +1381,37 @@ public class Job implements java.io.Serializable {
 	
 	public void setExpenseEntries(List<ExpenseEntry> expenseEntries) {
 		this.expenseEntries = expenseEntries;
+	}
+	
+	public String getCompany() {
+		return company == null ? department : company;
+	}
+	
+	public void setCompany(String company) {
+		this.company = company;
+	}
+	
+	public String getStrJobStatus() {
+		return strJobStatus;
+	}
+	
+	public void setStrJobStatus(String strJobStatus) {
+		this.strJobStatus = strJobStatus;
+	}
+	
+	public String getJobType() {
+		return jobType;
+	}
+	
+	public void setJobType(String jobType) {
+		this.jobType = jobType;
+	}
+	
+	public String getUsersNameRole() {
+		return usersNameRole;
+	}
+	
+	public void setUsersNameRole(String usersNameRole) {
+		this.usersNameRole = usersNameRole;
 	}
 }

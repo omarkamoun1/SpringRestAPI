@@ -18,7 +18,7 @@ public class ContactTypeService {
 	
 	public List<ContactType> getContactNotes(JobDivaSession jobDivaSession, Long clientId, Long contactId) {
 		//
-		return contactTypeDao.getContactTypes(contactId);
+		return contactTypeDao.getContactTypes(contactId,clientId);
 		//
 	}
 }

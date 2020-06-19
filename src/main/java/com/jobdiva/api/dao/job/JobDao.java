@@ -40,8 +40,8 @@ import com.jobdiva.api.model.JobUser;
 import com.jobdiva.api.model.Skill;
 import com.jobdiva.api.model.UserRole;
 import com.jobdiva.api.model.Userfield;
-import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.ZipInfo;
+import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.utils.StringUtils;
 
 @Component
@@ -472,8 +472,82 @@ public class JobDao extends AbstractActivityDao {
 		Object[] params = paramList.toArray();
 		list = jdbcTemplate.query(queryString, params, new JobRowMapper());
 		//
+		for (Job job : list) {
+			String str = "";
+			switch (job.getJobStatus()) {
+				case 0:
+					str = "Open";
+					break;
+				case 1:
+					str = "On Hold";
+					break;
+				case 2:
+					str = "Filled";
+					break;
+				case 3:
+					str = "Cancelled";
+					break;
+				case 4:
+					str = "Closed";
+					break;
+				case 5:
+					str = "Expired";
+					break;
+				case 6:
+					str = "Ignored";
+					break;
+				default:
+					str = String.valueOf(job.getJobStatus());
+			}
+			job.setStrJobStatus(str);
+			//
+			job.setJobType(getJobTypeString(job.getContract()));
+			//
+			//
+			ArrayList<String> jobusers = new ArrayList<String>();
+			List<JobUser> jobUsers = jobUserDao.getJobUsers(job.getId(), jobDivaSession.getTeamId());
+			for (JobUser jobUser : jobUsers) {
+				String jobuser = "";
+				jobuser += jobUser.getLastName();
+				jobuser += " | " + jobUser.getFirstName() + " |";
+				if (jobUser.getLeadRecruiter())
+					jobuser += " (PR)";
+				if (jobUser.getLeadSales())
+					jobuser += " (PS)";
+				if (jobUser.getSales() && !jobUser.getLeadSales())
+					jobuser += " (S)";
+				if (jobUser.getRecruiter() && !jobUser.getLeadRecruiter())
+					jobuser += " (R)";
+				jobuser += " | " + jobUser.getRecruiterId() + " |";
+				jobusers.add(jobuser);
+			}
+			//
+			job.setUsersNameRole(jobusers.toString());
+			//
+		}
 		//
 		return list;
+	}
+	
+	public String getJobTypeString(Integer typeid) {
+		String type = "";
+		if (typeid != null) {
+			switch (typeid) {
+				case 1:
+					type = "Direct Placement";
+					break;
+				case 2:
+					type = "contract";
+					break;
+				case 3:
+					type = "Right to Hire";
+					break;
+				case 4:
+					type = "Full Time/contract";
+					break;
+			}
+		}
+		return type;
 	}
 	
 	private List<UserRoleDef> gettUsersRoleDef(UserRole[] users) throws Exception {
