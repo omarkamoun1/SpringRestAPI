@@ -15,70 +15,70 @@ public class Contact implements java.io.Serializable {
 	@JsonIgnore
 	private Long					teamId;
 	//
-	@JsonProperty(value = "last name", index = 0)
+	@JsonProperty(value = "last name", index = 1)
 	private String					lastName;
 	//
-	@JsonProperty(value = "first name", index = 0)
+	@JsonProperty(value = "first name", index = 2)
 	private String					firstName;
 	//
-	@JsonProperty(value = "company name", index = 0)
+	@JsonProperty(value = "company name", index = 3)
 	private String					companyName;
 	//
-	@JsonProperty(value = "title", index = 0)
+	@JsonProperty(value = "title", index = 4)
 	private String					title;
 	//
-	@JsonProperty(value = "department name", index = 0)
+	@JsonProperty(value = "department name", index = 5)
 	private String					departmentName;
 	//
-	@JsonProperty(value = "phone 1", index = 0)
+	@JsonProperty(value = "phone 1", index = 6)
 	private String					phone1;
 	//
-	@JsonProperty(value = "phone 2", index = 0)
+	@JsonProperty(value = "phone 2", index = 7)
 	private String					phone2;
 	//
-	@JsonProperty(value = "phone 3", index = 0)
+	@JsonProperty(value = "phone 3", index = 8)
 	private String					phone3;
 	//
-	@JsonProperty(value = "phone 4", index = 0)
+	@JsonProperty(value = "phone 4", index = 9)
 	private String					phone4;
 	//
-	@JsonProperty(value = "address 1", index = 0)
+	@JsonProperty(value = "address 1", index = 10)
 	private String					address1;
 	//
-	@JsonProperty(value = "address 2", index = 0)
+	@JsonProperty(value = "address 2", index = 11)
 	private String					address2;
 	//
-	@JsonProperty(value = "city", index = 0)
+	@JsonProperty(value = "city", index = 12)
 	private String					city;
 	//
-	@JsonProperty(value = "state", index = 0)
+	@JsonProperty(value = "state", index = 13)
 	private String					state;
 	//
-	@JsonProperty(value = "zip code", index = 0)
+	@JsonProperty(value = "zip code", index = 14)
 	private String					zipcode;
 	//
-	@JsonProperty(value = "country", index = 0)
+	@JsonProperty(value = "country", index = 15)
 	private String					country;
 	//
-	@JsonProperty(value = "reports to", index = 0)
+	@JsonProperty(value = "reports to", index = 16)
 	private String					reportsToName;
 	//
-	@JsonProperty(value = "email", index = 0)
+	@JsonProperty(value = "email", index = 17)
 	private String					email;
 	//
-	@JsonProperty(value = "alternate email", index = 0)
+	@JsonProperty(value = "alternate email", index = 18)
 	private String					alternateEmail;
 	//
-	@JsonProperty(value = "assistant name", index = 0)
+	@JsonProperty(value = "assistant name", index = 19)
 	private String					assistantName;
 	//
-	@JsonProperty(value = "assistant email", index = 0)
+	@JsonProperty(value = "assistant email", index = 20)
 	private String					assistantEmail;
 	//
-	@JsonProperty(value = "assistant phone", index = 0)
+	@JsonProperty(value = "assistant phone", index = 21)
 	private String					assistantPhone;
 	//
-	@JsonProperty(value = "contact type", index = 0)
+	@JsonProperty(value = "contact type", index = 22)
 	private String					contactType;
 	//
 	@JsonIgnore

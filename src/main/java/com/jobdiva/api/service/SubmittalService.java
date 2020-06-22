@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.jobdiva.api.dao.submittal.SubmittalDao;
-import com.jobdiva.api.model.Activity;
+import com.jobdiva.api.model.Submittal;
 import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 
@@ -19,12 +19,12 @@ public class SubmittalService {
 	@Autowired
 	SubmittalDao submittalDao;
 	
-	public List<Activity> searchSubmittal(JobDivaSession jobDivaSession, Long submittalid, Long jobid, String joboptionalref, String companyname, //
+	public List<Submittal> searchSubmittal(JobDivaSession jobDivaSession, Long submittalid, Long jobid, String joboptionalref, String companyname, //
 			Long candidateid, String candidatefirstname, String candidatelastname, String candidateemail, String candidatephone, String candidatecity, String candidatestate) throws Exception {
 		//
 		try {
 			//
-			List<Activity> activities = submittalDao.searchSubmittal(jobDivaSession, submittalid, jobid, joboptionalref, companyname, candidateid, candidatefirstname, candidatelastname, candidateemail, candidatephone, candidatecity, candidatestate);
+			List<Submittal> activities = submittalDao.searchSubmittal(jobDivaSession, submittalid, jobid, joboptionalref, companyname, candidateid, candidatefirstname, candidatelastname, candidateemail, candidatephone, candidatecity, candidatestate);
 			//
 			submittalDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "searchSubmittal", "Search Successful");
 			//

@@ -333,8 +333,74 @@ public class CandidateDao extends AbstractJobDivaDao {
 		//
 		List<Candidate> list = jdbcTemplate.query(queryStringFinal, params, new CandidateRowMapper());
 		//
+		assignCandidatePhones(list);
+		//
 		return list;
 		//
+	}
+	
+	private void assignCandidatePhones(List<Candidate> list) {
+		for (Candidate candidate : list) {
+			String phoneTypes = candidate.getPhoneTypes();
+			for (int j = 0; j < 4; j++) {
+				//
+				if (phoneTypes == null)
+					phoneTypes = "0123";
+				else if (phoneTypes.length() < 4)
+					break;
+				//
+				String strPhone = "";
+				char t = phoneTypes.charAt(j);
+				switch (t) { // take care of space!
+					case '0':
+						strPhone = "Work Phone: ";
+						break;
+					case '1':
+						strPhone = "Home Phone: ";
+						break;
+					case '2':
+						strPhone = "Mobile Phone: ";
+						break;
+					case '3':
+						strPhone = "Home Fax: ";
+						break;
+					case '4':
+						strPhone = "Work Fax: ";
+						break;
+					case '5':
+						strPhone = "Pager: ";
+						break;
+					case '6':
+						strPhone = "Main Phone: ";
+						break;
+					case '7':
+						strPhone = "Direct Phone: ";
+						break;
+					case '8':
+						strPhone = "Other Phone: ";
+						break;
+				}
+				//
+				switch (j) {
+					case 0:
+						strPhone += (candidate.getWorkPhone() == null ? "" : candidate.getWorkPhone()) + " ext(" + (candidate.getWorkphoneExt() == null ? "" : candidate.getWorkphoneExt()) + ")";
+						candidate.setPhone1(strPhone);
+						break;
+					case 1:
+						strPhone += (candidate.getHomePhone() == null ? "" : candidate.getHomePhone()) + " ext(" + (candidate.getHomephoneExt() == null ? "" : candidate.getHomephoneExt()) + ")";
+						candidate.setPhone2(strPhone);
+						break;
+					case 2:
+						strPhone += (candidate.getCellPhone() == null ? "" : candidate.getCellPhone()) + " ext(" + (candidate.getCellphoneExt() == null ? "" : candidate.getCellphoneExt()) + ")";
+						candidate.setPhone3(strPhone);
+						break;
+					case 3:
+						strPhone += (candidate.getFax() == null ? "" : candidate.getFax()) + " ext(" + (candidate.getFax() == null ? "" : candidate.getFaxExt()) + ")";
+						candidate.setPhone4(strPhone);
+						break;
+				}
+			}
+		}
 	}
 	
 	private void assignCondidatePhones(PhoneType[] phoneList, Candidate candidate, ArrayList<String> fields, ArrayList<Object> paramList) throws Exception {

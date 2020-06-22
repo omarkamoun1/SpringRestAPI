@@ -17,7 +17,6 @@ import com.jobdiva.api.dao.candidate.CandidateUDFDao;
 import com.jobdiva.api.dao.candidate.CandidateUserFieldsDao;
 import com.jobdiva.api.model.Candidate;
 import com.jobdiva.api.model.CandidateQual;
-import com.jobdiva.api.model.CandidateUDF;
 import com.jobdiva.api.model.PhoneType;
 import com.jobdiva.api.model.QualificationType;
 import com.jobdiva.api.model.TitleSkillCertification;
@@ -54,12 +53,14 @@ public class CandidateService {
 			//
 			List<Candidate> candidates = candidateDao.searchCandidates(jobDivaSession, firstName, lastName, address, city, state, zipCode, country, email, phone, candidateQuals, rowLimit);
 			//
-			if (candidates != null) {
-				for (Candidate candidate : candidates) {
-					List<CandidateUDF> candidateUDFs = candidateUDFDao.getContactUDF(candidate.getId(), candidate.getTeamId());
-					candidate.setCandidateUDFs(candidateUDFs);
-				}
-			}
+			// if (candidates != null) {
+			// for (Candidate candidate : candidates) {
+			// List<CandidateUDF> candidateUDFs =
+			// candidateUDFDao.getContactUDF(candidate.getId(),
+			// candidate.getTeamId());
+			// candidate.setCandidateUDFs(candidateUDFs);
+			// }
+			// }
 			//
 			candidateDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "searchCandidateProfile", "Search Successful");
 			//

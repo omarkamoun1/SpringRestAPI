@@ -4,94 +4,207 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @SuppressWarnings("serial")
-public class Activity implements java.io.Serializable {
+public class Activity implements IActivity, java.io.Serializable {
 	
+	@JsonProperty(value = "id", index = 0)
 	private Long			id;
+	//
+	@JsonProperty(value = "job id", index = 1)
 	private Long			jobId;
-	private Long			recruiterId;
+	//
+	@JsonProperty(value = "candidate id", index = 2)
 	private Long			candidateId;
-	private String			notes;
-	private Date			dateInterview;
+	//
+	@JsonProperty(value = "candidate name", index = 3)
+	private String			candidateName;
+	//
+	@JsonProperty(value = "candidate email", index = 4)
+	private String			candidateEmail;
+	//
+	@JsonProperty(value = "candidate address", index = 5)
+	private String			candidateAddress;
+	//
+	@JsonProperty(value = "candidate phones", index = 6)
+	private String			candidatePhones;
+	//
+	@JsonProperty(value = "submittal date", index = 7)
 	private Date			datePresented;
+	//
+	@JsonProperty(value = "interview date", index = 8)
+	private Date			dateInterview;
+	//
+	@JsonProperty(value = "start date", index = 9)
 	private Date			dateHired;
-	private String			managerFirstName;
-	private String			managerLastName;
-	private Long			candidateTeamId;
-	private Long			recruiterTeamId;
-	private Boolean			dirty;
-	private Long			customerId;
-	private Date			hourlyDateModified;
-	private Long			hourlyRecruiterId;
-	private Date			dailyDateModified;
-	private Long			dailyRecruiterId;
-	private Date			yearlyDatemodified;
-	private Long			yearlyRecruiterId;
-	private Boolean			hourlyCorporate;
-	private Boolean			dailyCorporate;
-	private Boolean			yearlyCorporate;
-	private BigDecimal		hourly;
-	private BigDecimal		daily;
-	private BigDecimal		yearly;
-	private BigDecimal		billHourly;
-	private BigDecimal		billDaily;
-	private BigDecimal		payHourly;
-	private BigDecimal		payDaily;
-	private BigDecimal		payYearly;
-	private Long			recruiterIdCreator;
-	private Date			dateCreated;
+	//
+	@JsonProperty(value = "end date", index = 10)
 	private Date			dateEnded;
-	private Date			dateUpdated;
-	private Long			roleId;
-	private Integer			recordType;
-	private Date			dateRejected;
-	private Long			rejectedBy;
-	private Date			dateExtRejected;
-	private Long			extRejectedBy;
-	private String			payRateUnits;
-	private Date			extDateRejected;
-	private BigDecimal		extRejectId;
-	private BigDecimal		extRejectReasonId;
-	private Date			placementDate;
-	private String			presentedTimeZoneId;
-	private String			interviewTimeZoneId;
-	private String			hiredEndTimeZoneId;
-	private Date			dateTerminated;
-	private Short			reasonTerminated;
-	private Long			terminatorId;
-	private String			noteRerminated;
-	private Long			primarySalesId;
-	private Boolean			lastEmployment;
-	private Integer			hourlyCurrency;
-	private Integer			dailyCurrency;
-	private Integer			yearlyCurrency;
-	private Date			dateMail2managerSubmit;
-	private Date			dateMail2managerInterview;
-	private Short			performanceCode;
-	private Long			employType;
+	//
+	@JsonProperty(value = "position type", index = 11)
+	private String			positionType;
+	//
+	@JsonProperty(value = "recruited by", index = 12)
+	private String			strRecruiterName;
+	//
+	@JsonProperty(value = "submitted to", index = 13)
+	private String			managerName;
+	//
+	@JsonProperty(value = "internal notes", index = 14)
+	private String			notes;
+	//
+	@JsonProperty(value = "final bill rate", index = 15)
+	private BigDecimal		payHourly;
+	//
+	@JsonProperty(value = "bill rate currency/unit", index = 16)
 	private String			dbFinalBillRateUnit;
+	//
+	@JsonProperty(value = "agreed pay rate", index = 17)
+	private BigDecimal		hourly;
+	//
+	@JsonProperty(value = "pay rate currency/unit", index = 18)
+	private String			payRateUnits;
+	//
+	@JsonIgnore
+	private Long			recruiterId;
+	@JsonIgnore
+	private String			managerFirstName;
+	@JsonIgnore
+	private String			managerLastName;
+	@JsonIgnore
+	private Long			candidateTeamId;
+	@JsonIgnore
+	private Long			recruiterTeamId;
+	@JsonIgnore
+	private Boolean			dirty;
+	@JsonIgnore
+	private Long			customerId;
+	@JsonIgnore
+	private Date			hourlyDateModified;
+	@JsonIgnore
+	private Long			hourlyRecruiterId;
+	@JsonIgnore
+	private Date			dailyDateModified;
+	@JsonIgnore
+	private Long			dailyRecruiterId;
+	@JsonIgnore
+	private Date			yearlyDatemodified;
+	@JsonIgnore
+	private Long			yearlyRecruiterId;
+	@JsonIgnore
+	private Boolean			hourlyCorporate;
+	@JsonIgnore
+	private Boolean			dailyCorporate;
+	@JsonIgnore
+	private Boolean			yearlyCorporate;
+	@JsonIgnore
+	private BigDecimal		daily;
+	@JsonIgnore
+	private BigDecimal		yearly;
+	@JsonIgnore
+	private BigDecimal		billHourly;
+	@JsonIgnore
+	private BigDecimal		billDaily;
+	@JsonIgnore
+	private BigDecimal		payDaily;
+	@JsonIgnore
+	private BigDecimal		payYearly;
+	@JsonIgnore
+	private Long			recruiterIdCreator;
+	@JsonIgnore
+	private Date			dateCreated;
+	@JsonIgnore
+	private Date			dateUpdated;
+	@JsonIgnore
+	private Long			roleId;
+	@JsonIgnore
+	private Integer			recordType;
+	@JsonIgnore
+	private Date			dateRejected;
+	@JsonIgnore
+	private Long			rejectedBy;
+	@JsonIgnore
+	private Date			dateExtRejected;
+	@JsonIgnore
+	private Long			extRejectedBy;
+	@JsonIgnore
+	private Date			extDateRejected;
+	@JsonIgnore
+	private BigDecimal		extRejectId;
+	@JsonIgnore
+	private BigDecimal		extRejectReasonId;
+	@JsonIgnore
+	private Date			placementDate;
+	@JsonIgnore
+	private String			presentedTimeZoneId;
+	@JsonIgnore
+	private String			interviewTimeZoneId;
+	@JsonIgnore
+	private String			hiredEndTimeZoneId;
+	@JsonIgnore
+	private Date			dateTerminated;
+	@JsonIgnore
+	private Short			reasonTerminated;
+	@JsonIgnore
+	private Long			terminatorId;
+	@JsonIgnore
+	private String			noteRerminated;
+	@JsonIgnore
+	private Long			primarySalesId;
+	@JsonIgnore
+	private Boolean			lastEmployment;
+	@JsonIgnore
+	private Integer			hourlyCurrency;
+	@JsonIgnore
+	private Integer			dailyCurrency;
+	@JsonIgnore
+	private Integer			yearlyCurrency;
+	@JsonIgnore
+	private Date			dateMail2managerSubmit;
+	@JsonIgnore
+	private Date			dateMail2managerInterview;
+	@JsonIgnore
+	private Short			performanceCode;
+	@JsonIgnore
+	private Long			employType;
+	@JsonIgnore
 	private String			finalBillRateUnit;
+	@JsonIgnore
 	private Integer			finalBillrateCurrency;
+	@JsonIgnore
 	private Boolean			onboardIngassigned;
+	@JsonIgnore
 	private Long			onboardIngassignedBy;
+	@JsonIgnore
 	private Date			onboardIngassignedOn;
+	@JsonIgnore
 	private Date			dimDatePresented;
+	@JsonIgnore
 	private Date			interviewScheduleDate;
+	@JsonIgnore
 	private List<Userfield>	activityUDFs;
+	@JsonIgnore
 	private Integer			contract;
+	@JsonIgnore
 	private BigDecimal		fee;
+	@JsonIgnore
 	private Integer			feeType;
+	@JsonIgnore
 	private String			submittalStatus;
 	//
-	private String			candidateName;
+	@JsonIgnore
 	private String			candidateFirstName;
+	@JsonIgnore
 	private String			candidateLastName;
-	private String			candidatePhones;
-	private String			candidateAddress;
-	private String			candidateEmail;
+	@JsonIgnore
 	private String			candidateCity;
+	@JsonIgnore
 	private String			candidateState;
+	@JsonIgnore
 	private String			recruiterName;
+	@JsonIgnore
 	private String			recruiterEmail;
 	
 	public Long getId() {
@@ -772,5 +885,52 @@ public class Activity implements java.io.Serializable {
 	
 	public void setCandidateState(String candidateState) {
 		this.candidateState = candidateState;
+	}
+	
+	public String getManagerName() {
+		String str = "";
+		if (getManagerFirstName() != null && getManagerFirstName().length() > 0)
+			str = getManagerFirstName();
+		if (getManagerLastName() != null && getManagerLastName().length() > 0)
+			str += " " + getManagerLastName();
+		return str;
+	}
+	
+	public void setManagerName(String managerName) {
+		this.managerName = managerName;
+	}
+	
+	public String getPositionType() {
+		String type = "";
+		if (contract != null) {
+			switch (contract) {
+				case 1:
+					type = "Direct Placement";
+					break;
+				case 2:
+					type = "contract";
+					break;
+				case 3:
+					type = "Right to Hire";
+					break;
+				case 4:
+					type = "Full Time/contract";
+					break;
+			}
+		}
+		return type;
+	}
+	
+	public void setPositionType(String positionType) {
+		this.positionType = positionType;
+	}
+	
+	public String getStrRecruiterName() {
+		String str = getRecruiterName() + "(id:" + getRecruiterId() + ")";
+		return str;
+	}
+	
+	public void setStrRecruiterName(String strRecruiterName) {
+		this.strRecruiterName = strRecruiterName;
 	}
 }

@@ -33,6 +33,7 @@ import com.jobdiva.api.model.Contact;
 import com.jobdiva.api.model.Job;
 import com.jobdiva.api.model.JobContact;
 import com.jobdiva.api.model.JobUser;
+import com.jobdiva.api.model.Submittal;
 import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 
@@ -103,7 +104,7 @@ public class SubmittalDao extends AbstractActivityDao {
 		return candidatePhones;
 	}
 	
-	private Activity getActivity(JobDivaSession jobDivaSession, Long submittalid, Long jobid, Long candidateid) throws Exception {
+	private Submittal getActivity(JobDivaSession jobDivaSession, Long submittalid, Long jobid, Long candidateid) throws Exception {
 		Activity dbActivity = activityDao.getActivity(jobDivaSession, submittalid);
 		if (dbActivity == null)
 			throw new Exception("Error: Submittal " + submittalid + " is not found.");
@@ -112,20 +113,20 @@ public class SubmittalDao extends AbstractActivityDao {
 		//
 		Job job = jobDao.getJob(jobDivaSession, dbActivity.getJobId());
 		//
-		Activity newActivity = new Activity();
-		newActivity.setId(dbActivity.getId());
-		newActivity.setJobId(dbActivity.getJobId());
-		newActivity.setCandidateId(dbActivity.getCandidateId());
+		Submittal submittal = new Submittal();
+		submittal.setId(dbActivity.getId());
+		submittal.setJobId(dbActivity.getJobId());
+		submittal.setCandidateId(dbActivity.getCandidateId());
 		// get candidate name, email, address and phones
 		if (candidate.getFirstName() != null)
-			newActivity.setCandidateFirstName(candidate.getFirstName());
+			submittal.setCandidateFirstName(candidate.getFirstName());
 		//
 		if (candidate.getLastName() != null)
-			newActivity.setCandidateLastName(candidate.getLastName());
+			submittal.setCandidateLastName(candidate.getLastName());
 		//
-		newActivity.setCandidateEmail(candidate.getEmail());
+		submittal.setCandidateEmail(candidate.getEmail());
 		String str = formatCandidateAddress(candidate);
-		newActivity.setCandidateAddress(str);
+		submittal.setCandidateAddress(str);
 		String phoneTypes = null;
 		if (candidate.getPhoneTypes() == null)
 			phoneTypes = "0123";
@@ -133,15 +134,15 @@ public class SubmittalDao extends AbstractActivityDao {
 			phoneTypes = candidate.getPhoneTypes();
 		if (phoneTypes.length() >= 4) {
 			str = formatCandidatePhones(candidate, phoneTypes);
-			newActivity.setCandidatePhones(str);
+			submittal.setCandidatePhones(str);
 		}
-		newActivity.setCustomerId(job.getCustomerId());
-		newActivity.setDatePresented(dbActivity.getDatePresented());
-		newActivity.setDateInterview(dbActivity.getDateInterview());
-		newActivity.setDateHired(dbActivity.getDateHired());
-		newActivity.setDateEnded(dbActivity.getDateEnded());
-		newActivity.setContract(dbActivity.getContract());
-		newActivity.setRecruiterId(dbActivity.getRecruiterId());
+		submittal.setCustomerId(job.getCustomerId());
+		submittal.setDatePresented(dbActivity.getDatePresented());
+		submittal.setDateInterview(dbActivity.getDateInterview());
+		submittal.setDateHired(dbActivity.getDateHired());
+		submittal.setDateEnded(dbActivity.getDateEnded());
+		submittal.setContract(dbActivity.getContract());
+		submittal.setRecruiterId(dbActivity.getRecruiterId());
 		// get recruiter name
 		String sql = "SELECT FIRSTNAME, LASTNAME, EMAIL" //
 				+ " FROM TRECRUITER " //
@@ -162,17 +163,17 @@ public class SubmittalDao extends AbstractActivityDao {
 					str = firstName;
 				if (lastName != null)
 					str += " " + lastName;
-				newActivity.setRecruiterName(str);
-				newActivity.setRecruiterEmail(rs.getString("EMAIL"));
+				submittal.setRecruiterName(str);
+				submittal.setRecruiterEmail(rs.getString("EMAIL"));
 				return null;
 			}
 		});
 		if (dbActivity.getSubmittalStatus() != null)
-			newActivity.setSubmittalStatus(dbActivity.getSubmittalStatus());
-		newActivity.setManagerFirstName(dbActivity.getManagerFirstName());
-		newActivity.setManagerLastName(dbActivity.getManagerLastName());
-		newActivity.setNotes(dbActivity.getNotes());
-		newActivity.setPayHourly(dbActivity.getPayHourly());
+			submittal.setSubmittalStatus(dbActivity.getSubmittalStatus());
+		submittal.setManagerFirstName(dbActivity.getManagerFirstName());
+		submittal.setManagerLastName(dbActivity.getManagerLastName());
+		submittal.setNotes(dbActivity.getNotes());
+		submittal.setPayHourly(dbActivity.getPayHourly());
 		// formated along with FINALBILLRATE_CURRENCY
 		String currencyUnit = "";
 		String rateUnit = "";
@@ -184,8 +185,8 @@ public class SubmittalDao extends AbstractActivityDao {
 			rateUnit = "Hour";
 		else
 			rateUnit = getRateUnitString(dbActivity.getFinalBillRateUnit().toLowerCase().charAt(0), false);
-		newActivity.setFinalBillRateUnit(currencyUnit + "/" + rateUnit);
-		newActivity.setHourly(dbActivity.getHourly());
+		submittal.setFinalBillRateUnit(currencyUnit + "/" + rateUnit);
+		submittal.setHourly(dbActivity.getHourly());
 		// formated along with HOURLY_CURRENCY
 		if (dbActivity.getHourlyCurrency() == null)
 			currencyUnit = "USD";
@@ -195,8 +196,8 @@ public class SubmittalDao extends AbstractActivityDao {
 			rateUnit = "Hour";
 		else
 			rateUnit = getRateUnitString(dbActivity.getPayRateUnits().toLowerCase().charAt(0), true);
-		newActivity.setPayRateUnits(currencyUnit + "/" + rateUnit);
-		return newActivity;
+		submittal.setPayRateUnits(currencyUnit + "/" + rateUnit);
+		return submittal;
 	}
 	
 	private List<Job> searchJobs(Long jobid, String joboptionalref, String companyname, long teamid) {
@@ -329,13 +330,13 @@ public class SubmittalDao extends AbstractActivityDao {
 		return candidates;
 	}
 	
-	public List<Activity> searchSubmittal(JobDivaSession jobDivaSession, Long submittalid, Long jobid, String joboptionalref, String companyname, //
+	public List<Submittal> searchSubmittal(JobDivaSession jobDivaSession, Long submittalid, Long jobid, String joboptionalref, String companyname, //
 			Long candidateid, String candidatefirstname, String candidatelastname, String candidateemail, String candidatephone, String candidatecity, String candidatestate) throws Exception {
 		//
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
-		List<Activity> jdActivities = new ArrayList<Activity>();
+		List<Submittal> jdActivities = new ArrayList<Submittal>();
 		//
 		long teamid = jobDivaSession.getTeamId();
 		//
@@ -343,7 +344,7 @@ public class SubmittalDao extends AbstractActivityDao {
 		//
 		if (submittalid != null && submittalid > 0) {
 			//
-			Activity activity = getActivity(jobDivaSession, submittalid, jobid, candidateid);
+			Submittal activity = getActivity(jobDivaSession, submittalid, jobid, candidateid);
 			jdActivities.add(activity);
 			//
 		} else {
@@ -451,7 +452,7 @@ public class SubmittalDao extends AbstractActivityDao {
 					if (activities != null && !activities.isEmpty()) {
 						//
 						for (Activity activity : activities) {
-							Activity jda = new Activity();
+							Submittal jda = new Submittal();
 							jda.setId(activity.getId());
 							jda.setJobId(activity.getJobId());
 							jda.setCandidateId(activity.getCandidateId());
@@ -555,7 +556,7 @@ public class SubmittalDao extends AbstractActivityDao {
 				 */
 				if (jobs.size() >= 1 && candidates.size() == 1) {
 					// 1 job, 1 candidate (for creation)
-					Activity jda = new Activity();
+					Submittal jda = new Submittal();
 					Job job = jobs.get(0);
 					Candidate candidate = candidates.get(0);
 					long candidateId = candidate.getId();

@@ -4,67 +4,144 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @SuppressWarnings("serial")
 public class Candidate implements java.io.Serializable {
 	
-	private Long							id;
+	@JsonIgnore
 	private Long							teamId;
+	//
+	@JsonProperty(value = "id", index = 0)
+	private Long							id;
+	@JsonProperty(value = "first name", index = 1)
 	private String							firstName;
-	private String							lastName;
-	private String							address1;
-	private String							address2;
-	private String							city;
-	private String							state;
-	private String							zipCode;
-	private String							province;
-	private String							country;
-	private String							homePhone;
-	private String							workPhone;
-	private String							cellPhone;
-	private String							email;
-	private String							sysEmail;
-	private String							privateName;
-	private String							privateAddress;
-	private String							privatePhone;
-	private String							privateEmail;
-	private Date							dateReceived;
-	private Date							dateUpdated;
-	private Boolean							available;
-	private Date							dateAvailable;
-	private BigDecimal						currentSalary;
-	private String							currrentSalaryPer;
-	private BigDecimal						preferredSalaryMin;
-	private BigDecimal						preferredSalaryMax;
-	private String							preferredSalaryPer;
-	private String							password;
-	private Boolean							privateSalary;
+	@JsonProperty(value = "middle initial", index = 2)
 	private String							middleInitial;
-	private Boolean							znoltr;
-	private String							fax;
-	private String							beeper;
-	private Boolean							retagRequired;
-	private Byte							recentDocid;
-	private Date							dateupdatedManual;
-	private Boolean							confidential;
-	private Date							dateUpdatedCandidate;
-	private String							workphoneExt;
+	@JsonProperty(value = "last name", index = 3)
+	private String							lastName;
+	@JsonProperty(value = "email", index = 4)
+	private String							email;
+	@JsonProperty(value = "alternate email", index = 5)
 	private String							alternateEmail;
+	@JsonProperty(value = "address1", index = 6)
+	private String							address1;
+	@JsonProperty(value = "address2", index = 7)
+	private String							address2;
+	@JsonProperty(value = "city", index = 8)
+	private String							city;
+	@JsonProperty(value = "state", index = 9)
+	private String							state;
+	@JsonProperty(value = "zipcode", index = 10)
+	private String							zipCode;
+	@JsonProperty(value = "country", index = 11)
+	private String							country;
+	@JsonProperty(value = "phone 1", index = 12)
+	private String							phone1;
+	@JsonProperty(value = "phone 2", index = 13)
+	private String							phone2;
+	@JsonProperty(value = "phone 3", index = 14)
+	private String							phone3;
+	@JsonProperty(value = "phone 4", index = 15)
+	private String							phone4;
+	//
+	//
+	//
+	//
+	//
+	//
+	@JsonIgnore
+	private String							province;
+	@JsonIgnore
+	private String							homePhone;
+	@JsonIgnore
+	private String							workPhone;
+	@JsonIgnore
+	private String							cellPhone;
+	@JsonIgnore
+	private String							sysEmail;
+	@JsonIgnore
+	private String							privateName;
+	@JsonIgnore
+	private String							privateAddress;
+	@JsonIgnore
+	private String							privatePhone;
+	@JsonIgnore
+	private String							privateEmail;
+	@JsonIgnore
+	private Date							dateReceived;
+	@JsonIgnore
+	private Date							dateUpdated;
+	@JsonIgnore
+	private Boolean							available;
+	@JsonIgnore
+	private Date							dateAvailable;
+	@JsonIgnore
+	private BigDecimal						currentSalary;
+	@JsonIgnore
+	private String							currrentSalaryPer;
+	@JsonIgnore
+	private BigDecimal						preferredSalaryMin;
+	@JsonIgnore
+	private BigDecimal						preferredSalaryMax;
+	@JsonIgnore
+	private String							preferredSalaryPer;
+	@JsonIgnore
+	private String							password;
+	@JsonIgnore
+	private Boolean							privateSalary;
+	@JsonIgnore
+	private Boolean							znoltr;
+	@JsonIgnore
+	private String							fax;
+	@JsonIgnore
+	private String							beeper;
+	@JsonIgnore
+	private Boolean							retagRequired;
+	@JsonIgnore
+	private Byte							recentDocid;
+	@JsonIgnore
+	private Date							dateupdatedManual;
+	@JsonIgnore
+	private Boolean							confidential;
+	@JsonIgnore
+	private Date							dateUpdatedCandidate;
+	@JsonIgnore
+	private String							workphoneExt;
+	@JsonIgnore
 	private Boolean							availabilityType;
+	@JsonIgnore
 	private Boolean							eeoSent;
+	@JsonIgnore
 	private Date							lastemailRcvd;
+	@JsonIgnore
 	private Boolean							licEmailAlert;
+	@JsonIgnore
 	private Integer							currentSalaryCurrency;
+	@JsonIgnore
 	private Integer							preferredSalaryCurrency;
+	@JsonIgnore
 	private Boolean							pipelineUrlExpired;
+	@JsonIgnore
 	private Boolean							eeoSentStart;
+	@JsonIgnore
 	private String							homephoneExt;
+	@JsonIgnore
 	private String							cellphoneExt;
+	@JsonIgnore
 	private String							faxExt;
+	@JsonIgnore
 	private String							phoneTypes;
+	@JsonIgnore
 	private Date							timePwchanged;
+	@JsonIgnore
 	private List<CandidateUDF>				candidateUDFs;
+	@JsonIgnore
 	private List<TitleSkillCertification>	certifications;
+	@JsonIgnore
 	private List<CandidateQual>				candidateQuals;
+	@JsonIgnore
 	private List<QualificationType>			qualificationTypes;
 	
 	public Long getId() {
@@ -537,5 +614,37 @@ public class Candidate implements java.io.Serializable {
 	
 	public void setQualificationTypes(List<QualificationType> qualificationTypes) {
 		this.qualificationTypes = qualificationTypes;
+	}
+	
+	public String getPhone1() {
+		return phone1;
+	}
+	
+	public void setPhone1(String phone1) {
+		this.phone1 = phone1;
+	}
+	
+	public String getPhone2() {
+		return phone2;
+	}
+	
+	public void setPhone2(String phone2) {
+		this.phone2 = phone2;
+	}
+	
+	public String getPhone3() {
+		return phone3;
+	}
+	
+	public void setPhone3(String phone3) {
+		this.phone3 = phone3;
+	}
+	
+	public String getPhone4() {
+		return phone4;
+	}
+	
+	public void setPhone4(String phone4) {
+		this.phone4 = phone4;
 	}
 }

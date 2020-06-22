@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jobdiva.api.model.Attachment;
 import com.jobdiva.api.model.CandidateNote;
+import com.jobdiva.api.model.CandidateQual;
+import com.jobdiva.api.model.CandidateUDF;
 import com.jobdiva.api.model.CompanyAddress;
 import com.jobdiva.api.model.ContactAddress;
 import com.jobdiva.api.model.ContactRoleType;
@@ -17,9 +19,12 @@ import com.jobdiva.api.model.JobUDF;
 import com.jobdiva.api.model.JobUser;
 import com.jobdiva.api.model.Owner;
 import com.jobdiva.api.model.PhoneType;
+import com.jobdiva.api.model.QualificationType;
 import com.jobdiva.api.model.Skill;
 import com.jobdiva.api.model.TimesheetEntry;
+import com.jobdiva.api.model.TitleSkillCertification;
 import com.jobdiva.api.model.UserRole;
+import com.jobdiva.api.model.Userfield;
 
 import io.swagger.annotations.Api;
 
@@ -178,6 +183,51 @@ public class HiddenController {
 	) throws Exception {
 		//
 		return new ExpenseEntry();
+		//
+	}
+	
+	@RequestMapping(value = "/getTitleSkillCertification", method = RequestMethod.GET, produces = "application/json")
+	public TitleSkillCertification getTitleSkillCertification(
+	//
+	) throws Exception {
+		//
+		return new TitleSkillCertification();
+		//
+	}
+	
+	@RequestMapping(value = "/getCandidateUDF", method = RequestMethod.GET, produces = "application/json")
+	public CandidateUDF getCandidateUDF(
+	//
+	) throws Exception {
+		//
+		return new CandidateUDF();
+		//
+	}
+	
+	@RequestMapping(value = "/getCandidateQual", method = RequestMethod.GET, produces = "application/json")
+	public CandidateQual getCandidateQual(
+	//
+	) throws Exception {
+		//
+		return new CandidateQual();
+		//
+	}
+	
+	@RequestMapping(value = "/getQualificationType", method = RequestMethod.GET, produces = "application/json")
+	public QualificationType getQualificationType(
+	//
+	) throws Exception {
+		//
+		return new QualificationType();
+		//
+	}
+	
+	@RequestMapping(value = "/getUserfield", method = RequestMethod.GET, produces = "application/json")
+	public Userfield getUserfield(
+	//
+	) throws Exception {
+		//
+		return new Userfield();
 		//
 	}
 }

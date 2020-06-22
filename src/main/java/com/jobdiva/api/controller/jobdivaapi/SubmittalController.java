@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jobdiva.api.controller.AbstractJobDivaController;
-import com.jobdiva.api.model.Activity;
+import com.jobdiva.api.model.Submittal;
 import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.service.SubmittalService;
@@ -32,7 +32,7 @@ public class SubmittalController extends AbstractJobDivaController {
 	
 	@RequestMapping(value = "/searchSubmittal", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Search Submittal")
-	public List<Activity> searchSubmittal( //
+	public List<Submittal> searchSubmittal( //
 			//
 			@ApiParam(value = "Submittal ID", required = false) //
 			@RequestParam(required = false) Long submittalid, //
