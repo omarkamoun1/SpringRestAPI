@@ -17,6 +17,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -74,6 +75,8 @@ public class ProxyAPIDao extends AbstractJobDivaDao {
 			HttpMessage httpMessage = null;
 			if ("POST".equals(method)) {
 				httpMessage = new HttpPost(urlApi);
+			} else if ("PUT".equals(method)) {
+				httpMessage = new HttpPut(urlApi);
 			} else {
 				String url = body != null && !body.trim().isEmpty() ? urlApi + "?" + body : urlApi;
 				httpMessage = new HttpGet(url);
@@ -118,6 +121,10 @@ public class ProxyAPIDao extends AbstractJobDivaDao {
 				((HttpPost) httpMessage).setEntity(new UrlEncodedFormEntity(nvps));
 				//
 				httpResponse = httpclient.execute((HttpPost) httpMessage);
+			} else if ("PUT".equals(method)) {
+				((HttpPut) httpMessage).setEntity(new UrlEncodedFormEntity(nvps));
+				//
+				httpResponse = httpclient.execute((HttpPut) httpMessage);
 			} else {
 				httpResponse = httpclient.execute((HttpGet) httpMessage);
 			}
@@ -143,5 +150,28 @@ public class ProxyAPIDao extends AbstractJobDivaDao {
 			}
 		} finally {
 		}
+	}
+	
+	private static ProxyHeader createProxyHeader(String name, String value) {
+		ProxyHeader proxyHeader = new ProxyHeader();
+		proxyHeader.setName(name);
+		proxyHeader.setValue(value);
+		return proxyHeader;
+	}
+	
+	public static void main(String[] args) throws Exception {
+		ProxyAPIDao proxyAPIDao = new ProxyAPIDao();
+		String method = "PUT";
+		String urlApi = "https://www.reed.co.uk/recruiter/api/1.0/jobs/update/5258402";
+		String body = "username=test@jobdiva.co.uk&jobType=1&workingHours=1&description=dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd&title=Test Job From JobDiva&townName=London&postingKey=80dd4f2b-cc32-495f-aff4-4e99f8690589&productId=2&isDemo=true";
+		ProxyHeader[] headers = new ProxyHeader[6];
+		headers[0] = createProxyHeader("Content-Type", "application/x-www-form-urlencoded");
+		headers[1] = createProxyHeader("Method", "PUT ");
+		headers[2] = createProxyHeader("X-ApiClientId", "895808");
+		headers[3] = createProxyHeader("X-ApiSignature", "jtog7Nh9sRiAsXus4j/NrYsa45M=");
+		headers[4] = createProxyHeader("X-TimeStamp", "2020-06-24T17:49:22.782+0300");
+		headers[5] = createProxyHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
+		//
+		proxyAPIDao.proxyAPI(method, urlApi, headers, null, body);
 	}
 }

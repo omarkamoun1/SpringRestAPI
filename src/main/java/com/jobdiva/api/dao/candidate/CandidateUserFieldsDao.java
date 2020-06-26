@@ -69,9 +69,7 @@ public class CandidateUserFieldsDao extends AbstractJobDivaDao {
 						jdbcTemplate.update(sqlInsert, params);
 					} else {
 						String sqlUpdate = "Update TCANDIDATE_USERFIELDS SET USERFIELD_VALUE = ?, DATECREATED = ? " //
-								+ "WHERE CANDIDATEID = ? AND USERFIELD_ID = ?  " //
-								+ "VALUES " //
-								+ "(? , ?, ?, ?, ?) ";
+								+ "WHERE CANDIDATEID = ? AND USERFIELD_ID = ?  ";//
 						params = new Object[] { userfield.getUserfieldValue(), currentDt, candidateid, userfield.getUserfieldId() };
 						jdbcTemplate.update(sqlUpdate, params);
 					}
