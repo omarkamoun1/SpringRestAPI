@@ -7175,8 +7175,8 @@
                     }, c.default.createElement("div", {
                         className: "topbar-wrapper"
                     }, c.default.createElement(o, null, c.default.createElement("img", {
-                        height: "30",
-                        width: "150",
+                        // height: "30",
+                        // width: "150",
                         src: "logo.png",
                         alt: "Jobdiva UI"
                     }), c.default.createElement("span", null, "API")), c.default.createElement("form", {

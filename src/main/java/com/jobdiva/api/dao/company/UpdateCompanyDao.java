@@ -62,7 +62,7 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 					&& compAdd.getEmail() == null && (compAdd.getCountryid() == null || compAdd.getCountryid().equals("US")) && compAdd.getDefaultAddress()) {
 				//
 				oldCompanyAddresses.remove(0);
-				companyAddressDao.deleteCompanyAddress(companyid, compAdd.getAddressId(), compAdd.getTeamid());
+				companyAddressDao.deleteCompanyAddress(companyid, compAdd.getAddressId(), jobDivaSession.getTeamId());
 			}
 		}
 		//
@@ -106,7 +106,7 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 		//
 		for (CompanyAddress companyAddress : addresses) {
 			//
-			CompanyAddress dbCompanyAddress = companyAddressDao.searchForComapnyAddress(oldCompanyAddresses, companyAddress.getCompanyId(), companyAddress.getAddressId());
+			CompanyAddress dbCompanyAddress = companyAddressDao.searchForComapnyAddress(oldCompanyAddresses, companyAddress.getAddressId());
 			//
 			if (companyAddress.getAction() != null) {
 				//

@@ -169,10 +169,9 @@ public class CompanyAddressDao extends AbstractJobDivaDao {
 		return list;
 	}
 	
-	public CompanyAddress searchForComapnyAddress(List<CompanyAddress> companyAddressList, Long companyId, Short addressId) {
+	public CompanyAddress searchForComapnyAddress(List<CompanyAddress> companyAddressList, Short addressId) {
 		for (CompanyAddress address : companyAddressList) {
-			if (companyId != null && companyId.equals(address.getCompanyId()) //
-					&& (addressId != null && addressId.equals(address.getAddressId())) //
+			if ((addressId != null && addressId.equals(address.getAddressId())) //
 			)
 				return address;
 		}

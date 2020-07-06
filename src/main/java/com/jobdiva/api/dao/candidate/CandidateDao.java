@@ -519,8 +519,6 @@ public class CandidateDao extends AbstractJobDivaDao {
 		ArrayList<String> fields = new ArrayList<String>();
 		ArrayList<Object> paramList = new ArrayList<Object>();
 		//
-		fields.add("TEAMID");
-		paramList.add(jobDivaSession.getTeamId());
 		//
 		// set updated fields
 		if (isNotEmpty(firstName)) {

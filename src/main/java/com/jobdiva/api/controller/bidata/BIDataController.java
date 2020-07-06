@@ -4490,4 +4490,14 @@ public class BIDataController extends AbstractJobDivaController {
 		return biDataService.getBIData(jobDivaSession, "Userfields List", null, null, null);
 		//
 	}
+	
+	@RequestMapping(value = "/AttachmentTypeList", method = RequestMethod.GET, produces = "application/json")
+	public BiData AttachmentTypeList(//
+	//
+	) throws Exception {//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		return biDataService.getBIData(jobDivaSession, "Attachment Type List", null, null, null);
+		//
+	}
 }

@@ -1,19 +1,17 @@
 package com.jobdiva.api.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import io.swagger.annotations.ApiModel;
-
-@ApiModel()
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "addressId", "defaultAddress", "address1", "address2", "city", "state", "zipcode", "phone", "fax", "url", "email", "countryid", "action" })
 @SuppressWarnings("serial")
 public class CompanyAddress implements java.io.Serializable {
 	
 	//
+	//
+	@JsonIgnore
 	private Long	companyId;
 	//
+	//
+	@JsonIgnore
 	private Long	teamid;
 	//
 	private Short	addressId;
