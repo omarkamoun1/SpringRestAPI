@@ -403,8 +403,10 @@ public class CreateCompanyDao extends AbstractJobDivaDao {
 			companyId = listLong.get(0);
 		}
 		Short finalPiplineId = pipelineId;
+		String fieldPipeLine = finalPiplineId != null ? ", PIPELINE_ID " : "";
+		String fieldValuePipeLine = finalPiplineId != null ? ", ? " : "";
 		// this is the key holder
-		String insertSql = "INSERT INTO TCUSTOMERCOMPANY(ID,TEAMID, NAME,NAME_INDEX, DATEENTERED, RECRUITERID, PIPELINE_ID ) VALUES(" + companyId + ",? , ?, ? ,? ,?, ? ) ";
+		String insertSql = "INSERT INTO TCUSTOMERCOMPANY(ID,TEAMID, NAME,NAME_INDEX, DATEENTERED, RECRUITERID" + fieldPipeLine + ") VALUES(" + companyId + ",? , ?, ? ,? ,?" + fieldValuePipeLine + " ) ";
 		jdbcTemplate.update(connection -> {
 			PreparedStatement ps = connection.prepareStatement(insertSql, new String[] { "ID" });
 			ps.setLong(1, jobDivaSession.getTeamId());
@@ -412,7 +414,8 @@ public class CreateCompanyDao extends AbstractJobDivaDao {
 			ps.setString(3, companyname.toUpperCase());
 			ps.setDate(4, currentDt);
 			ps.setLong(5, jobDivaSession.getRecruiterId());
-			ps.setShort(6, finalPiplineId);
+			if (finalPiplineId != null)
+				ps.setShort(6, finalPiplineId);
 			return ps;
 		});
 		//

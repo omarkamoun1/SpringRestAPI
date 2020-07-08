@@ -25,10 +25,10 @@ public class AppProperties {
 	// @Value("{jobdiva.environment.production}")
 	private Boolean	jobDivaEnvironmentProduction	= false;
 	//
-	@Value("{smtp.server.location}")
+	@Value("${smtp.server.location}")
 	private String	smtpServerLocation;
 	//
-	@Value("{apache.location}")
+	@Value("${apache.location}")
 	private String	apacheLocation;
 	//
 	//

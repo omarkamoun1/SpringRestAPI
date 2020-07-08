@@ -1034,6 +1034,9 @@ public class JobDao extends AbstractActivityDao {
 											// check team profile below
 		//
 		//
+		if (description == null)
+			description = "Job Description";
+		//
 		if (isNotEmpty(description)) {
 			description = description.replaceAll("\r\n|\n|\r|\n\r", "<br>");
 			job.setJobDescription(description);
@@ -1176,16 +1179,20 @@ public class JobDao extends AbstractActivityDao {
 			submittalinstruction = submittalinstruction.replaceAll("\r\n|\n|\r|\n\r", "<br>");
 			job.setSubInstruction(submittalinstruction);
 		}
-		job.setBillRateMin(new BigDecimal(minbillrate));
-		job.setBillRateMax(new BigDecimal(maxbillrate));
+		if (minbillrate != null)
+			job.setBillRateMin(new BigDecimal(minbillrate));
+		if (maxbillrate != null)
+			job.setBillRateMax(new BigDecimal(maxbillrate));
 		//
 		if (isNotEmpty(billratecurrency))
 			job.setBillrateCurrency(getRateCurrencyID(defaultCurrencyID, billratecurrency));
 		else
 			job.setBillrateCurrency(defaultCurrencyID);
 		//
-		job.setRateMin(new BigDecimal(minpayrate));
-		job.setRateMax(new BigDecimal(maxpayrate));
+		if (minpayrate != null)
+			job.setRateMin(new BigDecimal(minpayrate));
+		if (maxpayrate != null)
+			job.setRateMax(new BigDecimal(maxpayrate));
 		//
 		//
 		if (isNotEmpty(payratecurrency))
