@@ -1,5 +1,7 @@
 package com.jobdiva.api.dao.candidate;
 
+import static java.net.URLDecoder.decode;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -186,6 +188,10 @@ public class CandidateNoteDao extends AbstractJobDivaDao {
 			throw new Exception("Error: Candidate(" + candidateid + ") is not found.");
 		}
 		//
+		if (note != null) {
+			note = decode(note, "UTF-8");
+		}
+		//
 		// set note clob, recruiter id ...
 		Timestamp currentDt = new Timestamp(System.currentTimeMillis());
 		int auto = setAsAuto != null && setAsAuto ? 3 : 0; //
@@ -243,8 +249,7 @@ public class CandidateNoteDao extends AbstractJobDivaDao {
 		// verify job id and set rfqid
 		if (link2AnOpenJob != null) {
 			//
-			List<Job> searchJobs = jobDao.searchJobs(jobDivaSession, link2AnOpenJob, 
-					null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+			List<Job> searchJobs = jobDao.searchJobs(jobDivaSession, link2AnOpenJob, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 			Job job = searchJobs != null && searchJobs.size() > 0 ? searchJobs.get(0) : null;
 			//
 			if (job == null || job.getTeamid() != jobDivaSession.getTeamId())

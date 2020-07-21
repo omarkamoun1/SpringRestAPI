@@ -14,7 +14,7 @@ import com.jobdiva.api.servlet.ServletTransporter;
 @Component
 public class JobApplicationDao extends AbstractJobDivaDao {
 	
-	public Integer createJobApplication(JobDivaSession jobDivaSession, Long candidateid, Long jobid, Date dateapplied, Integer resumesource, String globalid) throws Exception {
+	public Boolean createJobApplication(JobDivaSession jobDivaSession, Long candidateid, Long jobid, Date dateapplied, Integer resumesource, String globalid) throws Exception {
 		//
 		StringBuffer message = new StringBuffer();
 		// Data Validation
@@ -36,16 +36,17 @@ public class JobApplicationDao extends AbstractJobDivaDao {
 		candObj.rfqid = jobid;
 		DocumentObjectResume dummyResume = new DocumentObjectResume(0, 0, "", "", 0);
 		// TODO: change candidate/DocumentObject.ResumeSource to be Integer
-		dummyResume.ResumeSource = String.valueOf(resumesource);
+		if (resumesource != null)
+			dummyResume.ResumeSource = String.valueOf(resumesource);
 		dummyResume.global_id = globalid;
 		candObj.resume = dummyResume;
 		ServletRequestData data = new ServletRequestData(0L, candObj);
 		Object retObj = ServletTransporter.callServlet(getCandidateApplyJobUsingAPI(), data);
 		if (retObj instanceof Exception)
 			throw (Exception) retObj;
-		Integer ret_int = (Integer) retObj;
+		// Integer ret_int = (Integer) retObj;
 		///
 		///
-		return ret_int;
+		return true;
 	}
 }

@@ -1,5 +1,7 @@
 package com.jobdiva.api.dao.resume;
 
+import static java.net.URLDecoder.decode;
+
 import java.rmi.Naming;
 import java.text.SimpleDateFormat;
 
@@ -48,6 +50,9 @@ public class ResumeDao extends AbstractJobDivaDao {
 			throw new Exception("Parameter Check Failed \r\n" + message.toString());
 		}
 		//
+		if (textfile != null) {
+			textfile = decode(textfile, "UTF-8");
+		}
 		try {
 			DocumentObjectResume doc = new DocumentObjectResume(1, "", "Resume Uploaded by JobDivaAPI", null);
 			doc.setDateCreated(System.currentTimeMillis());

@@ -1292,13 +1292,13 @@ public class BIDataController extends AbstractJobDivaController {
 	
 	@RequestMapping(value = "/ContactHotlistDetail", method = RequestMethod.GET, produces = "application/json")
 	public BiData ContactHotlistDetail(//
-			@ApiParam(value = "Contact Id", required = true) //
-			@RequestParam(required = true) Long contactId //
+			@ApiParam(value = "Hotlist Id", required = true) //
+			@RequestParam(required = true) Long hotlistId //
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		String[] parameters = new String[] { contactId.toString() };
+		String[] parameters = new String[] { hotlistId.toString() };
 		//
 		return biDataService.getBIData(jobDivaSession, "Contact Hotlist Detail", null, null, parameters);
 		//
@@ -4498,6 +4498,23 @@ public class BIDataController extends AbstractJobDivaController {
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		return biDataService.getBIData(jobDivaSession, "Attachment Type List", null, null, null);
+		//
+	}
+	
+	@RequestMapping(value = "/EmailMergeOptOutCandidateList", method = RequestMethod.GET, produces = "application/json")
+	public BiData EmailMergeOptOutCandidateList(//
+			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
+			@RequestParam(required = true) Date fromDate, //
+			//
+			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
+			@RequestParam(required = true) Date toDate //
+	//
+	) throws Exception {//
+						//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		//
+		return biDataService.getBIData(jobDivaSession, "Email Merge OptOut Candidate List", fromDate, toDate, null);
 		//
 	}
 }

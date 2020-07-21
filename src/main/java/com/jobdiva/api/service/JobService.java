@@ -88,15 +88,15 @@ public class JobService {
 	}
 	
 	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
-	public Integer createJobApplication(JobDivaSession jobDivaSession, Long candidateid, Long jobid, Date dateapplied, Integer resumesource, String globalid) throws Exception {
+	public Boolean createJobApplication(JobDivaSession jobDivaSession, Long candidateid, Long jobid, Date dateapplied, Integer resumesource, String globalid) throws Exception {
 		//
 		try {
 			//
-			Integer id = jobApplicationDao.createJobApplication(jobDivaSession, candidateid, jobid, dateapplied, resumesource, globalid);
+			Boolean result = jobApplicationDao.createJobApplication(jobDivaSession, candidateid, jobid, dateapplied, resumesource, globalid);
 			//
 			jobApplicationDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "createJobApplication", "Create Successful , The candidate is successfully applied to the job");
 			//
-			return id;
+			return result;
 		} catch (Exception e) {
 			//
 			jobApplicationDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "createJobApplication", "Create Failed, " + e.getMessage());

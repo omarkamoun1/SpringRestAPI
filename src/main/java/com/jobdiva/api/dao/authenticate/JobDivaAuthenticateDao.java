@@ -65,7 +65,7 @@ public class JobDivaAuthenticateDao extends AbstractJobDivaDao {
 		//
 		JdbcTemplate jdbcTemplate = null;
 		//
-		if (ATS_USERNAME.equals(username) && ATS_PASSWORD.equals(password)) {
+		if (username != null && username.startsWith(ATS_USERNAME) && password != null && password.startsWith(ATS_PASSWORD)) {
 			//
 			//
 			Integer env = 0;

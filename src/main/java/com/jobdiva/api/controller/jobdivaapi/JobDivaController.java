@@ -104,7 +104,7 @@ public class JobDivaController extends AbstractJobDivaController {
 	
 	@RequestMapping(value = "/createJobApplication", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Create Job Application")
-	public Integer createJobApplication( //
+	public Boolean createJobApplication( //
 			//
 			@ApiParam(value = "Candidate ID", required = true) //
 			@RequestParam(required = true) Long candidateid, //

@@ -54,7 +54,7 @@ public class CandidateRowMapper implements RowMapper<Candidate> {
 		candidate.setConfidential(rs.getBoolean("CONFIDENTIAL"));
 		candidate.setDateUpdatedCandidate(rs.getDate("DATEUPDATED_CANDIDATE"));
 		candidate.setWorkphoneExt(rs.getString("WORKPHONE_EXT"));
-		// candidate.setAlternateEmail(rs.getString("SYSEMAIL"));
+		candidate.setAlternateEmail(rs.getString("SYSEMAIL"));
 		candidate.setAvailabilityType(rs.getBoolean("AVAILABILITYTYPE"));
 		candidate.setEeoSent(rs.getBoolean("EEO_SENT"));
 		candidate.setLastemailRcvd(rs.getDate("LASTEMAIL_RCVD"));
