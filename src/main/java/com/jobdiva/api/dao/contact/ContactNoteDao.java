@@ -39,7 +39,7 @@ public class ContactNoteDao extends AbstractJobDivaDao {
 	@Autowired
 	CandidateDao	candidateDao;
 	
-	public List<ContactNote> getContactNotes(long contactId) {
+	public List<ContactNote> getContactNotes(long contactId, Long teamId) {
 		String sql = " Select "//
 				+ " NOTEID," //
 				+ " CUSTOMERID," //
@@ -55,9 +55,9 @@ public class ContactNoteDao extends AbstractJobDivaDao {
 				+ " CANDIDATEID," //
 				+ " LATESTNOTES "//
 				+ " FROM TCUSTOMERNOTES " //
-				+ " WHERE CUSTOMERID = ?  ";
+				+ " WHERE CUSTOMERID = ?  AND RECRUITER_TEAMID = ? ";
 		//
-		Object[] params = new Object[] { contactId };
+		Object[] params = new Object[] { contactId, teamId };
 		//
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
@@ -119,7 +119,8 @@ public class ContactNoteDao extends AbstractJobDivaDao {
 			parameterSource.addValue("tagUpdate", contactNote.getTagUpdate());
 		}
 		//
-		if (contactNote.getRecruiterTeamId() != null) {
+		// insert Mode
+		if (contactNote.getId() == null && contactNote.getRecruiterTeamId() != null) {
 			fields.put("RECRUITER_TEAMID", "RECRUITER_TEAMID");
 			parameterSource.addValue("RECRUITER_TEAMID", contactNote.getRecruiterTeamId());
 		}
@@ -164,8 +165,9 @@ public class ContactNoteDao extends AbstractJobDivaDao {
 		//
 		try {
 			if (contactNote.getId() != null) {
-				String sqlUpdate = " UPDATE TCUSTOMERNOTES SET " + sqlUpdateFields(fields) + " WHERE NOTEID = :id  ";
+				String sqlUpdate = " UPDATE TCUSTOMERNOTES SET " + sqlUpdateFields(fields) + " WHERE NOTEID = :id and RECRUITER_TEAMID = :teamId  ";
 				parameterSource.addValue("id", contactNote.getId());
+				parameterSource.addValue("teamId", jobDivaSession.getTeamId());
 				//
 				NamedParameterJdbcTemplate jdbcTemplateObject = new NamedParameterJdbcTemplate(jdbcTemplate.getDataSource());
 				jdbcTemplateObject.update(sqlUpdate, parameterSource);

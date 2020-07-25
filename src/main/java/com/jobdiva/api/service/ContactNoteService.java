@@ -16,11 +16,11 @@ public class ContactNoteService {
 	ContactNoteDao contactNoteDao;
 	//
 	
-	public List<ContactNote> getContactNotes(JobDivaSession jobDivaSession, Long clientId, Long contactId) throws Exception {
+	public List<ContactNote> getContactNotes(JobDivaSession jobDivaSession, Long contactId) throws Exception {
 		//
 		try {
 			//
-			List<ContactNote> contactNotes = contactNoteDao.getContactNotes(contactId);
+			List<ContactNote> contactNotes = contactNoteDao.getContactNotes(contactId, jobDivaSession.getTeamId());
 			//
 			contactNoteDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getContactNotes", "Get Contact Notes Successful ");
 			//

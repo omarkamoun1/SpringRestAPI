@@ -17,16 +17,16 @@ import com.jobdiva.api.model.authenticate.JobDivaSession;
 public class ContactOwnerDao extends AbstractJobDivaDao {
 	
 	// public ContactOwner getContactOwnerByOnerId()
-	public List<ContactOwner> getContactOwners(long contactId) {
+	public List<ContactOwner> getContactOwners(long contactId, Long teamId) {
 		String sql = " Select "//
 				+ " RECRUITERID," //
 				+ " CUSTOMERID," //
 				+ " TEAMID," //
 				+ " ISPRIMARYOWNER  "//
 				+ " FROM TCUSTOMER_OWNERS " //
-				+ " WHERE CUSTOMERID = ?  ";
+				+ " WHERE CUSTOMERID = ? and TEAMID = ?  ";
 		//
-		Object[] params = new Object[] { contactId };
+		Object[] params = new Object[] { contactId, teamId };
 		//
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
@@ -75,11 +75,11 @@ public class ContactOwnerDao extends AbstractJobDivaDao {
 	public void updatecontactOwner(JobDivaSession jobDivaSession, ContactOwner contactOwner) {
 		//
 		//
-		String sqlInsert = "UPDATE  TCUSTOMER_OWNERS SET TEAMID = ? , ISPRIMARYOWNER = ? WHERE  CUSTOMERID = ? AND  RECRUITERID = ?  ";
+		String sqlInsert = "UPDATE  TCUSTOMER_OWNERS SET  ISPRIMARYOWNER = ? WHERE  CUSTOMERID = ? AND  RECRUITERID = ? and TEAMID = ?  ";
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
-		Object[] parameters = new Object[] { contactOwner.getTeamId(), contactOwner.getIsPrimaryOwner(), contactOwner.getCustomerId(), contactOwner.getRecruiterId() };
+		Object[] parameters = new Object[] { contactOwner.getIsPrimaryOwner(), contactOwner.getCustomerId(), contactOwner.getRecruiterId(), contactOwner.getTeamId() };
 		jdbcTemplate.update(sqlInsert, parameters);
 	}
 }

@@ -604,8 +604,9 @@ public class CandidateDao extends AbstractJobDivaDao {
 		//
 		//
 		//
-		String sqlUpdate = "UPDATE TCANDIDATE SET  " + sqlUpdateFields(fields) + " WHERE ID = ? ";
+		String sqlUpdate = "UPDATE TCANDIDATE SET  " + sqlUpdateFields(fields) + " WHERE ID = ? AND TEAMID = ?  ";
 		paramList.add(candidateid);
+		paramList.add(jobDivaSession.getTeamId());
 		//
 		Object[] parameters = paramList.toArray();
 		//

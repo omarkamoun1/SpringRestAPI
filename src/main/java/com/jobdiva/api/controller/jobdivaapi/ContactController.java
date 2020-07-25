@@ -388,7 +388,7 @@ public class ContactController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return contactNoteService.getContactNotes(jobDivaSession, jobDivaSession.getTeamId(), contactId);
+		return contactNoteService.getContactNotes(jobDivaSession, contactId);
 		//
 	}
 	

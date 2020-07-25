@@ -20,9 +20,9 @@ import com.jobdiva.api.sql.JobDivaSqlLobValue;
 @Component
 public class JobNoteDao extends AbstractJobDivaDao {
 	
-	private void checkJobIfExists(Long jobId) throws Exception {
-		String sqlCheck = "select ID from TRFQ where ID = ? ";
-		Object[] params = new Object[] { jobId };
+	private void checkJobIfExists(Long teamId, Long jobId) throws Exception {
+		String sqlCheck = "select ID from TRFQ where ID = ? and TEAMID = ? ";
+		Object[] params = new Object[] { teamId, jobId };
 		//
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
@@ -40,9 +40,9 @@ public class JobNoteDao extends AbstractJobDivaDao {
 		}
 	}
 	
-	private Boolean checkRecruiterid(Long recruiterId) throws Exception {
-		String sqlCheck = "select ID from TRECRUITER where ID = ? ";
-		Object[] params = new Object[] { recruiterId };
+	private Boolean checkRecruiterid(Long teamId, Long recruiterId) throws Exception {
+		String sqlCheck = "select ID from TRECRUITER where ID = ? and GROUPID = ? ";
+		Object[] params = new Object[] { recruiterId, teamId };
 		//
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
@@ -87,9 +87,9 @@ public class JobNoteDao extends AbstractJobDivaDao {
 		shared = shared != null ? shared : 0;
 		Long emId = 0L;
 		//
-		checkJobIfExists(jobId);
+		checkJobIfExists(jobDivaSession.getTeamId(), jobId);
 		//
-		checkRecruiterid(recruiterId);
+		checkRecruiterid(jobDivaSession.getTeamId(), recruiterId);
 		//
 		Integer noteId = getMaxNoteId(jobId) + 1;
 		//

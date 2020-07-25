@@ -102,9 +102,10 @@ public class CompanyAddressDao extends AbstractJobDivaDao {
 		//
 		paramList.add(companyid);
 		paramList.add(companyAddress.getAddressId());
+		paramList.add(jobDivaSession.getTeamId());
 		//
 		String sqlUpdate = "UPDATE TCUSTOMERCOMPANYADDRESSES SET " + sqlUpdateFields(fieldList);
-		sqlUpdate += " WHERE COMPANYID = ? AND ADDRESSID = ? ";
+		sqlUpdate += " WHERE COMPANYID = ? AND ADDRESSID = ? AND TEAMID = ? ";
 		//
 		Object[] parameters = paramList.toArray();
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();

@@ -185,6 +185,7 @@ public class CandidateNoteDao extends AbstractJobDivaDao {
 		//
 		Boolean existCandidate = candidateDao.existCandidate(jobDivaSession, candidateid);
 		if (!existCandidate) {
+			logger.info("Error: Candidate(" + candidateid + ") is not found For Team (" + jobDivaSession.getTeamId() + ").");
 			throw new Exception("Error: Candidate(" + candidateid + ") is not found.");
 		}
 		//
@@ -249,11 +250,14 @@ public class CandidateNoteDao extends AbstractJobDivaDao {
 		// verify job id and set rfqid
 		if (link2AnOpenJob != null) {
 			//
-			List<Job> searchJobs = jobDao.searchJobs(jobDivaSession, link2AnOpenJob, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+			List<Job> searchJobs = jobDao.searchJobs(jobDivaSession, link2AnOpenJob);
+			//
 			Job job = searchJobs != null && searchJobs.size() > 0 ? searchJobs.get(0) : null;
 			//
-			if (job == null || job.getTeamid() != jobDivaSession.getTeamId())
+			if (job == null) {
+				logger.info("Error: Invalid Job Id(" + link2AnOpenJob + "). For Team (" + jobDivaSession.getTeamId() + ").");
 				throw new Exception("Error: Invalid Job Id(" + link2AnOpenJob + ").");
+			}
 			//
 			candidateNote.setRfqId(link2AnOpenJob);
 		} else {
@@ -264,11 +268,11 @@ public class CandidateNoteDao extends AbstractJobDivaDao {
 		// verify contact id and set contactid
 		if (link2aContact != null) {
 			//
-			List<Contact> contacts = contactDao.searchContacts(jobDivaSession, jobDivaSession.getTeamId(), link2aContact, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+			List<Contact> contacts = contactDao.searchContacts(jobDivaSession, jobDivaSession.getTeamId(), link2aContact, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, false);
 			Contact contact = contacts != null && contacts.size() > 0 ? contacts.get(0) : null;
 			//
-			if (contact == null || contact.getTeamId() != jobDivaSession.getTeamId())
-				throw new Exception("Error: Invalid Contact Id(" + link2aContact + ").");
+			if (contact == null)
+				throw new Exception("Error: Invalid Contact Id(" + link2aContact + "). For Team " + jobDivaSession.getTeamId());
 			//
 			candidateNote.setContactId(link2aContact);
 		} else {

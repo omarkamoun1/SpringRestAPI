@@ -469,8 +469,8 @@ public class AbstractActivityDao extends AbstractJobDivaDao {
 			//
 			sqlUpdate = "update TINTERVIEWSCHEDULE " //
 					+ " set LASTEMPLOYMENT = 1 " //
-					+ " where ID = ? ";
-			params = new Object[] { lastemployied };
+					+ " where ID = ? and RECRUITER_TEAMID = ? ";
+			params = new Object[] { lastemployied, activity.getRecruiterTeamId() };
 			jdbcTemplate.update(sqlUpdate, params);
 			//
 			update = true;

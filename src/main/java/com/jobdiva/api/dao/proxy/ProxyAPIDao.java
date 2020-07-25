@@ -18,6 +18,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -72,6 +73,8 @@ public class ProxyAPIDao extends AbstractJobDivaDao {
 			//
 			HttpResponse httpResponse = null;
 			//
+			Boolean jsonContentType = false;
+			//
 			HttpMessage httpMessage = null;
 			if ("POST".equals(method)) {
 				httpMessage = new HttpPost(urlApi);
@@ -86,7 +89,13 @@ public class ProxyAPIDao extends AbstractJobDivaDao {
 			if (headers != null) {
 				for (int i = 0; i < headers.length; i++) {
 					ProxyHeader proxyHeader = headers[i];
-					httpMessage.setHeader(proxyHeader.getName(), proxyHeader.getValue());
+					String headerName = proxyHeader.getName();
+					String headerValue = proxyHeader.getValue();
+					httpMessage.setHeader(proxyHeader.getName(), headerValue);
+					//
+					if ("Content-Type".equalsIgnoreCase(headerName) && "application/json".equalsIgnoreCase(headerValue)) {
+						jsonContentType = true;
+					}
 				}
 			}
 			//
@@ -107,10 +116,14 @@ public class ProxyAPIDao extends AbstractJobDivaDao {
 			//
 			if (body != null) {
 				logger.info("BODY -- Params------------------");
-				Map<String, List<String>> extractParametersFromUrl = extractParametersFromUrl(body);
-				for (Map.Entry<String, List<String>> entry : extractParametersFromUrl.entrySet()) {
-					logger.info(entry.getKey() + "-->" + entry.getValue().get(0));
-					nvps.add(new BasicNameValuePair(entry.getKey(), entry.getValue().get(0)));
+				if (jsonContentType && ("POST".equals(method))) {
+					((HttpPost) httpMessage).setEntity(new StringEntity(body));
+				} else {
+					Map<String, List<String>> extractParametersFromUrl = extractParametersFromUrl(body);
+					for (Map.Entry<String, List<String>> entry : extractParametersFromUrl.entrySet()) {
+						logger.info(entry.getKey() + "-->" + entry.getValue().get(0));
+						nvps.add(new BasicNameValuePair(entry.getKey(), entry.getValue().get(0)));
+					}
 				}
 				logger.info("------------------");
 			}
@@ -136,6 +149,7 @@ public class ProxyAPIDao extends AbstractJobDivaDao {
 				//
 				String strResponse = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
 				//
+				logger.info("Response::" + strResponse);
 				Response response = new Response(httpResponse.getStatusLine().getStatusCode(), strResponse);
 				//
 				return response;
@@ -168,8 +182,8 @@ public class ProxyAPIDao extends AbstractJobDivaDao {
 		headers[0] = createProxyHeader("Content-Type", "application/x-www-form-urlencoded");
 		headers[1] = createProxyHeader("Method", "PUT ");
 		headers[2] = createProxyHeader("X-ApiClientId", "895808");
-		headers[3] = createProxyHeader("X-ApiSignature", "jtog7Nh9sRiAsXus4j/NrYsa45M=");
-		headers[4] = createProxyHeader("X-TimeStamp", "2020-06-24T17:49:22.782+0300");
+		headers[3] = createProxyHeader("X-ApiSignature", "LOhztJTis9OJrkdP7tFqDRO7NE8=");
+		headers[4] = createProxyHeader("X-TimeStamp", "2020-07-22T08:52:20.680+0300");
 		headers[5] = createProxyHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
 		//
 		proxyAPIDao.proxyAPI(method, urlApi, headers, null, body);

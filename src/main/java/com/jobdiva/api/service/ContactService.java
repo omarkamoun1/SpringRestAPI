@@ -41,7 +41,7 @@ public class ContactService {
 		try {
 			//
 			List<Contact> contactList = contactDao.searchContacts(jobDivaSession, teamId, contactId, firstname, lastname, email, title, phone, company, address, city, state, zipCode, country, //
-					onlyMyContacts, types, ownerIds, division, showPrimary, showInactive);
+					onlyMyContacts, types, ownerIds, division, showPrimary, showInactive, true);
 			//
 			// if (contactList != null) {
 			// for (Contact contact : contactList) {

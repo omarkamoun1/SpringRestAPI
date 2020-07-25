@@ -275,6 +275,17 @@ public class JobDao extends AbstractActivityDao {
 		}
 	}
 	
+	public List<Job> searchJobs(JobDivaSession jobDivaSession, Long jobId) {
+		//
+		String sql = "select * from trfq where teamid = ?  and id = ? ";
+		//
+		Object[] params = new Object[] { jobDivaSession.getTeamId(), jobId };
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		return jdbcTemplate.query(sql, params, new JobRowMapper());
+	}
+	
 	public List<Job> searchJobs(JobDivaSession jobDivaSession, Long jobId, String jobdivaref, String optionalref, String city, String[] states, String title, //
 			Long contactid, Long companyId, String companyname, Integer status, String[] jobTypes, Date issuedatefrom, //
 			Date issuedateto, Date startdatefrom, Date startdateto, //
@@ -465,7 +476,8 @@ public class JobDao extends AbstractActivityDao {
 				paramList.add(zipcode.toUpperCase() + "%");
 			}
 		}
-		sql_buff.append(" AND ROWNUM <= 10");
+		// for testing
+		// sql_buff.append(" AND ROWNUM <= 10");
 		sql_buff.append(" order by dateissued desc");
 		//
 		String queryString = sql_buff.toString();
@@ -741,7 +753,7 @@ public class JobDao extends AbstractActivityDao {
 		LinkedHashMap<String, String> fields = new LinkedHashMap<String, String>();
 		MapSqlParameterSource parameterSource = new MapSqlParameterSource();
 		//
-		JobSqlMapping.mapJob(jobDivaSession, job, fields, parameterSource);
+		JobSqlMapping.mapJob(jobDivaSession, job, fields, parameterSource, true);
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
@@ -773,12 +785,13 @@ public class JobDao extends AbstractActivityDao {
 		LinkedHashMap<String, String> fields = new LinkedHashMap<String, String>();
 		MapSqlParameterSource parameterSource = new MapSqlParameterSource();
 		//
-		JobSqlMapping.mapJob(jobDivaSession, job, fields, parameterSource);
+		JobSqlMapping.mapJob(jobDivaSession, job, fields, parameterSource, false);
 		//
 		//
 		String sqlInsert = " UPDATE TRFQ SET " + sqlUpdateparamFields(new ArrayList<String>(fields.keySet())) //
-				+ " WHERE ID = :ID ";
+				+ " WHERE ID = :ID and TEAMID = :TEAMID ";
 		parameterSource.addValue("ID", job.getId());
+		parameterSource.addValue("TEAMID", jobDivaSession.getTeamId());
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
@@ -1054,8 +1067,8 @@ public class JobDao extends AbstractActivityDao {
 		if (contacts != null) {
 			for (ContactRoleType contact : contacts) {
 				if (contact.getShowOnJob()) {
-					sql = " SELECT COMPANYID, COMPANYNAME, FIRSTNAME, LASTNAME FROM TCUSTOMER WHERE ID = ? ";
-					params = new Object[] { contact.getContactId() };
+					sql = " SELECT COMPANYID, COMPANYNAME, FIRSTNAME, LASTNAME FROM TCUSTOMER WHERE ID = ? and teamid = ? ";
+					params = new Object[] { contact.getContactId(), jobDivaSession.getTeamId() };
 					list = jdbcTemplate.query(sql, params, new RowMapper<Boolean>() {
 						
 						@Override
@@ -1865,8 +1878,8 @@ public class JobDao extends AbstractActivityDao {
 			//
 			//
 			if (job.getCustomerId() != customerid) {
-				sql = " SELECT COMPANYID, COMPANYNAME, FIRSTNAME, LASTNAME FROM TCUSTOMER WHERE ID = ? ";
-				params = new Object[] { job.getCustomerId() };
+				sql = " SELECT COMPANYID, COMPANYNAME, FIRSTNAME, LASTNAME FROM TCUSTOMER WHERE ID = ? and teamid = ? ";
+				params = new Object[] { job.getCustomerId(), jobDivaSession.getTeamId() };
 				jdbcTemplate.query(sql, params, new RowMapper<Boolean>() {
 					
 					@Override
@@ -2269,7 +2282,7 @@ public class JobDao extends AbstractActivityDao {
 				//
 				for (Userfield userfield : userfields) {
 					if (isNotEmpty(userfield.getUserfieldValue())) {
-						jobUserFieldsDao.deleteJobUserFieldsDao(jobid, userfield.getUserfieldId());
+						jobUserFieldsDao.deleteJobUserFieldsDao(jobid, userfield.getUserfieldId(), jobDivaSession.getTeamId());
 					} else {
 						String sql = "SELECT FROM TRFQ_USERFIELDS where RFQID = ? and USERFIELD_ID = ? ";//
 						Object[] params = new Object[] { jobid, userfield.getUserfieldId() };

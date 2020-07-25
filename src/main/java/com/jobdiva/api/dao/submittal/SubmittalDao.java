@@ -146,8 +146,8 @@ public class SubmittalDao extends AbstractActivityDao {
 		// get recruiter name
 		String sql = "SELECT FIRSTNAME, LASTNAME, EMAIL" //
 				+ " FROM TRECRUITER " //
-				+ " WHERE ID = ? ";
-		Object[] params = new Object[] { dbActivity.getRecruiterId() };
+				+ " WHERE ID = ? and GROUPID = ? ";
+		Object[] params = new Object[] { dbActivity.getRecruiterId(), jobDivaSession.getTeamId() };
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
@@ -486,8 +486,8 @@ public class SubmittalDao extends AbstractActivityDao {
 							// get recruiter name
 							sql = "SELECT FIRSTNAME, LASTNAME, EMAIL" //
 									+ " FROM TRECRUITER " //
-									+ " WHERE ID = ? ";
-							Object[] params = new Object[] { activity.getRecruiterId() };
+									+ " WHERE ID = ? and GROUPID = ? ";
+							Object[] params = new Object[] { activity.getRecruiterId(), jobDivaSession.getTeamId() };
 							//
 							jdbcTemplate.query(sql, params, new RowMapper<Long>() {
 								

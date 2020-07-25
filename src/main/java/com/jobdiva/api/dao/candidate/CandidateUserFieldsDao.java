@@ -44,11 +44,11 @@ public class CandidateUserFieldsDao extends AbstractJobDivaDao {
 				Userfield userfield = userfields[i];
 				//
 				if (isEmpty(userfield.getUserfieldValue())) {
-					candidateUDFDao.deletCandidateUDF(candidateid, userfield.getUserfieldId());
+					candidateUDFDao.deletCandidateUDF(jobDivaSession, candidateid, userfield.getUserfieldId());
 				} else {
-					String sql = "SELECT USERFIELD_VALUE from TCANDIDATE_USERFIELDS Where CANDIDATEID = ? AND USERFIELD_ID = ?  ";
+					String sql = "SELECT USERFIELD_VALUE from TCANDIDATE_USERFIELDS Where CANDIDATEID = ? AND USERFIELD_ID = ? and TEAMID = ?  ";
 					//
-					Object[] params = new Object[] { candidateid, userfield.getUserfieldId() };
+					Object[] params = new Object[] { candidateid, userfield.getUserfieldId(), jobDivaSession.getTeamId() };
 					//
 					//
 					List<String> list = jdbcTemplate.query(sql, params, new RowMapper<String>() {
@@ -69,8 +69,8 @@ public class CandidateUserFieldsDao extends AbstractJobDivaDao {
 						jdbcTemplate.update(sqlInsert, params);
 					} else {
 						String sqlUpdate = "Update TCANDIDATE_USERFIELDS SET USERFIELD_VALUE = ?, DATECREATED = ? " //
-								+ "WHERE CANDIDATEID = ? AND USERFIELD_ID = ?  ";//
-						params = new Object[] { userfield.getUserfieldValue(), currentDt, candidateid, userfield.getUserfieldId() };
+								+ "WHERE CANDIDATEID = ? AND USERFIELD_ID = ? and TEAMID = ?   ";//
+						params = new Object[] { userfield.getUserfieldValue(), currentDt, candidateid, userfield.getUserfieldId(), jobDivaSession.getTeamId() };
 						jdbcTemplate.update(sqlUpdate, params);
 					}
 					//

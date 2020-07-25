@@ -27,10 +27,10 @@ public class CreateCompanyDao extends AbstractJobDivaDao {
 		String	path;
 	}
 	
-	private void checkExistingCompanyWithSameName(String companyName) throws Exception {
-		String sql = "SELECT ID FROM TCUSTOMERCOMPANY Where   NLS_UPPER( name) =  ?  ";
+	private void checkExistingCompanyWithSameName(Long teamId, String companyName) throws Exception {
+		String sql = "SELECT ID FROM TCUSTOMERCOMPANY Where teamid = ? AND NLS_UPPER( name) =  ?  ";
 		//
-		Object[] params = new Object[] { companyName.toUpperCase() };
+		Object[] params = new Object[] { teamId, companyName.toUpperCase() };
 		//
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
@@ -97,8 +97,8 @@ public class CreateCompanyDao extends AbstractJobDivaDao {
 	private void updateparentCompanyInfo(JobDivaSession jobDivaSession, String parentcompany, Long companyId) throws Exception {
 		Object[] params;
 		ParentCompany parentCompanyObj = getParentCompany(jobDivaSession, parentcompany, companyId);
-		String slUpdate = "UPDATE TCUSTOMERCOMPANY SET PARENT_COMPANYID = ? , PARENT_COMPANY_NAME = ? , PARENTPATH = ?  WHERE ID = ?  ";
-		params = new Object[] { parentCompanyObj.id, parentCompanyObj.name, parentCompanyObj.path, companyId };
+		String slUpdate = "UPDATE TCUSTOMERCOMPANY SET PARENT_COMPANYID = ? , PARENT_COMPANY_NAME = ? , PARENTPATH = ?  WHERE ID = ? AND TEAMID = ? ";
+		params = new Object[] { parentCompanyObj.id, parentCompanyObj.name, parentCompanyObj.path, companyId, jobDivaSession.getTeamId() };
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
@@ -218,8 +218,8 @@ public class CreateCompanyDao extends AbstractJobDivaDao {
 				companyOwner.setCompanyid(companyid);
 				companyOwner.setRecruiterid(0L);
 				if (jdOwner.getOwnerId() != null) {
-					String sql = "SELECT ID FROM TRECRUITER WHERE ID = ?   ";
-					Object[] params = new Object[] { jdOwner.getOwnerId() };
+					String sql = "SELECT ID FROM TRECRUITER WHERE ID = ? AND GROUPID = ? ";
+					Object[] params = new Object[] { jdOwner.getOwnerId(), jobDivaSession.getTeamId() };
 					//
 					//
 					List<Long> list = jdbcTemplate.query(sql, params, new RowMapper<Long>() {
@@ -377,7 +377,7 @@ public class CreateCompanyDao extends AbstractJobDivaDao {
 		checkOwners(owners);
 		//
 		//
-		checkExistingCompanyWithSameName(companyname);
+		checkExistingCompanyWithSameName(jobDivaSession.getTeamId(), companyname);
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//

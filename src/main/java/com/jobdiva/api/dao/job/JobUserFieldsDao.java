@@ -23,9 +23,9 @@ public class JobUserFieldsDao extends AbstractJobDivaDao {
 		jdbcTemplate.update(sqlInsert, params);
 	}
 	
-	public void deleteJobUserFieldsDao(Long jobid, Integer userfieldId) {
-		String sqldelete = "DELETE FROM TRFQ_USERFIELDS where RFQID = ? and USERFIELD_ID = ? ";//
-		Object[] params = new Object[] { jobid, userfieldId };
+	public void deleteJobUserFieldsDao(Long jobid, Integer userfieldId, Long teamId) {
+		String sqldelete = "DELETE FROM TRFQ_USERFIELDS where RFQID = ? and USERFIELD_ID = ? and TEAMID = ? ";//
+		Object[] params = new Object[] { jobid, userfieldId, teamId };
 		// ,
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();

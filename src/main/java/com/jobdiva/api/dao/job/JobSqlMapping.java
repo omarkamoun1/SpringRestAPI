@@ -12,7 +12,7 @@ import com.jobdiva.api.sql.JobDivaSqlLobValue;
 
 public class JobSqlMapping {
 	
-	public static void mapJob(JobDivaSession jobDivaSession, Job job, LinkedHashMap<String, String> fields, MapSqlParameterSource parameterSource) {
+	public static void mapJob(JobDivaSession jobDivaSession, Job job, LinkedHashMap<String, String> fields, MapSqlParameterSource parameterSource, Boolean insertMode) {
 		//
 		// <column name="ID" precision="10" scale="0" />
 		// fields.put("", "");
@@ -192,7 +192,7 @@ public class JobSqlMapping {
 			parameterSource.addValue("SKILLS", job.getSkills());
 		}
 		//
-		if (job.getTeamid() != null) {
+		if (insertMode && job.getTeamid() != null) {
 			fields.put("TEAMID", "TEAMID");
 			parameterSource.addValue("TEAMID", job.getTeamid());
 		}

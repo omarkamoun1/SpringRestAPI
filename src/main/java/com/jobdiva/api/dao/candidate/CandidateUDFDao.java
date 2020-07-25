@@ -52,9 +52,9 @@ public class CandidateUDFDao extends AbstractJobDivaDao {
 		jdbcTemplate.update(sqlDelete, params);
 	}
 	
-	public void deletCandidateUDF(Long candidateid, Integer userfieldId) {
-		String sqlDelete = "DELETE FROM TCANDIDATE_USERFIELDS Where CANDIDATEID = ? AND USERFIELD_ID = ? ";
-		Object[] params = new Object[] { candidateid, userfieldId };
+	public void deletCandidateUDF(JobDivaSession jobDivaSession, Long candidateid, Integer userfieldId) {
+		String sqlDelete = "DELETE FROM TCANDIDATE_USERFIELDS Where CANDIDATEID = ? AND USERFIELD_ID = ?  AND TEAMID = ? ";
+		Object[] params = new Object[] { candidateid, userfieldId, jobDivaSession.getTeamId() };
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		jdbcTemplate.update(sqlDelete, params);
 	}

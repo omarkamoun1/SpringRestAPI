@@ -70,9 +70,9 @@ public class ContactAddressDao extends AbstractJobDivaDao {
 		return getContactAddresses(contactId, teamId, null);
 	}
 	
-	public void deleteContactAddress(Long id, Long contactId) {
-		String sqlDelete = "DELETE FROM TCUSTOMERADDRESS WHERE ID = ? AND CONTACTID = ? ";
-		Object[] params = new Object[] { id, contactId };
+	public void deleteContactAddress(Long teamId, Long id, Long contactId) {
+		String sqlDelete = "DELETE FROM TCUSTOMERADDRESS WHERE ID = ? AND CONTACTID = ? and TEAMID = ? ";
+		Object[] params = new Object[] { id, contactId, teamId };
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		jdbcTemplate.update(sqlDelete, params);
 	}
@@ -81,11 +81,14 @@ public class ContactAddressDao extends AbstractJobDivaDao {
 		ArrayList<String> fields = new ArrayList<String>();
 		ArrayList<Object> paramList = new ArrayList<Object>();
 		//
-		fields.add("CONTACTID");
-		paramList.add(contactAddress.getContactId());
-		//
-		fields.add("TEAMID");
-		paramList.add(contactAddress.getTeamId());
+		if (contactAddress.getId() == null || contactAddress.getId().intValue() == 0) {
+			//
+			fields.add("CONTACTID");
+			paramList.add(contactAddress.getContactId());
+			//
+			fields.add("TEAMID");
+			paramList.add(contactAddress.getTeamId());
+		}
 		//
 		//
 		if (isNotEmpty(contactAddress.getAddress1())) {
@@ -144,9 +147,10 @@ public class ContactAddressDao extends AbstractJobDivaDao {
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
 		try {
-			if (contactAddress.getId() != null) {
-				String sqlUpdate = " UPDATE TCUSTOMERADDRESS SET " + sqlUpdateFields(fields) + " WHERE ID = ?  ";
+			if (contactAddress.getId() != null && contactAddress.getId() > 0) {
+				String sqlUpdate = " UPDATE TCUSTOMERADDRESS SET " + sqlUpdateFields(fields) + " WHERE ID = ?  and TEAMID = ? ";
 				paramList.add(contactAddress.getId());
+				paramList.add(jobDivaSession.getTeamId());
 				Object[] params = paramList.toArray();
 				jdbcTemplate.update(sqlUpdate, params);
 			} else {

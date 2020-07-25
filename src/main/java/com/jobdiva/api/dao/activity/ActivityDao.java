@@ -34,12 +34,15 @@ public class ActivityDao extends AbstractActivityDao {
 				+ " b.ADDRESS1, b.ADDRESS2, b.CITY, b.STATE, b.ZIPCODE, " //
 				+ " c.FIRSTNAME as RecruiterFIRSTNAME, c.LASTNAME as RecruiterLASTNAME " //
 				+ " FROM  TINTERVIEWSCHEDULE a " //
-				+ " LEFT JOIN TCANDIDATE b ON b.ID = a.CANDIDATEID " //
+				+ " LEFT JOIN TCANDIDATE b ON b.ID = a.CANDIDATEID AND b.TEAMID = :teamid  " //
 				+ " LEFT JOIN TRECRUITER c ON c.ID = a.RECRUITERID " //
 				+ " where   " //
-				+ " a.ID = :id ";
+				+ " a.ID = :id " //
+				+ " CANDIDATE_TEAMID = :teamid " //
+				+ " and RECRUITER_TEAMID = :teamid ";
 		//
 		paramList.put("id", activityId);
+		paramList.put("teamid", jobDivaSession.getTeamId());
 		//
 		NamedParameterJdbcTemplate namedParameterJdbcTemplate = getNamedParameterJdbcTemplate();
 		//
@@ -161,7 +164,7 @@ public class ActivityDao extends AbstractActivityDao {
 			paramList.add(activity.getCandidateTeamId());
 		}
 		//
-		if (activity.getRecruiterTeamId() != null) {
+		if (activity.getId() == null && activity.getRecruiterTeamId() != null) {
 			fieldList.add("RECRUITER_TEAMID");
 			paramList.add(activity.getRecruiterTeamId());
 		}
@@ -495,8 +498,9 @@ public class ActivityDao extends AbstractActivityDao {
 			return activityId;
 		} else {
 			//
-			String sqlUpdate = "UPDATE TINTERVIEWSCHEDULE SET " + sqlUpdateFields(fieldList) + " WHERE ID = ? ";
+			String sqlUpdate = "UPDATE TINTERVIEWSCHEDULE SET " + sqlUpdateFields(fieldList) + " WHERE ID = ? AND RECRUITER_TEAMID = ? ";
 			paramList.add(activity.getId());
+			paramList.add(jobDivaSession.getTeamId());
 			//
 			jdbcTemplate.update(sqlUpdate, paramList.toArray());
 			//

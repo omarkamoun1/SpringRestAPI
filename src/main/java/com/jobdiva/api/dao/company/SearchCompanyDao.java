@@ -108,6 +108,18 @@ public class SearchCompanyDao extends AbstractJobDivaDao {
 		lcalCompany.setPrimaryContacts(primaryList.toString());
 	}
 	
+	public List<Long> searchForCompany(JobDivaSession jobDivaSession, String company) {
+		String sql = "SELECT id FROM TCUSTOMERCOMPANY WHERE   teamid = ? AND  upper(name) = upper(?) ";
+		Object[] params = new Object[] { jobDivaSession.getTeamId(), company };
+		return getJdbcTemplate().query(sql, params, new RowMapper<Long>() {
+			
+			@Override
+			public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getLong("id");
+			}
+		});
+	}
+	
 	public List<Company> searchForCompany(JobDivaSession jobDivaSession, Long companyId, String company, String address, String city, String state, String zip, String country, //
 			String phone, String fax, String url, String parentCompany, Boolean showAll, //
 			String[] types, Long ownerIds, String division, String nameIndex) throws Exception {

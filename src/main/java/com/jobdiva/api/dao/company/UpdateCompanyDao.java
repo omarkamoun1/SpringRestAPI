@@ -132,9 +132,9 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 		}
 	}
 	
-	private void deleteCompanyUDF(Long companyId, Integer userfieldId) {
-		String sqlDelete = "DELETE FROM TCOMPANY_USERFIELDS Where COMPANYID = ? AND USERFIELD_ID = ? ";
-		Object[] params = new Object[] { companyId, userfieldId };
+	private void deleteCompanyUDF(Long companyId, Integer userfieldId, Long teamId) {
+		String sqlDelete = "DELETE FROM TCOMPANY_USERFIELDS Where COMPANYID = ? AND USERFIELD_ID = ? and TEAMID = ? ";
+		Object[] params = new Object[] { companyId, userfieldId, teamId };
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
@@ -151,11 +151,11 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 			for (Userfield userfield : userfields) {
 				//
 				if (isEmpty(userfield.getUserfieldValue())) {
-					deleteCompanyUDF(companyId, userfield.getUserfieldId());
+					deleteCompanyUDF(companyId, userfield.getUserfieldId(), jobDivaSession.getTeamId());
 				} else {
-					String sql = "SELECT userfieldValue from TCOMPANY_USERFIELDS Where COMPANYID = ? AND USERFIELD_ID = ?  ";
+					String sql = "SELECT userfieldValue from TCOMPANY_USERFIELDS Where COMPANYID = ? AND USERFIELD_ID = ?  and TEAMID = ? ";
 					//
-					Object[] params = new Object[] { companyId, userfield.getUserfieldId() };
+					Object[] params = new Object[] { companyId, userfield.getUserfieldId(), jobDivaSession.getTeamId() };
 					//
 					//
 					List<String> list = jdbcTemplate.query(sql, params, new RowMapper<String>() {
@@ -176,9 +176,9 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 						jdbcTemplate.update(sqlInsert, params);
 					} else {
 						String sqlUpdate = "Update TCOMPANY_USERFIELDS SET USERFIELD_VALUE = ?, DATECREATED = ? " //
-								+ "WHERE COMPANYID = ? AND USERFIELD_ID = ?  " //
+								+ "WHERE COMPANYID = ? AND USERFIELD_ID = ? and TEAMID = ?  " //
 						;
-						params = new Object[] { userfield.getUserfieldValue(), currentDt, companyId, userfield.getUserfieldId() };
+						params = new Object[] { userfield.getUserfieldValue(), currentDt, companyId, userfield.getUserfieldId(), jobDivaSession.getTeamId() };
 						jdbcTemplate.update(sqlUpdate, params);
 					}
 					//
@@ -233,8 +233,8 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 				companyOwner.setCompanyid(companyid);
 				companyOwner.setRecruiterid(0L);
 				if (jdOwner.getOwnerId() != null) {
-					sql = "SELECT ID FROM TRECRUITER WHERE ID = ?   ";
-					params = new Object[] { jdOwner.getOwnerId() };
+					sql = "SELECT ID FROM TRECRUITER WHERE ID = ? AND GROUPID = ?  ";
+					params = new Object[] { jdOwner.getOwnerId(), jobDivaSession.getTeamId() };
 					//
 					//
 					List<Long> list = jdbcTemplate.query(sql, params, new RowMapper<Long>() {
@@ -279,9 +279,9 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 				if (jdOwner.getAction() == 2) {
 					if (all.containsKey(recid)) {
 						CompanyOwner owner = all.get(recid);
-						String sqlDelete = "DELETE FROM TCUSTOMER_COMPANY_OWNERS WHERE COMPANYID = ? AND RECRUITERID = ? ";
+						String sqlDelete = "DELETE FROM TCUSTOMER_COMPANY_OWNERS WHERE COMPANYID = ? AND RECRUITERID = ? and TEAMID = ?  ";
 						//
-						params = new Object[] { owner.getCompanyid(), owner.getRecruiterid() };
+						params = new Object[] { owner.getCompanyid(), owner.getRecruiterid(), jobDivaSession.getTeamId() };
 						//
 						jdbcTemplate.update(sqlDelete, params);
 						//
@@ -318,10 +318,9 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 					//
 					jdbcTemplate.update(sqlInsert, params);
 				} else {
-					String sqlInsert = "UPDATE TCUSTOMER_COMPANY_OWNERS  SET ISPRIMARYOWNER = ? , TEAMID = ? WHERE COMPANYID = ? AND  RECRUITERID = ? "//
-							+ "VALUES " //
-							+ "(?,?,?,?)";
-					params = new Object[] { companyOwner.getIsprimaryowner(), companyOwner.getTeamid(), companyOwner.getCompanyid(), companyOwner.getRecruiterid() };
+					String sqlInsert = "UPDATE TCUSTOMER_COMPANY_OWNERS  SET ISPRIMARYOWNER = ? WHERE COMPANYID = ? AND  RECRUITERID = ? AND TEAMID = ? ";//
+					//
+					params = new Object[] { companyOwner.getIsprimaryowner(), companyOwner.getCompanyid(), companyOwner.getRecruiterid(), companyOwner.getTeamid() };
 					//
 					jdbcTemplate.update(sqlInsert, params);
 				}
@@ -712,8 +711,9 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 		//
 		updateCompanyOwner(jobDivaSession, companyid, owners);
 		//
-		String sqlUpdate = " UPDATE TCUSTOMERCOMPANY SET " + sqlUpdateFields(fields) + " WHERE ID = :companyId ";
+		String sqlUpdate = " UPDATE TCUSTOMERCOMPANY SET " + sqlUpdateFields(fields) + " WHERE ID = :companyId and TEAMID = :teamId ";
 		parameterSource.addValue("companyId", companyid);
+		parameterSource.addValue("teamId", jobDivaSession.getTeamId());
 		//
 		//
 		NamedParameterJdbcTemplate jdbcTemplateObject = new NamedParameterJdbcTemplate(jdbcTemplate.getDataSource());
