@@ -151,7 +151,7 @@ public class TerminateStartDao extends AbstractActivityDao {
 		String sqlUpdate = " UPDATE tinterviewschedule SET " + sqlUpdateFields(fields)//
 				+ " WHERE  " //
 				+ " id = ? " //
-				+ " and candidate_teamid = ? "; //
+				+ " and recruiter_teamid = ? "; //
 		paramList.add(startid);
 		paramList.add(jobDivaSession.getTeamId());
 		//

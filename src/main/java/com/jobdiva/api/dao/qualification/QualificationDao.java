@@ -16,15 +16,9 @@ public class QualificationDao extends AbstractJobDivaDao {
 		// hash dcatName and dcatId
 		String sql = "select * " //
 				+ " from TCATEGORIES " //
-				+ " where CATID = ? ";
+				+ " where CATID = ? AND TEAMID = ? ";
 		//
-		Object[] params;
-		if (teamid != null) {
-			sql += " AND TEAMID = ? ";
-			params = new Object[] { catId, teamid };
-		} else {
-			params = new Object[] { catId };
-		}
+		Object[] params = new Object[] { catId, teamid };
 		//
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
@@ -33,10 +27,6 @@ public class QualificationDao extends AbstractJobDivaDao {
 		//
 		return list != null && list.size() > 0 ? list.get(0) : null;
 		//
-	}
-	
-	public Qualification getQualificationByCatId(Integer catId) {
-		return getQualificationByCatId(null, catId);
 	}
 	
 	public List<QualificationOption> getQualificationOptions(Long teamid, int catId, boolean closed) {

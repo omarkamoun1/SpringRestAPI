@@ -364,7 +364,7 @@ public class SubmittalDao extends AbstractActivityDao {
 				// Find internal submittal linking the job and the candidate
 				String sql = "SELECT CANDIDATEID, RECRUITERID " //
 						+ " FROM TINTERVIEWSCHEDULE "//
-						+ " WHERE CANDIDATE_TEAMID = ? "//
+						+ " WHERE RECRUITER_TEAMID = ? "//
 						+ " AND RFQID = ? "//
 						+ " AND nvl(ROLEID, 0) > 900";
 				//
@@ -436,8 +436,7 @@ public class SubmittalDao extends AbstractActivityDao {
 							+ " FROM  TINTERVIEWSCHEDULE a " //
 							+ " LEFT JOIN TCANDIDATE b ON b.ID = a.CANDIDATEID " //
 							+ " LEFT JOIN TRECRUITER c ON c.ID = a.RECRUITERID " //
-							+ " WHERE a.CANDIDATE_TEAMID = ? " //
-							+ " AND a.RECRUITER_TEAMID = ? " //
+							+ " WHERE a.RECRUITER_TEAMID = ? " //
 							+ " AND a.RFQID = ? " //
 							+ " and a.CANDIDATEID = ? " //
 							+ " AND nvl(a.ROLEID, 0) < 900";
@@ -717,7 +716,7 @@ public class SubmittalDao extends AbstractActivityDao {
 		// candidate & contact
 		String sql = "SELECT * from TINTERVIEWSCHEDULE " //
 				+ " where RFQID = ?  " //
-				+ " and CANDIDATE_TEAMID = ?  " //
+				+ " and RECRUITER_TEAMID = ?  " //
 				+ " and CUSTOMERID = ?  " //
 				+ " and CANDIDATEID = ? ";
 		//
@@ -738,7 +737,7 @@ public class SubmittalDao extends AbstractActivityDao {
 		// recruiter ID for creation.
 		sql = "SELECT * from TINTERVIEWSCHEDULE  " //
 				+ " where RFQID = ? " //
-				+ " and CANDIDATE_TEAMID = ?  " //
+				+ " and RECRUITER_TEAMID = ?  " //
 				+ " and CANDIDATEID = ? " //
 				+ " and nvl(ROLEID, 0) > 900";
 		//

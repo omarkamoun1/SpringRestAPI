@@ -27,7 +27,7 @@ public class EventController extends AbstractJobDivaController {
 	
 	@RequestMapping(value = "/createTask", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Create Task")
-	public Boolean createTask( //
+	public Long createTask( //
 			//
 			@ApiParam(value = "The subject of the task", required = true) //
 			@RequestParam(required = true) String subject, //

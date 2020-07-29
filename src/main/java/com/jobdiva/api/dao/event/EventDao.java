@@ -43,7 +43,7 @@ public class EventDao extends AbstractJobDivaDao {
 		}
 	}
 	
-	public Boolean createTask(JobDivaSession jobDivaSession, String subject, Date duedate, Long assignedtoid, Long assignedbyid, Integer tasktype, //
+	public Long createTask(JobDivaSession jobDivaSession, String subject, Date duedate, Long assignedtoid, Long assignedbyid, Integer tasktype, //
 			Integer percentagecompleted, Long contactid, Long candidateid, String description, Boolean isprivate) throws Exception {
 		//
 		// Parameters Check
@@ -140,6 +140,6 @@ public class EventDao extends AbstractJobDivaDao {
 			jdbcTemplate.update(sqlInsert, parameters);
 		}
 		//
-		return true;
+		return eventId;
 	}
 }

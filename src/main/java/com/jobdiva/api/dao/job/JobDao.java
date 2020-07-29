@@ -80,9 +80,10 @@ public class JobDao extends AbstractActivityDao {
 		String sql = " SELECT * " //
 				+ " FROM  TRFQ  " //
 				+ " where " //
-				+ "  ID = :id ";
+				+ "  ID = :id and TEAMID = :teamId ";
 		//
 		paramList.put("id", jobId);
+		paramList.put("teamId", jobDivaSession.getTeamId());
 		//
 		List<Job> list = getNamedParameterJdbcTemplate().query(sql, paramList, new JobRowMapper());
 		//
@@ -2284,8 +2285,8 @@ public class JobDao extends AbstractActivityDao {
 					if (isNotEmpty(userfield.getUserfieldValue())) {
 						jobUserFieldsDao.deleteJobUserFieldsDao(jobid, userfield.getUserfieldId(), jobDivaSession.getTeamId());
 					} else {
-						String sql = "SELECT FROM TRFQ_USERFIELDS where RFQID = ? and USERFIELD_ID = ? ";//
-						Object[] params = new Object[] { jobid, userfield.getUserfieldId() };
+						String sql = "SELECT FROM TRFQ_USERFIELDS where RFQID = ? and USERFIELD_ID = ? AND TEAMID = ? ";//
+						Object[] params = new Object[] { jobid, userfield.getUserfieldId(), jobDivaSession.getTeamId() };
 						// ,
 						jdbcTemplate.update(sql, params);
 						//

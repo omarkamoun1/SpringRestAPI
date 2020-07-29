@@ -313,7 +313,9 @@ public class ContactNoteDao extends AbstractJobDivaDao {
 				+ " and CUSTOMERID = ? " //
 				+ " and latestNotes = 1 " //
 				+ " order by datecreated desc ";
+		//
 		Object[] params = new Object[] { teamid, contactid };
+		//
 		List<ContactNote> latestNotesList = jdbcTemplate.query(sql, params, new RowMapper<ContactNote>() {
 			
 			@Override
@@ -327,20 +329,23 @@ public class ContactNoteDao extends AbstractJobDivaDao {
 				return contactNote;
 			}
 		});
+		//
+		//
 		if (latestNotesList.size() >= 3) { // update latestNotes flag if
 											// there're already 3 notes
 			boolean updatedL = false;
 			for (int i = 2; i < latestNotesList.size(); i++) {
+				ContactNote contactNote = latestNotesList.get(i);
 				if (i == 2) {
-					if (latestNotesList.get(i).getDateCreated().before(dateCreated)) {
-						String sqlUpdate = "UPDATE TCUSTOMERNOTES set latestNotes = 0 where recruiterTeamid = ? and customerid = ? and id = ? ";
-						params = new Object[] { teamid, contactid, latestNotesList.get(i).getId() };
+					if (contactNote.getDateCreated().before(dateCreated)) {
+						String sqlUpdate = "UPDATE TCUSTOMERNOTES set latestNotes = 0 where RECRUITER_TEAMID = ? and NOTEID = ? ";
+						params = new Object[] { teamid, contactNote.getId() };
 						jdbcTemplate.update(sqlUpdate, params);
 						updatedL = true;
 					}
 				} else { // fix up if there are more than 3 latestNotes
-					String sqlUpdate = "UPDATE TCUSTOMERNOTES set latestNotes = 0 where recruiterTeamid = ? and customerid = ? and id = ? ";
-					params = new Object[] { teamid, contactid, latestNotesList.get(i).getId() };
+					String sqlUpdate = "UPDATE TCUSTOMERNOTES set latestNotes = 0 where RECRUITER_TEAMID = ? and NOTEID = ? ";
+					params = new Object[] { teamid, contactNote.getId() };
 					jdbcTemplate.update(sqlUpdate, params);
 				}
 			}

@@ -16,7 +16,7 @@ import com.jobdiva.api.model.authenticate.JobDivaSession;
 @Component
 public class ContactAddressDao extends AbstractJobDivaDao {
 	
-	public List<ContactAddress> getContactAddresses(long contactId, long teamId, Boolean deleted) {
+	public List<ContactAddress> getContactAddresses(long contactId, long teamId, Boolean deleted, Long id) {
 		String sql = " Select DISTINCT "//
 				+ " ID, " //
 				+ " CONTACTID, " //
@@ -31,13 +31,18 @@ public class ContactAddressDao extends AbstractJobDivaDao {
 				+ " DELETED, " //
 				+ " FREETEXT " //
 				+ " FROM TCUSTOMERADDRESS " //
-				+ " WHERE CONTACTID = ? and TEAMID = ? AND ROWNUM <= 100 ORDER BY ID";
+				+ " WHERE CONTACTID = ? and TEAMID = ? ";
+		//
+		if (id != null) {
+			sql += " AND ID = " + id;
+		}
 		//
 		Object[] params = null;
 		if (deleted != null) {
 			sql += " AND DELETED = ? ";
-			params = new Object[] { contactId, teamId, deleted };
+			params = new Object[] { contactId, teamId, deleted ? 1 : 0 };
 		} else {
+			sql += " AND ROWNUM <= 100 ORDER BY ID ";
 			params = new Object[] { contactId, teamId };
 		}
 		//
@@ -49,8 +54,6 @@ public class ContactAddressDao extends AbstractJobDivaDao {
 			public ContactAddress mapRow(ResultSet rs, int rowNum) throws SQLException {
 				ContactAddress contactAddress = new ContactAddress();
 				contactAddress.setId(rs.getLong("ID"));
-				contactAddress.setContactId(rs.getLong("CONTACTID"));
-				contactAddress.setTeamId(rs.getLong("TEAMID"));
 				contactAddress.setAddress1(rs.getString("ADDRESS1"));
 				contactAddress.setAddress2(rs.getString("ADDRESS2"));
 				contactAddress.setCity(rs.getString("CITY"));
@@ -66,8 +69,8 @@ public class ContactAddressDao extends AbstractJobDivaDao {
 		return list;
 	}
 	
-	public List<ContactAddress> getContactAddresses(long contactId, long teamId) {
-		return getContactAddresses(contactId, teamId, null);
+	public List<ContactAddress> getContactAddresses(long contactId, long teamId, Long id) {
+		return getContactAddresses(contactId, teamId, null, id);
 	}
 	
 	public void deleteContactAddress(Long teamId, Long id, Long contactId) {
@@ -77,17 +80,20 @@ public class ContactAddressDao extends AbstractJobDivaDao {
 		jdbcTemplate.update(sqlDelete, params);
 	}
 	
-	public void insertUpdateContactAddress(JobDivaSession jobDivaSession, ContactAddress contactAddress) throws Exception {
+	public void insertUpdateContactAddress(JobDivaSession jobDivaSession, Long contactId, ContactAddress contactAddress, Boolean insertMode) throws Exception {
 		ArrayList<String> fields = new ArrayList<String>();
 		ArrayList<Object> paramList = new ArrayList<Object>();
 		//
-		if (contactAddress.getId() == null || contactAddress.getId().intValue() == 0) {
+		if (insertMode) {
+			//
+			fields.add("ID");
+			paramList.add(contactAddress.getId());
 			//
 			fields.add("CONTACTID");
-			paramList.add(contactAddress.getContactId());
+			paramList.add(contactId);
 			//
 			fields.add("TEAMID");
-			paramList.add(contactAddress.getTeamId());
+			paramList.add(jobDivaSession.getTeamId());
 		}
 		//
 		//
@@ -114,24 +120,19 @@ public class ContactAddressDao extends AbstractJobDivaDao {
 		if (isNotEmpty(contactAddress.getCountryId())) {
 			fields.add("COUNTRYID");
 			paramList.add(contactAddress.getCountryId());
+		} else if (!fields.contains("COUNTRYID")) {
+			fields.add("COUNTRYID");
+			paramList.add("US");
+			//
 		}
 		//
 		if (isNotEmpty(contactAddress.getState())) {
 			//
-			if (!isNotEmpty(contactAddress.getCountryId()))
-				contactAddress.setCountryId("US");
+			fields.add("STATE");
+			paramList.add(contactAddress.getState());
 			//
-			String lookUpState = lookupState(contactAddress.getState(), contactAddress.getCountryId());
-			if (lookUpState != null) {
-				fields.add("STATE");
-				paramList.add(lookUpState);
-			} else {
-				throw new Exception("Error: State (" + contactAddress.getState() + ") can not be identified.(with countryid(" + contactAddress.getCountryId() + ")) \r\n");
-			}
-		} else if (!fields.contains("COUNTRYID")) {
-			fields.add("COUNTRYID");
-			paramList.add("US");
 		}
+		//
 		//
 		fields.add("DELETED");
 		paramList.add(contactAddress.getDeleted());
@@ -147,22 +148,24 @@ public class ContactAddressDao extends AbstractJobDivaDao {
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
 		try {
-			if (contactAddress.getId() != null && contactAddress.getId() > 0) {
-				String sqlUpdate = " UPDATE TCUSTOMERADDRESS SET " + sqlUpdateFields(fields) + " WHERE ID = ?  and TEAMID = ? ";
-				paramList.add(contactAddress.getId());
-				paramList.add(jobDivaSession.getTeamId());
-				Object[] params = paramList.toArray();
-				jdbcTemplate.update(sqlUpdate, params);
-			} else {
-				//
+			if (insertMode) {
 				String sqlInsert = "INSERT INTO TCUSTOMERADDRESS (" + sqlInsertFields(fields) + ") VALUES (" + sqlInsertParams(fields) + ") ";
 				//
 				Object[] parameters = paramList.toArray();
 				jdbcTemplate.update(sqlInsert, parameters);
 				//
+			} else {
+				//
+				String sqlUpdate = " UPDATE TCUSTOMERADDRESS SET " + sqlUpdateFields(fields) + " WHERE ID = ? and CONTACTID = ? and TEAMID = ? ";
+				paramList.add(contactAddress.getId());
+				paramList.add(contactId);
+				paramList.add(jobDivaSession.getTeamId());
+				Object[] params = paramList.toArray();
+				jdbcTemplate.update(sqlUpdate, params);
+				//
 			}
 		} catch (Exception e) {
-			logger.debug("insertUpdateContactAddress " + e.getMessage());
+			logger.error("insertUpdateContactAddress " + e.getMessage());
 			throw new Exception(e);
 		}
 	}

@@ -42,10 +42,10 @@ public class CandidateNoteDao extends AbstractJobDivaDao {
 	
 	public void addContactNote(Long candidateid, Integer type, Long recruiterid, Long rfqid, Timestamp datecreated, Long teamid, int auto, String note) {
 		//
-		String sqlInsert = " INSERT INTO TCANDIDATENOTES (NOTEID, CANDIDATEID, TYPE, RECRUITERID, RFQID, DATECREATED, TEAMID, AUTO, NOTE)" //
+		String sqlInsert = " INSERT INTO TCANDIDATENOTES (NOTEID, CANDIDATEID, TYPE, RECRUITERID, RFQID, DATECREATED, TEAMID, RECRUITER_TEAMID, AUTO, NOTE)" //
 				+ "  VALUES " //
 				+ " (CANDIDATENOTEID.nextval, ?, ?, ?, ?, ?, ?, ?, ?) ";
-		Object[] params = new Object[] { candidateid, type, recruiterid, rfqid, datecreated, teamid, auto, note };
+		Object[] params = new Object[] { candidateid, type, recruiterid, rfqid, datecreated, teamid, teamid, auto, note };
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//

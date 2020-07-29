@@ -737,25 +737,44 @@ public class ContactDao extends AbstractJobDivaDao {
 		}
 		//
 		//
+		long addressId = 1;
 		if (addresses == null || addresses.length == 0) {
 			ContactAddress contactAddress = new ContactAddress();
-			contactAddress.setContactId(contactId);
-			contactAddress.setTeamId(jobDivaSession.getTeamId());
+			contactAddress.setId(addressId);
 			contactAddress.setCountryId("US");
 			contactAddress.setDefaultAddress(true);
 			contactAddress.setDeleted(false);
 			addresses = new ContactAddress[] { contactAddress };
-		}
-		//
-		//
-		//
-		for (int i = 0; i < addresses.length; i++) {
-			ContactAddress contactAddress = addresses[i];
-			// to be sure it's an insert
-			contactAddress.setId(null);
-			contactAddress.setContactId(contactId);
-			contactAddress.setTeamId(jobDivaSession.getTeamId());
-			contactAddressDao.insertUpdateContactAddress(jobDivaSession, contactAddress);
+			//
+			contactAddressDao.insertUpdateContactAddress(jobDivaSession, contactId, contactAddress, true);
+		} else {
+			//
+			//
+			//
+			for (int i = 0; i < addresses.length; i++) {
+				ContactAddress contactAddress = addresses[i];
+				// to be sure it's an insert
+				contactAddress.setId(addressId);
+				contactAddress.setDeleted(false);
+				//
+				//
+				if (isNotEmpty(contactAddress.getState())) {
+					String countryid = contactAddress.getCountryId();
+					if (countryid == null || countryid.length() == 0) {
+						countryid = "US";
+						contactAddress.setCountryId(countryid);
+					}
+					String state = lookupState(contactAddress.getState(), countryid);
+					if (state != null)
+						contactAddress.setState(state);
+					else
+						throw new Exception("Error: Contact(" + firstname + ", " + lastname + ") can not be created, due to State(" + contactAddress.getState() + ") mapping unfound.(with countryid(" + countryid + ")) \r\n");
+				}
+				//
+				contactAddressDao.insertUpdateContactAddress(jobDivaSession, contactId, contactAddress, true);
+				//
+				addressId++;
+			}
 		}
 		//
 		//
@@ -820,6 +839,9 @@ public class ContactDao extends AbstractJobDivaDao {
 		if (addresses != null) {
 			int default_cnt = 0;
 			for (ContactAddress cont_add : addresses) {
+				//
+				if (cont_add == null)
+					continue;
 				//
 				if (cont_add.getDefaultAddress())
 					default_cnt++;
@@ -1013,16 +1035,21 @@ public class ContactDao extends AbstractJobDivaDao {
 	
 	private void updateContactAddresses(JobDivaSession jobDivaSession, Long contactid, ContactAddress[] addresses) throws Exception {
 		if (addresses != null) {
-			List<ContactAddress> oldAddresses = contactAddressDao.getContactAddresses(contactid, jobDivaSession.getTeamId(), false);
+			List<ContactAddress> oldAddresses = contactAddressDao.getContactAddresses(contactid, jobDivaSession.getTeamId(), false, null);
 			//
+			//
+			// if there's only one address with no data, delete it so that new
+			// ones can be inserted
 			if (oldAddresses.size() == 1) {
 				ContactAddress contAdd = oldAddresses.get(0);
 				if (contAdd.getAddress1() == null && contAdd.getAddress2() == null && contAdd.getCity() == null && contAdd.getState() == null && contAdd.getZipCode() == null && contAdd.getFreeText() == null && contAdd.getDeleted() == false
 						&& (contAdd.getCountryId() == null || contAdd.getCountryId().equals("US")) && contAdd.getDefaultAddress() == true) {
 					oldAddresses.remove(0);
-					contactAddressDao.deleteContactAddress(jobDivaSession.getTeamId(), contAdd.getId(), contAdd.getContactId());
+					contactAddressDao.deleteContactAddress(jobDivaSession.getTeamId(), contAdd.getId(), contactid);
 				}
 			}
+			//
+			//
 			long maxAddressId = 0;
 			Hashtable<Long, Boolean> pairs = new Hashtable<Long, Boolean>();
 			for (ContactAddress contAdd : oldAddresses) {
@@ -1033,6 +1060,7 @@ public class ContactDao extends AbstractJobDivaDao {
 				else
 					pairs.put(contAdd.getId(), contAdd.getDefaultAddress());
 			}
+			//
 			//
 			long maxAddId_tmp = maxAddressId;
 			for (int i = 0; i < addresses.length; i++) {
@@ -1045,6 +1073,9 @@ public class ContactDao extends AbstractJobDivaDao {
 				} else if (jd_contAddress.getAction() == 2) // delete
 					pairs.remove(jd_contAddress.getId());
 			}
+			//
+			//
+			//
 			Enumeration<Boolean> v = pairs.elements();
 			int da_cnt = 0;
 			while (v.hasMoreElements() && da_cnt < 2)
@@ -1055,19 +1086,24 @@ public class ContactDao extends AbstractJobDivaDao {
 			//
 			//
 			for (int i = 0; i < addresses.length; i++) {
+				//
+				Boolean insertMode = false;
 				ContactAddress jd_contAddress = addresses[i];
-				List<ContactAddress> contAddressess = contactAddressDao.getContactAddresses(jd_contAddress.getContactId(), jobDivaSession.getTeamId());
+				//
+				//
+				List<ContactAddress> contAddressess = jd_contAddress.getId() == null ? null : contactAddressDao.getContactAddresses(contactid, jobDivaSession.getTeamId(), jd_contAddress.getId());
+				//
 				ContactAddress contAddress = contAddressess != null && contAddressess.size() > 0 ? contAddressess.get(0) : null;
+				//
 				//
 				if (jd_contAddress.getAction() == 1) {
 					if (contAddress == null) {// insert
+						insertMode = true;
 						contAddress = new ContactAddress();
 						if (jd_contAddress.getId() != null)
 							contAddress.setId(jd_contAddress.getId());
 						else
 							contAddress.setId(++maxAddressId);
-						contAddress.setContactId(contactid);
-						contAddress.setTeamId(jobDivaSession.getTeamId());
 						contAddress.setDeleted(false);
 						if (!isNotEmpty(jd_contAddress.getCountryId()))
 							;
@@ -1108,8 +1144,10 @@ public class ContactDao extends AbstractJobDivaDao {
 						else
 							throw new Exception("Error: State (" + jd_contAddress.getState() + ") can not be updated due to the mapping unfound.(with countryid(" + countryid + ")) \r\n");
 					}
+					//
 					if (isNotEmpty(jd_contAddress.getZipCode()))
 						contAddress.setZipCode(jd_contAddress.getZipCode());
+					//
 					if (isNotEmpty(jd_contAddress.getFreeText()))
 						contAddress.setFreeText(jd_contAddress.getFreeText());
 					// else modify
@@ -1118,8 +1156,10 @@ public class ContactDao extends AbstractJobDivaDao {
 						throw new Exception("Error: Address(" + jd_contAddress.getId() + ") of contact(" + contactid + ") is not found. Can not delete this address from the contact. \r\n");
 					contAddress.setDeleted(true);
 				}
+				//
+				//
 				if (contAddress != null)
-					contactAddressDao.insertUpdateContactAddress(jobDivaSession, contAddress);
+					contactAddressDao.insertUpdateContactAddress(jobDivaSession, contactid, contAddress, insertMode);
 			}
 		}
 	}

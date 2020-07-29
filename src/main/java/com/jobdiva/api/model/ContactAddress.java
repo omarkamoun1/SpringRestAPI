@@ -10,8 +10,6 @@ import io.swagger.annotations.ApiModel;
 public class ContactAddress implements java.io.Serializable {
 	
 	private Long	id;
-	private Long	contactId;
-	private Long	teamId;
 	private String	address1;
 	private String	address2;
 	private String	city;
@@ -29,22 +27,6 @@ public class ContactAddress implements java.io.Serializable {
 	
 	public void setId(Long id) {
 		this.id = id;
-	}
-	
-	public Long getContactId() {
-		return contactId;
-	}
-	
-	public void setContactId(Long contactId) {
-		this.contactId = contactId;
-	}
-	
-	public Long getTeamId() {
-		return teamId;
-	}
-	
-	public void setTeamId(Long teamId) {
-		this.teamId = teamId;
 	}
 	
 	public String getAddress1() {

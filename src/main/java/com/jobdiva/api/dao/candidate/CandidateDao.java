@@ -116,7 +116,7 @@ public class CandidateDao extends AbstractJobDivaDao {
 		int catId = candidateQual.getCatId();
 		//
 		// check catId
-		Qualification qualification = qualificationDao.getQualificationByCatId(catId);
+		Qualification qualification = qualificationDao.getQualificationByCatId(teamid, catId);
 		if (qualification == null || qualification.getClosed())
 			throw new Exception("Error: Qualification(" + catId + ") is not found. \r\n");
 		//
