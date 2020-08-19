@@ -172,10 +172,10 @@ public class CandidateService {
 	}
 	
 	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
-	public Long createCandidateNote(JobDivaSession jobDivaSession, Long candidateid, String note, Long recruiterid, String action, Date actionDate, Long link2AnOpenJob, Long link2aContact, Boolean setAsAuto) throws Exception {
+	public Long createCandidateNote(JobDivaSession jobDivaSession, Long candidateid, String note, Long recruiterid, String action, Date actionDate, Long link2AnOpenJob, Long link2aContact, Boolean setAsAuto, Date createDate) throws Exception {
 		//
 		try {
-			Long noteID = candidateNoteDao.createCandidateNote(jobDivaSession, candidateid, note, recruiterid, action, actionDate, link2AnOpenJob, link2aContact, setAsAuto);
+			Long noteID = candidateNoteDao.createCandidateNote(jobDivaSession, candidateid, note, recruiterid, action, actionDate, link2AnOpenJob, link2aContact, setAsAuto, createDate);
 			//
 			candidateDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "createCandidateNote", "Create Successful");
 			//
@@ -203,6 +203,65 @@ public class CandidateService {
 		} catch (Exception e) {
 			//
 			candidateDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateCandidateHRRecord", "Update Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	/**
+	 * @param jobDivaSession
+	 * @param candidateid
+	 * @param contactid
+	 * @param createdByRecruiterid
+	 * @param checkedByRecruiterid
+	 * @param dateChecked
+	 * @param notes
+	 * @param standardQuestions
+	 * @return
+	 * @throws Exception
+	 */
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+	public Boolean createCandidateReference(JobDivaSession jobDivaSession, Long candidateid, Long contactid, Long createdByRecruiterid, Long checkedByRecruiterid, Date dateChecked, String notes, String standardQuestions) throws Exception {
+		//
+		try {
+			Boolean success = candidateDao.createCandidateReference(jobDivaSession, candidateid, contactid, createdByRecruiterid, checkedByRecruiterid, dateChecked, notes, standardQuestions);
+			//
+			candidateDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "createCandidateReference", "Update Successful");
+			//
+			return success;
+			//
+		} catch (Exception e) {
+			//
+			candidateDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "createCandidateReference", "Update Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	/**
+	 * @param jobDivaSession
+	 * @param candidateid
+	 * @param backonemailmerge
+	 * @param requestoffemailindef
+	 * @param requestoffemailuntil
+	 * @param requestoffemailuntildate
+	 * @param reason
+	 * @return
+	 * @throws Exception
+	 */
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+	public Boolean updateCandidateEmailMerge(JobDivaSession jobDivaSession, Long candidateid, Boolean backonemailmerge, Boolean requestoffemailindef, Boolean requestoffemailuntil, Date requestoffemailuntildate, String reason) throws Exception {
+		//
+		try {
+			Boolean success = candidateDao.updateCandidateEmailMerge(jobDivaSession, candidateid, backonemailmerge, requestoffemailindef, requestoffemailuntil, requestoffemailuntildate, reason);
+			//
+			candidateDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateCandidateEmailMerge", "Update Successful");
+			//
+			return success;
+			//
+		} catch (Exception e) {
+			//
+			candidateDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateCandidateEmailMerge", "Update Failed, " + e.getMessage());
 			//
 			throw new Exception(e.getMessage());
 		}

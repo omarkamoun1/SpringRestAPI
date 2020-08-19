@@ -1,5 +1,6 @@
 package com.jobdiva.api.dao.candidate;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -7,12 +8,16 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.stereotype.Component;
 
 import com.axelon.candidate.CandidateData;
@@ -21,23 +26,30 @@ import com.axelon.candidate.WorkExperience;
 import com.axelon.oc4j.ServletRequestData;
 import com.axelon.shared.Zipper;
 import com.jobdiva.api.dao.AbstractJobDivaDao;
+import com.jobdiva.api.dao.contact.ContactDao;
 import com.jobdiva.api.dao.qualification.QualificationDao;
 import com.jobdiva.api.model.Candidate;
 import com.jobdiva.api.model.CandidateQual;
+import com.jobdiva.api.model.Contact;
 import com.jobdiva.api.model.PhoneType;
 import com.jobdiva.api.model.Qualification;
 import com.jobdiva.api.model.QualificationOption;
 import com.jobdiva.api.model.TitleSkillCertification;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.servlet.ServletTransporter;
+import com.jobdiva.api.sql.JobDivaSqlLobValue;
 import com.jobdiva.api.utils.StringUtils;
 
 @Component
 public class CandidateDao extends AbstractJobDivaDao {
 	
 	@Autowired
-	QualificationDao qualificationDao;
+	QualificationDao	qualificationDao;
+	//
+	@Autowired
+	ContactDao			contactDao;
 	
+	//
 	public Candidate getCandidate(JobDivaSession jobDivaSession, Long candidateId) {
 		String sql = " Select * "//
 				+ " FROM TCANDIDATE " //
@@ -937,5 +949,274 @@ public class CandidateDao extends AbstractJobDivaDao {
 		}
 		//
 		return null;
+	}
+	
+	private Boolean checkRecruiterid(Long teamId, Long recruiterId) throws Exception {
+		String sqlCheck = "select ID from TRECRUITER where ID = ? and GROUPID = ? ";
+		Object[] params = new Object[] { recruiterId, teamId };
+		//
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<Long> list = jdbcTemplate.query(sqlCheck, params, new RowMapper<Long>() {
+			
+			@Override
+			public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getLong("ID");
+			}
+		});
+		//
+		return (list == null || list.size() == 0);
+	}
+	
+	/**
+	 * @param jobDivaSession
+	 * @param candidateid
+	 * @param contactid
+	 * @param createdByRecruiterid
+	 * @param checkedByRecruiterid
+	 * @param dateChecked
+	 * @param notes
+	 * @param standardQuestions
+	 * @return
+	 * @throws Exception
+	 */
+	public Boolean createCandidateReference(JobDivaSession jobDivaSession, Long candidateid, Long contactid, Long createdByRecruiterid, Long checkedByRecruiterid, Date dateChecked, String notes, String standardQuestions) throws Exception {
+		//
+		if (candidateid != null) {
+			Candidate candidate = getCandidate(jobDivaSession, candidateid);
+			if (candidate == null)
+				throw new Exception("Error: Candidate(" + candidateid + ") is not found.\r\n");
+		}
+		//
+		Contact contact = contactDao.getContact(jobDivaSession, contactid);
+		if (contact == null)
+			throw new Exception("Error: Contact(" + contactid + ") is not found.\r\n");
+		//
+		if (checkRecruiterid(jobDivaSession.getTeamId(), createdByRecruiterid))
+			throw new Exception("Error: Invalid user id(" + createdByRecruiterid + ") for 'createdByRecruiterid'.\r\n");
+		//
+		//
+		// Check if there's duplicate
+		String sqlCheck = "SELECT count(*) as TotalRef " //
+				+ " FROM tcandidatereferences " //
+				+ " WHERE customerid = ? " //
+				+ " AND candidateid = ? " //
+				+ " AND recruiter_teamid = ? " //
+				+ "AND active=1";
+		//
+		Object[] params = new Object[] { contactid, candidateid, jobDivaSession.getTeamId() };
+		//
+		List<BigDecimal> list = getJdbcTemplate().query(sqlCheck, params, new RowMapper<BigDecimal>() {
+			
+			@Override
+			public BigDecimal mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getBigDecimal("TotalRef");
+			}
+		});
+		if (list != null && list.size() > 0) {
+			BigDecimal cnt = list.get(0);
+			if (cnt.intValue() > 0)
+				throw new Exception(String.format("Error: Contact(%d) already exist as a reference to Candidate(%d).\r\n", contactid, candidateid));
+		}
+		//
+		//
+		LinkedHashMap<String, String> fields = new LinkedHashMap<String, String>();
+		MapSqlParameterSource parameterSource = new MapSqlParameterSource();
+		//
+		fields.put("CANDIDATEID", "CANDIDATEID");
+		parameterSource.addValue("CANDIDATEID", candidateid);
+		//
+		fields.put("RECRUITER_TEAMID", "RECRUITER_TEAMID");
+		parameterSource.addValue("RECRUITER_TEAMID", jobDivaSession.getTeamId());
+		//
+		fields.put("CUSTOMERID", "CUSTOMERID");
+		parameterSource.addValue("CUSTOMERID", contactid);
+		//
+		fields.put("ACTIVE", "ACTIVE");
+		parameterSource.addValue("ACTIVE", true);
+		//
+		fields.put("SOURCE", "SOURCE");
+		parameterSource.addValue("SOURCE", 0);
+		//
+		fields.put("DATECREATED", "DATECREATED");
+		parameterSource.addValue("DATECREATED", new Timestamp(System.currentTimeMillis()));
+		//
+		fields.put("RECRUITERID", "RECRUITERID");
+		parameterSource.addValue("RECRUITERID", createdByRecruiterid);
+		//
+		//
+		// set fields
+		if (isNotEmpty(notes)) {
+			fields.put("NOTE", "NOTE");
+			//
+			notes = notes.replaceAll("\r\n|\r|\n|\n\r", "<br>");
+			parameterSource.addValue("NOTE", notes);
+		}
+		//
+		if (isNotEmpty(standardQuestions)) {
+			// REFFORM
+			standardQuestions = standardQuestions.replaceAll("\r\n|\r|\n|\n\r", "<br>");
+			DefaultLobHandler defaultLobHandler = new DefaultLobHandler();
+			fields.put("REFFORM", "REFFORM");
+			parameterSource.addValue("REFFORM", new JobDivaSqlLobValue(standardQuestions, defaultLobHandler));
+		}
+		if (checkedByRecruiterid != null && dateChecked != null) {
+			fields.put("RECRUITERID_CHECKED", "RECRUITERID_CHECKED");
+			parameterSource.addValue("RECRUITERID_CHECKED", checkedByRecruiterid);
+			//
+			if (checkRecruiterid(jobDivaSession.getTeamId(), checkedByRecruiterid))
+				throw new Exception("Error: Invalid user id(" + checkedByRecruiterid + ") for 'checkedByRecruiterid'.\r\n");
+			//
+			fields.put("DATECHECKED", "DATECHECKED");
+			parameterSource.addValue("DATECHECKED", dateChecked);
+		}
+		//
+		String sqlInsert = " INSERT INTO tcandidatereferences (" + sqlInsertFields(new ArrayList<String>(fields.keySet())) + ") VALUES (" + sqlInsertValues(fields) + ") ";
+		//
+		NamedParameterJdbcTemplate jdbcTemplateObject = new NamedParameterJdbcTemplate(getJdbcTemplate().getDataSource());
+		jdbcTemplateObject.update(sqlInsert, parameterSource);
+		//
+		return true;
+	}
+	
+	/**
+	 * @param jobDivaSession
+	 * @param candidateid
+	 * @param backonemailmerge
+	 * @param requestoffemailindef
+	 * @param requestoffemailuntil
+	 * @param requestoffemailuntildate
+	 * @param reason
+	 * @return
+	 * @throws Exception
+	 */
+	public Boolean updateCandidateEmailMerge(JobDivaSession jobDivaSession, Long candidateid, Boolean backonemailmerge, Boolean requestoffemailindef, Boolean requestoffemailuntil, Date requestoffemailuntildate, String reason) throws Exception {
+		//
+		//
+		int optionsSet = 0;
+		//
+		if (backonemailmerge != null && backonemailmerge)
+			optionsSet++;
+		//
+		if (requestoffemailuntil != null && requestoffemailuntil)
+			optionsSet++;
+		//
+		if (requestoffemailindef != null && requestoffemailindef)
+			optionsSet++;
+		//
+		if (optionsSet != 1)
+			throw new Exception("Error: One and only one option in (\'backonemailmerge\', \'requestoffemailindef\', \'requestoffemailuntil\') should be set to update candidate email merge settings. \r\n");
+		//
+		if (requestoffemailuntildate != null) {
+			if ((backonemailmerge != null && backonemailmerge) || (requestoffemailindef != null && requestoffemailindef))
+				throw new Exception("Error: No date should be set for neither \'backonemailmerge\' or \'requestoffemailindef\'.\r\n ");
+		}
+		//
+		if (requestoffemailuntil != null && requestoffemailuntil && requestoffemailuntildate == null)
+			throw new Exception("Error: Please set \'requestoffemailuntildate\' if \'requestoffemailuntil\' is true.\r\n");
+		//
+		//
+		//
+		Candidate candidate = getCandidate(jobDivaSession, candidateid);
+		if (candidate == null)
+			throw new Exception("Error: Candidate(" + candidateid + ") is not found.\r\n");
+		//
+		StringBuffer notestr = new StringBuffer();
+		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+		Timestamp currentdate = new Timestamp(System.currentTimeMillis());
+		//
+		if (isNotEmpty(reason))
+			notestr.append("Reason: " + reason + " \n");
+		//
+		// insert or update temailmerge_flag
+		int old_flag, new_flag = -1;
+		boolean flag_changed = false;
+		//
+		if (backonemailmerge != null && backonemailmerge)
+			new_flag = -1;
+		else if (requestoffemailuntil != null && requestoffemailuntil)
+			new_flag = 2;
+		else if (requestoffemailindef != null && requestoffemailindef)
+			new_flag = 3;
+		//
+		//
+		String sql = "Select Flag " //
+				+ " FROM temailmerge_flag " //
+				+ " WHERE candidateid = ? " //
+				+ " AND recruiter_teamid = ? "//
+				+ " and nvl(dirty,0) <>2 ";
+		//
+		Object[] params = new Object[] { candidateid, jobDivaSession.getTeamId() };
+		//
+		List<Integer> list = getJdbcTemplate().query(sql, params, new RowMapper<Integer>() {
+			
+			@Override
+			public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getInt("Flag");
+			}
+		});
+		//
+		if (list != null && list.size() > 0) {
+			old_flag = list.get(0);
+		} else {
+			old_flag = 0; // On Email Merge
+		}
+		//
+		//
+		if ((old_flag == 0 && new_flag != -1) || (old_flag != 0 && new_flag == -1))
+			flag_changed = true;
+		//
+		//
+		if (flag_changed) {
+			if (backonemailmerge != null && backonemailmerge) {
+				notestr.append("Marked candidate as back on email-merge.\n");
+				//
+			} else if (requestoffemailindef != null && requestoffemailindef) {
+				notestr.append("Marked candidate as being off email-merge indefinitely.\n");
+			} else if (requestoffemailuntil != null && requestoffemailuntil) {
+				notestr.append("Marked candidate as being off email-merge until " + sdf.format(requestoffemailuntildate) + ".\n");
+			}
+		}
+		if (notestr.length() > 0) {
+			//
+			// insert candidate note
+			addContactNote(candidateid, 0, jobDivaSession.getRecruiterId(), 0L, currentdate, jobDivaSession.getTeamId(), 3, notestr.toString());
+		}
+		//
+		//
+		//
+		if (backonemailmerge != null && backonemailmerge) {
+			String sqlUpdate = "update temailmerge_flag set dirty = 2 " //
+					+ " where candidateid = ? " //
+					+ " AND recruiter_teamid = ? ";
+			params = new Object[] { candidateid, jobDivaSession.getTeamId() };
+			getJdbcTemplate().update(sqlUpdate, params);
+			//
+		} else {
+			String sqlDelete = "delete from temailmerge_flag where candidateid= ? AND recruiter_teamid = ?";
+			params = new Object[] { candidateid, jobDivaSession.getTeamId() };
+			getJdbcTemplate().update(sqlDelete, params);
+			//
+			Timestamp dateuntil_candidate = new Timestamp(0);
+			SimpleDateFormat sdf1 = new SimpleDateFormat("MM/dd/yyyy");
+			Timestamp dateuntil_recruiter = new Timestamp(sdf1.parse("01/01/9999").getTime()); // Indefinitely
+			//
+			//
+			if (requestoffemailuntil != null && requestoffemailuntil && requestoffemailuntildate != null) {
+				dateuntil_recruiter = new Timestamp(requestoffemailuntildate.getTime());
+			}
+			//
+			//
+			String sqlInsertg = "Insert into temailmerge_flag " //
+					+ " (candidateid, recruiter_teamid, flag, recruiterid, datechanged, dateuntil_recruiter, dateuntil_candidate, dirty, email) " //
+					+ "values" //
+					+ " (?, ?, ?, ?, sysdate, ?, ?, 1, ?)";
+			//
+			params = new Object[] { candidateid, jobDivaSession.getTeamId(), new_flag, jobDivaSession.getRecruiterId(), dateuntil_recruiter, dateuntil_candidate, candidate.getEmail() };
+			//
+			getJdbcTemplate().update(sqlInsertg, params);
+		}
+		return true;
 	}
 }

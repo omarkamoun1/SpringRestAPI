@@ -604,7 +604,7 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 		//
 		if (references != null) {
 			fields.put("REFCHECK", "references");
-			parameterSource.addValue("references", maxsubmittals);
+			parameterSource.addValue("references", references);
 		}
 		//
 		if (drugtest != null) {
@@ -613,8 +613,8 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 		}
 		//
 		if (backgroundcheck != null) {
-			fields.put("DRUGTEST", "backgroundcheck");
-			parameterSource.addValue("backgroundcheck", backgroundcheck);
+			fields.put("BACKCHECK", "backcheck");
+			parameterSource.addValue("backcheck", backgroundcheck);
 		}
 		//
 		if (securityclearance != null) {

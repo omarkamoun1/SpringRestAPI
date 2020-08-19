@@ -466,6 +466,189 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		//
 	}
 	
+	@RequestMapping(value = "/createBillingRecord", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Create Billing Record")
+	public Integer createBillingRecord( //
+			//
+			@ApiParam(required = true) //
+			@RequestParam(required = true) Long candidateID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Long assignmentID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Long jobID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Integer recordID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Long createdByID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Boolean approved, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Date startDate, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Date endDate, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String customerRefNo, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Long hiringManagerID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Long billingContactID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Long division, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Integer invoiceGroupIndex, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String invoiceGroup, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String vMSWebsite, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String vMSEmployeeName, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Integer invoiceContent, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Integer expenseInvoices, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Boolean enableTimesheet, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Boolean allowEnterTimeOnPortal, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String timesheetInstruction, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Boolean expenseEnabled, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Double billRate, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String billRatePer, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Boolean overtimeExempt, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Long timesheetEntryFormat, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Integer frequency, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Integer overtimeByWorkingState, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Double overtimeRate, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String overtimeRatePer, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Double doubletimeRate, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String doubletimePer, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Integer billingUnit, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Integer weekEnding, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Double hoursPerDay, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Double hoursPerHalfDay, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String workAddress1, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String workAddress2, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String workCity, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String workState, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String workZipcode, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String workCountry, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Integer paymentTerms, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Long primarySalesPersonID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Double primarySalesPercentage, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Long secondarySalesPersonID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Double secondarySalesPercentage, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Long tertiarySalesPersonID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Double tertiarySalesPercentage, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Long primaryRecruiterID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Double primaryRecruiterPercentage, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Long secondaryRecruiterID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Double secondaryRecruiterPercentage, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Long tertiaryRecruiterID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Double tertiaryRecruiterPercentage //
+	//
+	//
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		return invoiceService.createBillingRecord(jobDivaSession, candidateID, assignmentID, jobID, recordID, createdByID, approved, startDate, endDate, customerRefNo, hiringManagerID, billingContactID, division, invoiceGroupIndex, invoiceGroup,
+				vMSWebsite, vMSEmployeeName, invoiceContent, expenseInvoices, enableTimesheet, allowEnterTimeOnPortal, timesheetInstruction, expenseEnabled, billRate, billRatePer, overtimeExempt, timesheetEntryFormat, frequency,
+				overtimeByWorkingState, overtimeRate, overtimeRatePer, doubletimeRate, doubletimePer, billingUnit, weekEnding, hoursPerDay, hoursPerHalfDay, workAddress1, workAddress2, workCity, workState, workZipcode, workCountry, paymentTerms,
+				primarySalesPersonID, primarySalesPercentage, secondarySalesPersonID, secondarySalesPercentage, tertiarySalesPersonID, tertiarySalesPercentage, primaryRecruiterID, primaryRecruiterPercentage, secondaryRecruiterID,
+				secondaryRecruiterPercentage, tertiaryRecruiterID, tertiaryRecruiterPercentage);
+		//
+	}
+	
 	@RequestMapping(value = "/updateBillingRecord", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Update Billing Record")
 	public Boolean updateBillingRecord( //

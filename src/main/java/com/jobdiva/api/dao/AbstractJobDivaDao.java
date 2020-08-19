@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -1122,5 +1123,17 @@ public class AbstractJobDivaDao {
 			}
 		}
 		return pipelineId;
+	}
+	
+	public void addContactNote(Long candidateid, Integer type, Long recruiterid, Long rfqid, Timestamp datecreated, Long teamid, int auto, String note) {
+		//
+		String sqlInsert = " INSERT INTO TCANDIDATENOTES (NOTEID, CANDIDATEID, TYPE, RECRUITERID, RFQID, DATECREATED, TEAMID, RECRUITER_TEAMID, AUTO, NOTE)" //
+				+ "  VALUES " //
+				+ " (CANDIDATENOTEID.nextval, ?, ?, ?, ?, ?, ?, ?, ? , ?) ";
+		Object[] params = new Object[] { candidateid, type, recruiterid, rfqid, datecreated, teamid, teamid, auto, note };
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		jdbcTemplate.update(sqlInsert, params);
 	}
 }

@@ -24,6 +24,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping("/api/jobdiva/")
@@ -352,7 +353,48 @@ public class CandidateController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return candidateService.createCandidateNote(jobDivaSession, candidateid, note, recruiterid, action, actionDate, link2AnOpenJob, link2AContact, setAsAuto);
+		return candidateService.createCandidateNote(jobDivaSession, candidateid, note, recruiterid, action, actionDate, link2AnOpenJob, link2AContact, setAsAuto, null);
+		//
+	}
+	
+	@ApiIgnore
+	@RequestMapping(value = "/createCandidateNoteWithCreateDate", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Create Candidate Note With CreateDate")
+	public Long createCandidateNoteWithCreateDate( //
+			//
+			@ApiParam(value = "Candidate ID", required = true) //
+			@RequestParam(required = true) Long candidateid, //
+			//
+			@ApiParam(value = "Note", required = true) //
+			@RequestParam(required = true) String note, //
+			//
+			@ApiParam(value = "Recruiter Id", required = false) //
+			@RequestParam(required = false) Long recruiterid, //
+			//
+			@ApiParam(value = "action", required = false) //
+			@RequestParam(required = false) String action, //
+			//
+			@ApiParam(value = "Action Date format(MM/dd/yyyy HH:mm:ss)", required = false) //
+			@RequestParam(required = false) Date actionDate, //
+			//
+			@ApiParam(value = "Create Date format(MM/dd/yyyy HH:mm:ss)", required = false) //
+			@RequestParam(required = false) Date createDate, //
+			//
+			@ApiParam(value = "link to an open job", required = false) //
+			@RequestParam(required = false) Long link2AnOpenJob, //
+			//
+			@ApiParam(value = "Link to a contact", required = false) //
+			@RequestParam(required = false) Long link2AContact, //
+			//
+			@ApiParam(value = "Set As Auto", required = false) //
+			@RequestParam(required = false) Boolean setAsAuto //
+	//
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		return candidateService.createCandidateNote(jobDivaSession, candidateid, note, recruiterid, action, actionDate, link2AnOpenJob, link2AContact, setAsAuto, createDate);
 		//
 	}
 	
@@ -393,6 +435,72 @@ public class CandidateController extends AbstractJobDivaController {
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		return candidateService.updateCandidateHRRecord(jobDivaSession, candidateid, dateofbirth, legalfirstname, legallastname, legalmiddlename, suffix, maritalstatus, ssn, visastatus);
+		//
+	}
+	
+	@RequestMapping(value = "/createCandidateReference", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Create Candidate Reference")
+	public Boolean createCandidateReference( //
+			//
+			@ApiParam(value = "Candidate ID", required = true) //
+			@RequestParam(required = true) Long candidateid, //
+			//
+			@ApiParam(value = "Contact ID", required = true) //
+			@RequestParam(required = true) Long contactid, //
+			//
+			@ApiParam(value = "Created By Recruiter Id", required = true) //
+			@RequestParam(required = true) Long createdByRecruiterid, //
+			//
+			@ApiParam(value = "Checked By Recruiter Id", required = false) //
+			@RequestParam(required = false) Long checkedByRecruiterid, //
+			@ApiParam(value = "Date Checked format(MM/dd/yyyy HH:mm:ss)", required = false) //
+			@RequestParam(required = false) Date dateChecked, //
+			//
+			@ApiParam(value = "Notes", required = false) //
+			@RequestParam(required = false) String notes, //
+			//
+			@ApiParam(value = "Standard Questions", required = false) //
+			@RequestParam(required = false) String standardQuestions //
+	//
+	//
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		return candidateService.createCandidateReference(jobDivaSession, candidateid, contactid, createdByRecruiterid, checkedByRecruiterid, dateChecked, notes, standardQuestions);
+		//
+	}
+	
+	@RequestMapping(value = "/updateCandidateEmailMerge", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Update Candidate Email Merge")
+	public Boolean updateCandidateEmailMerge( //
+			//
+			@ApiParam(value = "Candidate ID", required = true) //
+			@RequestParam(required = true) Long candidateid, //
+			//
+			@ApiParam(value = "Backon Email Merge", required = false) //
+			@RequestParam(required = false) Boolean backonemailmerge, //
+			//
+			@ApiParam(value = "Request Off Email in def", required = false) //
+			@RequestParam(required = false) Boolean requestoffemailindef, //
+			//
+			@ApiParam(value = "Request Off Email Until", required = false) //
+			@RequestParam(required = false) Boolean requestoffemailuntil, //
+			//
+			@ApiParam(value = "Request Off Email Until Date format(MM/dd/yyyy HH:mm:ss)", required = false) //
+			@RequestParam(required = false) Date requestoffemailuntildate, //
+			//
+			@ApiParam(value = "Reason", required = false) //
+			@RequestParam(required = false) String reason//
+	//
+	//
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		return candidateService.updateCandidateEmailMerge(jobDivaSession, candidateid, backonemailmerge, requestoffemailindef, requestoffemailuntil, requestoffemailuntildate, reason);
 		//
 	}
 }

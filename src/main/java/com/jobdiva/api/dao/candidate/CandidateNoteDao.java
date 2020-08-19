@@ -40,18 +40,6 @@ public class CandidateNoteDao extends AbstractJobDivaDao {
 	@Autowired
 	ContactDao		contactDao;
 	
-	public void addContactNote(Long candidateid, Integer type, Long recruiterid, Long rfqid, Timestamp datecreated, Long teamid, int auto, String note) {
-		//
-		String sqlInsert = " INSERT INTO TCANDIDATENOTES (NOTEID, CANDIDATEID, TYPE, RECRUITERID, RFQID, DATECREATED, TEAMID, RECRUITER_TEAMID, AUTO, NOTE)" //
-				+ "  VALUES " //
-				+ " (CANDIDATENOTEID.nextval, ?, ?, ?, ?, ?, ?, ?, ?) ";
-		Object[] params = new Object[] { candidateid, type, recruiterid, rfqid, datecreated, teamid, teamid, auto, note };
-		//
-		JdbcTemplate jdbcTemplate = getJdbcTemplate();
-		//
-		jdbcTemplate.update(sqlInsert, params);
-	}
-	
 	public Long saveCandidateNote(JobDivaSession jobDivaSession, CandidateNote candidateNote) {
 		//
 		//
@@ -175,7 +163,7 @@ public class CandidateNoteDao extends AbstractJobDivaDao {
 	}
 	
 	public Long createCandidateNote(JobDivaSession jobDivaSession, Long candidateid, String note, Long recruiterid, String action, //
-			Date actionDate, Long link2AnOpenJob, Long link2aContact, Boolean setAsAuto) throws Exception {
+			Date actionDate, Long link2AnOpenJob, Long link2aContact, Boolean setAsAuto, Date createDate) throws Exception {
 		//
 		if (isEmpty(action)) {
 			if (actionDate != null) {
@@ -194,7 +182,7 @@ public class CandidateNoteDao extends AbstractJobDivaDao {
 		}
 		//
 		// set note clob, recruiter id ...
-		Timestamp currentDt = new Timestamp(System.currentTimeMillis());
+		Timestamp currentDt = createDate != null ? new Timestamp(createDate.getTime()) : new Timestamp(System.currentTimeMillis());
 		int auto = setAsAuto != null && setAsAuto ? 3 : 0; //
 		//
 		CandidateNote candidateNote = new CandidateNote();

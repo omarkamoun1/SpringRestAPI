@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.jobdiva.api.dao.invoice.CreateBillingRecordDao;
 import com.jobdiva.api.dao.invoice.InvoiceDao;
 import com.jobdiva.api.dao.invoice.UpdateBillingRecordDao;
 import com.jobdiva.api.dao.invoice.UpdatePayRecordDao;
@@ -18,6 +19,9 @@ public class InvoiceService {
 	
 	@Autowired
 	InvoiceDao				invoiceDao;
+	//
+	@Autowired
+	CreateBillingRecordDao	createBillingRecordDao;
 	//
 	@Autowired
 	UpdateBillingRecordDao	updateBillingRecordDao;
@@ -107,6 +111,34 @@ public class InvoiceService {
 		} catch (Exception e) {
 			//
 			invoiceDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updatePayrollProfile", "Update Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
+		}
+	}
+	
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+	public Integer createBillingRecord(JobDivaSession jobDivaSession, Long candidateID, Long assignmentID, Long jobID, Integer recordID, Long createdByID, Boolean approved, Date startDate, Date endDate, String customerRefNo, Long hiringManagerID,
+			Long billingContactID, Long division, Integer invoiceGroupIndex, String invoiceGroup, String vMSWebsite, String vMSEmployeeName, Integer invoiceContent, Integer expenseInvoices, Boolean enableTimesheet, Boolean allowEnterTimeOnPortal,
+			String timesheetInstruction, Boolean expenseEnabled, Double billRate, String billRatePer, Boolean overtimeExempt, Long timesheetEntryFormat, Integer frequency, Integer overtimeByWorkingState, Double overtimeRate, String overtimeRatePer,
+			Double doubletimeRate, String doubletimePer, Integer billingUnit, Integer weekEnding, Double hoursPerDay, Double hoursPerHalfDay, String workAddress1, String workAddress2, String workCity, String workState, String workZipcode,
+			String workCountry, Integer paymentTerms, Long primarySalesPersonID, Double primarySalesPercentage, Long secondarySalesPersonID, Double secondarySalesPercentage, Long tertiarySalesPersonID, Double tertiarySalesPercentage,
+			Long primaryRecruiterID, Double primaryRecruiterPercentage, Long secondaryRecruiterID, Double secondaryRecruiterPercentage, Long tertiaryRecruiterID, Double tertiaryRecruiterPercentage) throws Exception {
+		try {
+			//
+			Integer result = createBillingRecordDao.createBillingRecord(jobDivaSession, candidateID, assignmentID, jobID, recordID, createdByID, approved, startDate, endDate, customerRefNo, hiringManagerID, billingContactID, division,
+					invoiceGroupIndex, invoiceGroup, vMSWebsite, vMSEmployeeName, invoiceContent, expenseInvoices, enableTimesheet, allowEnterTimeOnPortal, timesheetInstruction, expenseEnabled, billRate, billRatePer, overtimeExempt,
+					timesheetEntryFormat, frequency, overtimeByWorkingState, overtimeRate, overtimeRatePer, doubletimeRate, doubletimePer, billingUnit, weekEnding, hoursPerDay, hoursPerHalfDay, workAddress1, workAddress2, workCity, workState,
+					workZipcode, workCountry, paymentTerms, primarySalesPersonID, primarySalesPercentage, secondarySalesPersonID, secondarySalesPercentage, tertiarySalesPersonID, tertiarySalesPercentage, primaryRecruiterID,
+					primaryRecruiterPercentage, secondaryRecruiterID, secondaryRecruiterPercentage, tertiaryRecruiterID, tertiaryRecruiterPercentage);
+			//
+			invoiceDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "createBillingRecord", "Update Successful");
+			//
+			return result;
+			//
+		} catch (Exception e) {
+			//
+			createBillingRecordDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "createBillingRecord", "Update Failed, " + e.getMessage());
 			//
 			throw new Exception(e.getMessage());
 			//

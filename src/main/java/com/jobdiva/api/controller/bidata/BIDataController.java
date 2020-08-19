@@ -4517,4 +4517,20 @@ public class BIDataController extends AbstractJobDivaController {
 		return biDataService.getBIData(jobDivaSession, "Email Merge OptOut Candidate List", fromDate, toDate, null);
 		//
 	}
+	
+	@RequestMapping(value = "/RedactedCandidatesRecords", method = RequestMethod.GET, produces = "application/json")
+	public BiData RedactedCandidatesRecords(//
+			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
+			@RequestParam(required = true) Date fromDate, //
+			//
+			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
+			@RequestParam(required = true) Date toDate //
+	//
+	) throws Exception {//
+						//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		return biDataService.getBIData(jobDivaSession, "Redacted Candidates Records", fromDate, toDate, null);
+		//
+	}
 }
