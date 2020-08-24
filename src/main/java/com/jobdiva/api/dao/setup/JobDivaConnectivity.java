@@ -20,6 +20,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import com.zaxxer.hikari.HikariDataSource;
+
 @Component
 public class JobDivaConnectivity {
 	
@@ -55,6 +57,8 @@ public class JobDivaConnectivity {
 				+ " UNIVERSALSEARCH_SERVLET, " //
 				+ "	FLEXSTAFFING_SERVLET " //
 				+ " FROM TMAINDBS ";
+		//
+		logger.info(((HikariDataSource) jdbcTemplate.getDataSource()).getJdbcUrl());
 		//
 		divaConnections = jdbcTemplate.query(sql, new RowMapper<JobDivaConnection>() {
 			
@@ -142,6 +146,9 @@ public class JobDivaConnectivity {
 		dataSourceBuilder.url("jdbc:oracle:thin:@" + jobDivaConnection.getConnectionThin());
 		dataSourceBuilder.username(jobDivaConnection.getUserName());
 		dataSourceBuilder.password(jobDivaConnection.getPasword());
+		//
+		logger.info("Connecting to jdbc:oracle:thin:@" + jobDivaConnection.getConnectionThin());
+		//
 		DataSource dataSource = dataSourceBuilder.build();
 		//
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);

@@ -952,4 +952,105 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 				outsideCommissionPer, overtimeExempt, overtimeRate, overtimeRatePer, paymentTerms, payOnRemittance, perDiem, perDiemPer, recordID, salary, salaryPer, status, subcontractCompanyID, taxID);
 		//
 	}
+	
+	@RequestMapping(value = "/createPayRecord", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Create Pay Record")
+	public Integer createPayRecord( //
+			//
+			@ApiParam(required = true) //
+			@RequestParam(required = true) Long candidateID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Double assignmentID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Long jobID, //
+			//
+			// @ApiParam(required = false) //
+			// @RequestParam(required = false) Integer recordID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Boolean approved, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Long createdByID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Date effectiveDate, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Date endDate, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Integer status, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String taxID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String paymentTerms, //
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Long subcontractCompanyID, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Boolean payOnRemittance, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Double salary, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String salaryPer, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Double perDiem, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String perDiemPer, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Double otherExpenses, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String otherExpensesPer, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Double outsideCommission, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String outsideCommissionPer, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Double overtimeRate, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String overtimeRatePer, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Double doubletimeRate, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String doubletimeRatePer, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Boolean overtimeExempt, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String fileNo, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String aDPCOCODE, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String aDPPAYFREQUENCY //
+	//
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		return invoiceService.createPayRecord(jobDivaSession, candidateID, assignmentID, jobID,
+				/* recordID, */ approved, createdByID, effectiveDate, endDate, status, taxID, paymentTerms, subcontractCompanyID, payOnRemittance, salary, salaryPer, perDiem, perDiemPer, otherExpenses, otherExpensesPer, outsideCommission,
+				outsideCommissionPer, overtimeRate, overtimeRatePer, doubletimeRate, doubletimeRatePer, overtimeExempt, fileNo, aDPCOCODE, aDPPAYFREQUENCY);
+		//
+	}
 }

@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.jobdiva.api.dao.invoice.CreateBillingRecordDao;
+import com.jobdiva.api.dao.invoice.CreatePayRecordDao;
 import com.jobdiva.api.dao.invoice.InvoiceDao;
 import com.jobdiva.api.dao.invoice.UpdateBillingRecordDao;
 import com.jobdiva.api.dao.invoice.UpdatePayRecordDao;
@@ -28,6 +29,9 @@ public class InvoiceService {
 	//
 	@Autowired
 	UpdatePayRecordDao		updatePayRecordDao;
+	//
+	@Autowired
+	CreatePayRecordDao		createPayRecordDao;
 	
 	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
 	public Integer addExpenseInvoice(JobDivaSession jobDivaSession, Long employeeid, Date weekendingdate, Date invoicedate, String feedback, String description, ExpenseEntry[] expenses, String[] emailrecipients) throws Exception {
@@ -174,6 +178,7 @@ public class InvoiceService {
 		}
 	}
 	
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
 	public Boolean UpdatePayRecord(JobDivaSession jobDivaSession, String aDPCOCODE, String aDPPAYFREQUENCY, Boolean approved, Double assignmentID, Long candidateID, Double doubletimeRate, String doubletimeRatePer, Date effectiveDate, //
 			Date endDate, String fileNo, Double otherExpenses, String otherExpensesPer, Double outsideCommission, String outsideCommissionPer, Boolean overtimeExempt, Double overtimeRate, //
 			String overtimeRatePer, String paymentTerms, Boolean payOnRemittance, Double perDiem, String perDiemPer, Integer recordID, Double salary, String salaryPer, Integer status, //
@@ -191,6 +196,31 @@ public class InvoiceService {
 		} catch (Exception e) {
 			//
 			updateBillingRecordDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "UpdatePayRecord", "Update Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
+		}
+	}
+	
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+	public Integer createPayRecord(JobDivaSession jobDivaSession, Long candidateID, Double assignmentID, Long jobID,
+			/* Integer recordID, */ Boolean approved, Long createdByID, Date effectiveDate, Date endDate, Integer status, String taxID, String paymentTerms, Long subcontractCompanyID, Boolean payOnRemittance, Double salary, String salaryPer,
+			Double perDiem, String perDiemPer, Double otherExpenses, String otherExpensesPer, Double outsideCommission, String outsideCommissionPer, Double overtimeRate, String overtimeRatePer, Double doubletimeRate, String doubletimeRatePer,
+			Boolean overtimeExempt, String fileNo, String aDPCOCODE, String aDPPAYFREQUENCY) throws Exception {
+		//
+		try {
+			//
+			Integer recordId = createPayRecordDao.createPayRecord(jobDivaSession, candidateID, assignmentID, jobID,
+					/* recordID, */ approved, createdByID, effectiveDate, endDate, status, taxID, paymentTerms, subcontractCompanyID, payOnRemittance, salary, salaryPer, perDiem, perDiemPer, otherExpenses, otherExpensesPer, outsideCommission,
+					outsideCommissionPer, overtimeRate, overtimeRatePer, doubletimeRate, doubletimeRatePer, overtimeExempt, fileNo, aDPCOCODE, aDPPAYFREQUENCY);
+			//
+			invoiceDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "CreatePayRecord", "Create Successful");
+			//
+			return recordId;
+			//
+		} catch (Exception e) {
+			//
+			updateBillingRecordDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "CreatePayRecord", "Create Failed, " + e.getMessage());
 			//
 			throw new Exception(e.getMessage());
 			//
