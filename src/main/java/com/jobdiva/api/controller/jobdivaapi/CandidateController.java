@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -366,7 +367,9 @@ public class CandidateController extends AbstractJobDivaController {
 			@RequestParam(required = true) Long candidateid, //
 			//
 			@ApiParam(value = "Note", required = true) //
-			@RequestParam(required = true) String note, //
+			//
+			// @RequestParam(required = true)
+			@RequestBody(required = true) String note, //
 			//
 			@ApiParam(value = "Recruiter Id", required = false) //
 			@RequestParam(required = false) Long recruiterid, //

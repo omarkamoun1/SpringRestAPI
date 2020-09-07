@@ -14,7 +14,7 @@ public class JobUserFieldsDao extends AbstractJobDivaDao {
 		String sqlInsert = "INSERT INTO TRFQ_USERFIELDS " //
 				+ " (RFQID, USERFIELD_ID, TEAMID, USERFIELD_VALUE, DATECREATED, DATEISSUED ) " //
 				+ " VALUES " //
-				+ "(?, ?, ? ,? ,?   ) ";//
+				+ "(?, ?, ? ,? ,? ,? ) ";//
 		Object[] params = new Object[] { jobid, userfieldId, teamid, userfieldValue, new Date(), dateIssued };
 		// ,
 		//

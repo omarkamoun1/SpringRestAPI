@@ -2282,23 +2282,25 @@ public class JobDao extends AbstractActivityDao {
 				validateUserFields(jobDivaSession, teamid, userfields, UDF_FIELDFOR_JOB);
 				//
 				for (Userfield userfield : userfields) {
-					if (isNotEmpty(userfield.getUserfieldValue())) {
+					//
+					if (isEmpty(userfield.getUserfieldValue())) {
+						//
 						jobUserFieldsDao.deleteJobUserFieldsDao(jobid, userfield.getUserfieldId(), jobDivaSession.getTeamId());
+						//
 					} else {
-						String sql = "SELECT FROM TRFQ_USERFIELDS where RFQID = ? and USERFIELD_ID = ? AND TEAMID = ? ";//
+						//
+						String sql = "SELECT Count(*) as CNT FROM TRFQ_USERFIELDS where RFQID = ? and USERFIELD_ID = ? AND TEAMID = ? ";//
 						Object[] params = new Object[] { jobid, userfield.getUserfieldId(), jobDivaSession.getTeamId() };
-						// ,
-						jdbcTemplate.update(sql, params);
 						//
 						List<Integer> list = jdbcTemplate.query(sql, params, new RowMapper<Integer>() {
 							
 							@Override
 							public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
-								return rs.getInt(1);
+								return rs.getInt("CNT");
 							}
 						});
 						//
-						Boolean insertMode = list != null && list.size() > 0;
+						Boolean insertMode = list == null || (list.size() > 0 && list.get(0) <= 0);
 						if (insertMode) {
 							jobUserFieldsDao.addJobUserFieldsDao(jobid, userfield.getUserfieldId(), teamid, job.getDateIssued(), userfield.getUserfieldValue());
 						} else {
