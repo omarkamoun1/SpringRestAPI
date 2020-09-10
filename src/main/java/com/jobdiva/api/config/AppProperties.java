@@ -188,6 +188,9 @@ public class AppProperties {
 	//
 	@Value("${attachmentdb.datasource.password}")
 	private String	attachmentdbPassword;
+	//
+	@Value("${jobserveuk.url}")
+	private String	jobserveukUrl;
 	
 	public String getServletBiDataIp() {
 		return servletBiDataIp;
@@ -603,5 +606,13 @@ public class AppProperties {
 	
 	public void setApacheLocation(String apacheLocation) {
 		this.apacheLocation = apacheLocation;
+	}
+	
+	public String getJobserveukUrl() {
+		return this.jobserveukUrl;
+	}
+	
+	public void setJobserveukUrl(String jobserveukUrl) {
+		this.jobserveukUrl = jobserveukUrl;
 	}
 }
