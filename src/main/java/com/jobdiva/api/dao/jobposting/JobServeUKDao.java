@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import com.jobdiva.api.dao.setup.JobDivaConnectivity;
 import com.jobdiva.api.config.AppProperties;
+import com.jobdiva.api.model.JsukResponse;
 
 
 @Component
@@ -35,7 +36,7 @@ public class JobServeUKDao {
 	@Autowired
 	AppProperties		appProperties;
 	//
-	public String request(String req, Long teamid, String rfqid, String username, String pass) {
+	public JsukResponse request(String req, Long teamid, String rfqid, String username, String pass) {
 		//
 		//JobDivaSession jobDivaSession = getJobDivaSession();
 		
@@ -44,7 +45,7 @@ public class JobServeUKDao {
 		String[] data = new String[25];
 		String response = "";
 		String status = "Success";
-		String[] responseAr = new String[0];
+		List<String> responseAr = new ArrayList<String>();
 		
 		if (req.equals("PostAdvert") || req.equals("AmendAdvert")) {
 			String sql = "select param, value " //
@@ -67,8 +68,8 @@ public class JobServeUKDao {
 				}
 			});
 			
-			sql = "select jobdescription from trfq where id = ?";
-			params = new Object[] { rfqid };
+			sql = "select jobdescription from trfq where id = ? and teamid = ?";
+			params = new Object[] { rfqid, teamid };
 			
 			List<String> desc = jdbcTemplate.query(sql, params, new RowMapper<String>() {
 				@Override
@@ -85,7 +86,11 @@ public class JobServeUKDao {
 			for (int i = 3; i < 13; i++) {
 				if (i==6) data[i] = desc.get(0);
 				else if (isInList(list,elements[i]) != -1) data[i] = (String) list.get(isInList(list,elements[i])).get(1); 
-				else return "{\"Status\":\"Fail\", \"Message\":\"Required Field(s) Missing in Database\"}";
+				else {
+					List<String> failList = new ArrayList<String>();
+					failList.add("Required Field(s) Missing in Database");
+					return new JsukResponse("Fail", failList);
+				}
 			}
 			for (int i = 13; i < 25; i++) {
 				if (isInList(list,elements[i]) != -1) data[i] = (String) list.get(isInList(list,elements[i])).get(1);
@@ -103,7 +108,9 @@ public class JobServeUKDao {
 		try {
 			soapResponse = sendJsPost(createJsMessage(data, req), req);
 		} catch (IOException e) {
-			return "{\"Status\":\"Exception\", \"Message\":\"" + e + "\"}";
+			List<String> errorList = new ArrayList<String>();
+			errorList.add(e.getMessage());
+			return new JsukResponse("Exception", errorList);
 		}
 		
 		switch (req) {
@@ -111,7 +118,7 @@ public class JobServeUKDao {
 				if (!isTag(soapResponse, "CreditsRemaining")) {
 					status = "Query Failure";
 					response = "Account credentials are invalid";
-				} else response = getTagValue(soapResponse, "CreditsRemaining")[0];
+				} else response = getTagValue(soapResponse, "CreditsRemaining").get(0);
 				break;
 				
 			case "PostAdvert":
@@ -144,16 +151,11 @@ public class JobServeUKDao {
 		}
 		
 		if(status.equals("Success") || status.equals("Query Failure")) {
-			return "{\"Status\":\"" + status + "\", \"Message\":\"" + response + "\"}";
-		} else {
-			String ret = "{\"Status\":\"" + status + "\", ";
-			for(int i = 0; i < responseAr.length; i++) {
-				if(!responseAr[i].equals("")) ret += "\"Message" + (i+1) + "\":\"" + responseAr[i] + "\"";
-				if(i==responseAr.length-1) ret += "}";
-				else if (!responseAr[i].equals("")) ret += ", ";
-			}
-			return ret;
-		}
+			List<String> messageList = new ArrayList<String>();
+			messageList.add(response);
+			return new JsukResponse(status, messageList);
+		} else return new JsukResponse(status, responseAr);
+		
 		//
 	}
 	
@@ -304,11 +306,11 @@ public class JobServeUKDao {
     }
     
     
-    private String[] getTagValue(String message, String tag) {
+    private List<String> getTagValue(String message, String tag) {
         
     	int rep = (message.split(Pattern.quote("<"+tag+">"), -1).length) - 1;
         
-        String[] results = new String[rep];
+        List<String> results = new ArrayList<String>();
         int repIndex = 0;
         int searchIndex = 0;
 
@@ -333,7 +335,7 @@ public class JobServeUKDao {
                         while (message.charAt(indexE) != '<') {
                             indexE++;
                         }
-                        results[repIndex] = message.substring(indexB, indexE);
+                        results.add(message.substring(indexB, indexE));
                         repIndex++;
                         if (repIndex == rep) return results;
                     }

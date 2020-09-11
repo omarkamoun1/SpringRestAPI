@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.service.JobServeUKService;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
+import com.jobdiva.api.model.JsukResponse;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -26,7 +27,7 @@ public class JobServeUKController extends AbstractJobDivaController {
 	//
 	@ApiOperation(value = "Request")
 	@RequestMapping(value = "/request", method = RequestMethod.POST, produces = "application/json")
-	public String request(
+	public JsukResponse request(
 			//
 			//
 			@ApiParam(value = "req", required = true, type = "String") //

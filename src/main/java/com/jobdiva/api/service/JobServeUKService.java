@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.jobdiva.api.dao.jobposting.JobServeUKDao;
+import com.jobdiva.api.model.JsukResponse;
 
 @Service
 public class JobServeUKService {
@@ -15,7 +16,7 @@ public class JobServeUKService {
 	JobServeUKDao jobServeUKDao;
 	
 	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
-	public String request(String req, Long teamid, String rfqid, String username, String pass) {
+	public JsukResponse request(String req, Long teamid, String rfqid, String username, String pass) {
 		return jobServeUKDao.request(req, teamid, rfqid, username, pass);
 	}
 	
