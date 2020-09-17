@@ -182,7 +182,7 @@ public class JobServeUKDao {
                 xmlMessage += "<Contact>" + data[4] + "</Contact>";
                 if (data[13] != "") xmlMessage += "<Telephone>" + data[13] + "</Telephone>"; //Telephone
                 xmlMessage += "<Position>" + data[5] + "</Position>";
-                xmlMessage += "<HtmlSkills>><![CDATA[ " + data[6] + " ]]></HtmlSkills>";
+                xmlMessage += "<HtmlSkills><![CDATA[ " + data[6] + " ]]></HtmlSkills>";
                 xmlMessage += "<Location>" + data[7] + "</Location>";
                 xmlMessage += "<CountryCode>" + data[8] + "</CountryCode>";
                 if (data[14] != "") xmlMessage += "<PostZipCode>" + data[14] + "</PostZipCode>"; //PostZipCode
@@ -238,7 +238,7 @@ public class JobServeUKDao {
                 xmlMessage += "<Contact>" + data[4] + "</Contact>";
                 if (data[13] != "") xmlMessage += "<Telephone>" + data[13] + "</Telephone>"; //Telephone
                 xmlMessage += "<Position>" + data[5] + "</Position>";
-                xmlMessage += "<HtmlSkills>" + data[6] + "</HtmlSkills>";
+                xmlMessage += "<HtmlSkills><![CDATA[ " + data[6] + " ]]></HtmlSkills>";
                 xmlMessage += "<Location>" + data[7] + "</Location>";
                 if (data[15] != "") xmlMessage += "<StartDate>" + data[15] + "</StartDate>"; //StartDate
                 if (data[16] != "") xmlMessage += "<Duration>" + data[16] + "</Duration>"; //Duration 
