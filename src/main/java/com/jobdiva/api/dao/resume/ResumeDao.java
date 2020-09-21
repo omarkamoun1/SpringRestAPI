@@ -4,6 +4,7 @@ import static java.net.URLDecoder.decode;
 
 import java.rmi.Naming;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.springframework.stereotype.Component;
 
@@ -27,7 +28,7 @@ public class ResumeDao extends AbstractJobDivaDao {
 		return LOADBALANCERSERVLETLOCATION + "/candidate/servlet/CandidateAttachmentServlet";
 	}
 	
-	public Long uploadResume(JobDivaSession jobDivaSession, String filename, byte[] filecontent, String textfile, Long candidateid, Integer resumesource, Long recruiterId) throws Exception {
+	public Long uploadResume(JobDivaSession jobDivaSession, String filename, byte[] filecontent, String textfile, Long candidateid, Integer resumesource, Long recruiterId, Date resumeDate) throws Exception {
 		//
 		// data checking
 		StringBuffer message = new StringBuffer();
@@ -110,7 +111,10 @@ public class ResumeDao extends AbstractJobDivaDao {
 			}
 			String[] args = new String[4];
 			args[0] = doc.PlainText;
-			args[1] = String.valueOf(System.currentTimeMillis());
+			//
+			Long longResumeDate = resumeDate != null ? resumeDate.getTime() : System.currentTimeMillis();
+			//
+			args[1] = String.valueOf(longResumeDate); //
 			args[2] = "16511"; // Robot.PARSE_ALL
 			args[3] = String.valueOf(jobDivaSession.getTeamId());
 			//
@@ -133,6 +137,11 @@ public class ResumeDao extends AbstractJobDivaDao {
 				canData.action_code = 50;
 			} else {
 				canData.action_code = -1;
+			}
+			//
+			//
+			if (resumeDate != null) {
+				canData.resume.setDateCreated(resumeDate.getTime());
 			}
 			//
 			if (recruiterId != null)

@@ -1,5 +1,7 @@
 package com.jobdiva.api.service;
 
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,11 +18,11 @@ public class ResumeService {
 	@Autowired
 	CandidateAttachmentDao	candidateAttachmentDao;
 	
-	public Long uploadResume(JobDivaSession jobDivaSession, String filename, byte[] filecontent, String textfile, Long candidateid, Integer resumesource, Long recruiterId) throws Exception {
+	public Long uploadResume(JobDivaSession jobDivaSession, String filename, byte[] filecontent, String textfile, Long candidateid, Integer resumesource, Long recruiterId, Date resumeDate) throws Exception {
 		//
 		try {
 			//
-			Long id = resumeDao.uploadResume(jobDivaSession, filename, filecontent, textfile, candidateid, resumesource, recruiterId);
+			Long id = resumeDao.uploadResume(jobDivaSession, filename, filecontent, textfile, candidateid, resumesource, recruiterId, resumeDate);
 			//
 			resumeDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "uploadResume", "Upload Successful");
 			//

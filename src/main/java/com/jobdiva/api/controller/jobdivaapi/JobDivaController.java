@@ -58,7 +58,10 @@ public class JobDivaController extends AbstractJobDivaController {
 			@RequestParam(required = false) Integer resumesource, //
 			//
 			@ApiParam(value = "Recruiter ID", required = false) //
-			@RequestParam(required = false) Long recruiterid //
+			@RequestParam(required = false) Long recruiterid, //
+			//
+			@ApiParam(value = "Resume Date Format [MM/dd/yyyy HH:mm:ss]", required = false) //
+			@RequestParam(required = false) Date resumeDate //
 	//
 	//
 	//
@@ -66,7 +69,7 @@ public class JobDivaController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return resumeService.uploadResume(jobDivaSession, filename, filecontent, textfile, candidateid, resumesource, recruiterid);
+		return resumeService.uploadResume(jobDivaSession, filename, filecontent, textfile, candidateid, resumesource, recruiterid, resumeDate);
 		//
 	}
 	
