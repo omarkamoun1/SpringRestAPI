@@ -7,6 +7,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -24,8 +26,9 @@ import io.jsonwebtoken.ExpiredJwtException;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
-	//
 	
+	//
+	protected final Logger	logger	= LoggerFactory.getLogger(this.getClass());
 	//
 	@Autowired
 	private JwtTokenUtil	jwtTokenUtil;
@@ -41,6 +44,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		String username = null;
 		String jwtToken = null;
 		//
+		logger.info(requestTokenHeader);
 		//
 		// JWT Token is in the form "Bearer token". Remove Bearer word and get
 		// only the Token
@@ -61,6 +65,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		} else {
 			// logger.warn("JWT Token does not begin with Bearer String");
 		}
+		//
+		//
+		//
+		// jwtToken =
+		// "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhcGkudXNlckBqb2JkaXZhLmNvbSIsImV4cCI6MTYwNzE2Mzc5MiwiaWF0IjoxNjAxOTc5NzkyfQ.yW98q83_3mP6yLqEFZo7Lh43R7bplj3MeV-Yg9F_nWKN81e12A9IBABoT0zF0cemcYeOSb3hc0dxBFtePk1Vaw";
+		// username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+		// //
+		//
 		// Once we get the token validate it.
 		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 			//

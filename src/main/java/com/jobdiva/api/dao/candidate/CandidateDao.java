@@ -7,9 +7,12 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,7 @@ import com.jobdiva.api.model.Contact;
 import com.jobdiva.api.model.PhoneType;
 import com.jobdiva.api.model.Qualification;
 import com.jobdiva.api.model.QualificationOption;
+import com.jobdiva.api.model.SocialNetworkType;
 import com.jobdiva.api.model.TitleSkillCertification;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.servlet.ServletTransporter;
@@ -1217,6 +1221,108 @@ public class CandidateDao extends AbstractJobDivaDao {
 			//
 			getJdbcTemplate().update(sqlInsertg, params);
 		}
+		return true;
+	}
+	
+	public Boolean updateCandidateSNLinks(JobDivaSession jobDivaSession, Long candidateid, SocialNetworkType[] socialNetworkTypes) throws Exception {
+		//
+		if (candidateid != null) {
+			Candidate candidate = getCandidate(jobDivaSession, candidateid);
+			if (candidate == null)
+				throw new Exception("Error: Candidate(" + candidateid + ") is not found.");
+		}
+		//
+		for (SocialNetworkType sn : socialNetworkTypes) {
+			if (isEmpty(sn.getName())) {
+				throw new Exception("Empty Social Network Name.");
+			}
+		}
+		//
+		HashMap<String, Integer> nameToIdMap = new HashMap<String, Integer>();
+		//
+		String sql = " SELECT socialnetwork, snid " //
+				+ " FROM tsocialnetwork_identifiers " //
+				+ " WHERE deleted = 0 AND enabled = 1 ";
+		//
+		getJdbcTemplate().query(sql, new RowMapper<Boolean>() {
+			
+			@Override
+			public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
+				//
+				String name = rs.getString("socialnetwork");
+				Integer id = rs.getInt("snid");
+				nameToIdMap.put(name.toUpperCase(), id);
+				//
+				return true;
+			}
+		});
+		//
+		//
+		for (SocialNetworkType sn : socialNetworkTypes) {
+			if (!nameToIdMap.containsKey(sn.getName().toUpperCase()))
+				throw new Exception("Invalid Social Network Name (" + sn.getName() + "). Either not supported or not enabled. ");
+		}
+		//
+		Set<Integer> snids = new HashSet<Integer>();
+		sql = "SELECT snid " //
+				+ " FROM tcandidate_socialnetwork " //
+				+ " WHERE candidateid = ? " //
+				+ " AND teamid = ? ";
+		//
+		Object[] params = new Object[] { candidateid, jobDivaSession.getTeamId() };
+		//
+		//
+		getJdbcTemplate().query(sql, params, new RowMapper<Boolean>() {
+			
+			@Override
+			public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
+				//
+				Integer snid = rs.getInt("snid");
+				snids.add(snid);
+				//
+				return true;
+			}
+		});
+		//
+		for (SocialNetworkType sn : socialNetworkTypes) {
+			String name = sn.getName();
+			String link = sn.getLink();
+			if (snids.contains(nameToIdMap.get(name.toUpperCase()))) {
+				String sqlUpdate = "UPDATE tcandidate_socialnetwork " //
+						+ " SET snurl = ? , " //
+						+ " dateupdated_manual = sysdate, " //
+						+ " type = ?  " //
+						+ " WHERE candidateid = ? " //
+						+ " AND teamid = ?  " //
+						+ " AND snid = ? ";
+				//
+				// if save empty string, only do update when table is not empty
+				if (link.length() == 0) { //
+					sqlUpdate += " AND snurl is not null ";
+					params = new Object[] { link, 0, candidateid, jobDivaSession.getTeamId(), nameToIdMap.get(name.toUpperCase()) };
+					// if save a normal string, then do update when table is
+					// empty
+					// or table has a different value
+				} else {
+					sqlUpdate += " AND (snurl is null OR snurl <> ?) ";
+					params = new Object[] { link, 0, candidateid, jobDivaSession.getTeamId(), nameToIdMap.get(name.toUpperCase()), link };
+				}
+				//
+				//
+				getJdbcTemplate().update(sqlUpdate, params);
+			} else {
+				String sqlInsert = "INSERT INTO tcandidate_socialnetwork " //
+						+ " (candidateid, teamid, snid, snurl, type, dateupdated_manual) " //
+						+ " values " //
+						+ "(?, ? , ?, ?, ?, sysdate)";
+				//
+				params = new Object[] { candidateid, jobDivaSession.getTeamId(), nameToIdMap.get(name.toUpperCase()), link, 0 };
+				//
+				getJdbcTemplate().update(sqlInsert, params);
+				//
+			}
+		}
+		//
 		return true;
 	}
 }

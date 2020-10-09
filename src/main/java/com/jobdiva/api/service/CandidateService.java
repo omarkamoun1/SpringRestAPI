@@ -19,6 +19,7 @@ import com.jobdiva.api.model.Candidate;
 import com.jobdiva.api.model.CandidateQual;
 import com.jobdiva.api.model.PhoneType;
 import com.jobdiva.api.model.QualificationType;
+import com.jobdiva.api.model.SocialNetworkType;
 import com.jobdiva.api.model.TitleSkillCertification;
 import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
@@ -262,6 +263,30 @@ public class CandidateService {
 		} catch (Exception e) {
 			//
 			candidateDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateCandidateEmailMerge", "Update Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	/**
+	 * @param jobDivaSession
+	 * @param candidateid
+	 * @param socialNetworkTypes
+	 * @return
+	 */
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+	public Boolean updateCandidateSNLinks(JobDivaSession jobDivaSession, Long candidateid, SocialNetworkType[] socialNetworkType) throws Exception {
+		try {
+			//
+			Boolean success = candidateDao.updateCandidateSNLinks(jobDivaSession, candidateid, socialNetworkType);
+			//
+			candidateDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateCandidateSNLinks", "Update Successful");
+			//
+			return success;
+			//
+		} catch (Exception e) {
+			//
+			candidateDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateCandidateSNLinks", "Update Failed, " + e.getMessage());
 			//
 			throw new Exception(e.getMessage());
 		}

@@ -21,6 +21,7 @@ import com.jobdiva.api.model.Owner;
 import com.jobdiva.api.model.PhoneType;
 import com.jobdiva.api.model.QualificationType;
 import com.jobdiva.api.model.Skill;
+import com.jobdiva.api.model.SocialNetworkType;
 import com.jobdiva.api.model.TimesheetEntry;
 import com.jobdiva.api.model.TitleSkillCertification;
 import com.jobdiva.api.model.UserRole;
@@ -32,6 +33,7 @@ import io.swagger.annotations.Api;
  * @author Joseph Chidiac
  *
  */
+@CrossOrigin
 @RestController
 @RequestMapping("/api/jobdiva/")
 @Api(value = "Job API", description = "Hidden")
@@ -228,6 +230,15 @@ public class HiddenController {
 	) throws Exception {
 		//
 		return new Userfield();
+		//
+	}
+	
+	@RequestMapping(value = "/getSocialNetworkType", method = RequestMethod.GET, produces = "application/json")
+	public SocialNetworkType getSocialNetworkType(
+	//
+	) throws Exception {
+		//
+		return new SocialNetworkType();
 		//
 	}
 }

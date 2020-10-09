@@ -3,6 +3,7 @@ package com.jobdiva.api.controller.jobdivaapi;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,6 +23,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/jobdiva/")
 @Api(value = "Billing, Pay, Timesheet API", description = "REST API Used For Billing, Pay and Timesheet")

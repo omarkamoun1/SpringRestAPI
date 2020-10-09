@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -15,6 +16,7 @@ import com.jobdiva.api.model.Candidate;
 import com.jobdiva.api.model.CandidateQual;
 import com.jobdiva.api.model.PhoneType;
 import com.jobdiva.api.model.QualificationType;
+import com.jobdiva.api.model.SocialNetworkType;
 import com.jobdiva.api.model.TitleSkillCertification;
 import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
@@ -27,6 +29,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import springfox.documentation.annotations.ApiIgnore;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/jobdiva/")
 @Api(value = "Candidate API", description = "REST API Used For Candidate")
@@ -504,6 +507,26 @@ public class CandidateController extends AbstractJobDivaController {
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		return candidateService.updateCandidateEmailMerge(jobDivaSession, candidateid, backonemailmerge, requestoffemailindef, requestoffemailuntil, requestoffemailuntildate, reason);
+		//
+	}
+	
+	//
+	@ApiImplicitParams({ @ApiImplicitParam(name = "socialnetworks", required = true, allowMultiple = true, dataType = "SocialNetworkType") })
+	@RequestMapping(value = "/updateCandidateSNLinks", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Update Candidate Social Network Links")
+	public Boolean updateCandidateSNLinks( //
+			//
+			@ApiParam(value = "Candidate ID", required = true) //
+			@RequestParam(required = true) Long candidateid, //
+			//
+			@ApiParam(value = "socialnetworks", required = true, type = "SocialNetworkType", allowMultiple = true) //
+			@RequestParam(required = false) SocialNetworkType[] socialnetworks //
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		return candidateService.updateCandidateSNLinks(jobDivaSession, candidateid, socialnetworks);
 		//
 	}
 }

@@ -143,6 +143,8 @@ public class Candidate implements java.io.Serializable {
 	private List<CandidateQual>				candidateQuals;
 	@JsonIgnore
 	private List<QualificationType>			qualificationTypes;
+	@JsonIgnore
+	private List<SocialNetworkType>			socialNetworkTypes;
 	
 	public Long getId() {
 		return id;
@@ -614,6 +616,14 @@ public class Candidate implements java.io.Serializable {
 	
 	public void setQualificationTypes(List<QualificationType> qualificationTypes) {
 		this.qualificationTypes = qualificationTypes;
+	}
+	
+	public List<SocialNetworkType> getSocialNetworkTypes() {
+		return socialNetworkTypes;
+	}
+	
+	public void setSocialNetworkTypes(List<SocialNetworkType> socialNetworkTypes) {
+		this.socialNetworkTypes = socialNetworkTypes;
 	}
 	
 	public String getPhone1() {
