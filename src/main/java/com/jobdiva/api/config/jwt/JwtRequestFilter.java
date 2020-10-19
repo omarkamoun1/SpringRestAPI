@@ -44,7 +44,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		String username = null;
 		String jwtToken = null;
 		//
-		logger.info(requestTokenHeader);
+		// logger.info(requestTokenHeader);
 		//
 		// JWT Token is in the form "Bearer token". Remove Bearer word and get
 		// only the Token
