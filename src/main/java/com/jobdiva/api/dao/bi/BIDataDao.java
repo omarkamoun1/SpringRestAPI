@@ -241,7 +241,7 @@ public class BIDataDao extends AbstractBIDataDao {
 					}
 				}
 				biData.setMessage("Query \"" + metricName + "\" completed successfully");
-				biData.setData(data);
+				// biData.setData(data);
 			}
 			//
 		} catch (Exception e) {

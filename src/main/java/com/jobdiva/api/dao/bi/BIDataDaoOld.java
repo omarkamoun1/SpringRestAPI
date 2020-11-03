@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.bidata.BiData;
+import com.jobdiva.api.model.bidata.IBiData;
+import com.jobdiva.api.model.bidata.NewBiData;
+import com.jobdiva.api.model.bidata.Record;
 import com.jobdiva.api.servlet.ServletTransporter;
 import com.jobdiva.api.utils.DateUtils;
 import com.jobdiva.api.utils.StringUtils;
@@ -92,14 +95,15 @@ public class BIDataDaoOld extends AbstractJobDivaDao {
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public BiData getBIData(JobDivaSession jobDivaSession, String metricName, Date fromDate, Date toDate, String[] parameters) {
+	public IBiData getBIData(JobDivaSession jobDivaSession, String metricName, Date fromDate, Date toDate, String[] parameters, Boolean alternateFormat) {
 		//
+		alternateFormat = alternateFormat == null ? false : alternateFormat;
 		//
 		metricName = adjustMetricName(metricName);
 		parameters = adjustParameters(parameters);
 		//
 		//
-		BiData biData = new BiData();
+		IBiData biData = alternateFormat ? new NewBiData() : new BiData();
 		//
 		//
 		Boolean validateDate = validDate(fromDate, toDate);
@@ -125,24 +129,27 @@ public class BIDataDaoOld extends AbstractJobDivaDao {
 			if (rspData.size() > 1) {
 				Vector d = (Vector) rspData.elementAt(1);
 				String[] cols = (String[]) d.elementAt(0);
-				biData.assignColumnNames(Arrays.asList(cols));
-				//
-				biData.setData(d);
-				// if (d.size() > 1) {
-				// //
-				// for (int i = 1; i < d.size(); i++) {
-				// Record record = biData.addRecord();
-				// //
-				// String[] values = (String[]) d.elementAt(i);
-				// //
-				// for (int j = 0; j < values.length; j++) {
-				// String columnName = cols[j];
-				// String columnValue = values[j];
-				// record.addValue(columnName, columnValue);
-				// }
-				// }
-				// //
-				// }
+				if (!alternateFormat) {
+					((BiData) biData).assignColumnNames(Arrays.asList(cols));
+					//
+					((BiData) biData).setData(d);
+				} else {
+					if (d.size() > 1) {
+						//
+						for (int i = 1; i < d.size(); i++) {
+							Record record = ((NewBiData) biData).addRecord();
+							//
+							String[] values = (String[]) d.elementAt(i);
+							//
+							for (int j = 0; j < values.length; j++) {
+								String columnName = cols[j];
+								String columnValue = values[j];
+								record.addValue(columnName, columnValue);
+							}
+						}
+						//
+					}
+				}
 			}
 			//
 		} catch (Exception e) {

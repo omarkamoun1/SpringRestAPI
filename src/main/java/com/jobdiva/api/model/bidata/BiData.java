@@ -7,7 +7,7 @@ import java.util.Vector;
 import io.swagger.annotations.ApiModelProperty;
 
 @SuppressWarnings("serial")
-public class BiData implements Serializable {
+public class BiData implements IBiData, Serializable {
 	
 	@ApiModelProperty(notes = "Message")
 	private String				message;

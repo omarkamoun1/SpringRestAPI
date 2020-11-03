@@ -12,12 +12,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
-import com.jobdiva.api.model.bidata.BiData;
+import com.jobdiva.api.model.bidata.IBiData;
 import com.jobdiva.api.service.BIDataService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 @CrossOrigin
 @RestController
@@ -32,7 +33,7 @@ public class BIDataController extends AbstractJobDivaController {
 	//
 	@ApiOperation(value = "Bi Data Information")
 	@RequestMapping(value = "/getBIData", method = RequestMethod.GET, produces = "application/json")
-	public BiData getBIData(//
+	public IBiData getBIData(//
 			//
 			//
 			@ApiParam(value = "MetricName", required = true, type = "String") //
@@ -45,24 +46,32 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "Parameters", required = false, type = "String") //
-			@RequestParam(required = false) String[] parameters //
+			@RequestParam(required = false) String[] parameters, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, metricName, fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, metricName, fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CompanyDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CompanyDetail(//
+	public IBiData CompanyDetail(//
 			//
 			@ApiParam(value = "Company Id", required = true) //
 			@RequestParam(required = true) Long companyId, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -78,18 +87,22 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Company Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Company Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CompaniesDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CompaniesDetail(//
+	public IBiData CompaniesDetail(//
 			//
 			@ApiParam(value = "Company Id (s)", required = true) //
 			@RequestParam(required = true) Long[] companyIds, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -108,30 +121,38 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Companies Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Companies Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CompanyOwnersDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CompanyOwnersDetail(//
+	public IBiData CompanyOwnersDetail(//
 			//
 			@ApiParam(value = "Company Id", required = true) //
-			@RequestParam(required = true) Long companyId //
+			@RequestParam(required = true) Long companyId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { companyId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Company Owners Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Company Owners Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CompaniesOwnersDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CompaniesOwnersDetail(//
+	public IBiData CompaniesOwnersDetail(//
 			//
 			@ApiParam(value = "Company Id (s)", required = true) //
-			@RequestParam(required = true) Long[] companyIds //
+			@RequestParam(required = true) Long[] companyIds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -144,15 +165,19 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Companies Owners Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Companies Owners Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CompaniesTypesDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CompaniesTypesDetail(//
+	public IBiData CompaniesTypesDetail(//
 			//
 			@ApiParam(value = "Company Id (s)", required = true) //
-			@RequestParam(required = true) Long[] companyIds //
+			@RequestParam(required = true) Long[] companyIds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -165,33 +190,41 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Companies Types Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Companies Types Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CompanyAddressesDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CompanyAddressesDetail(//
+	public IBiData CompanyAddressesDetail(//
 			//
 			@ApiParam(value = "Company Id", required = true) //
-			@RequestParam(required = true) Long companyId //
+			@RequestParam(required = true) Long companyId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { companyId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Company Addresses Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Company Addresses Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ContactDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData ContactDetail(//
+	public IBiData ContactDetail(//
 			//
 			@ApiParam(value = "Contact Id", required = true) //
 			@RequestParam(required = true) Long contacId, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -206,18 +239,22 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Contact Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Contact Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/V2ContactDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData V2ContactDetail(//
+	public IBiData V2ContactDetail(//
 			//
 			@ApiParam(value = "Contact Id", required = true) //
 			@RequestParam(required = true) Long contacId, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -232,18 +269,22 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "V2 Contact Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "V2 Contact Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ContactsDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData ContactsDetail(//
+	public IBiData ContactsDetail(//
 			//
 			@ApiParam(value = "Contact Id (s)", required = true) //
 			@RequestParam(required = true) Long[] contactIds, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -262,18 +303,22 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Contacts Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Contacts Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/V2ContactsDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData V2ContactsDetail(//
+	public IBiData V2ContactsDetail(//
 			//
 			@ApiParam(value = "Contact Id (s)", required = true) //
 			@RequestParam(required = true) Long[] contactIds, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -293,15 +338,19 @@ public class BIDataController extends AbstractJobDivaController {
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
 		//
-		return biDataService.getBIData(jobDivaSession, "V2 Contacts Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "V2 Contacts Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ContactOwnersDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData ContactOwnersDetail(//
+	public IBiData ContactOwnersDetail(//
 			//
 			@ApiParam(value = "Contact Id", required = true) //
-			@RequestParam(required = true) Long contacId //
+			@RequestParam(required = true) Long contacId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -309,15 +358,19 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = new String[] { contacId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Contact Owners Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Contact Owners Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ContactsOwnersDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData ContactsOwnersDetail(//
+	public IBiData ContactsOwnersDetail(//
 			//
 			@ApiParam(value = "Contact Id (s)", required = true) //
-			@RequestParam(required = true) Long[] contactIds //
+			@RequestParam(required = true) Long[] contactIds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	//
 	) throws Exception {//
@@ -333,15 +386,19 @@ public class BIDataController extends AbstractJobDivaController {
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
 		//
-		return biDataService.getBIData(jobDivaSession, "Contacts Owners Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Contacts Owners Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ContactsTypesDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData ContactsTypesDetail(//
+	public IBiData ContactsTypesDetail(//
 			//
 			@ApiParam(value = "Contact Id (s)", required = true) //
-			@RequestParam(required = true) Long[] contactIds //
+			@RequestParam(required = true) Long[] contactIds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	//
 	) throws Exception {//
@@ -355,15 +412,19 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Contacts Types Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Contacts Types Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ContactAddressesDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData ContactAddressesDetail(//
+	public IBiData ContactAddressesDetail(//
 			//
 			@ApiParam(value = "Contact Id", required = true) //
-			@RequestParam(required = true) Long contacId //
+			@RequestParam(required = true) Long contacId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	//
 	) throws Exception {//
@@ -372,18 +433,22 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = new String[] { contacId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Contact Addresses Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Contact Addresses Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/JobDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData JobDetail(//
+	public IBiData JobDetail(//
 			//
 			@ApiParam(value = "Job Id", required = true) //
 			@RequestParam(required = true) Long jobId, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -400,18 +465,22 @@ public class BIDataController extends AbstractJobDivaController {
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
 		//
-		return biDataService.getBIData(jobDivaSession, "Job Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Job Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/JobsDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData JobsDetail(//
+	public IBiData JobsDetail(//
 			//
 			@ApiParam(value = "Job Id (s)", required = true) //
 			@RequestParam(required = true) Long[] jobIds, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -430,29 +499,37 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Jobs Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Jobs Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/JobContactsDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData JobContactsDetail(//
+	public IBiData JobContactsDetail(//
 			//
 			@ApiParam(value = "Job Id", required = true) //
-			@RequestParam(required = true) Long jobId //
+			@RequestParam(required = true) Long jobId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { jobId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Job Contacts Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Job Contacts Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/JobsContactsDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData JobsContactsDetail(//
+	public IBiData JobsContactsDetail(//
 			//
 			@ApiParam(value = "Job Id (s)", required = true) //
-			@RequestParam(required = true) Long[] jobIds //
+			@RequestParam(required = true) Long[] jobIds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	//
 	) throws Exception {//
@@ -466,29 +543,37 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Jobs Contacts Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Jobs Contacts Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/JobUsersDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData JobUsersDetail(//
+	public IBiData JobUsersDetail(//
 			//
 			@ApiParam(value = "Job Id", required = true) //
-			@RequestParam(required = true) Long jobId //
+			@RequestParam(required = true) Long jobId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { jobId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Job Users Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Job Users Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/JobsUsersDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData JobsUsersDetail(//
+	public IBiData JobsUsersDetail(//
 			//
 			@ApiParam(value = "Job Id (s)", required = true) //
-			@RequestParam(required = true) Long[] jobIds //
+			@RequestParam(required = true) Long[] jobIds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	//
 	) throws Exception {//
@@ -502,60 +587,76 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Jobs Users Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Jobs Users Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/JobApplicantsDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData JobApplicantsDetail(//
+	public IBiData JobApplicantsDetail(//
 			//
 			@ApiParam(value = "Job Id", required = true) //
-			@RequestParam(required = true) Long jobId //
+			@RequestParam(required = true) Long jobId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { jobId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Job Applicants Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Job Applicants Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateJobApplicationDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateJobApplicationDetail(//
+	public IBiData CandidateJobApplicationDetail(//
 			//
 			@ApiParam(value = "Candidate Id", required = true) //
 			@RequestParam(required = true) Long candidateId, //
 			//
 			@ApiParam(value = "Job Id", required = true) //
-			@RequestParam(required = true) Long jobId //
+			@RequestParam(required = true) Long jobId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { candidateId.toString(), jobId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Job Application Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate Job Application Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/JobSubmittalsDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData JobSubmittalsDetail(//
+	public IBiData JobSubmittalsDetail(//
 			//
 			@ApiParam(value = "Job Id", required = true) //
-			@RequestParam(required = true) Long jobId //
+			@RequestParam(required = true) Long jobId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { jobId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Job Submittals Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Job Submittals Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/JobsSubmittalsDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData JobsSubmittalsDetail(//
+	public IBiData JobsSubmittalsDetail(//
 			//
 			@ApiParam(value = "Job Id (s)", required = true) //
-			@RequestParam(required = true) Long[] jobIds //
+			@RequestParam(required = true) Long[] jobIds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	//
 	) throws Exception {//
@@ -569,42 +670,50 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Jobs Submittals Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Jobs Submittals Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateSubmittalsDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateSubmittalsDetail(//
+	public IBiData CandidateSubmittalsDetail(//
 			//
 			@ApiParam(value = "Candidate Id", required = true) //
-			@RequestParam(required = true) Long candidateid //
+			@RequestParam(required = true) Long candidateid, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { candidateid.toString() };
 		//
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Submittals Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate Submittals Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ResumeDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData ResumeDetail(//
+	public IBiData ResumeDetail(//
 			//
 			@ApiParam(value = "Resume Id", required = true) //
-			@RequestParam(required = true) Long resumeId //
+			@RequestParam(required = true) Long resumeId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { resumeId.toString() };
 		//
 		//
-		return biDataService.getBIData(jobDivaSession, "Resume Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Resume Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/UsersTasksDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData UsersTasksDetail(//
+	public IBiData UsersTasksDetail(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -612,7 +721,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Id (s)", required = true) //
-			@RequestParam(required = true) Long[] userds//
+			@RequestParam(required = true) Long[] userds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -625,15 +738,19 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Users Tasks Detail", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "Users Tasks Detail", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/EventsAttendeesDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData EventsAttendeesDetail(//
+	public IBiData EventsAttendeesDetail(//
 			//
 			@ApiParam(value = "Event Id (s)", required = true) //
-			@RequestParam(required = true) Long[] eventids //
+			@RequestParam(required = true) Long[] eventids, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	//
 	) throws Exception {//
@@ -647,18 +764,22 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Events Attendees Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Events Attendees Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateDetail(//
+	public IBiData CandidateDetail(//
 			//
 			@ApiParam(value = "Candidate Id", required = true) //
 			@RequestParam(required = true) Long candidateId, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -675,18 +796,22 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidatesDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidatesDetail(//
+	public IBiData CandidatesDetail(//
 			//
 			@ApiParam(value = "Candidate Id (s)", required = true) //
 			@RequestParam(required = true) Long[] candidateIds, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -705,18 +830,22 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidates Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidates Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateQualificationsDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateQualificationsDetail(//
+	public IBiData CandidateQualificationsDetail(//
 			//
 			@ApiParam(value = "Candidate Id", required = true) //
 			@RequestParam(required = true) Long candidateId, //
 			//
 			@ApiParam(value = "Category Names", required = false) //
-			@RequestParam(required = false) String[] categoryNames //
+			@RequestParam(required = false) String[] categoryNames, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -733,18 +862,22 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Qualifications Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate Qualifications Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidatesQualificationsDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidatesQualificationsDetail(//
+	public IBiData CandidatesQualificationsDetail(//
 			//
 			@ApiParam(value = "Candidate Id (s)", required = true) //
 			@RequestParam(required = true) Long[] candidateIds, //
 			//
 			@ApiParam(value = "Category Names", required = false) //
-			@RequestParam(required = false) String[] categoryNames //
+			@RequestParam(required = false) String[] categoryNames, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -763,15 +896,19 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidates Qualifications Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidates Qualifications Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateAvailabilityDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateAvailabilityDetail(//
+	public IBiData CandidateAvailabilityDetail(//
 			//
 			@ApiParam(value = "Candidate Id", required = true) //
-			@RequestParam(required = true) Long candidateId //
+			@RequestParam(required = true) Long candidateId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	//
 	) throws Exception {//
@@ -780,15 +917,18 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = new String[] { candidateId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Availability Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate Availability Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidatesAvailabilityDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidatesAvailabilityDetail(//
+	public IBiData CandidatesAvailabilityDetail(//
 			//
 			@ApiParam(value = "Candidate Id (s)", required = true) //
-			@RequestParam(required = true) Long[] candidateIds //
+			@RequestParam(required = true) Long[] candidateIds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
 	//
 	//
 	) throws Exception {//
@@ -803,15 +943,19 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidates Availability Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidates Availability Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateResumesDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateResumesDetail(//
+	public IBiData CandidateResumesDetail(//
 			//
 			@ApiParam(value = "Candidate Id", required = true) //
-			@RequestParam(required = true) Long candidateId //
+			@RequestParam(required = true) Long candidateId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	//
 	) throws Exception {//
@@ -821,15 +965,19 @@ public class BIDataController extends AbstractJobDivaController {
 		String[] parameters = new String[] { candidateId.toString() };
 		//
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Resumes Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate Resumes Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidatesResumesDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidatesResumesDetail(//
+	public IBiData CandidatesResumesDetail(//
 			//
 			@ApiParam(value = "Candidate Id (s)", required = true) //
-			@RequestParam(required = true) Long[] candidateIds //
+			@RequestParam(required = true) Long[] candidateIds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	//
 	) throws Exception {//
@@ -844,15 +992,19 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidates Resumes Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidates Resumes Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateResumeSourceDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateResumeSourceDetail(//
+	public IBiData CandidateResumeSourceDetail(//
 			//
 			@ApiParam(value = "Candidate Id", required = true) //
-			@RequestParam(required = true) Long candidateId //
+			@RequestParam(required = true) Long candidateId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	//
 	) throws Exception {//
@@ -862,12 +1014,12 @@ public class BIDataController extends AbstractJobDivaController {
 		String[] parameters = new String[] { candidateId.toString() };
 		//
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Resume Source Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate Resume Source Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateOnBoardingDocumentDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateOnBoardingDocumentDetail(//
+	public IBiData CandidateOnBoardingDocumentDetail(//
 			//
 			@ApiParam(value = "Candidate Id", required = true) //
 			@RequestParam(required = true) Long candidateId, //
@@ -876,40 +1028,52 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Long interviewId, //
 			//
 			@ApiParam(value = "File Name", required = true) //
-			@RequestParam(required = true) String fileName //
+			@RequestParam(required = true) String fileName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { candidateId.toString(), interviewId.toString(), fileName };
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate On-Boarding Document Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate On-Boarding Document Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateAttachmentDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateAttachmentDetail(//
+	public IBiData CandidateAttachmentDetail(//
 			//
 			@ApiParam(value = "Candidate Id", required = true) //
 			@RequestParam(required = true) Long candidateId, //
 			//
 			@ApiParam(value = "File Name", required = true) //
-			@RequestParam(required = true) String fileName //
+			@RequestParam(required = true) String fileName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { candidateId.toString(), fileName };
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Attachment Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate Attachment Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CompanyNoteDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CompanyNoteDetail(//
+	public IBiData CompanyNoteDetail(//
 			//
 			@ApiParam(value = "Note Id", required = true) //
-			@RequestParam(required = true) Long noteId //
+			@RequestParam(required = true) Long noteId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	//
 	) throws Exception {//
@@ -919,15 +1083,19 @@ public class BIDataController extends AbstractJobDivaController {
 		String[] parameters = new String[] { noteId.toString() };
 		//
 		//
-		return biDataService.getBIData(jobDivaSession, "Company Note Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Company Note Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CompanyNotesDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CompanyNotesDetail(//
+	public IBiData CompanyNotesDetail(//
 			//
 			@ApiParam(value = "Note Id (s)", required = true) //
-			@RequestParam(required = true) Long[] noteIds //
+			@RequestParam(required = true) Long[] noteIds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	//
 	) throws Exception {//
@@ -942,15 +1110,19 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Company Notes Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Company Notes Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ContactNoteDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData ContactNoteDetail(//
+	public IBiData ContactNoteDetail(//
 			//
 			@ApiParam(value = "Note Id", required = true) //
-			@RequestParam(required = true) Long noteId //
+			@RequestParam(required = true) Long noteId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	//
 	) throws Exception {//
@@ -959,15 +1131,19 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = new String[] { noteId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Contact Note Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Contact Note Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ContactNotesDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData ContactNotesDetail(//
+	public IBiData ContactNotesDetail(//
 			//
 			@ApiParam(value = "Note Id (s)", required = true) //
-			@RequestParam(required = true) Long[] noteIds //
+			@RequestParam(required = true) Long[] noteIds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -980,15 +1156,19 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Contact Notes Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Contact Notes Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateNoteDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateNoteDetail(//
+	public IBiData CandidateNoteDetail(//
 			//
 			@ApiParam(value = "Note Id", required = true) //
-			@RequestParam(required = true) Long noteId //
+			@RequestParam(required = true) Long noteId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -996,15 +1176,19 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = new String[] { noteId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Note Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate Note Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateNotesDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateNotesDetail(//
+	public IBiData CandidateNotesDetail(//
 			//
 			@ApiParam(value = "Note Id (s)", required = true) //
-			@RequestParam(required = true) Long[] noteIds //
+			@RequestParam(required = true) Long[] noteIds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -1017,15 +1201,19 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Notes Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate Notes Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateEEODetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateEEODetail(//
+	public IBiData CandidateEEODetail(//
 			//
 			@ApiParam(value = "Candidate Id", required = true) //
-			@RequestParam(required = true) Long candidateId //
+			@RequestParam(required = true) Long candidateId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -1033,18 +1221,22 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = new String[] { candidateId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate EEO Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate EEO Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/SubmittalDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData SubmittalDetail(//
+	public IBiData SubmittalDetail(//
 			//
 			@ApiParam(value = "Interview Schedule Id", required = true) //
 			@RequestParam(required = true) Long interviewScheduleId, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -1061,18 +1253,22 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Submittal Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Submittal Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/SubmittalsDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData SubmittalsDetail(//
+	public IBiData SubmittalsDetail(//
 			//
 			@ApiParam(value = "Interview Schedule Id(s)", required = true) //
 			@RequestParam(required = true) Long[] interviewScheduleIds, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -1091,33 +1287,41 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Submittals Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Submittals Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/BillingRecordDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData BillingRecordDetail(//
+	public IBiData BillingRecordDetail(//
 			//
 			@ApiParam(value = "Employee Id", required = true) //
 			@RequestParam(required = true) Long employeeId, //
 			//
 			//
 			@ApiParam(value = "Record Id", required = true) //
-			@RequestParam(required = true) Long recordId //
+			@RequestParam(required = true) Long recordId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { employeeId.toString(), recordId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Billing Record Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Billing Record Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/BillingRecordsDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData BillingRecordsDetail(//
+	public IBiData BillingRecordsDetail(//
 			//
 			@ApiParam(value = "Employee Id(s)", required = true) //
-			@RequestParam(required = true) Long[] employeeIds //
+			@RequestParam(required = true) Long[] employeeIds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -1132,48 +1336,60 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Billing Records Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Billing Records Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/EmployeeBillingRecordsDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData EmployeeBillingRecordsDetail(//
+	public IBiData EmployeeBillingRecordsDetail(//
 			//
 			@ApiParam(value = "Employee Id", required = true) //
-			@RequestParam(required = true) Long employeeId //
+			@RequestParam(required = true) Long employeeId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { employeeId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Employee Billing Records Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Employee Billing Records Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/SalaryRecordDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData SalaryRecordDetail(//
+	public IBiData SalaryRecordDetail(//
 			//
 			@ApiParam(value = "Employee Id", required = true) //
 			@RequestParam(required = true) Long employeeId, //
 			//
 			//
 			@ApiParam(value = "Record Id", required = true) //
-			@RequestParam(required = true) Long recordId //
+			@RequestParam(required = true) Long recordId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { employeeId.toString(), recordId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Salary Record Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Salary Record Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/SalaryRecordsDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData SalaryRecordsDetail(//
+	public IBiData SalaryRecordsDetail(//
 			//
 			@ApiParam(value = "Employee Id(s)", required = true) //
-			@RequestParam(required = true) Long[] employeeIds //
+			@RequestParam(required = true) Long[] employeeIds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -1187,57 +1403,69 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Salary Records Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Salary Records Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/EmployeeSalaryRecordsDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData EmployeeSalaryRecordsDetail(//
+	public IBiData EmployeeSalaryRecordsDetail(//
 			//
 			@ApiParam(value = "Employee Id", required = true) //
-			@RequestParam(required = true) Long employeeId //
+			@RequestParam(required = true) Long employeeId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { employeeId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Employee Salary Records Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Employee Salary Records Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/InvoiceDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData InvoiceDetail(//
+	public IBiData InvoiceDetail(//
 			//
 			@ApiParam(value = "Invoice Id", required = true) //
-			@RequestParam(required = true) Long invoiceId //
+			@RequestParam(required = true) Long invoiceId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { invoiceId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Invoice Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Invoice Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/PlacementDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData PlacementDetail(//
+	public IBiData PlacementDetail(//
 			//
 			@ApiParam(value = "Invoice Id", required = true) //
-			@RequestParam(required = true) Long invoiceId //
+			@RequestParam(required = true) Long invoiceId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { invoiceId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Placement Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Placement Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/EmployeeTimesheetImageDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData EmployeeTimesheetImageDetail(//
+	public IBiData EmployeeTimesheetImageDetail(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -1248,39 +1476,51 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Long employeeId, //
 			//
 			@ApiParam(value = "biiling Record Id", required = true) //
-			@RequestParam(required = true) Long billiingRecordId //
+			@RequestParam(required = true) Long billiingRecordId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { employeeId.toString(), billiingRecordId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Employee Timesheet Image Detail", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "Employee Timesheet Image Detail", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/EmployeeTimesheetImagebyTimecardIDDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData EmployeeTimesheetImagebyTimecardIDDetail(//
+	public IBiData EmployeeTimesheetImagebyTimecardIDDetail(//
 			@ApiParam(value = "Employee Id", required = true) //
 			@RequestParam(required = true) Long employeeId, //
 			//
 			@ApiParam(value = "Time Card Id", required = true) //
-			@RequestParam(required = true) Long timeCardId //
+			@RequestParam(required = true) Long timeCardId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { employeeId.toString(), timeCardId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Employee Timesheet Image by Timecard ID Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Employee Timesheet Image by Timecard ID Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/TimesheetDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData TimesheetDetail(//
+	public IBiData TimesheetDetail(//
 			@ApiParam(value = "Recruiter TeamI Id", required = true) //
 			@RequestParam(required = true) Long recruiterTeamId, //
 			//
 			@ApiParam(value = "Exist Employee In Billing Record", required = false) //
-			@RequestParam(required = false) Boolean existEmployeeInBillingRecord //
+			@RequestParam(required = false) Boolean existEmployeeInBillingRecord, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -1288,70 +1528,90 @@ public class BIDataController extends AbstractJobDivaController {
 		String[] parameters = existEmployeeInBillingRecord != null ? new String[] { recruiterTeamId.toString(), Boolean.toString(existEmployeeInBillingRecord) } : new String[] { recruiterTeamId.toString() };
 		//
 		//
-		return biDataService.getBIData(jobDivaSession, "Timesheet Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Timesheet Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ContactHotlistDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData ContactHotlistDetail(//
+	public IBiData ContactHotlistDetail(//
 			@ApiParam(value = "Hotlist Id", required = true) //
-			@RequestParam(required = true) Long hotlistId //
+			@RequestParam(required = true) Long hotlistId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { hotlistId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Contact Hotlist Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Contact Hotlist Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateHotlistDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateHotlistDetail(//
+	public IBiData CandidateHotlistDetail(//
 			@ApiParam(value = "Hotlist Id", required = true) //
-			@RequestParam(required = true) Long hotlistId //
+			@RequestParam(required = true) Long hotlistId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { hotlistId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Hotlist Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate Hotlist Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/UserContactHotlistDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData UserContactHotlistDetail(//
+	public IBiData UserContactHotlistDetail(//
 			@ApiParam(value = "Recruiter Id", required = true) //
-			@RequestParam(required = true) Long recruiterId //
+			@RequestParam(required = true) Long recruiterId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { recruiterId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "User Contact Hotlist Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "User Contact Hotlist Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/UserCandidateHotlistDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData UserCandidateHotlistDetail(//
+	public IBiData UserCandidateHotlistDetail(//
 			@ApiParam(value = "Recruiter Id", required = true) //
-			@RequestParam(required = true) Long recruiterId //
+			@RequestParam(required = true) Long recruiterId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { recruiterId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "User Candidate Hotlist Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "User Candidate Hotlist Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ContactHotlistsDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData ContactHotlistsDetail(//
+	public IBiData ContactHotlistsDetail(//
 			@ApiParam(value = "Hotlist Id (s)", required = true) //
-			@RequestParam(required = true) Long[] hotlistIds //
+			@RequestParam(required = true) Long[] hotlistIds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	//
 	) throws Exception {//
@@ -1365,14 +1625,18 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Contact Hotlists Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Contact Hotlists Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateHotlistsDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateHotlistsDetail(//
+	public IBiData CandidateHotlistsDetail(//
 			@ApiParam(value = "Hotlist Id (s)", required = true) //
-			@RequestParam(required = true) Long[] hotlistIds //
+			@RequestParam(required = true) Long[] hotlistIds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	//
 	) throws Exception {//
@@ -1386,42 +1650,54 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Hotlists Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate Hotlists Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateNotesListDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateNotesListDetail(//
+	public IBiData CandidateNotesListDetail(//
 			@ApiParam(value = "Candidate Id", required = true) //
-			@RequestParam(required = true) Long candidateId //
+			@RequestParam(required = true) Long candidateId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { candidateId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Notes List Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate Notes List Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateHRDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateHRDetail(//
+	public IBiData CandidateHRDetail(//
 			@ApiParam(value = "Candidate Id", required = true) //
-			@RequestParam(required = true) Long candidateId //
+			@RequestParam(required = true) Long candidateId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { candidateId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate HR Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate HR Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidatesHRDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidatesHRDetail(//
+	public IBiData CandidatesHRDetail(//
 			@ApiParam(value = "Candidate Id(s)", required = true) //
-			@RequestParam(required = true) Long[] candidateIds //
+			@RequestParam(required = true) Long[] candidateIds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -1434,417 +1710,529 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidates HR Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidates HR Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/EmailDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData EmailDetail(//
+	public IBiData EmailDetail(//
 			@ApiParam(value = "Id", required = true) //
-			@RequestParam(required = true) Long id //
+			@RequestParam(required = true) Long id, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { id.toString() };
 		// //
-		return biDataService.getBIData(jobDivaSession, "Email Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Email Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ADPProfileDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData ADPProfileDetail(//
+	public IBiData ADPProfileDetail(//
 			@ApiParam(value = "Employee Id", required = true) //
-			@RequestParam(required = true) Long employeeId //
+			@RequestParam(required = true) Long employeeId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { employeeId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "ADP Profile Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "ADP Profile Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateAttributeDetail", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateAttributeDetail(//
+	public IBiData CandidateAttributeDetail(//
 			@ApiParam(value = "Candidate Id", required = true) //
-			@RequestParam(required = true) Long candidateId //
+			@RequestParam(required = true) Long candidateId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { candidateId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Attribute Detail", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate Attribute Detail", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/JobsListbyUserbyStatus", method = RequestMethod.GET, produces = "application/json")
-	public BiData JobsListbyUserbyStatus(//
+	public IBiData JobsListbyUserbyStatus(//
 			//
 			@ApiParam(value = "Recruiter Id", required = true) //
 			@RequestParam(required = true) Long recruiterId, //
 			//
 			@ApiParam(value = "Job Status", required = true) //
-			@RequestParam(required = true) Integer jobStatus //
+			@RequestParam(required = true) Integer jobStatus, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { recruiterId.toString(), jobStatus.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Jobs List by User by Status", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Jobs List by User by Status", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/PortalJobsList", method = RequestMethod.GET, produces = "application/json")
-	public BiData PortalJobsList(//
+	public IBiData PortalJobsList(//
 			@ApiParam(value = "Company Id", required = true) //
-			@RequestParam(required = true) Long companyId //
+			@RequestParam(required = true) Long companyId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { companyId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Portal Jobs List", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Portal Jobs List", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/JobsDashboardbyUser", method = RequestMethod.GET, produces = "application/json")
-	public BiData JobsDashboardbyUser(//
+	public IBiData JobsDashboardbyUser(//
 			@ApiParam(value = "Recruiter Id", required = true) //
-			@RequestParam(required = true) Long recruiterId //
+			@RequestParam(required = true) Long recruiterId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { recruiterId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Jobs Dashboard by User", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Jobs Dashboard by User", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/OpenJobsListbyCompany", method = RequestMethod.GET, produces = "application/json")
-	public BiData OpenJobsListbyCompany(//
+	public IBiData OpenJobsListbyCompany(//
 			@ApiParam(value = "Company Id", required = true) //
-			@RequestParam(required = true) Long companyId //
+			@RequestParam(required = true) Long companyId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { companyId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Open Jobs List by Company", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Open Jobs List by Company", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/OpenJobsListbyContact", method = RequestMethod.GET, produces = "application/json")
-	public BiData OpenJobsListbyContact(//
+	public IBiData OpenJobsListbyContact(//
 			//
 			@ApiParam(value = "Customer Id", required = true) //
-			@RequestParam(required = true) Long customerId //
+			@RequestParam(required = true) Long customerId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { customerId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Open Jobs List by Contact", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Open Jobs List by Contact", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateApplicationRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateApplicationRecords(//
+	public IBiData CandidateApplicationRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Application Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Candidate Application Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewApprovedBillingRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewApprovedBillingRecords(//
+	public IBiData NewApprovedBillingRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New Approved Billing Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New Approved Billing Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewApprovedSalaryRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewApprovedSalaryRecords(//
+	public IBiData NewApprovedSalaryRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New Approved Salary Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New Approved Salary Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/UpdatedApprovedBillingRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData UpdatedApprovedBillingRecords(//
+	public IBiData UpdatedApprovedBillingRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Updated Approved Billing Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Updated Approved Billing Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/UpdatedApprovedSalaryRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData UpdatedApprovedSalaryRecords(//
+	public IBiData UpdatedApprovedSalaryRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Updated Approved Salary Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Updated Approved Salary Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewInvoices", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewInvoices(//
+	public IBiData NewInvoices(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New Invoices", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New Invoices", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/VoidedInvoices", method = RequestMethod.GET, produces = "application/json")
-	public BiData VoidedInvoices(//
+	public IBiData VoidedInvoices(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Voided Invoices", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Voided Invoices", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewApprovedTimesheets", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewApprovedTimesheets(//
+	public IBiData NewApprovedTimesheets(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New Approved Timesheets", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New Approved Timesheets", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ApprovedTimesheetsbyWeekEndingDate", method = RequestMethod.GET, produces = "application/json")
-	public BiData ApprovedTimesheetsbyWeekEndingDate(//
+	public IBiData ApprovedTimesheetsbyWeekEndingDate(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Approved Timesheets by Week Ending Date", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Approved Timesheets by Week Ending Date", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewHires", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewHires(//
+	public IBiData NewHires(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New Hires", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New Hires", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/UpdatedHires", method = RequestMethod.GET, produces = "application/json")
-	public BiData UpdatedHires(//
+	public IBiData UpdatedHires(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Updated Hires", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Updated Hires", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/MergedCompanies", method = RequestMethod.GET, produces = "application/json")
-	public BiData MergedCompanies(//
+	public IBiData MergedCompanies(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Merged Companies", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Merged Companies", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/MergedContacts", method = RequestMethod.GET, produces = "application/json")
-	public BiData MergedContacts(//
+	public IBiData MergedContacts(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Merged Contacts", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Merged Contacts", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/MergedJobs", method = RequestMethod.GET, produces = "application/json")
-	public BiData MergedJobs(//
+	public IBiData MergedJobs(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Merged Jobs", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Merged Jobs", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/MergedCandidates", method = RequestMethod.GET, produces = "application/json")
-	public BiData MergedCandidates(//
+	public IBiData MergedCandidates(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Merged Candidates", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Merged Candidates", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateResumeSubmittedtoJob", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateResumeSubmittedtoJob(//
+	public IBiData CandidateResumeSubmittedtoJob(//
 			//
 			@ApiParam(value = "Candidate Id", required = true) //
 			@RequestParam(required = true) Long candidateId, //
 			//
 			@ApiParam(value = "Job Id", required = true) //
-			@RequestParam(required = true) Long jobId //
+			@RequestParam(required = true) Long jobId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { candidateId.toString(), jobId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Resume Submitted to Job", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate Resume Submitted to Job", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/SubmittalRecordsbyCandidateandJob", method = RequestMethod.GET, produces = "application/json")
-	public BiData SubmittalRecordsbyCandidateandJob(//
+	public IBiData SubmittalRecordsbyCandidateandJob(//
 			//
 			@ApiParam(value = "Candidate Id", required = true) //
 			@RequestParam(required = true) Long candidateId, //
 			//
 			@ApiParam(value = "Job Id", required = true) //
-			@RequestParam(required = true) Long jobId //
+			@RequestParam(required = true) Long jobId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { candidateId.toString(), jobId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Submittal Records by Candidate and Job", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Submittal Records by Candidate and Job", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/JobsPosted", method = RequestMethod.GET, produces = "application/json")
-	public BiData JobsPosted(//
+	public IBiData JobsPosted(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Jobs Posted", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Jobs Posted", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/JobsCurrentlyPosted", method = RequestMethod.GET, produces = "application/json")
-	public BiData JobsCurrentlyPosted(//
+	public IBiData JobsCurrentlyPosted(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Jobs Currently Posted", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Jobs Currently Posted", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/UsersUpdatedJobsList", method = RequestMethod.GET, produces = "application/json")
-	public BiData UsersUpdatedJobsList(//
+	public IBiData UsersUpdatedJobsList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Users Updated Jobs List", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Users Updated Jobs List", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedCompanyRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedCompanyRecords(//
+	public IBiData NewUpdatedCompanyRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -1852,7 +2240,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -1868,26 +2260,30 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Company Records", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Company Records", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedCompanyNoteRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedCompanyNoteRecords(//
+	public IBiData NewUpdatedCompanyNoteRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Company Note Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Company Note Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedContactRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedContactRecords(//
+	public IBiData NewUpdatedContactRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -1895,7 +2291,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -1911,40 +2311,48 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Contact Records", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Contact Records", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedContactNoteRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedContactNoteRecords(//
+	public IBiData NewUpdatedContactNoteRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Contact Note Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Contact Note Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedOpportunityRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedOpportunityRecords(//
+	public IBiData NewUpdatedOpportunityRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Opportunity Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Opportunity Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedJobRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedJobRecords(//
+	public IBiData NewUpdatedJobRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -1952,7 +2360,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -1968,12 +2380,12 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Job Records", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Job Records", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedCandidateRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedCandidateRecords(//
+	public IBiData NewUpdatedCandidateRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -1981,7 +2393,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -1997,54 +2413,66 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Candidate Records", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Candidate Records", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedCandidateNoteRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedCandidateNoteRecords(//
+	public IBiData NewUpdatedCandidateNoteRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Candidate Note Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Candidate Note Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedCandidateHRRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedCandidateHRRecords(//
+	public IBiData NewUpdatedCandidateHRRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Candidate HR Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Candidate HR Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedEmployeeRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedEmployeeRecords(//
+	public IBiData NewUpdatedEmployeeRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Employee Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Employee Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedActivityRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedActivityRecords(//
+	public IBiData NewUpdatedActivityRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -2052,7 +2480,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -2069,54 +2501,66 @@ public class BIDataController extends AbstractJobDivaController {
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Activity Records", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Activity Records", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedTaskRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedTaskRecords(//
+	public IBiData NewUpdatedTaskRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Task Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Task Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedEventRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedEventRecords(//
+	public IBiData NewUpdatedEventRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Event Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Event Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedCandidateQualificationRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedCandidateQualificationRecords(//
+	public IBiData NewUpdatedCandidateQualificationRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Candidate Qualification Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Candidate Qualification Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/V2NewUpdatedContactRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData V2NewUpdatedContactRecords(//
+	public IBiData V2NewUpdatedContactRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -2124,7 +2568,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -2140,296 +2588,376 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "V2 New/Updated Contact Records", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "V2 New/Updated Contact Records", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedSubmittalInterviewHireActivityRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedSubmittalInterviewHireActivityRecords(//
+	public IBiData NewUpdatedSubmittalInterviewHireActivityRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Submittal/Interview/Hire Activity Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Submittal/Interview/Hire Activity Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedJobUserRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedJobUserRecords(//
+	public IBiData NewUpdatedJobUserRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Job User Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Job User Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedBillingRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedBillingRecords(//
+	public IBiData NewUpdatedBillingRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Billing Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Billing Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedSalaryRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedSalaryRecords(//
+	public IBiData NewUpdatedSalaryRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Salary Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Salary Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedApprovedTimesheetRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedApprovedTimesheetRecords(//
+	public IBiData NewUpdatedApprovedTimesheetRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Approved Timesheet Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Approved Timesheet Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedApprovedTimesheetandExpenseRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedApprovedTimesheetandExpenseRecords(//
+	public IBiData NewUpdatedApprovedTimesheetandExpenseRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Approved Timesheet and Expense Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Approved Timesheet and Expense Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedCandidateAvailabilityRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedCandidateAvailabilityRecords(//
+	public IBiData NewUpdatedCandidateAvailabilityRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Candidate Availability Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Candidate Availability Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/DeletedCandidateNoteRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData DeletedCandidateNoteRecords(//
+	public IBiData DeletedCandidateNoteRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Deleted Candidate Note Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Deleted Candidate Note Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/DeletedEmployeeRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData DeletedEmployeeRecords(//
+	public IBiData DeletedEmployeeRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Deleted Employee Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Deleted Employee Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/DeletedActivityRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData DeletedActivityRecords(//
+	public IBiData DeletedActivityRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Deleted Activity Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Deleted Activity Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/DeletedCompanyRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData DeletedCompanyRecords(//
+	public IBiData DeletedCompanyRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Deleted Company Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Deleted Company Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/DeletedContactRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData DeletedContactRecords(//
+	public IBiData DeletedContactRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Deleted Contact Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Deleted Contact Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/DeletedContactNoteRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData DeletedContactNoteRecords(//
+	public IBiData DeletedContactNoteRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Deleted Contact Note Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Deleted Contact Note Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/DeletedJobRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData DeletedJobRecords(//
+	public IBiData DeletedJobRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Deleted Job Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Deleted Job Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/DeletedCandidateRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData DeletedCandidateRecords(//
+	public IBiData DeletedCandidateRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Deleted Candidate Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Deleted Candidate Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/DeletedTaskRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData DeletedTaskRecords(//
+	public IBiData DeletedTaskRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Deleted Task Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Deleted Task Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/Sage50RedberryNewEmployeeFeed", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData Sage50RedberryNewEmployeeFeed(//
+	public IBiData Sage50RedberryNewEmployeeFeed(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Sage 50 Redberry New Employee Feed", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Sage 50 Redberry New Employee Feed", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/Sage50RedberryNewTimesheetFeed", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData Sage50RedberryNewTimesheetFeed(//
+	public IBiData Sage50RedberryNewTimesheetFeed(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Sage 50 Redberry New Timesheet Feed", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Sage 50 Redberry New Timesheet Feed", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/MISINewUpdatedJobs", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData MISINewUpdatedJobs(//
+	public IBiData MISINewUpdatedJobs(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "MISI New/Updated Jobs", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "MISI New/Updated Jobs", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/MISINewUpdatedStarts", method = RequestMethod.GET, produces = "application/json")
-	public BiData MISINewUpdatedStarts(//
+	public IBiData MISINewUpdatedStarts(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "MISI New/Updated Starts", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "MISI New/Updated Starts", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageNewCompaniesList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageNewCompaniesList(//
+	public IBiData AdvantageNewCompaniesList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -2437,7 +2965,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -2453,13 +2985,13 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage New Companies List", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "Advantage New Companies List", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageUpdatedCompaniesList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageUpdatedCompaniesList(//
+	public IBiData AdvantageUpdatedCompaniesList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -2467,7 +2999,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -2483,73 +3019,89 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Updated Companies List", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "Advantage Updated Companies List", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageDeletedCompaniesList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageDeletedCompaniesList(//
+	public IBiData AdvantageDeletedCompaniesList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Companies List", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Companies List", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageMergedCompaniesList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageMergedCompaniesList(//
+	public IBiData AdvantageMergedCompaniesList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Merged Companies List", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Merged Companies List", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageOwnersUpdatedCompaniesList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageOwnersUpdatedCompaniesList(//
+	public IBiData AdvantageOwnersUpdatedCompaniesList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Owners Updated Companies List", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Owners Updated Companies List", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageCompanyTypesUpdatedCompaniesList",
 	// method = RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageCompanyTypesUpdatedCompaniesList(//
+	public IBiData AdvantageCompanyTypesUpdatedCompaniesList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Company Types Updated Companies List", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Company Types Updated Companies List", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageNewContactsList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageNewContactsList(//
+	public IBiData AdvantageNewContactsList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -2557,7 +3109,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -2573,13 +3129,13 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage New Contacts List", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "Advantage New Contacts List", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageUpdatedContactsList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageUpdatedContactsList(//
+	public IBiData AdvantageUpdatedContactsList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -2587,7 +3143,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -2603,59 +3163,71 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Updated Contacts List", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "Advantage Updated Contacts List", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageDeletedContactsList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageDeletedContactsList(//
+	public IBiData AdvantageDeletedContactsList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Contacts List", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Contacts List", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageMergedContactsList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageMergedContactsList(//
+	public IBiData AdvantageMergedContactsList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Merged Contacts List", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Merged Contacts List", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageOwnersUpdatedContactsList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageOwnersUpdatedContactsList(//
+	public IBiData AdvantageOwnersUpdatedContactsList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Owners Updated Contacts List", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Owners Updated Contacts List", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageIssuedJobsList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageIssuedJobsList(//
+	public IBiData AdvantageIssuedJobsList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -2663,7 +3235,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -2679,13 +3255,13 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Issued Jobs List", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "Advantage Issued Jobs List", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageUpdatedJobsList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageUpdatedJobsList(//
+	public IBiData AdvantageUpdatedJobsList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -2693,7 +3269,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -2709,58 +3289,70 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Updated Jobs List", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "Advantage Updated Jobs List", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageDeletedJobsList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageDeletedJobsList(//
+	public IBiData AdvantageDeletedJobsList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Jobs List", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Jobs List", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageMergedJobsList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageMergedJobsList(//
+	public IBiData AdvantageMergedJobsList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Merged Jobs List", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Merged Jobs List", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageUsersUpdatedJobsList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageUsersUpdatedJobsList(//
+	public IBiData AdvantageUsersUpdatedJobsList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Users Updated Jobs List", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Users Updated Jobs List", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageNewCandidatesList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageNewCandidatesList(//
+	public IBiData AdvantageNewCandidatesList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -2768,7 +3360,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -2784,13 +3380,13 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage New Candidates List", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "Advantage New Candidates List", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageUpdatedCandidatesList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageUpdatedCandidatesList(//
+	public IBiData AdvantageUpdatedCandidatesList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -2798,7 +3394,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -2814,43 +3414,51 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Updated Candidates List", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "Advantage Updated Candidates List", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageDeletedCandidatesList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageDeletedCandidatesList(//
+	public IBiData AdvantageDeletedCandidatesList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Candidates List", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Candidates List", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageMergedCandidatesList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageMergedCandidatesList(//
+	public IBiData AdvantageMergedCandidatesList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Merged Candidates List", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Merged Candidates List", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageSubmittalInterviewHireActivitiesList",
 	// method = RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageSubmittalInterviewHireActivitiesList(//
+	public IBiData AdvantageSubmittalInterviewHireActivitiesList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -2858,7 +3466,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -2874,14 +3486,14 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Submittal/Interview/Hire Activities List", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "Advantage Submittal/Interview/Hire Activities List", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value =
 	// "/AdvantageUpdatedSubmittalInterviewHireActivitiesList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageUpdatedSubmittalInterviewHireActivitiesList(//
+	public IBiData AdvantageUpdatedSubmittalInterviewHireActivitiesList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -2889,7 +3501,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -2905,411 +3521,523 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Updated Submittal/Interview/Hire Activities List", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "Advantage Updated Submittal/Interview/Hire Activities List", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value =
 	// "/AdvantageDeletedSubmittalInterviewHireActivitiesList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageDeletedSubmittalInterviewHireActivitiesList(//
+	public IBiData AdvantageDeletedSubmittalInterviewHireActivitiesList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Submittal/Interview/Hire Activities List", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Submittal/Interview/Hire Activities List", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageCandidateActions", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageCandidateActions(//
+	public IBiData AdvantageCandidateActions(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Candidate Actions", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Candidate Actions", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageContactActions", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageContactActions(//
+	public IBiData AdvantageContactActions(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Contact Actions", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Contact Actions", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageDeletedCandidateActions", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageDeletedCandidateActions(//
+	public IBiData AdvantageDeletedCandidateActions(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Candidate Actions", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Candidate Actions", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageUpdatedContactActions", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageUpdatedContactActions(//
+	public IBiData AdvantageUpdatedContactActions(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Updated Contact Actions", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Updated Contact Actions", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageDeletedContactActions", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageDeletedContactActions(//
+	public IBiData AdvantageDeletedContactActions(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Contact Actions", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Contact Actions", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageJobActions", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageJobActions(//
+	public IBiData AdvantageJobActions(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Job Actions", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Job Actions", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageDeletedJobActions", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageDeletedJobActions(//
+	public IBiData AdvantageDeletedJobActions(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Job Actions", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Job Actions", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageNewEmployee", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageNewEmployee(//
+	public IBiData AdvantageNewEmployee(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage New Employee", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage New Employee", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageUpdatedEmployee", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageUpdatedEmployee(//
+	public IBiData AdvantageUpdatedEmployee(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Updated Employee", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Updated Employee", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageDeletedEmployee", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageDeletedEmployee(//
+	public IBiData AdvantageDeletedEmployee(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Employee", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Employee", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageSalesPipeline", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageSalesPipeline(//
+	public IBiData AdvantageSalesPipeline(//
 			@ApiParam(value = "Type Name", required = false) //
-			@RequestParam(required = false) String typeName //
+			@RequestParam(required = false) String typeName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = typeName != null ? new String[] { typeName } : null;
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Sales Pipeline", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Advantage Sales Pipeline", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageUsersList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageUsersList(//
+	public IBiData AdvantageUsersList(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Users List", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Users List", null, null, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageUserGroupLists", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageUserGroupLists(//
+	public IBiData AdvantageUserGroupLists(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage User Group Lists", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage User Group Lists", null, null, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageNewCandidateReferenceCheck", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageNewCandidateReferenceCheck(//
+	public IBiData AdvantageNewCandidateReferenceCheck(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage New Candidate Reference Check", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage New Candidate Reference Check", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageUpdatedCandidateReferenceCheck",
 	// method = RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageUpdatedCandidateReferenceCheck(//
+	public IBiData AdvantageUpdatedCandidateReferenceCheck(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Updated Candidate Reference Check", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Updated Candidate Reference Check", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageDeletedCandidateReferenceCheck",
 	// method = RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageDeletedCandidateReferenceCheck(//
+	public IBiData AdvantageDeletedCandidateReferenceCheck(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Candidate Reference Check", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Deleted Candidate Reference Check", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageNewAIF", method = RequestMethod.GET,
 	// produces = "application/json")
-	public BiData AdvantageNewAIF(//
+	public IBiData AdvantageNewAIF(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage New AIF", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage New AIF", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageUpdatedAIF", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageUpdatedAIF(//
+	public IBiData AdvantageUpdatedAIF(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Updated AIF", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Updated AIF", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageDeletedAIF", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageDeletedAIF(//
+	public IBiData AdvantageDeletedAIF(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Deleted AIF", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Deleted AIF", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageAccessLog", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageAccessLog(//
+	public IBiData AdvantageAccessLog(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage Access Log", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage Access Log", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AdvantageBIDataCheck", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AdvantageBIDataCheck(//
+	public IBiData AdvantageBIDataCheck(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Advantage BIData Check", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Advantage BIData Check", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/TCMLNewHires", method = RequestMethod.GET,
 	// produces = "application/json")
-	public BiData TCMLNewHires(//
+	public IBiData TCMLNewHires(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "TCML New Hires", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "TCML New Hires", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/TCMLUpdatedHires", method = RequestMethod.GET,
 	// produces = "application/json")
-	public BiData TCMLUpdatedHires(//
+	public IBiData TCMLUpdatedHires(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "TCML Updated Hires", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "TCML Updated Hires", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/TCMLEEO", method = RequestMethod.GET, produces
 	// = "application/json")
-	public BiData TCMLEEO(//
+	public IBiData TCMLEEO(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "TCML EEO", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "TCML EEO", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/ACSIFeed", method = RequestMethod.GET, produces
 	// = "application/json")
-	public BiData ACSIFeed(//
+	public IBiData ACSIFeed(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "ACSI Feed", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "ACSI Feed", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AditiCurrentPlacementActivities", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AditiCurrentPlacementActivities(//
+	public IBiData AditiCurrentPlacementActivities(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Aditi Current Placement Activities", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Aditi Current Placement Activities", null, null, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AditiCurrentHeadCount", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AditiCurrentHeadCount(//
+	public IBiData AditiCurrentHeadCount(//
 			//
 			@ApiParam(value = "company Id", required = true) //
 			@RequestParam(required = true) Long companyId, //
 			//
 			@ApiParam(value = "Sales Person Id(s)", required = false) //
-			@RequestParam(required = false) Long[] salesPersonIds //
+			@RequestParam(required = false) Long[] salesPersonIds, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -3325,461 +4053,593 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Aditi Current Head Count", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Aditi Current Head Count", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/ICSOFFICEVISITS", method = RequestMethod.GET,
 	// produces = "application/json")
-	public BiData ICSOFFICEVISITS(//
+	public IBiData ICSOFFICEVISITS(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "ICS_OFFICE_VISITS", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "ICS_OFFICE_VISITS", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/ICSSUBMITTALS", method = RequestMethod.GET,
 	// produces = "application/json")
-	public BiData ICSSUBMITTALS(//
+	public IBiData ICSSUBMITTALS(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "ICS_SUBMITTALS", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "ICS_SUBMITTALS", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/ICSINTERVIEWS", method = RequestMethod.GET,
 	// produces = "application/json")
-	public BiData ICSINTERVIEWS(//
+	public IBiData ICSINTERVIEWS(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "ICS_INTERVIEWS", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "ICS_INTERVIEWS", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/ICSHIRES", method = RequestMethod.GET, produces
 	// = "application/json")
-	public BiData ICSHIRES(//
+	public IBiData ICSHIRES(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "ICS_HIRES", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "ICS_HIRES", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/ICSREFERENCES", method = RequestMethod.GET,
 	// produces = "application/json")
-	public BiData ICSREFERENCES(//
+	public IBiData ICSREFERENCES(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "ICS_REFERENCES", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "ICS_REFERENCES", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/ICSCONTACTS", method = RequestMethod.GET,
 	// produces = "application/json")
-	public BiData ICSCONTACTS(//
+	public IBiData ICSCONTACTS(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "ICS_CONTACTS", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "ICS_CONTACTS", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/ICSCONTACTACTIVITIES", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData ICSCONTACTACTIVITIES(//
+	public IBiData ICSCONTACTACTIVITIES(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "ICS_CONTACT_ACTIVITIES", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "ICS_CONTACT_ACTIVITIES", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/ICSCOVERS", method = RequestMethod.GET,
 	// produces = "application/json")
-	public BiData ICSCOVERS(//
+	public IBiData ICSCOVERS(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "ICS_COVERS", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "ICS_COVERS", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/ICSJOBREQUISITIONS", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData ICSJOBREQUISITIONS(//
+	public IBiData ICSJOBREQUISITIONS(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "ICS_JOB_REQUISITIONS", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "ICS_JOB_REQUISITIONS", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/LiniumInvoicesList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData LiniumInvoicesList(//
+	public IBiData LiniumInvoicesList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Linium Invoices List", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Linium Invoices List", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/LiniumActiveEmployeesList", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData LiniumActiveEmployeesList(//
+	public IBiData LiniumActiveEmployeesList(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Linium Active Employees List", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Linium Active Employees List", null, null, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value =
 	// "/LiniumActiveEmployeesListNotExcludedfromWorkterra", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData LiniumActiveEmployeesListNotExcludedfromWorkterra(//
+	public IBiData LiniumActiveEmployeesListNotExcludedfromWorkterra(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Linium Active Employees List Not Excluded from Workterra", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Linium Active Employees List Not Excluded from Workterra", null, null, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/LiniumEmployeesTerminatedinthePreviousDay",
 	// method = RequestMethod.GET, produces = "application/json")
-	public BiData LiniumEmployeesTerminatedinthePreviousDay(//
+	public IBiData LiniumEmployeesTerminatedinthePreviousDay(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Linium Employees Terminated in the Previous Day", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Linium Employees Terminated in the Previous Day", null, null, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value =
 	// "/RotatorSubmittalInterviewActivitiesCountbyRecruiter", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData RotatorSubmittalInterviewActivitiesCountbyRecruiter(//
+	public IBiData RotatorSubmittalInterviewActivitiesCountbyRecruiter(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Rotator Submittal/Interview Activities Count by Recruiter", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Rotator Submittal/Interview Activities Count by Recruiter", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/RotatorInternalSubmittalsCountbyRecruiter",
 	// method = RequestMethod.GET, produces = "application/json")
-	public BiData RotatorInternalSubmittalsCountbyRecruiter(//
+	public IBiData RotatorInternalSubmittalsCountbyRecruiter(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Rotator Internal Submittals Count by Recruiter", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Rotator Internal Submittals Count by Recruiter", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/RotatorExternalSubmittalsCountbyRecruiter",
 	// method = RequestMethod.GET, produces = "application/json")
-	public BiData RotatorExternalSubmittalsCountbyRecruiter(//
+	public IBiData RotatorExternalSubmittalsCountbyRecruiter(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Rotator External Submittals Count by Recruiter", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Rotator External Submittals Count by Recruiter", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/RotatorInterviewsCountbyRecruiter", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData RotatorInterviewsCountbyRecruiter(//
+	public IBiData RotatorInterviewsCountbyRecruiter(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Rotator Interviews Count by Recruiter", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Rotator Interviews Count by Recruiter", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/RotatorHiresCountbyRecruiter", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData RotatorHiresCountbyRecruiter(//
+	public IBiData RotatorHiresCountbyRecruiter(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Rotator Hires Count by Recruiter", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Rotator Hires Count by Recruiter", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/RotatorActiveAssignments", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData RotatorActiveAssignments(//
+	public IBiData RotatorActiveAssignments(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Rotator Active Assignments", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Rotator Active Assignments", null, null, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/RotatorAllAssignments", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData RotatorAllAssignments(//
+	public IBiData RotatorAllAssignments(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Rotator All Assignments", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Rotator All Assignments", null, null, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/RotatorNewPositionsCountbyDivision", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData RotatorNewPositionsCountbyDivision(//
+	public IBiData RotatorNewPositionsCountbyDivision(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Rotator New Positions Count by Division", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Rotator New Positions Count by Division", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/GenuentOpenandOnHoldJobsbyDivision", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData GenuentOpenandOnHoldJobsbyDivision(//
+	public IBiData GenuentOpenandOnHoldJobsbyDivision(//
 			//
 			@ApiParam(value = "Division Id", required = true) //
-			@RequestParam(required = true) Long divisionid//
+			@RequestParam(required = true) Long divisionid, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { divisionid.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Genuent Open and On Hold Jobs by Division", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Genuent Open and On Hold Jobs by Division", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AkrayaInPersonMeetingNoteCount", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AkrayaInPersonMeetingNoteCount(//
+	public IBiData AkrayaInPersonMeetingNoteCount(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Akraya In Person Meeting Note Count", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Akraya In Person Meeting Note Count", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AkrayaIssuedJobCountbyPrimarySales", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData AkrayaIssuedJobCountbyPrimarySales(//
+	public IBiData AkrayaIssuedJobCountbyPrimarySales(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Akraya Issued Job Count by Primary Sales", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Akraya Issued Job Count by Primary Sales", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AkrayaExternalSubmittalCountbyPrimarySales",
 	// method = RequestMethod.GET, produces = "application/json")
-	public BiData AkrayaExternalSubmittalCountbyPrimarySales(//
+	public IBiData AkrayaExternalSubmittalCountbyPrimarySales(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Akraya External Submittal Count by Primary Sales", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Akraya External Submittal Count by Primary Sales", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/AkrayaKPI", method = RequestMethod.GET,
 	// produces = "application/json")
-	public BiData AkrayaKPI(//
+	public IBiData AkrayaKPI(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Akraya KPI", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Akraya KPI", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/BuildspaceClientReferences", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData BuildspaceClientReferences(//
+	public IBiData BuildspaceClientReferences(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Buildspace Client References", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Buildspace Client References", null, null, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/BuildspaceWorkerReferences", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData BuildspaceWorkerReferences(//
+	public IBiData BuildspaceWorkerReferences(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Buildspace Worker References", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Buildspace Worker References", null, null, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/BuildspaceSuppliers", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData BuildspaceSuppliers(//
+	public IBiData BuildspaceSuppliers(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Buildspace Suppliers", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Buildspace Suppliers", null, null, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/BuildspaceCIS", method = RequestMethod.GET,
 	// produces = "application/json")
-	public BiData BuildspaceCIS(//
+	public IBiData BuildspaceCIS(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Buildspace CIS", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Buildspace CIS", null, null, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/NTTDataMoatFlipSubmittalCount", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData NTTDataMoatFlipSubmittalCount(//
+	public IBiData NTTDataMoatFlipSubmittalCount(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "NTT Data Moat/Flip/Submittal Count", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "NTT Data Moat/Flip/Submittal Count", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value =
 	// "/RangTechnologiesCandidateRecordswithMissingData", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData RangTechnologiesCandidateRecordswithMissingData(//
+	public IBiData RangTechnologiesCandidateRecordswithMissingData(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Rang Technologies Candidate Records with Missing Data", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Rang Technologies Candidate Records with Missing Data", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/DiversantActiveAssignments", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData DiversantActiveAssignments(//
+	public IBiData DiversantActiveAssignments(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Diversant Active Assignments", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Diversant Active Assignments", null, null, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/ETeamSubmittalMetricsbyLaborCategory", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData ETeamSubmittalMetricsbyLaborCategory(//
+	public IBiData ETeamSubmittalMetricsbyLaborCategory(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -3787,470 +4647,610 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "Company Id", required = false) //
-			@RequestParam(required = false) Long companyid//
+			@RequestParam(required = false) Long companyid, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = companyid != null ? new String[] { companyid.toString() } : new String[] {};
 		//
-		return biDataService.getBIData(jobDivaSession, "ETeam Submittal Metrics by Labor Category", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "ETeam Submittal Metrics by Labor Category", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/RedBerryRecruitmentWeeksonAssignment", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData RedBerryRecruitmentWeeksonAssignment(//
+	public IBiData RedBerryRecruitmentWeeksonAssignment(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Red Berry Recruitment Weeks on Assignment", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Red Berry Recruitment Weeks on Assignment", null, null, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateEmailRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateEmailRecords(//
+	public IBiData CandidateEmailRecords(//
 			@ApiParam(value = "Candidate Id", required = true) //
-			@RequestParam(required = true) Long candidateId//
+			@RequestParam(required = true) Long candidateId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { candidateId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Email Records", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate Email Records", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ContactEmailRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData ContactEmailRecords(//
+	public IBiData ContactEmailRecords(//
 			@ApiParam(value = "Contact Id", required = true) //
-			@RequestParam(required = true) Long contactId//
+			@RequestParam(required = true) Long contactId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { contactId.toString() };
 		//
 		//
-		return biDataService.getBIData(jobDivaSession, "Contact Email Records", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Contact Email Records", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/SavedEmails", method = RequestMethod.GET, produces = "application/json")
-	public BiData SavedEmails(//
+	public IBiData SavedEmails(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Saved Emails", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Saved Emails", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ResumeCVCountbyRecruiter", method = RequestMethod.GET, produces = "application/json")
-	public BiData ResumeCVCountbyRecruiter(//
+	public IBiData ResumeCVCountbyRecruiter(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Resume/CV Count by Recruiter", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Resume/CV Count by Recruiter", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/SubmittalInterviewHireActivitiesCountbyRecruiter", method = RequestMethod.GET, produces = "application/json")
-	public BiData SubmittalInterviewHireActivitiesCountbyRecruiter(//
+	public IBiData SubmittalInterviewHireActivitiesCountbyRecruiter(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Submittal/Interview/Hire Activities Count by Recruiter", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Submittal/Interview/Hire Activities Count by Recruiter", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedPaychexProfile", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedPaychexProfile(//
+	public IBiData NewUpdatedPaychexProfile(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated Paychex Profiles", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New/Updated Paychex Profiles", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewUpdatedADPProfiles", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewUpdatedADPProfiles(//
+	public IBiData NewUpdatedADPProfiles(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New/Updated ADP Profiles", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New/Updated ADP Profiles", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CompaniesCountbyUser", method = RequestMethod.GET, produces = "application/json")
-	public BiData CompaniesCountbyUser(//
+	public IBiData CompaniesCountbyUser(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Companies Count by User", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Companies Count by User", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/JobCountbyUser", method = RequestMethod.GET, produces = "application/json")
-	public BiData JobCountbyUser(//
+	public IBiData JobCountbyUser(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Job Count by User", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Job Count by User", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ContactCountbyUser", method = RequestMethod.GET, produces = "application/json")
-	public BiData ContactCountbyUser(//
+	public IBiData ContactCountbyUser(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Contact Count by User", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Contact Count by User", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateNoteCountbyUser", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateNoteCountbyUser(//
+	public IBiData CandidateNoteCountbyUser(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Note Count by User", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Candidate Note Count by User", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ContactNoteCountbyUser", method = RequestMethod.GET, produces = "application/json")
-	public BiData ContactNoteCountbyUser(//
+	public IBiData ContactNoteCountbyUser(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Contact Note Count by User", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Contact Note Count by User", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateNoteCountbyActionbyUser", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateNoteCountbyActionbyUser(//
+	public IBiData CandidateNoteCountbyActionbyUser(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Note Count by Action by User", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Candidate Note Count by Action by User", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ContactNoteCountbyActionbyUser", method = RequestMethod.GET, produces = "application/json")
-	public BiData ContactNoteCountbyActionbyUser(//
+	public IBiData ContactNoteCountbyActionbyUser(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Contact Note Count by Action by User", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Contact Note Count by Action by User", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	// @RequestMapping(value = "/EDIApprovedTimesheets", method =
 	// RequestMethod.GET, produces = "application/json")
-	public BiData EDIApprovedTimesheets(//
+	public IBiData EDIApprovedTimesheets(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "EDI Approved Timesheets", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "EDI Approved Timesheets", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewResumesDownloaded", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewResumesDownloaded(//
+	public IBiData NewResumesDownloaded(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New Resumes Downloaded", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New Resumes Downloaded", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewExpenses", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewExpenses(//
+	public IBiData NewExpenses(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New Expenses", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New Expenses", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateOnBoardingDocumentList", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateOnBoardingDocumentList(//
+	public IBiData CandidateOnBoardingDocumentList(//
 			//
 			@ApiParam(value = "Candidate Id", required = true) //
-			@RequestParam(required = true) Long candidateId //
+			@RequestParam(required = true) Long candidateId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		String[] parameters = new String[] { candidateId.toString() };
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate On-Boarding Document List", null, null, parameters);
+		return biDataService.getBIData(jobDivaSession, "Candidate On-Boarding Document List", null, null, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewPositionsCountbyDivision", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewPositionsCountbyDivision(//
+	public IBiData NewPositionsCountbyDivision(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New Positions Count by Division", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New Positions Count by Division", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewPositionsCountbyPrimarySales", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewPositionsCountbyPrimarySales(//
+	public IBiData NewPositionsCountbyPrimarySales(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New Positions Count by Primary Sales", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New Positions Count by Primary Sales", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/NewPositionsCount", method = RequestMethod.GET, produces = "application/json")
-	public BiData NewPositionsCount(//
+	public IBiData NewPositionsCount(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "New Positions Count", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "New Positions Count", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/OpenPositionsCountbyDivision", method = RequestMethod.GET, produces = "application/json")
-	public BiData OpenPositionsCountbyDivision(//
+	public IBiData OpenPositionsCountbyDivision(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Open Positions Count by Division", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Open Positions Count by Division", null, null, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/OpenPositionsCountbyPrimarySales", method = RequestMethod.GET, produces = "application/json")
-	public BiData OpenPositionsCountbyPrimarySales(//
+	public IBiData OpenPositionsCountbyPrimarySales(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Open Positions Count by Primary Sales", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Open Positions Count by Primary Sales", null, null, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/OpenPositionsCountbyJobType", method = RequestMethod.GET, produces = "application/json")
-	public BiData OpenPositionsCountbyJobType(//
+	public IBiData OpenPositionsCountbyJobType(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Open Positions Count by Job Type", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Open Positions Count by Job Type", null, null, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/OpenPositionsCount", method = RequestMethod.GET, produces = "application/json")
-	public BiData OpenPositionsCount(//
+	public IBiData OpenPositionsCount(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Open Positions Count", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Open Positions Count", null, null, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/IncomingResumesCount", method = RequestMethod.GET, produces = "application/json")
-	public BiData IncomingResumesCount(//
+	public IBiData IncomingResumesCount(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Incoming Resumes Count", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Incoming Resumes Count", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/HiresCountbyDivision", method = RequestMethod.GET, produces = "application/json")
-	public BiData HiresCountbyDivision(//
+	public IBiData HiresCountbyDivision(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Hires Count by Division", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Hires Count by Division", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/FilledPositionsCountbyDivision", method = RequestMethod.GET, produces = "application/json")
-	public BiData FilledPositionsCountbyDivision(//
+	public IBiData FilledPositionsCountbyDivision(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Filled Positions Count by Division", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Filled Positions Count by Division", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/FilledPositionsCount", method = RequestMethod.GET, produces = "application/json")
-	public BiData FilledPositionsCount(//
+	public IBiData FilledPositionsCount(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Filled Positions Count", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Filled Positions Count", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/SubmittalInterviewActivitiesCountbyDivision", method = RequestMethod.GET, produces = "application/json")
-	public BiData SubmittalInterviewActivitiesCountbyDivision( //
+	public IBiData SubmittalInterviewActivitiesCountbyDivision( //
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Submittal/Interview Activities Count by Division", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Submittal/Interview Activities Count by Division", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/SubmittalInterviewActivitiesCountbyRecruiter", method = RequestMethod.GET, produces = "application/json")
-	public BiData SubmittalInterviewActivitiesCountbyRecruiter(//
+	public IBiData SubmittalInterviewActivitiesCountbyRecruiter(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Submittal/Interview Activities Count by Recruiter", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Submittal/Interview Activities Count by Recruiter", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/HiresCountbyPrimarySales", method = RequestMethod.GET, produces = "application/json")
-	public BiData HiresCountbyPrimarySales(//
+	public IBiData HiresCountbyPrimarySales(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Hires Count by Primary Sales", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Hires Count by Primary Sales", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/HiresCountbyRecruiter", method = RequestMethod.GET, produces = "application/json")
-	public BiData HiresCountbyRecruiter(//
+	public IBiData HiresCountbyRecruiter(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Hires Count by Recruiter", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Hires Count by Recruiter", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/AgingofPositionsCountbyDivision", method = RequestMethod.GET, produces = "application/json")
-	public BiData AgingofPositionsCountbyDivision(//
+	public IBiData AgingofPositionsCountbyDivision(//
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date toDate, //
@@ -4262,7 +5262,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Integer agingRange1, //
 			//
 			@ApiParam(value = "Aging Range 2", required = false) //
-			@RequestParam(required = false) Integer agingRange2 //
+			@RequestParam(required = false) Integer agingRange2, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -4276,12 +5280,12 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Aging of Positions Count by Division", null, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "Aging of Positions Count by Division", null, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/AgingofPositionsCountbyPrimarySales", method = RequestMethod.GET, produces = "application/json")
-	public BiData AgingofPositionsCountbyPrimarySales(//
+	public IBiData AgingofPositionsCountbyPrimarySales(//
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date toDate, //
@@ -4293,7 +5297,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Integer agingRange1, //
 			//
 			@ApiParam(value = "Aging Range 2", required = false) //
-			@RequestParam(required = false) Integer agingRange2//
+			@RequestParam(required = false) Integer agingRange2, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -4307,26 +5315,30 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Aging of Positions Count by Primary Sales", null, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "Aging of Positions Count by Primary Sales", null, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/EndedAssignmentsCountbyDivision", method = RequestMethod.GET, produces = "application/json")
-	public BiData EndedAssignmentsCountbyDivision(//
+	public IBiData EndedAssignmentsCountbyDivision(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Ended Assignments Count by Division", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Ended Assignments Count by Division", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/IssuedJobsList", method = RequestMethod.GET, produces = "application/json")
-	public BiData IssuedJobsList(//
+	public IBiData IssuedJobsList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -4334,7 +5346,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -4350,12 +5366,12 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Issued Jobs List", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "Issued Jobs List", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/UpdatedJobsList", method = RequestMethod.GET, produces = "application/json")
-	public BiData UpdatedJobsList(//
+	public IBiData UpdatedJobsList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
@@ -4363,7 +5379,11 @@ public class BIDataController extends AbstractJobDivaController {
 			@RequestParam(required = true) Date toDate, //
 			//
 			@ApiParam(value = "User Fields Name", required = false) //
-			@RequestParam(required = false) String[] userFieldsName //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
@@ -4379,160 +5399,327 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
-		return biDataService.getBIData(jobDivaSession, "Updated Jobs List", fromDate, toDate, parameters);
+		return biDataService.getBIData(jobDivaSession, "Updated Jobs List", fromDate, toDate, parameters, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/SubmittalInterviewHireActivitiesList", method = RequestMethod.GET, produces = "application/json")
-	public BiData SubmittalInterviewHireActivitiesList(//
+	public IBiData SubmittalInterviewHireActivitiesList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Submittal/Interview/Hire Activities List", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Submittal/Interview/Hire Activities List", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/CandidateActions", method = RequestMethod.GET, produces = "application/json")
-	public BiData CandidateActions(//
+	public IBiData CandidateActions(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Candidate Actions", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Candidate Actions", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/ContactActions", method = RequestMethod.GET, produces = "application/json")
-	public BiData ContactActions(//
+	public IBiData ContactActions(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Contact Actions", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Contact Actions", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/AccessLog", method = RequestMethod.GET, produces = "application/json")
-	public BiData AccessLog(//
+	public IBiData AccessLog(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Access Log", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Access Log", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/UsersList", method = RequestMethod.GET, produces = "application/json")
-	public BiData UsersList(//
+	public IBiData UsersList(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Users List", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Users List", null, null, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/VMSUsersList", method = RequestMethod.GET, produces = "application/json")
-	public BiData VMSUsersList(//
+	public IBiData VMSUsersList(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "VMS Users List", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "VMS Users List", null, null, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/UserGroupLists", method = RequestMethod.GET, produces = "application/json")
-	public BiData UserGroupLists(//
+	public IBiData UserGroupLists(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "User Group Lists", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "User Group Lists", null, null, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/DivisionsList", method = RequestMethod.GET, produces = "application/json")
-	public BiData DivisionsList(//
+	public IBiData DivisionsList(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Divisions List", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Divisions List", null, null, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/RejectionReasonsList", method = RequestMethod.GET, produces = "application/json")
-	public BiData RejectionReasonsList(//
+	public IBiData RejectionReasonsList(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Rejection Reasons List", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Rejection Reasons List", null, null, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/UserfieldsList", method = RequestMethod.GET, produces = "application/json")
-	public BiData UserfieldsList(//
+	public IBiData UserfieldsList(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Userfields List", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Userfields List", null, null, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/AttachmentTypeList", method = RequestMethod.GET, produces = "application/json")
-	public BiData AttachmentTypeList(//
+	public IBiData AttachmentTypeList(//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Attachment Type List", null, null, null);
+		return biDataService.getBIData(jobDivaSession, "Attachment Type List", null, null, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/EmailMergeOptOutCandidateList", method = RequestMethod.GET, produces = "application/json")
-	public BiData EmailMergeOptOutCandidateList(//
+	public IBiData EmailMergeOptOutCandidateList(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		//
-		return biDataService.getBIData(jobDivaSession, "Email Merge OptOut Candidate List", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Email Merge OptOut Candidate List", fromDate, toDate, null, alternateFormat);
 		//
 	}
 	
 	@RequestMapping(value = "/RedactedCandidatesRecords", method = RequestMethod.GET, produces = "application/json")
-	public BiData RedactedCandidatesRecords(//
+	public IBiData RedactedCandidatesRecords(//
 			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
 			@RequestParam(required = true) Date fromDate, //
 			//
 			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
-			@RequestParam(required = true) Date toDate //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
 	//
 	) throws Exception {//
 						//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Redacted Candidates Records", fromDate, toDate, null);
+		return biDataService.getBIData(jobDivaSession, "Redacted Candidates Records", fromDate, toDate, null, alternateFormat);
+		//
+	}
+	
+	@ApiIgnore
+	@RequestMapping(value = "/NescoDinesolCandidateDetail", method = RequestMethod.GET, produces = "application/json")
+	public IBiData NescoDinesolCandidateDetail(//
+			//
+			@ApiParam(value = "Candidate Id", required = true) //
+			@RequestParam(required = true) Long candidateId, //
+			//
+			@ApiParam(value = "User Fields Name", required = false) //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
+	//
+	) throws Exception {//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		ArrayList<String> paramLits = new ArrayList<String>();
+		//
+		paramLits.add(candidateId.toString());
+		//
+		if (userFieldsName != null) {
+			for (int i = 0; i < userFieldsName.length; i++) {
+				paramLits.add(userFieldsName[i]);
+			}
+		}
+		//
+		String[] parameters = paramLits.stream().toArray(String[]::new);
+		//
+		return biDataService.getBIData(jobDivaSession, "Nesco Dinesol Candidate Detail", null, null, parameters, alternateFormat);
+		//
+	}
+	
+	@ApiIgnore
+	@RequestMapping(value = "/NescoDinesolCandidateEEODetail", method = RequestMethod.GET, produces = "application/json")
+	public IBiData NescoDinesolCandidateEEODetail(//
+			//
+			@ApiParam(value = "Candidate Id", required = true) //
+			@RequestParam(required = true) Long candidateId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
+	//
+	) throws Exception {//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		//
+		String[] parameters = new String[] { candidateId.toString() };
+		//
+		return biDataService.getBIData(jobDivaSession, "Nesco Dinesol Candidate EEO Detail", null, null, parameters, alternateFormat);
+		//
+	}
+	
+	@ApiIgnore
+	@RequestMapping(value = "/NescoDinesolBillingRecordDetail", method = RequestMethod.GET, produces = "application/json")
+	public IBiData NescoDinesolBillingRecordDetail(//
+			//
+			@ApiParam(value = "Employee Id", required = true) //
+			@RequestParam(required = true) Long employeeId, //
+			//
+			//
+			@ApiParam(value = "Record Id", required = true) //
+			@RequestParam(required = true) Long recordId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
+	) throws Exception {//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		String[] parameters = new String[] { employeeId.toString(), recordId.toString() };
+		//
+		return biDataService.getBIData(jobDivaSession, "Nesco Dinesol Billing Record Detail", null, null, parameters, alternateFormat);
+		//
+	}
+	
+	@ApiIgnore
+	@RequestMapping(value = "/NescoDinesolCandidateHRDetail", method = RequestMethod.GET, produces = "application/json")
+	public IBiData NescoDinesolCandidateHRDetail(//
+			@ApiParam(value = "Candidate Id", required = true) //
+			@RequestParam(required = true) Long candidateId, //
+			//
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
+	) throws Exception {//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		String[] parameters = new String[] { candidateId.toString() };
+		//
+		return biDataService.getBIData(jobDivaSession, "Nesco Dinesol Candidate HR Detail", null, null, parameters, alternateFormat);
+		//
+	}
+	
+	@ApiIgnore
+	@RequestMapping(value = "/NescoDinesolNewApprovedBillingRecords", method = RequestMethod.GET, produces = "application/json")
+	public IBiData NescoDinesolNewApprovedBillingRecords(//
+			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
+			@RequestParam(required = true) Date fromDate, //
+			//
+			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
+	) throws Exception {//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		return biDataService.getBIData(jobDivaSession, "Nesco Dinesol New Approved Billing Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
 }

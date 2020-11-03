@@ -292,7 +292,6 @@ public class JobDao extends AbstractActivityDao {
 			Date issuedateto, Date startdatefrom, Date startdateto, //
 			String department, String skill, String zipcode, Integer zipcodeRadius, String countryId) throws Exception {
 		//
-		List<Job> list = null;
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		/* Check if status is user-defined status in this team */
 		if (status != null)
@@ -483,61 +482,83 @@ public class JobDao extends AbstractActivityDao {
 		//
 		String queryString = sql_buff.toString();
 		Object[] params = paramList.toArray();
-		list = jdbcTemplate.query(queryString, params, new JobRowMapper());
+		List<Job> list = jdbcTemplate.query(queryString, params, new JobRowMapper());
+		//
 		//
 		for (Job job : list) {
-			String str = "";
-			switch (job.getJobStatus()) {
-				case 0:
-					str = "Open";
-					break;
-				case 1:
-					str = "On Hold";
-					break;
-				case 2:
-					str = "Filled";
-					break;
-				case 3:
-					str = "Cancelled";
-					break;
-				case 4:
-					str = "Closed";
-					break;
-				case 5:
-					str = "Expired";
-					break;
-				case 6:
-					str = "Ignored";
-					break;
-				default:
-					str = String.valueOf(job.getJobStatus());
-			}
-			job.setStrJobStatus(str);
 			//
-			job.setJobType(getJobTypeString(job.getContract()));
+			//
+			//
+			if (job.getJobStatus() != null) {
+				String str = "";
+				try {
+					switch (job.getJobStatus()) {
+						case 0:
+							str = "Open";
+							break;
+						case 1:
+							str = "On Hold";
+							break;
+						case 2:
+							str = "Filled";
+							break;
+						case 3:
+							str = "Cancelled";
+							break;
+						case 4:
+							str = "Closed";
+							break;
+						case 5:
+							str = "Expired";
+							break;
+						case 6:
+							str = "Ignored";
+							break;
+						default:
+							str = String.valueOf(job.getJobStatus());
+					}
+					job.setStrJobStatus(str);
+					//
+				} catch (Exception e) {
+					logger.info("Assign Job Status for job " + job.getId() + " Error :: " + e.getMessage());
+				}
+			}
+			//
+			//
+			try {
+				job.setJobType(getJobTypeString(job.getContract()));
+			} catch (Exception e) {
+				logger.info("Assign JobType for job " + job.getId() + " Error :: " + e.getMessage());
+			}
 			//
 			//
 			ArrayList<String> jobusers = new ArrayList<String>();
-			List<JobUser> jobUsers = jobUserDao.getJobUsers(job.getId(), jobDivaSession.getTeamId());
-			for (JobUser jobUser : jobUsers) {
-				String jobuser = "";
-				jobuser += jobUser.getLastName();
-				jobuser += " | " + jobUser.getFirstName() + " |";
-				if (jobUser.getLeadRecruiter())
-					jobuser += " (PR)";
-				if (jobUser.getLeadSales())
-					jobuser += " (PS)";
-				if (jobUser.getSales() && !jobUser.getLeadSales())
-					jobuser += " (S)";
-				if (jobUser.getRecruiter() && !jobUser.getLeadRecruiter())
-					jobuser += " (R)";
-				jobuser += " | " + jobUser.getRecruiterId() + " |";
-				jobusers.add(jobuser);
+			try {
+				List<JobUser> jobUsers = jobUserDao.getJobUsers(job.getId(), jobDivaSession.getTeamId());
+				for (JobUser jobUser : jobUsers) {
+					String jobuser = "";
+					jobuser += jobUser.getLastName();
+					jobuser += " | " + jobUser.getFirstName() + " |";
+					if (jobUser.getLeadRecruiter())
+						jobuser += " (PR)";
+					if (jobUser.getLeadSales())
+						jobuser += " (PS)";
+					if (jobUser.getSales() && !jobUser.getLeadSales())
+						jobuser += " (S)";
+					if (jobUser.getRecruiter() && !jobUser.getLeadRecruiter())
+						jobuser += " (R)";
+					jobuser += " | " + jobUser.getRecruiterId() + " |";
+					jobusers.add(jobuser);
+				}
+			} catch (Exception e) {
+				logger.info("Assign UsersNameRole for job " + job.getId() + " Error :: " + e.getMessage());
 			}
+			//
 			//
 			job.setUsersNameRole(jobusers.toString());
 			//
 		}
+		//
 		//
 		return list;
 	}
@@ -1729,612 +1750,658 @@ public class JobDao extends AbstractActivityDao {
 			checkJobPriority(jobDivaSession, priority, priority_id);
 		}
 		/* Update Job */
-		List<Job> jobs = searchJobs(jobDivaSession, jobid, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+		List<Job> jobs = null;
+		//
+		try {
+			jobs = searchJobs(jobDivaSession, jobid, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+		} catch (Exception e) {
+			logger.info("Error: Job " + jobid + " is not found  ERROR: " + e.getMessage());
+		}
+		//
 		if (jobs == null || jobs.size() == 0) {
+			//
 			throw new Exception("Error: Job " + jobid + " is not found.");
 		} else {
-			logger.debug("Updating job(" + jobid + "). ");
+			logger.info("Updating job(" + jobid + "). ");
 		}
 		//
-		Job job = jobs.get(0);
-		//
-		if (isNotEmpty(optionalref))
-			job.setRfqRefNo(optionalref);
-		//
-		if (isNotEmpty(title))
-			job.setRfqTitle(title.replaceAll("\r\n|\n|\r|\n\r", ""));
-		//
-		if (isNotEmpty(description)) {
-			job.setJobDescription(description.replaceAll("\r\n|\n|\r|\n\r", "<br>"));
-		}
-		//
-		if (isNotEmpty(postingtitle))
-			job.setPostingTitle(postingtitle);
-		//
-		if (isNotEmpty(postingdescription)) {
-			job.setPostingDescription(postingdescription);
-		}
-		//
-		JdbcTemplate jdbcTemplate = getJdbcTemplate();
-		//
-		Long teamid = jobDivaSession.getTeamId();
-		// Update contacts
-		if (contacts != null) {
+		try {
+			Job job = jobs.get(0);
 			//
-			int cnt_showonjob = 0;
-			for (ContactRoleType contactRoleType : contacts) {
-				if (contactRoleType.getContactId() < 1)
-					throw new Exception("Error: Contactid should be a positive number. \r\n");
-				if (contactRoleType.getAction() != null && contactRoleType.getAction() != 1 && contactRoleType.getAction() != 2)
-					throw new Exception("Error: Action code should be 1(insert/modify) or 2(delete) \r\n");
-				if (contactRoleType.getShowOnJob() != null && contactRoleType.getShowOnJob() && contactRoleType.getAction() != null && contactRoleType.getAction() == 1)
-					cnt_showonjob++;
-			}
-			if (cnt_showonjob > 1)
-				throw new Exception("Error: Only one contact can be shown on job screen. \r\n");
+			if (isNotEmpty(optionalref))
+				job.setRfqRefNo(optionalref);
 			//
+			if (isNotEmpty(title))
+				job.setRfqTitle(title.replaceAll("\r\n|\n|\r|\n\r", ""));
 			//
-			String sql = "SELeCT * FROM TRFQ_CUSTOMERS WHERE RFQID = ? and TEAMID = ? ";
-			Object[] params = new Object[] { jobid, teamid };
-			//
-			//
-			List<List<Object>> oldcontacts = jdbcTemplate.query(sql, params, new RowMapper<List<Object>>() {
-				
-				@Override
-				public List<Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
-					List<Object> pair = new ArrayList<Object>();
-					pair.add(rs.getLong("CUSTOMERID"));
-					pair.add(rs.getBoolean("SHOWONJOB"));
-					pair.add(rs.getLong("ROLEID"));
-					return pair;
-				}
-			});
-			//
-			Hashtable<Long, Boolean> pairs = new Hashtable<Long, Boolean>(oldcontacts.size());
-			for (int i = 0; i < oldcontacts.size(); i++) {
-				if (isRecruiter((Long) oldcontacts.get(i).get(2)))
-					continue;
-				if (oldcontacts.get(i).get(1) == null)
-					pairs.put((Long) oldcontacts.get(i).get(0), false);
-				else
-					pairs.put((Long) oldcontacts.get(i).get(0), (Boolean) oldcontacts.get(i).get(1));
+			if (isNotEmpty(description)) {
+				job.setJobDescription(description.replaceAll("\r\n|\n|\r|\n\r", "<br>"));
 			}
 			//
+			if (isNotEmpty(postingtitle))
+				job.setPostingTitle(postingtitle);
 			//
-			// Check updated contacts shownonjob setting
-			int soj_cnt = 0;
-			long customerid = 0L;
-			for (ContactRoleType contactRoleType : contacts) {
-				if (contactRoleType.getAction() == 1) { // insert or modify
-					pairs.put(contactRoleType.getContactId(), contactRoleType.getShowOnJob());
-				} else if (contactRoleType.getAction() == 2) { // delete
-					pairs.remove(contactRoleType.getContactId());
-				}
+			if (isNotEmpty(postingdescription)) {
+				job.setPostingDescription(postingdescription);
 			}
 			//
-			for (Map.Entry<Long, Boolean> entry : pairs.entrySet()) {
-				if (entry.getValue() != null && entry.getValue()) {
-					soj_cnt++;
-					customerid = entry.getKey();
-				}
-			}
+			JdbcTemplate jdbcTemplate = getJdbcTemplate();
 			//
-			if (soj_cnt != 1)
-				throw new Exception("Error: There should be one and only one contact shown on job, please make sure the flags are set correctly. \r\n");
-			//
-			// Write back updates
-			for (ContactRoleType contactRoleType : contacts) {
-				Long roleid = contactRoleType.getRoleId();
-				if (isRecruiter(roleid))
-					throw new Exception("Error: Invalid role type(" + roleid + ") of job contact(" + contactRoleType.getContactId() + "). \r\n");
-				// verify contact
-				Contact contact = contactDao.getContact(jobDivaSession, contactRoleType.getContactId());
-				if (contact == null || contact.getTeamId() != teamid)
-					throw new Exception("Error: Contact(" + contactRoleType.getContactId() + ") is not found. Can not add this contact to the job. \r\n");
+			Long teamid = jobDivaSession.getTeamId();
+			// Update contacts
+			if (contacts != null) {
 				//
-				// insert or modify or delete a contact from the job
-				sql = "SELECT  * FROM TRFQ_CUSTOMERS  where RFQID = ?  and TEAMID = ?  and CUSTOMERID = ? ";
-				params = new Object[] { jobid, jobDivaSession.getTeamId(), contactRoleType.getContactId() };
+				int cnt_showonjob = 0;
+				for (ContactRoleType contactRoleType : contacts) {
+					if (contactRoleType.getContactId() < 1)
+						throw new Exception("Error: Contactid should be a positive number. \r\n");
+					if (contactRoleType.getAction() != null && contactRoleType.getAction() != 1 && contactRoleType.getAction() != 2)
+						throw new Exception("Error: Action code should be 1(insert/modify) or 2(delete) \r\n");
+					if (contactRoleType.getShowOnJob() != null && contactRoleType.getShowOnJob() && contactRoleType.getAction() != null && contactRoleType.getAction() == 1)
+						cnt_showonjob++;
+				}
+				if (cnt_showonjob > 1)
+					throw new Exception("Error: Only one contact can be shown on job screen. \r\n");
 				//
-				List<Map<String, Object>> dbJobContactsList = jdbcTemplate.query(sql, params, new RowMapper<Map<String, Object>>() {
+				//
+				String sql = "SELeCT * FROM TRFQ_CUSTOMERS WHERE RFQID = ? and TEAMID = ? ";
+				Object[] params = new Object[] { jobid, teamid };
+				//
+				//
+				List<List<Object>> oldcontacts = jdbcTemplate.query(sql, params, new RowMapper<List<Object>>() {
 					
 					@Override
-					public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
-						//
-						Map<String, Object> contactIfo = new HashMap<String, Object>();
-						contactIfo.put("TEAMID", rs.getLong("TEAMID"));
-						contactIfo.put("RFQID", rs.getLong("RFQID"));
-						contactIfo.put("CUSTOMERID", rs.getLong("CUSTOMERID"));
-						contactIfo.put("SHOWONJOB", rs.getBoolean("SHOWONJOB"));
-						contactIfo.put("ROLEID", rs.getInt("ROLEID"));
-						return contactIfo;
+					public List<Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
+						List<Object> pair = new ArrayList<Object>();
+						pair.add(rs.getLong("CUSTOMERID"));
+						pair.add(rs.getBoolean("SHOWONJOB"));
+						pair.add(rs.getLong("ROLEID"));
+						return pair;
 					}
 				});
 				//
-				Map<String, Object> jobContact = null;
+				Hashtable<Long, Boolean> pairs = new Hashtable<Long, Boolean>(oldcontacts.size());
+				for (int i = 0; i < oldcontacts.size(); i++) {
+					if (isRecruiter((Long) oldcontacts.get(i).get(2)))
+						continue;
+					if (oldcontacts.get(i).get(1) == null)
+						pairs.put((Long) oldcontacts.get(i).get(0), false);
+					else
+						pairs.put((Long) oldcontacts.get(i).get(0), (Boolean) oldcontacts.get(i).get(1));
+				}
 				//
-				if (dbJobContactsList != null && dbJobContactsList.size() > 0) {
-					for (Map<String, Object> jdContact : dbJobContactsList) {
-						Integer roleId = (Integer) jdContact.get("ROLEID");
-						if (roleId != null && isRecruiter(roleId.longValue()))
-							continue;
-						jobContact = jdContact;
+				//
+				// Check updated contacts shownonjob setting
+				int soj_cnt = 0;
+				long customerid = 0L;
+				for (ContactRoleType contactRoleType : contacts) {
+					if (contactRoleType.getAction() == 1) { // insert or modify
+						pairs.put(contactRoleType.getContactId(), contactRoleType.getShowOnJob());
+					} else if (contactRoleType.getAction() == 2) { // delete
+						pairs.remove(contactRoleType.getContactId());
 					}
 				}
 				//
-				if (contactRoleType.getAction() == 1) {
-					if (jobContact == null) { // insert
-						jobContactDao.saveJobContact(teamid, jobid, contactRoleType.getContactId(), contactRoleType.getShowOnJob(), roleid != null ? roleid.intValue() : null);
-					} else { // modify
-						jobContactDao.updateJobContact(teamid, jobid, contactRoleType.getContactId(), contactRoleType.getShowOnJob(), roleid != null ? roleid.intValue() : null);
+				for (Map.Entry<Long, Boolean> entry : pairs.entrySet()) {
+					if (entry.getValue() != null && entry.getValue()) {
+						soj_cnt++;
+						customerid = entry.getKey();
 					}
-				} else if (contactRoleType.getAction() == 2) { // delete
-					logger.debug("Deleting contact(" + contactRoleType.getContactId() + ") to job.");
-					if (jobContact == null)
-						throw new Exception("Error: Can not delete contact(" + contactRoleType.getContactId() + ") from the job due to either the contact not found or the contact is a recruiter. \r\n");
-					jobContactDao.deleteJobContact(teamid, jobid, contactRoleType.getContactId());
+				}
+				//
+				if (soj_cnt != 1)
+					throw new Exception("Error: There should be one and only one contact shown on job, please make sure the flags are set correctly. \r\n");
+				//
+				// Write back updates
+				for (ContactRoleType contactRoleType : contacts) {
+					Long roleid = contactRoleType.getRoleId();
+					if (isRecruiter(roleid))
+						throw new Exception("Error: Invalid role type(" + roleid + ") of job contact(" + contactRoleType.getContactId() + "). \r\n");
+					// verify contact
+					Contact contact = contactDao.getContact(jobDivaSession, contactRoleType.getContactId());
+					if (contact == null || contact.getTeamId() != teamid)
+						throw new Exception("Error: Contact(" + contactRoleType.getContactId() + ") is not found. Can not add this contact to the job. \r\n");
+					//
+					// insert or modify or delete a contact from the job
+					sql = "SELECT  * FROM TRFQ_CUSTOMERS  where RFQID = ?  and TEAMID = ?  and CUSTOMERID = ? ";
+					params = new Object[] { jobid, jobDivaSession.getTeamId(), contactRoleType.getContactId() };
+					//
+					List<Map<String, Object>> dbJobContactsList = jdbcTemplate.query(sql, params, new RowMapper<Map<String, Object>>() {
+						
+						@Override
+						public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
+							//
+							Map<String, Object> contactIfo = new HashMap<String, Object>();
+							contactIfo.put("TEAMID", rs.getLong("TEAMID"));
+							contactIfo.put("RFQID", rs.getLong("RFQID"));
+							contactIfo.put("CUSTOMERID", rs.getLong("CUSTOMERID"));
+							contactIfo.put("SHOWONJOB", rs.getBoolean("SHOWONJOB"));
+							contactIfo.put("ROLEID", rs.getInt("ROLEID"));
+							return contactIfo;
+						}
+					});
+					//
+					Map<String, Object> jobContact = null;
+					//
+					if (dbJobContactsList != null && dbJobContactsList.size() > 0) {
+						for (Map<String, Object> jdContact : dbJobContactsList) {
+							Integer roleId = (Integer) jdContact.get("ROLEID");
+							if (roleId != null && isRecruiter(roleId.longValue()))
+								continue;
+							jobContact = jdContact;
+						}
+					}
+					//
+					if (contactRoleType.getAction() == 1) {
+						if (jobContact == null) { // insert
+							jobContactDao.saveJobContact(teamid, jobid, contactRoleType.getContactId(), contactRoleType.getShowOnJob(), roleid != null ? roleid.intValue() : null);
+						} else { // modify
+							jobContactDao.updateJobContact(teamid, jobid, contactRoleType.getContactId(), contactRoleType.getShowOnJob(), roleid != null ? roleid.intValue() : null);
+						}
+					} else if (contactRoleType.getAction() == 2) { // delete
+						logger.info("Deleting contact(" + contactRoleType.getContactId() + ") to job.");
+						if (jobContact == null)
+							throw new Exception("Error: Can not delete contact(" + contactRoleType.getContactId() + ") from the job due to either the contact not found or the contact is a recruiter. \r\n");
+						jobContactDao.deleteJobContact(teamid, jobid, contactRoleType.getContactId());
+					}
+				}
+				//
+				//
+				//
+				if (job.getCustomerId() != customerid) {
+					sql = " SELECT COMPANYID, COMPANYNAME, FIRSTNAME, LASTNAME FROM TCUSTOMER WHERE ID = ? and teamid = ? ";
+					params = new Object[] { job.getCustomerId(), jobDivaSession.getTeamId() };
+					jdbcTemplate.query(sql, params, new RowMapper<Boolean>() {
+						
+						@Override
+						public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
+							//
+							job.setCompanyId(rs.getLong("COMPANYID"));
+							job.setDepartment(rs.getString("COMPANYNAME"));
+							job.setFirstName(rs.getString("FIRSTNAME"));
+							job.setLastName(rs.getString("LASTNAME"));
+							//
+							return true;
+						}
+					});
+					//
 				}
 			}
-			//
-			//
-			//
-			if (job.getCustomerId() != customerid) {
-				sql = " SELECT COMPANYID, COMPANYNAME, FIRSTNAME, LASTNAME FROM TCUSTOMER WHERE ID = ? and teamid = ? ";
-				params = new Object[] { job.getCustomerId(), jobDivaSession.getTeamId() };
-				jdbcTemplate.query(sql, params, new RowMapper<Boolean>() {
-					
-					@Override
-					public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
-						//
-						job.setCompanyId(rs.getLong("COMPANYID"));
-						job.setDepartment(rs.getString("COMPANYNAME"));
-						job.setFirstName(rs.getString("FIRSTNAME"));
-						job.setLastName(rs.getString("LASTNAME"));
-						//
-						return true;
-					}
-				});
-				//
-			}
-		}
-		// Update job users in both JobUser and JobContact
-		if (users != null) {
-			HashMap<Long, Integer> userRole = new HashMap<Long, Integer>();// limit
-																			// for
-																			// primary
-																			// sales/recruiter
-			// get previous users and their roles
-			List<JobUser> prevUsers_it = jobUserDao.getJobUsers(jobid, teamid);
-			for (JobUser prevUser : prevUsers_it) {
-				int role = 0;
-				if (prevUser.getLeadSales())
-					role = role | 2;
-				if (prevUser.getLeadRecruiter())
-					role = role | 8;
-				userRole.put(prevUser.getRecruiterId(), role);
-			}
-			//
-			//
-			for (UserRole localUuserRole : users) {
-				//
-				if (localUuserRole.getAction() != 1 && localUuserRole.getAction() != 2)
-					throw new Exception("Error: Action code should be 1(insert/modify) or 2(delete) \r\n");
-				//
-				List<JobUser> jobUsers = jobUserDao.getJobUsers(jobid, teamid, localUuserRole.getUserId());
-				JobUser jobuser = jobUsers != null && jobUsers.size() > 0 ? jobUsers.get(0) : null;
-				//
-				String sql = "SELECT  * FROM TCUSTOMER WHERE IFRECRUITERTHENID = ? AND TEAMID = ? ";
-				Object[] params = new Object[] { localUuserRole.getUserId(), jobDivaSession.getTeamId() };
-				//
-				List<Long> cid = jdbcTemplate.query(sql, params, new RowMapper<Long>() {
-					
-					@Override
-					public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-						//
-						return rs.getLong("ID");
-					}
-				});
-				if (cid == null || cid.size() == 0)
-					throw new Exception("Error: Recruiter(" + localUuserRole.getUserId() + ") is not found. Failed in job user update. \r\n");
-				//
-				Boolean sale = false;
-				Boolean leadSale = false;
-				Boolean recruiter = false;
-				Boolean leadRecruiter = false;
-				String strRole = localUuserRole.getRole();
-				if (isNotEmpty(strRole)) {
-					strRole = strRole.toLowerCase();
-					if (strRole.indexOf("sales") > -1)
-						sale = true;
-					if (strRole.indexOf("primary sales") > -1)
-						leadSale = true;
-					if (strRole.indexOf("recruiter") > -1)
-						recruiter = true;
-					if (strRole.indexOf("primary recruiter") > -1)
-						leadRecruiter = true;
+			// Update job users in both JobUser and JobContact
+			if (users != null) {
+				HashMap<Long, Integer> userRole = new HashMap<Long, Integer>();// limit
+																				// for
+																				// primary
+																				// sales/recruiter
+				// get previous users and their roles
+				List<JobUser> prevUsers_it = jobUserDao.getJobUsers(jobid, teamid);
+				for (JobUser prevUser : prevUsers_it) {
+					int role = 0;
+					if (prevUser.getLeadSales())
+						role = role | 2;
+					if (prevUser.getLeadRecruiter())
+						role = role | 8;
+					userRole.put(prevUser.getRecruiterId(), role);
 				}
 				//
-				int role = 0;
-				if (sale)
-					role = role | 1;
-				if (leadSale)
-					role = role | 2;
-				if (recruiter)
-					role = role | 4;
-				if (leadRecruiter)
-					role = role | 8;
-				int roleid = 0;
-				switch (role) {
-					case 0:
-						roleid = 950;
-						break;// nothing
-					case 1:
-						roleid = 999;
-						break;// (S)
-					case 3:
-						roleid = 996;
-						break;// (PS)
-					case 4:
-						roleid = 997;
-						break;// (R)
-					case 5:
-						roleid = 999;
-						break;// (R)(S)
-					case 7:
-						roleid = 996;
-						break;// (PS)(R)
-					case 12:
-						roleid = 998;
-						break;// (PR)
-					case 13:
-						roleid = 999;
-						break;// (S)(PR)
-					case 15:
-						roleid = 996;
-						break;// (PS)(PR)
-				}
 				//
-				// grab the record in TRFQ_CUSTOMERS ready for update
-				sql = "SELECT  * FROM TRFQ_CUSTOMERS  where RFQID = ?  and TEAMID = ?  and CUSTOMERID = ? ";
-				params = new Object[] { jobid, jobDivaSession.getTeamId(), cid.get(0) };
-				//
-				List<Map<String, Object>> dbJobContactsList = jdbcTemplate.query(sql, params, new RowMapper<Map<String, Object>>() {
-					
-					@Override
-					public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
-						//
-						Map<String, Object> contactIfo = new HashMap<String, Object>();
-						contactIfo.put("TEAMID", rs.getLong("TEAMID"));
-						contactIfo.put("RFQID", rs.getLong("RFQID"));
-						contactIfo.put("CUSTOMERID", rs.getLong("CUSTOMERID"));
-						contactIfo.put("SHOWONJOB", rs.getBoolean("SHOWONJOB"));
-						contactIfo.put("ROLEID", rs.getInt("ROLEID"));
-						return contactIfo;
+				for (UserRole localUuserRole : users) {
+					//
+					if (localUuserRole.getAction() != 1 && localUuserRole.getAction() != 2)
+						throw new Exception("Error: Action code should be 1(insert/modify) or 2(delete) \r\n");
+					//
+					List<JobUser> jobUsers = jobUserDao.getJobUsers(jobid, teamid, localUuserRole.getUserId());
+					JobUser jobuser = jobUsers != null && jobUsers.size() > 0 ? jobUsers.get(0) : null;
+					//
+					String sql = "SELECT  * FROM TCUSTOMER WHERE IFRECRUITERTHENID = ? AND TEAMID = ? ";
+					Object[] params = new Object[] { localUuserRole.getUserId(), jobDivaSession.getTeamId() };
+					//
+					List<Long> cid = jdbcTemplate.query(sql, params, new RowMapper<Long>() {
+						
+						@Override
+						public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+							//
+							return rs.getLong("ID");
+						}
+					});
+					if (cid == null || cid.size() == 0)
+						throw new Exception("Error: Recruiter(" + localUuserRole.getUserId() + ") is not found. Failed in job user update. \r\n");
+					//
+					Boolean sale = false;
+					Boolean leadSale = false;
+					Boolean recruiter = false;
+					Boolean leadRecruiter = false;
+					String strRole = localUuserRole.getRole();
+					if (isNotEmpty(strRole)) {
+						strRole = strRole.toLowerCase();
+						if (strRole.indexOf("sales") > -1)
+							sale = true;
+						if (strRole.indexOf("primary sales") > -1)
+							leadSale = true;
+						if (strRole.indexOf("recruiter") > -1)
+							recruiter = true;
+						if (strRole.indexOf("primary recruiter") > -1)
+							leadRecruiter = true;
 					}
-				});
-				//
-				Map<String, Object> jobContact = null;
-				//
-				Boolean insertJobContact = false;
-				if (dbJobContactsList != null && dbJobContactsList.size() > 0) {
-					for (Map<String, Object> jdContact : dbJobContactsList) {
-						Integer roleId = (Integer) jdContact.get("ROLEID");
-						if (roleId != null && !isRecruiter(roleId.longValue()))
-							continue;
-						jobContact = jdContact;
-						insertJobContact = false;
+					//
+					int role = 0;
+					if (sale)
+						role = role | 1;
+					if (leadSale)
+						role = role | 2;
+					if (recruiter)
+						role = role | 4;
+					if (leadRecruiter)
+						role = role | 8;
+					int roleid = 0;
+					switch (role) {
+						case 0:
+							roleid = 950;
+							break;// nothing
+						case 1:
+							roleid = 999;
+							break;// (S)
+						case 3:
+							roleid = 996;
+							break;// (PS)
+						case 4:
+							roleid = 997;
+							break;// (R)
+						case 5:
+							roleid = 999;
+							break;// (R)(S)
+						case 7:
+							roleid = 996;
+							break;// (PS)(R)
+						case 12:
+							roleid = 998;
+							break;// (PR)
+						case 13:
+							roleid = 999;
+							break;// (S)(PR)
+						case 15:
+							roleid = 996;
+							break;// (PS)(PR)
 					}
-				}
-				//
-				if (jobContact == null) {
-					insertJobContact = true;
-					jobContact = new HashMap<String, Object>();
-					jobContact.put("TEAMID", jobDivaSession.getTeamId());
-					jobContact.put("RFQID", jobid);
-					jobContact.put("CUSTOMERID", cid.get(0));
-					jobContact.put("SHOWONJOB", false);
-					jobContact.put("ROLEID", roleid);
-				}
-				logger.debug("jobcontact(update users) -- " + jobContact + " roleid: " + roleid);
-				if (localUuserRole.getAction() == 1) {
-					if (jobuser == null) { // insert JobUser &&
-											// JobContact
-						logger.debug("Adding recruiter(" + localUuserRole.getUserId() + ") to the job.");
-						//
-						sql = "SELECT * " //
-								+ " FROM TRECRUITER " //
-								+ " WHERE ID = ? AND ACTIVE = 1 AND GROUPID = ? ";
-						params = new Object[] { localUuserRole.getUserId(), jobDivaSession.getTeamId() };
-						//
-						List<Long> userList = jdbcTemplate.query(sql, params, new RowMapper<Long>() {
-							
-							@Override
-							public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-								//
-								return rs.getLong("ID");
-							}
-						});
-						//
-						if (userList == null || userList.isEmpty())
-							throw new Exception("Error: User(" + localUuserRole.getUserId() + ") is not found. Can not add this user to the job. \r\n");
-						//
-						jobUserDao.insertJobUser(jobid, localUuserRole.getUserId(), teamid, false, leadRecruiter, sale, leadSale, recruiter, status);
-						;
-					} else { // modify
-						logger.debug("Modifying recruiter(" + localUuserRole.getUserId() + ") on the job.");
-						jobUserDao.updateJobUser(jobid, localUuserRole.getUserId(), teamid, jobuser.getReceiveEmail(), leadRecruiter, sale, leadSale, recruiter, status);
-						//
+					//
+					// grab the record in TRFQ_CUSTOMERS ready for update
+					sql = "SELECT  * FROM TRFQ_CUSTOMERS  where RFQID = ?  and TEAMID = ?  and CUSTOMERID = ? ";
+					params = new Object[] { jobid, jobDivaSession.getTeamId(), cid.get(0) };
+					//
+					List<Map<String, Object>> dbJobContactsList = jdbcTemplate.query(sql, params, new RowMapper<Map<String, Object>>() {
+						
+						@Override
+						public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
+							//
+							Map<String, Object> contactIfo = new HashMap<String, Object>();
+							contactIfo.put("TEAMID", rs.getLong("TEAMID"));
+							contactIfo.put("RFQID", rs.getLong("RFQID"));
+							contactIfo.put("CUSTOMERID", rs.getLong("CUSTOMERID"));
+							contactIfo.put("SHOWONJOB", rs.getBoolean("SHOWONJOB"));
+							contactIfo.put("ROLEID", rs.getInt("ROLEID"));
+							return contactIfo;
+						}
+					});
+					//
+					Map<String, Object> jobContact = null;
+					//
+					Boolean insertJobContact = false;
+					if (dbJobContactsList != null && dbJobContactsList.size() > 0) {
+						for (Map<String, Object> jdContact : dbJobContactsList) {
+							Integer roleId = (Integer) jdContact.get("ROLEID");
+							if (roleId != null && !isRecruiter(roleId.longValue()))
+								continue;
+							jobContact = jdContact;
+							insertJobContact = false;
+						}
+					}
+					//
+					if (jobContact == null) {
+						insertJobContact = true;
+						jobContact = new HashMap<String, Object>();
+						jobContact.put("TEAMID", jobDivaSession.getTeamId());
+						jobContact.put("RFQID", jobid);
+						jobContact.put("CUSTOMERID", cid.get(0));
+						jobContact.put("SHOWONJOB", false);
 						jobContact.put("ROLEID", roleid);
-						logger.debug("roleid: " + roleid + " for contid:" + (jobContact != null ? jobContact.get("CUSTOMERID") : "NULL"));
 					}
-					userRole.put(localUuserRole.getUserId(), role);// for
-																	// check
-																	// primary
-																	// recruiter/sales
-					//
-					if (insertJobContact)
-						jobContactDao.saveJobContact(teamid, jobid, (Long) jobContact.get("CUSTOMERID"), (Boolean) jobContact.get("SHOWONJOB"), (Integer) jobContact.get("ROLEID"));
-					else
-						jobContactDao.updateJobContact(teamid, jobid, (Long) jobContact.get("CUSTOMERID"), (Boolean) jobContact.get("SHOWONJOB"), (Integer) jobContact.get("ROLEID"));
-				} else if (localUuserRole.getAction() == 2) { // delete
-					logger.debug("Deleting recruiter(" + localUuserRole.getUserId() + ") from the job.");
-					if (jobuser == null || jobuser.getTeamId() != teamid)
-						throw new Exception("Error: User(" + localUuserRole.getUserId() + ") is not found. Can not delete this user from the job. \r\n");
-					userRole.remove(localUuserRole.getUserId());
-					//
-					jobUserDao.deletJobuser(jobid, localUuserRole.getUserId(), teamid);
-					//
-					jobContactDao.deleteJobContact(teamid, jobid, (Long) jobContact.get("CUSTOMERID"));
-					//
+					logger.info("jobcontact(update users) -- " + jobContact + " roleid: " + roleid);
+					if (localUuserRole.getAction() == 1) {
+						if (jobuser == null) { // insert JobUser &&
+												// JobContact
+							logger.info("Adding recruiter(" + localUuserRole.getUserId() + ") to the job.");
+							//
+							sql = "SELECT * " //
+									+ " FROM TRECRUITER " //
+									+ " WHERE ID = ? AND ACTIVE = 1 AND GROUPID = ? ";
+							params = new Object[] { localUuserRole.getUserId(), jobDivaSession.getTeamId() };
+							//
+							List<Long> userList = jdbcTemplate.query(sql, params, new RowMapper<Long>() {
+								
+								@Override
+								public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+									//
+									return rs.getLong("ID");
+								}
+							});
+							//
+							if (userList == null || userList.isEmpty())
+								throw new Exception("Error: User(" + localUuserRole.getUserId() + ") is not found. Can not add this user to the job. \r\n");
+							//
+							jobUserDao.insertJobUser(jobid, localUuserRole.getUserId(), teamid, false, leadRecruiter, sale, leadSale, recruiter, status);
+							;
+						} else { // modify
+							logger.info("Modifying recruiter(" + localUuserRole.getUserId() + ") on the job.");
+							jobUserDao.updateJobUser(jobid, localUuserRole.getUserId(), teamid, jobuser.getReceiveEmail(), leadRecruiter, sale, leadSale, recruiter, status);
+							//
+							jobContact.put("ROLEID", roleid);
+							logger.info("roleid: " + roleid + " for contid:" + (jobContact != null ? jobContact.get("CUSTOMERID") : "NULL"));
+						}
+						userRole.put(localUuserRole.getUserId(), role);// for
+																		// check
+																		// primary
+																		// recruiter/sales
+						//
+						if (insertJobContact)
+							jobContactDao.saveJobContact(teamid, jobid, (Long) jobContact.get("CUSTOMERID"), (Boolean) jobContact.get("SHOWONJOB"), (Integer) jobContact.get("ROLEID"));
+						else
+							jobContactDao.updateJobContact(teamid, jobid, (Long) jobContact.get("CUSTOMERID"), (Boolean) jobContact.get("SHOWONJOB"), (Integer) jobContact.get("ROLEID"));
+					} else if (localUuserRole.getAction() == 2) { // delete
+						logger.info("Deleting recruiter(" + localUuserRole.getUserId() + ") from the job.");
+						if (jobuser == null || jobuser.getTeamId() != teamid)
+							throw new Exception("Error: User(" + localUuserRole.getUserId() + ") is not found. Can not delete this user from the job. \r\n");
+						userRole.remove(localUuserRole.getUserId());
+						//
+						jobUserDao.deletJobuser(jobid, localUuserRole.getUserId(), teamid);
+						//
+						jobContactDao.deleteJobContact(teamid, jobid, (Long) jobContact.get("CUSTOMERID"));
+						//
+					}
+				}
+				//
+				//
+				int count_leadsale = 0;
+				int count_leadrec = 0;
+				for (long recid : userRole.keySet()) {
+					logger.info("recid" + recid + " userRole.get(recid) " + userRole.get(recid));
+					if ((userRole.get(recid) & 2) == 2)
+						count_leadsale++;
+					if ((userRole.get(recid) & 8) == 8)
+						count_leadrec++;
+				}
+				//
+				if (count_leadsale > 1)
+					throw new Exception("Error: Only one user can be assigned as Primary Sales. ");
+				//
+				if (count_leadrec > 1)
+					throw new Exception("Error: Only one user can be assigned as Primary Recruiter. ");
+				//
+			}
+			//
+			//
+			// update companyid, if there is a contact, it will be updated
+			// based on contact
+			if (companyid != null) {
+				List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, companyid, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+				if (companies == null || companies.size() == 0) {
+					// message.append("Warning: The companyid is invalid.");
+				} else {
+					job.setDepartment(companies.get(0).getName());
+					job.setCompanyId(companyid);
 				}
 			}
 			//
+			if (isNotEmpty(address1))
+				job.setAddress1(address1);
 			//
-			int count_leadsale = 0;
-			int count_leadrec = 0;
-			for (long recid : userRole.keySet()) {
-				logger.debug("recid" + recid + " userRole.get(recid) " + userRole.get(recid));
-				if ((userRole.get(recid) & 2) == 2)
-					count_leadsale++;
-				if ((userRole.get(recid) & 8) == 8)
-					count_leadrec++;
+			if (isNotEmpty(address2))
+				job.setAddress2(address2);
+			//
+			if (isNotEmpty(city))
+				job.setCity(city);
+			//
+			String localCountrId = "";
+			if (countryid != null)
+				localCountrId = getCountryID(countryid);
+			//
+			job.setCountry(isNotEmpty(localCountrId) ? localCountrId : "US");
+			//
+			if (isNotEmpty(state)) {
+				state = lookupState(state, job.getCountry());
+				if (state != null)
+					job.setState(state);
+				else
+					throw new Exception("Error: State (" + state + ") can not be updated due to the mapping unfound.(with countryid(" + countryid + ")) \r\n");
 			}
 			//
-			if (count_leadsale > 1)
-				throw new Exception("Error: Only one user can be assigned as Primary Sales. ");
+			if (isNotEmpty(zipcode))
+				job.setZipcode(zipcode);
 			//
-			if (count_leadrec > 1)
-				throw new Exception("Error: Only one user can be assigned as Primary Recruiter. ");
-			//
-		}
-		//
-		//
-		// update companyid, if there is a contact, it will be updated
-		// based on contact
-		if (companyid != null) {
-			List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, companyid, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
-			if (companies == null || companies.size() == 0) {
-				// message.append("Warning: The companyid is invalid.");
-			} else {
-				job.setDepartment(companies.get(0).getName());
-				job.setCompanyId(companyid);
+			if (startdate != null) {
+				// Timestamp issuedate = new
+				// Timestamp(isujob.getDateissued().getTime());
+				// issuedate.setYear(issuedate.getYear() - 1);
+				// if (jobObj.getStartdate().before(issuedate))
+				// throw new Exception("Error: Start Date(" +
+				// jobObj.getStartdate().toString() + ") should not precede
+				// Issue Date(" + job.getDateissued().toString() + ") by more
+				// than one year.");
+				job.setStartDate(startdate);
 			}
-		}
-		//
-		job.setAddress1(address1);
-		job.setAddress2(address2);
-		job.setCity(city);
-		//
-		String localCountrId = "";
-		if (countryid != null)
-			localCountrId = getCountryID(countryid);
-		job.setCountry(isNotEmpty(localCountrId) ? localCountrId : "US");
-		//
-		if (isNotEmpty(state)) {
-			state = lookupState(state, job.getCountry());
-			if (state != null)
-				job.setState(state);
-			else
-				throw new Exception("Error: State (" + state + ") can not be updated due to the mapping unfound.(with countryid(" + countryid + ")) \r\n");
-		}
-		//
-		job.setZipcode(zipcode);
-		//
-		if (startdate != null) {
-			// Timestamp issuedate = new
-			// Timestamp(isujob.getDateissued().getTime());
-			// issuedate.setYear(issuedate.getYear() - 1);
-			// if (jobObj.getStartdate().before(issuedate))
-			// throw new Exception("Error: Start Date(" +
-			// jobObj.getStartdate().toString() + ") should not precede
-			// Issue Date(" + job.getDateissued().toString() + ") by more
-			// than one year.");
-			job.setStartDate(startdate);
-		}
-		job.setEndDate(enddate);
-		//
-		if (status != null && status != job.getJobStatus()) {
-			// insert a job note
-			// SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
-			String str = "The Job Status was changed from " //
-					+ getJobStatusName(status, teamid) //
-					+ " to " //
-					+ getJobStatusName(status, teamid);
+			//
+			if (enddate != null)
+				job.setEndDate(enddate);
+			//
+			if (status != null && status != job.getJobStatus()) {
+				// insert a job note
+				// SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
+				String str = "The Job Status was changed from " //
+						+ getJobStatusName(status, teamid) //
+						+ " to " //
+						+ getJobStatusName(status, teamid);
+				//
+				//
+				//
+				jobNoteDao.addJobNote(jobDivaSession, jobid, 5, jobDivaSession.getRecruiterId(), 0, str);
+				//
+				// insert a job status log
+				jobStatusLogDao.addJobStatusLog(teamid, jobid, status, jobDivaSession.getRecruiterId(), status);
+				//
+				// send job tatus Notification
+				// --get the name of the recruiter who modified the status
+				try {
+					sendUpdateJobNotification(job, teamid, jobDivaSession.getRecruiterId(), status);
+				} catch (Exception e) {
+					logger.info("Send Update Job Notification [" + jobid + "] Error :: " + e.getMessage());
+				}
+				// set new job status
+				if (status != null)
+					job.setJobStatus(status);
+			}
+			//
+			// /
+			if (isNotEmpty(jobtype)) {
+				Integer contract = getContractValue(jobtype.toLowerCase(), teamid);
+				if (contract != null)
+					job.setContract(contract);
+				else
+					throw new Exception(String.format("Error: Position Type(%s) is invalid", jobtype));
+			}
+			//
+			/* Check User Defined Job Priority */
+			if (priority_id != null) {
+				job.setJobPriority(priority_id);
+			}
+			//
+			if (maxsubmittals != null)
+				job.setMaxSubmitals(maxsubmittals.shortValue());
 			//
 			//
+			if (reference != null)
+				job.setRefCheck(reference);
 			//
-			jobNoteDao.addJobNote(jobDivaSession, jobid, 5, jobDivaSession.getRecruiterId(), 0, str);
+			if (drugtest != null)
+				job.setDrugTest(drugtest);
 			//
-			// insert a job status log
-			jobStatusLogDao.addJobStatusLog(teamid, jobid, status, jobDivaSession.getRecruiterId(), status);
+			if (backgroundcheck != null)
+				job.setBackCheck(backgroundcheck);
 			//
-			// send job tatus Notification
-			// --get the name of the recruiter who modified the status
-			sendUpdateJobNotification(job, teamid, jobDivaSession.getRecruiterId(), status);
-			// set new job status
-			job.setJobStatus(status);
-		}
-		//
-		// /
-		if (isNotEmpty(jobtype)) {
-			Integer contract = getContractValue(jobtype.toLowerCase(), teamid);
-			if (contract != null)
-				job.setContract(contract);
-			else
-				throw new Exception(String.format("Error: Position Type(%s) is invalid", jobtype));
-		}
-		//
-		/* Check User Defined Job Priority */
-		if (priority_id != null) {
-			job.setPriority(priority);
-		}
-		//
-		if (maxsubmittals != null)
-			job.setMaxSubmitals(maxsubmittals.shortValue());
-		job.setRefCheck(reference);
-		job.setDrugTest(drugtest);
-		job.setBackCheck(backgroundcheck);
-		job.setSecClearance(securityclearance);
-		job.setInstruction(remarks);
-		//
-		if (isNotEmpty(submittalinstruction)) {
-			submittalinstruction = submittalinstruction.replaceAll("\r\n|\n|\r|\n\r", "<br>");
-			job.setSubInstruction(submittalinstruction);
-		}
-		//
-		if (minbillrate != null)
-			job.setBillRateMin(new BigDecimal(minbillrate));
-		//
-		if (maxbillrate != null)
-			job.setBillRateMax(new BigDecimal(maxbillrate));
-		//
-		if (minpayrate != null)
-			job.setRateMin(new BigDecimal(minpayrate));
-		//
-		if (maxpayrate != null)
-			job.setRateMax(new BigDecimal(maxpayrate));
-		//
-		if (openings != null) {
-			short positions = openings.shortValue();
-			if (fills != null)
+			if (securityclearance != null)
+				job.setSecClearance(securityclearance);
+			//
+			if (isNotEmpty(remarks))
+				job.setInstruction(remarks);
+			//
+			if (isNotEmpty(submittalinstruction)) {
+				submittalinstruction = submittalinstruction.replaceAll("\r\n|\n|\r|\n\r", "<br>");
+				job.setSubInstruction(submittalinstruction);
+			}
+			//
+			if (minbillrate != null)
+				job.setBillRateMin(new BigDecimal(minbillrate));
+			//
+			if (maxbillrate != null)
+				job.setBillRateMax(new BigDecimal(maxbillrate));
+			//
+			if (minpayrate != null)
+				job.setRateMin(new BigDecimal(minpayrate));
+			//
+			if (maxpayrate != null)
+				job.setRateMax(new BigDecimal(maxpayrate));
+			//
+			if (openings != null) {
+				short positions = openings.shortValue();
+				if (fills != null)
+					job.setFills(fills.shortValue());
+				else if (positions < job.getFills().shortValue())
+					throw new Exception("Error: Positions(" + positions + ") should be larger than fills(" + job.getFills() + ")");
+				job.setPositions(openings.shortValue());
+				//
+			} else if (fills != null) {
+				short positions = (openings == null ? (short) 0 : openings.shortValue());
+				if (fills.shortValue() > positions)
+					throw new Exception("Error: Fills(" + fills + ") should be no larger than positions(" + positions + ")");
 				job.setFills(fills.shortValue());
-			else if (positions < job.getFills().shortValue())
-				throw new Exception("Error: Positions(" + positions + ") should be larger than fills(" + job.getFills() + ")");
-			job.setPositions(openings.shortValue());
-			//
-		} else if (fills != null) {
-			short positions = (openings == null ? (short) 0 : openings.shortValue());
-			if (fills.shortValue() > positions)
-				throw new Exception("Error: Fills(" + fills + ") should be no larger than positions(" + positions + ")");
-			job.setFills(fills.shortValue());
-		}
-		//
-		job.setPrivateAddress(hidemyclientaddress);
-		job.setPrivateMyCompanyName(hidemeandmycompany);
-		job.setOvertime(overtime);
-		job.setTravel(travel);
-		//
-		if (isNotEmpty(harvest)) {
-			Short resumeNo;
-			String ha = harvest.toLowerCase();
-			if (ha.equals("now")) {
-				if (resumes != null) {
-					if (resumes < 10)
-						throw new Exception("Error: The number of resumes is too low, should be at least 10. \r\n");
-					else
-						resumeNo = resumes.shortValue();
-				} else
-					resumeNo = new Short("1");
-				job.setDatePriorityUpdated(new Date());
-			} else if (ha.equals("on schedule")) {
-				job.setDatePriorityUpdated(null);
-				resumeNo = new Short("-1");
-			} else if (ha.equals("not scheduled")) {
-				job.setDatePriorityUpdated(new Timestamp(1000));
-				resumeNo = new Short("-1");
-			} else
-				throw new Exception("Error: Invalid 'harvest' type, please select within('NOW', 'On Schedule', 'Not Scheduled')");
-			//
-			if (!job.getHarvestEnable())
-				throw new Exception("Error: Job(" + job.getId() + ") was scheduled to 'NOW' and unable to change harvest status. \r\n");
-			//
-			if (resumeNo != null) { // when harvest is set
-									// to 'now'
-				if (job.getResumesNo().compareTo(job.getMaxResumesNo()) > 0) { // compare
-																				// to
-																				// max_resumes_no
-					throw new Exception("Error: The number of resumes exceeds the maximum limit of " + job.getMaxResumesNo() + ". \r\n");
-				} else
-					job.setResumesNo(resumeNo);
 			}
 			//
-			if (job.getDatePriorityUpdated() != null && job.getDatePriorityUpdated().getTime() > 1000)
-				job.setHarvestEnable(false);
-		}
-		/*
-		 * Further checking should be added to check the udf_id, values for
-		 * listed fields By creating mapping for tuserfields &
-		 * tuserfield_listvalues
-		 */
-		if (userfields != null) {
+			if (hidemyclientaddress != null)
+				job.setPrivateAddress(hidemyclientaddress);
+			//
+			if (hidemeandmycompany != null)
+				job.setPrivateMyCompanyName(hidemeandmycompany);
+			//
+			if (overtime != null)
+				job.setOvertime(overtime);
+			//
+			if (travel != null)
+				job.setTravel(travel);
+			//
+			if (isNotEmpty(harvest)) {
+				Short resumeNo;
+				String ha = harvest.toLowerCase();
+				if (ha.equals("now")) {
+					if (resumes != null) {
+						if (resumes < 10)
+							throw new Exception("Error: The number of resumes is too low, should be at least 10. \r\n");
+						else
+							resumeNo = resumes.shortValue();
+					} else
+						resumeNo = new Short("1");
+					job.setDatePriorityUpdated(new Date());
+				} else if (ha.equals("on schedule")) {
+					job.setDatePriorityUpdated(null);
+					resumeNo = new Short("-1");
+				} else if (ha.equals("not scheduled")) {
+					job.setDatePriorityUpdated(new Timestamp(1000));
+					resumeNo = new Short("-1");
+				} else
+					throw new Exception("Error: Invalid 'harvest' type, please select within('NOW', 'On Schedule', 'Not Scheduled')");
+				//
+				if (!job.getHarvestEnable())
+					throw new Exception("Error: Job(" + job.getId() + ") was scheduled to 'NOW' and unable to change harvest status. \r\n");
+				//
+				if (resumeNo != null) { // when harvest is set
+										// to 'now'
+					if (job.getResumesNo() != null && job.getResumesNo().compareTo(job.getMaxResumesNo()) > 0) { // compare
+						// to
+						// max_resumes_no
+						throw new Exception("Error: The number of resumes exceeds the maximum limit of " + job.getMaxResumesNo() + ". \r\n");
+					} else
+						job.setResumesNo(resumeNo);
+				}
+				//
+				if (job.getDatePriorityUpdated() != null && job.getDatePriorityUpdated().getTime() > 1000)
+					job.setHarvestEnable(false);
+			}
+			/*
+			 * Further checking should be added to check the udf_id, values for
+			 * listed fields By creating mapping for tuserfields &
+			 * tuserfield_listvalues
+			 */
 			if (userfields != null) {
-				//
-				validateUserFields(jobDivaSession, teamid, userfields, UDF_FIELDFOR_JOB);
-				//
-				for (Userfield userfield : userfields) {
+				if (userfields != null) {
 					//
-					if (isEmpty(userfield.getUserfieldValue())) {
+					validateUserFields(jobDivaSession, teamid, userfields, UDF_FIELDFOR_JOB);
+					//
+					for (Userfield userfield : userfields) {
 						//
-						jobUserFieldsDao.deleteJobUserFieldsDao(jobid, userfield.getUserfieldId(), jobDivaSession.getTeamId());
-						//
-					} else {
-						//
-						String sql = "SELECT Count(*) as CNT FROM TRFQ_USERFIELDS where RFQID = ? and USERFIELD_ID = ? AND TEAMID = ? ";//
-						Object[] params = new Object[] { jobid, userfield.getUserfieldId(), jobDivaSession.getTeamId() };
-						//
-						List<Integer> list = jdbcTemplate.query(sql, params, new RowMapper<Integer>() {
-							
-							@Override
-							public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
-								return rs.getInt("CNT");
-							}
-						});
-						//
-						Boolean insertMode = list == null || (list.size() > 0 && list.get(0) <= 0);
-						if (insertMode) {
-							jobUserFieldsDao.addJobUserFieldsDao(jobid, userfield.getUserfieldId(), teamid, job.getDateIssued(), userfield.getUserfieldValue());
+						if (isEmpty(userfield.getUserfieldValue())) {
+							//
+							jobUserFieldsDao.deleteJobUserFieldsDao(jobid, userfield.getUserfieldId(), jobDivaSession.getTeamId());
+							//
 						} else {
-							jobUserFieldsDao.updateJobUserFieldsDao(jobid, userfield.getUserfieldId(), teamid, job.getDateIssued(), userfield.getUserfieldValue(), new Date());
+							//
+							String sql = "SELECT Count(*) as CNT FROM TRFQ_USERFIELDS where RFQID = ? and USERFIELD_ID = ? AND TEAMID = ? ";//
+							Object[] params = new Object[] { jobid, userfield.getUserfieldId(), jobDivaSession.getTeamId() };
+							//
+							List<Integer> list = jdbcTemplate.query(sql, params, new RowMapper<Integer>() {
+								
+								@Override
+								public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+									return rs.getInt("CNT");
+								}
+							});
+							//
+							Boolean insertMode = list == null || (list.size() > 0 && list.get(0) <= 0);
+							if (insertMode) {
+								jobUserFieldsDao.addJobUserFieldsDao(jobid, userfield.getUserfieldId(), teamid, job.getDateIssued(), userfield.getUserfieldValue());
+							} else {
+								jobUserFieldsDao.updateJobUserFieldsDao(jobid, userfield.getUserfieldId(), teamid, job.getDateIssued(), userfield.getUserfieldValue(), new Date());
+							}
 						}
 					}
 				}
 			}
+			job.setSyncRequired(true);
+			//
+			if (divisionid != null) {
+				//
+				String sql = "SELECT ID FROM TDIVISION WHERE ID = ? AND TEAMID = ? ";
+				Object[] params = new Object[] { divisionid, teamid };
+				//
+				//
+				List<Long> divisons = jdbcTemplate.query(sql, params, new RowMapper<Long>() {
+					
+					@Override
+					public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+						return rs.getLong("ID");
+					}
+				});
+				if (divisons == null || divisons.size() == 0) {
+					job.setDivisionId(null);
+				} else
+					job.setDivisionId(divisionid);
+			}
+			//
+			job.setDateLastUpdated(new Date());
+			//
+			updateJob(jobDivaSession, job);
+			//
+			return true;
+		} catch (Exception e) {
+			logger.info("Error: Job " + jobid + " Exception ::  " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
 		}
-		job.setSyncRequired(true);
-		//
-		if (divisionid != null) {
-			//
-			String sql = "SELECT ID FROM TDIVISION WHERE ID = ? AND TEAMID = ? ";
-			Object[] params = new Object[] { divisionid, teamid };
-			//
-			//
-			List<Long> divisons = jdbcTemplate.query(sql, params, new RowMapper<Long>() {
-				
-				@Override
-				public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-					return rs.getLong("ID");
-				}
-			});
-			if (divisons == null || divisons.size() == 0) {
-				job.setDivisionId(null);
-			} else
-				job.setDivisionId(divisionid);
-		}
-		//
-		job.setDateLastUpdated(new Date());
-		//
-		updateJob(jobDivaSession, job);
-		//
-		return true;
 	}
 }

@@ -1023,6 +1023,11 @@ public class AbstractJobDivaDao {
 	
 	protected void sendUpdateJobNotification(Job job, Long teamid, Long recruiterid, Integer jobStatus) {
 		//
+		List<JobUser> jobJobusers = job.getJobUsers();
+		//
+		if (jobJobusers == null)
+			return;
+		//
 		com.axelon.mail.SMTPServer mailServer = new com.axelon.mail.SMTPServer();
 		//
 		mailServer.setHost(appProperties.getSmtpServerLocation());
@@ -1059,7 +1064,6 @@ public class AbstractJobDivaDao {
 		String subject = "Job Status changed by " + updateRecName;
 		//
 		//
-		List<JobUser> jobJobusers = job.getJobUsers();
 		for (JobUser jobJobUser : jobJobusers) {
 			//
 			if (jobJobUser == null)

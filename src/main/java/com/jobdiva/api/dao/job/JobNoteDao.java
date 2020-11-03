@@ -22,7 +22,7 @@ public class JobNoteDao extends AbstractJobDivaDao {
 	
 	private void checkJobIfExists(Long teamId, Long jobId) throws Exception {
 		String sqlCheck = "select ID from TRFQ where ID = ? and TEAMID = ? ";
-		Object[] params = new Object[] { teamId, jobId };
+		Object[] params = new Object[] { jobId, teamId };
 		//
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
