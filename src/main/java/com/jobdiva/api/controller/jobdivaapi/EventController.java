@@ -66,6 +66,8 @@ public class EventController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("createTask");
+		//
 		return eventService.createTask(jobDivaSession, subject, duedate, assignedtoid, assignedbyid, tasktype, percentagecompleted, contactid, candidateid, description, isprivate);
 		//
 	}

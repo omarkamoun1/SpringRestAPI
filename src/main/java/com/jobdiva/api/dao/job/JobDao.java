@@ -1738,6 +1738,13 @@ public class JobDao extends AbstractActivityDao {
 			Boolean hidemyclient, Boolean hidemyclientaddress, Boolean hidemeandmycompany, Boolean overtime, Boolean reference, Boolean travel, Boolean drugtest, Boolean backgroundcheck, Boolean securityclearance, String remarks,
 			String submittalinstruction, Double minbillrate, Double maxbillrate, Double minpayrate, Double maxpayrate, Userfield[] userfields, String harvest, Integer resumes, Long divisionid) throws Exception {
 		//
+		String userLog = "";
+		if (users != null) {
+			for (UserRole userRole : users)
+				userLog += "[" + userRole.getRole() + "/" + userRole.getAction() + "/" + userRole.getUserId() + "]";
+		}
+		logger.info("updateJob(" + jobid + "/" + jobDivaSession.getTeamId() + "/) -- users [" + userLog + "]");
+		//
 		/* Check if status is user-defined status in this team */
 		if (status != null) {
 			logger.info("Job status to be verified: " + status);
@@ -1953,6 +1960,10 @@ public class JobDao extends AbstractActivityDao {
 					List<JobUser> jobUsers = jobUserDao.getJobUsers(jobid, teamid, localUuserRole.getUserId());
 					JobUser jobuser = jobUsers != null && jobUsers.size() > 0 ? jobUsers.get(0) : null;
 					//
+					if (jobuser == null) {
+						logger.info("getJobUsers(" + jobid + "/" + teamid + "/" + localUuserRole.getUserId() + ") -- NULLABLE");
+					}
+					//
 					String sql = "SELECT  * FROM TCUSTOMER WHERE IFRECRUITERTHENID = ? AND TEAMID = ? ";
 					Object[] params = new Object[] { localUuserRole.getUserId(), jobDivaSession.getTeamId() };
 					//
@@ -2107,9 +2118,22 @@ public class JobDao extends AbstractActivityDao {
 						else
 							jobContactDao.updateJobContact(teamid, jobid, (Long) jobContact.get("CUSTOMERID"), (Boolean) jobContact.get("SHOWONJOB"), (Integer) jobContact.get("ROLEID"));
 					} else if (localUuserRole.getAction() == 2) { // delete
-						logger.info("Deleting recruiter(" + localUuserRole.getUserId() + ") from the job.");
-						if (jobuser == null || jobuser.getTeamId() != teamid)
+						//
+						//
+						String strJobUser = "";
+						if (jobuser != null) {
+							strJobUser = teamid + "//" + jobuser.getTeamId() + "/" + jobuser.getRecruiterId() + "/" + jobuser.getLeadSales();
+						}
+						//
+						//
+						//
+						logger.info("Deleting recruiter(" + localUuserRole.getUserId() + "[" + strJobUser + "]) from the job.");
+						//
+						//
+						if (jobuser == null)
 							throw new Exception("Error: User(" + localUuserRole.getUserId() + ") is not found. Can not delete this user from the job. \r\n");
+						//
+						//
 						userRole.remove(localUuserRole.getUserId());
 						//
 						jobUserDao.deletJobuser(jobid, localUuserRole.getUserId(), teamid);

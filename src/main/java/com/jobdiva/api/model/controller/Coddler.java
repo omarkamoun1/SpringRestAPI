@@ -10,6 +10,7 @@ public class Coddler implements Serializable {
 	private Integer					machineId;
 	private Long					teamId;
 	private Integer					id;
+	private String					siteName;
 	private Integer					coddlerTypeId;
 	private String					name;
 	private String					executableFile;
@@ -28,6 +29,14 @@ public class Coddler implements Serializable {
 	private Integer					logExpDays			= 7;
 	private Boolean					enableCleanImages	= true;
 	private Integer					imageExpDays		= 7;
+	
+	public String getSiteName() {
+		return siteName;
+	}
+	
+	public void setSiteName(String siteName) {
+		this.siteName = siteName;
+	}
 	
 	public Integer getMachineId() {
 		return machineId;

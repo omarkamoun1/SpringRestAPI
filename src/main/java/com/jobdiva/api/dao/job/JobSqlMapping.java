@@ -372,10 +372,10 @@ public class JobSqlMapping {
 			parameterSource.addValue("DIVISIONID", job.getDivisionId());
 		}
 		//
-		if (job.getInstruction() != null) {
-			fields.put("INSTRUCTION_OLD", "INSTRUCTION_OLD");
-			parameterSource.addValue("INSTRUCTION_OLD", job.getInstruction());
-		}
+		// if (job.getInstruction() != null) {
+		// fields.put("INSTRUCTION_OLD", "INSTRUCTION_OLD");
+		// parameterSource.addValue("INSTRUCTION_OLD", job.getInstruction());
+		// }
 		//
 		if (job.getCriteriaAttributes() != null) {
 			fields.put("CRITERIA_ATTRIBUTES", "CRITERIA_ATTRIBUTES");

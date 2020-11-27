@@ -75,6 +75,8 @@ public class SubmittalController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("searchSubmittal");
+		//
 		return submittalService.searchSubmittal(jobDivaSession, submittalid, jobid, joboptionalref, companyname, candidateid, candidatefirstname, candidatelastname, candidateemail, candidatephone, candidatecity, candidatestate);
 		//
 	}
@@ -161,6 +163,8 @@ public class SubmittalController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("createSubmittal");
+		//
 		return submittalService.createSubmittal(jobDivaSession, jobid, candidateid, status, submit2id, submittaldate, positiontype, recruitedbyid, primarysalesid, internalnotes, salary, feetype, fee, quotedbillrate, agreedbillrate, payrate,
 				payratecurrency, payrateunit, corp2corp, agreedon, userfields, filename, filecontent, textfile);
 	}
@@ -222,6 +226,8 @@ public class SubmittalController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("updateSubmittal");
 		//
 		return submittalService.updateSubmittal(jobDivaSession, submittalid, status, internalnotes, salary, feetype, fee, quotedbillrate, agreedbillrate, payrate, payratecurrency, payrateunit, corp2corp, agreedon, interviewdate, internalrejectdate,
 				externalrejectdate);

@@ -5722,4 +5722,21 @@ public class BIDataController extends AbstractJobDivaController {
 		return biDataService.getBIData(jobDivaSession, "Nesco Dinesol New Approved Billing Records", fromDate, toDate, null, alternateFormat);
 		//
 	}
+	
+	@RequestMapping(value = "/VMSSynchronizationList", method = RequestMethod.GET, produces = "application/json")
+	public IBiData VMSSynchronizationList(//
+			@ApiParam(value = "Site Name", required = true) //
+			@RequestParam(required = true) String siteName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
+	) throws Exception {//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		String[] parameters = new String[] { siteName };
+		//
+		return biDataService.getBIData(jobDivaSession, "VMS Synchronization List", null, null, parameters, alternateFormat);
+		//
+	}
 }

@@ -8,6 +8,9 @@ import java.sql.Statement;
 public class OracleTestConnection {
 	
 	public static void main(String args[]) {
+		// System.out.println( Encryption.hashStringWithSalt("n3wPassw0rd1",
+		// "33+8GvhN6T9SFKJTYLxpvD4m40r7wUDZ+GOD8oZLBDQ=") );
+		// System.out.println("+EFz2YXRO9TNk7jTYrlONdvYMCepVGXpqbhAy/+OftE=");
 		try {
 			// step1 load the driver class
 			Class.forName("oracle.jdbc.driver.OracleDriver");

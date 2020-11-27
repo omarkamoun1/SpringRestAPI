@@ -27,7 +27,6 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
-
 @CrossOrigin
 @RestController
 @RequestMapping("/api/jobdiva/")
@@ -118,6 +117,8 @@ public class JobController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("SearchJob");
 		//
 		return jobService.searchJobs(jobDivaSession, jobId, jobdivaref, optionalref, city, state, title, contactid, companyId, companyname, status, jobtype, issuedatefrom, issuedateto, startdatefrom, startdateto, zipcode, zipcodeRadius, countryId);
 		//
@@ -356,6 +357,8 @@ public class JobController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("createJob");
+		//
 		return jobService.createJob(jobDivaSession, contacts, contactfirstname, contactlastname, title, description, department, companyid, priority, divisionid, users, experience, status, optionalref, address1, address2, city, state, zipcode,
 				countryid, startdate, enddate, jobtype, openings, fills, maxsubmittals, hidemyclient, hidemyclientaddress, hidemeandmycompany, overtime, reference, travel, drugtest, backgroundcheck, securityclearance, remarks, submittalinstruction,
 				minbillrate, maxbillrate, billratecurrency, billrateunit, minpayrate, maxpayrate, payratecurrency, payrateunit, skills, skillstates, skillzipcode, skillzipcodemiles, excludedskills, harvest, resumes, attachments, Userfields);
@@ -542,6 +545,8 @@ public class JobController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("updateJob");
+		//
 		return jobService.updateJob(jobDivaSession, jobid, optionalref, title, description, postingtitle, postingdescription, companyid, contacts, users, address1, address2, city, state, zipcode, countryid, startdate, enddate, status, jobtype,
 				priority, openings, fills, maxsubmittals, hidemyclient, hidemyclientaddress, hidemeandmycompany, overtime, reference, travel, drugtest, backgroundcheck, securityclearance, remarks, submittalinstruction, minbillrate, maxbillrate,
 				minpayrate, maxpayrate, Userfields, harvest, resumes, divisionid);
@@ -570,6 +575,8 @@ public class JobController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("AddJobNote");
 		//
 		return jobService.addJobNote(jobDivaSession, jobId, type, recruiterId, shared, note);
 		//

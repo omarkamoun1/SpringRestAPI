@@ -41,15 +41,12 @@ public class JobServeUKController extends AbstractJobDivaController {
 			//
 			@ApiParam(value = "pass", required = true, type = "String") //
 			@RequestParam(required = true) String pass //
-			//
+	//
 	//
 	) throws Exception {//
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
-		
+		//
 		return jobServeUKService.request(req, jobDivaSession.getTeamId(), rfqid, username, pass);
 	}
-	
-	
 }
-

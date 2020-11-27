@@ -66,11 +66,11 @@ public class ServletTransporter {
 	
 	public static void main(String[] args) throws Exception {
 		//
-		String url = "http://10.10.139.22:8000/BIData/servlet/GetBIDataServlet";
+		String url = "http://10.50.139.22:8000/BIData/servlet/GetBIDataServlet";
 		Vector<Object> reqData = new Vector<Object>();
 		reqData.add("1");
 		reqData.add("api.user@jobdiva.com");
-		reqData.add("password1");
+		reqData.add("test1234");
 		reqData.add("New/Updated Candidate Note Records");
 		reqData.add("01/04/2020 00:00:00");
 		reqData.add("01/04/2020 23:59:59");

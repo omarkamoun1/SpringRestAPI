@@ -93,6 +93,8 @@ public class CompanyController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("searchCompany");
+		//
 		return companyService.searchForCompany(jobDivaSession, companyid, company, address, city, state, zip, country, phone, fax, url, parentcompany, showall, types, ownerids, division, salespipeline);
 		//
 	}
@@ -152,6 +154,8 @@ public class CompanyController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("createCompany");
 		//
 		return companyService.createCompany(jobDivaSession, companyname, address1, address2, city, state, zipcode, country, phone, fax, email, url, parentcompany, companytypes, owners, salespipeline);
 		//
@@ -221,6 +225,8 @@ public class CompanyController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("updateCompany");
 		//
 		return companyService.updateCompany(jobDivaSession, companyid, name, parentcompanyid, addresses, subguidelines, maxsubmittals, references, drugtest, backgroundcheck, securityclearance, Userfields, discount, discountper, percentagediscount,
 				financials, owners, salespipeline);

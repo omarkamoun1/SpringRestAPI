@@ -25,6 +25,12 @@ public class CoddlerService {
 		//
 	}
 	
+	public List<String> getSites(Long teamId) {
+		//
+		return coddlerSchedulerDao.getSites(teamId);
+		//
+	}
+	
 	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
 	public Boolean saveCoddlers(List<Coddler> coddlers) {
 		return coddlerSchedulerDao.saveCoddlers(coddlers);
@@ -42,7 +48,7 @@ public class CoddlerService {
 	}
 	
 	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
-	public Integer saveMachineId(String machineId) {
+	public Integer saveMachineId(String machineId) throws Exception {
 		return coddlerSchedulerDao.saveMachineId(machineId);
 	}
 }

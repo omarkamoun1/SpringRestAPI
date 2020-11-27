@@ -81,6 +81,8 @@ public class CandidateController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("searchCandidateProfile");
+		//
 		return candidateService.searchCandidateProfile(jobDivaSession, firstName, lastName, address, city, state, zipCode, country, email, phone, candidateQuals, maxreturned);
 		//
 	}
@@ -170,6 +172,8 @@ public class CandidateController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("createCandidate");
+		//
 		return candidateService.createCandidate(jobDivaSession, firstName, lastName, email, alternateemail, address1, address2, city, state, zipCode, countryid, homephone, workphone, cellphone, fax, currentsalary, currentsalaryunit, preferredsalary,
 				preferredsalaryunit, narrative, titleskillcertifications, titleskillcertification, startdate, enddate, years);
 		//
@@ -235,6 +239,8 @@ public class CandidateController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("updateCandidateProfile");
+		//
 		return candidateService.updateCandidateProfile(jobDivaSession, candidateid, firstName, lastName, email, alternateemail, address1, address2, city, state, zipCode, countryid, phones, currentsalary, currentsalaryunit, preferredsalary,
 				preferredsalaryunit);
 		//
@@ -263,6 +269,8 @@ public class CandidateController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("updateCandidateUserfields");
+		//
 		return candidateService.updateCandidateUserfields(jobDivaSession, candidateid, overwrite, Userfields);
 		//
 	}
@@ -287,6 +295,8 @@ public class CandidateController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("updateCandidateQualifications");
 		//
 		return candidateService.updateCandidateQualifications(jobDivaSession, candidateid, overwrite, Qualifications);
 		//
@@ -319,6 +329,8 @@ public class CandidateController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("updateCandidateAvailability");
 		//
 		return candidateService.updateCandidateAvailability(jobDivaSession, candidateid, availablenow, unavailableindef, unavailableuntil, unavailableuntildate, reason);
 		//
@@ -356,6 +368,8 @@ public class CandidateController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("createCandidateNote");
 		//
 		return candidateService.createCandidateNote(jobDivaSession, candidateid, note, recruiterid, action, actionDate, link2AnOpenJob, link2AContact, setAsAuto, null);
 		//
@@ -400,6 +414,8 @@ public class CandidateController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("createCandidateNoteWithCreateDate");
+		//
 		return candidateService.createCandidateNote(jobDivaSession, candidateid, note, recruiterid, action, actionDate, link2AnOpenJob, link2AContact, setAsAuto, createDate);
 		//
 	}
@@ -440,6 +456,8 @@ public class CandidateController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("updateCandidateHRRecord");
+		//
 		return candidateService.updateCandidateHRRecord(jobDivaSession, candidateid, dateofbirth, legalfirstname, legallastname, legalmiddlename, suffix, maritalstatus, ssn, visastatus);
 		//
 	}
@@ -474,6 +492,8 @@ public class CandidateController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("createCandidateReference");
+		//
 		return candidateService.createCandidateReference(jobDivaSession, candidateid, contactid, createdByRecruiterid, checkedByRecruiterid, dateChecked, notes, standardQuestions);
 		//
 	}
@@ -506,6 +526,8 @@ public class CandidateController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("updateCandidateEmailMerge");
+		//
 		return candidateService.updateCandidateEmailMerge(jobDivaSession, candidateid, backonemailmerge, requestoffemailindef, requestoffemailuntil, requestoffemailuntildate, reason);
 		//
 	}
@@ -525,6 +547,8 @@ public class CandidateController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("updateCandidateSNLinks");
 		//
 		return candidateService.updateCandidateSNLinks(jobDivaSession, candidateid, socialnetworks);
 		//

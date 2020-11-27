@@ -71,6 +71,8 @@ public class JobDivaController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("uploadResume");
+		//
 		return resumeService.uploadResume(jobDivaSession, filename, filecontent, textfile, candidateid, resumesource, recruiterid, resumeDate);
 		//
 	}
@@ -103,7 +105,44 @@ public class JobDivaController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("uploadCandidateAttachment");
+		//
 		return resumeService.uploadCandidateAttachment(jobDivaSession, candidateid, name, filename, filecontent, attachmenttype, description);
+		//
+	}
+	
+	// @ApiIgnore
+	@RequestMapping(value = "/uploadContactAttachment", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Upload Contact Attachment")
+	public Long uploadContactAttachment( //
+			//
+			@ApiParam(value = "Contact internal JobDiva ID", required = true) //
+			@RequestParam(required = true) Long contactId, //
+			//
+			@ApiParam(value = "Nickname of the uploaded attachment file", required = true) //
+			@RequestParam(required = true) String name, //
+			//
+			@ApiParam(value = "Actual file name with file extension (.pdf, for example)", required = true) //
+			@RequestParam(required = true) String filename, //
+			//
+			@ApiParam(value = "Uploaded file in base64 binary", required = true) //
+			@RequestParam(required = true) byte[] filecontent, //
+			//
+			@ApiParam(value = "The type of the attachment", required = true) //
+			@RequestParam(required = true) Integer attachmenttype, //
+			//
+			@ApiParam(value = "Additional description of the file", required = false) //
+			@RequestParam(required = false) String description //
+	//
+	//
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("uploadContactAttachment");
+		//
+		return resumeService.uploadContactAttachment(jobDivaSession, contactId, name, filename, filecontent, attachmenttype, description);
 		//
 	}
 	
@@ -131,6 +170,8 @@ public class JobDivaController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("createJobApplication");
 		//
 		return jobService.createJobApplication(jobDivaSession, candidateid, jobid, dateapplied, resumesource, globalid);
 		//

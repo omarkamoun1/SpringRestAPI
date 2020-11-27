@@ -53,6 +53,17 @@ public class CoddlerController extends AbstractJobDivaController {
 	}
 	
 	@CrossOrigin(origins = "*")
+	@RequestMapping(value = "/getSites", produces = "application/json")
+	public List<String> getSites( //
+			//
+			@RequestParam(required = true) Long teamId) //
+			throws Exception {
+		//
+		return coddlerService.getSites(teamId);
+		//
+	}
+	
+	@CrossOrigin(origins = "*")
 	@RequestMapping(value = "/getConfiguration", produces = "application/json")
 	public Configuration getConfiguration( //
 			//
@@ -83,7 +94,7 @@ public class CoddlerController extends AbstractJobDivaController {
 	
 	@CrossOrigin(origins = "*")
 	@PostMapping(value = "/saveMachineId")
-	public Integer saveMachineId(@RequestBody Machine company) {
+	public Integer saveMachineId(@RequestBody Machine company) throws Exception {
 		//
 		return coddlerService.saveMachineId(company.getMachineId());
 		//

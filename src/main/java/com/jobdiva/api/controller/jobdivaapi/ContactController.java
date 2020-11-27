@@ -103,6 +103,8 @@ public class ContactController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("SearchContacts");
+		//
 		return contactService.searchContacts(jobDivaSession, jobDivaSession.getTeamId(), contactId, firstname, lastname, email, title, phone, //
 				company, address, city, state, zipCode, country, null, types, ownerIds, division, showPrimary, showInactive);
 		//
@@ -213,6 +215,8 @@ public class ContactController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("createContact");
 		//
 		return contactService.createContact(jobDivaSession, company, firstname, lastname, title, department, phones, addresses, email, alternateemail, types, owners, reportsto, primary, assistantname, assistantemail, assistantphone,
 				assistantphoneextension, subguidelines, maxsubmittals, references, drugtest, backgroundcheck, securityclearance);
@@ -331,6 +335,8 @@ public class ContactController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("updateContact");
+		//
 		return contactService.updateContact(jobDivaSession, contactid, firstname, lastname, title, companyid, department, addresses, phones, reportsto, active, primary, email, alternateemail, assistantname, assistantemail, assistantphone,
 				assistantphoneextension, subguidelines, maxsubmittals, references, drugtest, backgroundcheck, securityclearance, Userfields, owners);
 	}
@@ -364,6 +370,8 @@ public class ContactController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("createContactNote");
+		//
 		return contactService.createContactNote(jobDivaSession, contactid, note, recruiterid, action, actionDate, link2AnOpenJob, link2ACandidate);
 		//
 	}
@@ -376,6 +384,8 @@ public class ContactController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("GetContactById");
 		//
 		return contactService.getContactById(jobDivaSession, jobDivaSession.getTeamId(), contactId);
 		//
@@ -390,6 +400,8 @@ public class ContactController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("GetContactNotes");
+		//
 		return contactNoteService.getContactNotes(jobDivaSession, contactId);
 		//
 	}
@@ -402,6 +414,8 @@ public class ContactController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("GetContactTypes");
 		//
 		return contactTypeService.getContactNotes(jobDivaSession, jobDivaSession.getTeamId(), contactId);
 		//

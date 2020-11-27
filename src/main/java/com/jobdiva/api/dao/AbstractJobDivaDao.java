@@ -36,7 +36,6 @@ import com.axelon.util.JDLocale;
 import com.jobdiva.api.config.AppProperties;
 import com.jobdiva.api.config.jwt.CustomAuthenticationToken;
 import com.jobdiva.api.dao.def.UserfieldsDef;
-import com.jobdiva.api.dao.job.JobUserDao;
 import com.jobdiva.api.dao.team.TeamRowMapper;
 import com.jobdiva.api.model.Job;
 import com.jobdiva.api.model.JobUser;
@@ -1069,7 +1068,7 @@ public class AbstractJobDivaDao {
 			if (jobJobUser == null)
 				continue; // get user from trecruiterrfq JobUserId juid = new
 			//
-			List<JobUser> jobusers = JobUserDao.getJobUsers(jdbcTemplate, jobJobUser.getRfqId(), teamid, jobJobUser.getRecruiterId());
+			List<JobUser> jobusers = getJobUsers(jdbcTemplate, jobJobUser.getRfqId(), teamid, jobJobUser.getRecruiterId());
 			JobUser jobUser = jobusers != null && jobusers.size() > 0 ? jobusers.get(0) : null;
 			//
 			// get user from trecruiter
@@ -1139,5 +1138,89 @@ public class AbstractJobDivaDao {
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
 		jdbcTemplate.update(sqlInsert, params);
+	}
+	
+	public List<JobUser> getJobUsers(Long jobId, Long teamId) {
+		return getJobUsers(jobId, teamId, null);
+	}
+	
+	public List<JobUser> getJobUsers(Long jobId, Long teamId, Long recruiterId) {
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		return getJobUsers(jdbcTemplate, jobId, teamId, recruiterId);
+	}
+	
+	public List<JobUser> getJobUsers(JdbcTemplate jdbcTemplate, Long jobId, Long teamId, Long recruiterId) {
+		String sql = " Select "//
+				+ " a.RFQID, "//
+				+ " a.RECRUITERID, "//
+				+ " a.TEAMID , "//
+				+ " a.REC_EMAIL, " //
+				+ " a.LEAD_RECRUITER , " //
+				+ " a.SALES ," //
+				+ " a.LEAD_SALES, "//
+				+ " a.RECRUITER , "//
+				+ " a.JOBSTATUS ,"//
+				//
+				+ " b.FIRSTNAME ,"//
+				+ " b.LASTNAME, "//
+				+ " b.WORKPHONE ,"//
+				+ " b.REC_EMAIL_STATUS ,"//
+				+ " b.EMAIL " //
+				//
+				+ " FROM TRECRUITERRFQ a , TRECRUITER b " //
+				+ " WHERE " //
+				+ " a.RECRUITERID = b.ID  " //
+				+ " AND a.RFQID = ?  AND a.TEAMID = ? ";
+		//
+		if (recruiterId != null)
+			sql += " AND a.RECRUITERID = ? ";
+		//
+		Object[] params = recruiterId != null ? new Object[] { jobId, teamId, recruiterId } : new Object[] { jobId, teamId };
+		//
+		logger.info("getJobUsers :: " + sql + " [" + params + "]");
+		//
+		List<JobUser> list = jdbcTemplate.query(sql, params, new RowMapper<JobUser>() {
+			
+			@Override
+			public JobUser mapRow(ResultSet rs, int rowNum) throws SQLException {
+				try {
+					JobUser jobUser = new JobUser();
+					jobUser.setRfqId(rs.getLong("RFQID"));
+					jobUser.setRecruiterId(rs.getLong("RECRUITERID"));
+					jobUser.setTeamId(rs.getLong("TEAMID"));
+					jobUser.setReceiveEmail(rs.getBoolean("REC_EMAIL"));
+					jobUser.setLeadRecruiter(rs.getBoolean("LEAD_RECRUITER"));
+					jobUser.setSales(rs.getBoolean("SALES"));
+					jobUser.setLeadSales(rs.getBoolean("LEAD_SALES"));
+					jobUser.setRecruiter(rs.getBoolean("RECRUITER"));
+					jobUser.setJobStatus(rs.getInt("JOBSTATUS"));
+					jobUser.setFirstName(rs.getString("FIRSTNAME"));
+					jobUser.setLastName(rs.getString("LASTNAME"));
+					jobUser.setPhone(rs.getString("WORKPHONE"));
+					jobUser.setEmail(rs.getString("EMAIL"));
+					jobUser.setRecEmailStatus(rs.getInt("REC_EMAIL_STATUS"));
+					return jobUser;
+				} catch (Exception e) {
+					logger.info("getJobUsers ERROR :: " + e.getMessage());
+				}
+				return null;
+			}
+		});
+		if (list != null) {
+			String strBuffer = "";
+			for (JobUser jobUser : list) {
+				if (jobUser != null) {
+					strBuffer += "[" + jobUser.getTeamId() + "][" + jobUser.getLeadSales() + "][" + jobUser.getRecruiterId() + "]\r\n";
+				} else {
+					strBuffer += " EMPTY OBJECT \r\n";
+				}
+			}
+			logger.info("getJobUsers [" + jobId + "] [" + teamId + "] [" + recruiterId + "] " + strBuffer);
+		} else {
+			logger.info("getJobUsers [" + jobId + "] [" + teamId + "] [" + recruiterId + "] EMPTY LIST");
+		}
+		return list;
 	}
 }

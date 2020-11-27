@@ -17,6 +17,7 @@ import com.arizon.shared.Encryption;
 import com.jobdiva.api.config.AppProperties;
 import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.dao.setup.JobDivaConnectivity;
+import com.jobdiva.api.model.accessright.APIPermission;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 
 @Component
@@ -150,6 +151,7 @@ public class JobDivaAuthenticateDao extends AbstractJobDivaDao {
 			String db_password = (String) list.get(1);
 			String salt = (String) list.get(4);
 			//
+			
 			boolean correctPassword = false;
 			if (salt != null) {
 				if (Encryption.hashStringWithSalt(password, salt).equals(db_password))
@@ -171,7 +173,32 @@ public class JobDivaAuthenticateDao extends AbstractJobDivaDao {
 			}
 			//
 			clientid = ((Long) list.get(6));
-			return new JobDivaSession(clientid, username, password, env, userId, leader);
+			//
+			//
+			JobDivaSession jobDivaSession = new JobDivaSession(clientid, username, password, env, userId, leader);
+			//
+			sql = "select allowedoperation, divisionid from tapipermission where teamid=? and recruiterid=? ";
+			param = new Object[] { clientid, userId };
+			jdbcTemplate.query(sql, param, new RowMapper<Boolean>() {
+				
+				@Override
+				public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
+					String methodName = rs.getString("allowedoperation");
+					Long divisionId = rs.getLong("divisionid");
+					//
+					APIPermission apiPermission = new APIPermission();
+					apiPermission.setDivisionId(divisionId);
+					apiPermission.setMethodName(methodName);
+					//
+					jobDivaSession.getApiPermissions().add(apiPermission);
+					//
+					return false;
+				}
+			});
+			//
+			//
+			//
+			return jobDivaSession;
 		}
 		//
 	}

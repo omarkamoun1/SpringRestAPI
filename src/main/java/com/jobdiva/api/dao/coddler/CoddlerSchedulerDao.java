@@ -13,7 +13,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
-import com.jobdiva.api.config.AppProperties;
+import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.dao.setup.JobDivaConnectivity;
 import com.jobdiva.api.model.controller.Coddler;
 import com.jobdiva.api.model.controller.CoddlerScheduler;
@@ -22,18 +22,14 @@ import com.jobdiva.api.model.controller.FixedTime;
 import com.jobdiva.api.model.controller.Parameter;
 
 @Component
-public class CoddlerSchedulerDao {
+public class CoddlerSchedulerDao extends AbstractJobDivaDao {
 	
 	//
 	@Autowired
-	JobDivaConnectivity		jobDivaConnectivity;
+	JobDivaConnectivity	jobDivaConnectivity;
 	//
-	@Autowired
-	AppProperties			appProperties;
 	//
-	protected List<Coddler>	coddlers;
-	//
-	SimpleDateFormat		dateFormat	= new SimpleDateFormat("HH:mm");
+	SimpleDateFormat	dateFormat	= new SimpleDateFormat("HH:mm");
 	
 	private Timestamp strToTimeStamp(String strTime) {
 		try {
@@ -80,12 +76,12 @@ public class CoddlerSchedulerDao {
 	private List<Coddler> getCoddlers(Integer machineId, JdbcTemplate jdbctemplate, Long teamId) {
 		//
 		//
-		String sql = "SELECT ID, MACHINE_ID, TEAM_ID, CODLER_TYPE_ID, NAME, ACTIVE, TIMEZONE, EXECUTABLE_FILE, ENABLE_CLEAN_LOGS, ENABLE_CLEAN_IMAGES, LOG_EXP_DAYS, IMAGE_EXP_DAYS " //
-				+ " FROM CONTROLLER_CODDLER  " //
-				+ " WHERE MACHINE_ID = ? ";
+		String sql = "SELECT ID, MACHINEID, TEAMID, SITE, CODLERTYPEID, NAME, ACTIVE, TIMEZONE, EXECUTABLEFILE, ENABLECLEANLOGS, ENABLECLEANIMAGES, LOGEXPDAYS, IMAGEEXPDAYS " //
+				+ " FROM TCONTROLLER_CODDLER  " //
+				+ " WHERE MACHINEID = ? ";
 		//
 		if (teamId != null) {
-			sql += "AND TEAM_ID = ? ";
+			sql += "AND TEAMID = ? ";
 		}
 		//
 		Object[] params = teamId != null ? new Object[] { machineId, teamId } : new Object[] { machineId };
@@ -96,18 +92,19 @@ public class CoddlerSchedulerDao {
 			public Coddler mapRow(ResultSet rs, int rowNum) throws SQLException {
 				Coddler coddler = new Coddler();
 				coddler.setId(rs.getInt("ID"));
-				coddler.setCoddlerTypeId(rs.getInt("CODLER_TYPE_ID"));
-				coddler.setMachineId(rs.getInt("MACHINE_ID"));
-				coddler.setTeamId(rs.getLong("TEAM_ID"));
+				coddler.setSiteName(rs.getString("SITE"));
+				coddler.setCoddlerTypeId(rs.getInt("CODLERTYPEID"));
+				coddler.setMachineId(rs.getInt("MACHINEID"));
+				coddler.setTeamId(rs.getLong("TEAMID"));
 				coddler.setActive(rs.getBoolean("ACTIVE"));
 				coddler.setName(rs.getString("NAME"));
 				coddler.setTimezone(rs.getString("TIMEZONE"));
-				coddler.setExecutableFile(rs.getString("EXECUTABLE_FILE"));
+				coddler.setExecutableFile(rs.getString("EXECUTABLEFILE"));
 				//
-				coddler.setEnableCleanLogs(rs.getBoolean("ENABLE_CLEAN_LOGS"));
-				coddler.setEnableCleanImages(rs.getBoolean("ENABLE_CLEAN_IMAGES"));
-				coddler.setLogExpDays(rs.getInt("LOG_EXP_DAYS"));
-				coddler.setImageExpDays(rs.getInt("IMAGE_EXP_DAYS"));
+				coddler.setEnableCleanLogs(rs.getBoolean("ENABLECLEANLOGS"));
+				coddler.setEnableCleanImages(rs.getBoolean("ENABLECLEANIMAGES"));
+				coddler.setLogExpDays(rs.getInt("LOGEXPDAYS"));
+				coddler.setImageExpDays(rs.getInt("IMAGEEXPDAYS"));
 				return coddler;
 			}
 		});
@@ -118,9 +115,9 @@ public class CoddlerSchedulerDao {
 				calculateCoddlerParams(coddler);
 				//
 				//
-				sql = "SELECT ID, MACHINE_ID, TEAM_ID, START_TIME, END_TIME, FREQUENCY_IN_MINUTES,MODE_TYPE_ID  " //
-						+ " FROM CONTROLLER_SCHEDULER " //
-						+ " WHERE CODDLER_ID = ? ";
+				sql = "SELECT ID, MACHINEID, TEAMID, STARTTIME, ENDTIME, FREQUENCYINMINUTES , MODETYPEID  " //
+						+ " FROM TCONTROLLER_SCHEDULER " //
+						+ " WHERE CODDLERID = ? ";
 				//
 				params = new Object[] { coddler.getId() };
 				//
@@ -131,14 +128,13 @@ public class CoddlerSchedulerDao {
 						CoddlerScheduler coddlerScheduler = new CoddlerScheduler();
 						//
 						coddlerScheduler.setId(rs.getInt("ID"));
-						coddlerScheduler.setCompanyId(rs.getString("MACHINE_ID"));
-						coddlerScheduler.setTeamId(rs.getLong("TEAM_ID"));
+						coddlerScheduler.setCompanyId(rs.getString("MACHINEID"));
+						coddlerScheduler.setTeamId(rs.getLong("TEAMID"));
 						//
-						coddlerScheduler.setStartTime(rs.getTimestamp("START_TIME"), dateFormat);
-						coddlerScheduler.setEndTime(rs.getTimestamp("END_TIME"), dateFormat);
-						coddlerScheduler.setFrequency(rs.getInt("FREQUENCY_IN_MINUTES"));
-						coddlerScheduler.setModeTypeId(rs.getInt("MODE_TYPE_ID"));
-						coddlerScheduler.setModeTypeId(rs.getInt("MODE_TYPE_ID"));
+						coddlerScheduler.setStartTime(rs.getTimestamp("STARTTIME"), dateFormat);
+						coddlerScheduler.setEndTime(rs.getTimestamp("ENDTIME"), dateFormat);
+						coddlerScheduler.setFrequency(rs.getInt("FREQUENCYINMINUTES"));
+						coddlerScheduler.setModeTypeId(rs.getInt("MODETYPEID"));
 						//
 						//
 						coddlerScheduler.setStrStartTime(timeStampToStr(coddlerScheduler.getStartTime()));
@@ -163,8 +159,30 @@ public class CoddlerSchedulerDao {
 		return list;
 	}
 	
+	public List<String> getSites(Long teamId) {
+		JdbcTemplate jdbctemplate = getJdbcTemplate(teamId);
+		//
+		String sqlParam = "SELECT SITE " //
+				+ " FROM TSPIDERSWEBSITES " //
+				+ " WHERE TEAMID = ? " //
+				+ " ORDER BY SITE ";
+		Object[] param = new Object[] { teamId };
+		//
+		List<String> list = jdbctemplate.query(sqlParam, param, new RowMapper<String>() {
+			
+			@Override
+			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+				//
+				return rs.getString("SITE");
+				//
+			}
+		});
+		//
+		return list;
+	}
+	
 	private void calculateCoddlerParams(Coddler coddler) {
-		String sqlParam = "SELECT * FROM CONTROLLER_PARAMETER WHERE CODDLER_ID = ? ";
+		String sqlParam = "SELECT * FROM TCONTROLLER_PARAMETER WHERE CODDLERID = ? ";
 		Object[] param = new Object[] { coddler.getId() };
 		//
 		JdbcTemplate jdbctemplate = getJdbcTemplate(coddler.getTeamId());
@@ -185,7 +203,7 @@ public class CoddlerSchedulerDao {
 	}
 	
 	private void calculateSchedularParams(CoddlerScheduler coddlerScheduler) {
-		String sqlParams = "SELECT * FROM CONTROLLER_PARAMETER WHERE SCHEDULER_ID = ? ";
+		String sqlParams = "SELECT * FROM TCONTROLLER_PARAMETER WHERE SCHEDULERID = ? ";
 		Object[] paramList = new Object[] { coddlerScheduler.getId() };
 		//
 		JdbcTemplate jdbctemplate = getJdbcTemplate(coddlerScheduler.getTeamId());
@@ -206,7 +224,7 @@ public class CoddlerSchedulerDao {
 	}
 	
 	private void calculateFixedTime(CoddlerScheduler coddlerScheduler) {
-		String sqlFixedTime = "SELECT * FROM CONTROLLER_SCHEDULER_FIXED_TIME WHERE SCHEDULER_ID = ? ";
+		String sqlFixedTime = "SELECT * FROM TCONTROLLER_SCHFIXTIME WHERE SCHEDULERID = ? ";
 		Object[] paramsFixedTime = new Object[] { coddlerScheduler.getId() };
 		//
 		JdbcTemplate jdbctemplate = getJdbcTemplate(coddlerScheduler.getTeamId());
@@ -217,7 +235,7 @@ public class CoddlerSchedulerDao {
 			public FixedTime mapRow(ResultSet rs, int rowNum) throws SQLException {
 				FixedTime fixedTime = new FixedTime();
 				//
-				fixedTime.setValue(rs.getTimestamp("FIXED_TIME"));
+				fixedTime.setValue(rs.getTimestamp("FIXEDTIME"));
 				fixedTime.setStrValue(timeStampToStr(fixedTime.getValue()));
 				//
 				return fixedTime;
@@ -235,11 +253,11 @@ public class CoddlerSchedulerDao {
 			//
 			JdbcTemplate jdbctemplate = getJdbcTemplate(coddler.getTeamId());
 			//
-			String sqlDelete = "DELETE FROM CONTROLLER_CODDLER WHERE MACHINE_ID = ? AND TEAM_ID = ? ";
+			String sqlDelete = "DELETE FROM TCONTROLLER_CODDLER WHERE MACHINEID = ? AND TEAMID = ? ";
 			Object[] params = new Object[] { coddler.getMachineId(), coddler.getTeamId() };
 			jdbctemplate.update(sqlDelete, params);
 			//
-			sqlDelete = "DELETE FROM CONTROLLER_SCHEDULER WHERE MACHINE_ID = ? AND TEAM_ID = ? ";
+			sqlDelete = "DELETE FROM TCONTROLLER_SCHEDULER WHERE MACHINEID = ? AND TEAMID = ? ";
 			jdbctemplate.update(sqlDelete, params);
 			//
 		}
@@ -250,13 +268,13 @@ public class CoddlerSchedulerDao {
 			JdbcTemplate jdbctemplate = getJdbcTemplate(coddler.getTeamId());
 			//
 			if (coddler.getId() != null) {
-				String sqlDelete = "DELETE FROM CONTROLLER_PARAMETER WHERE CODDLER_ID = ? ";
+				String sqlDelete = "DELETE FROM TCONTROLLER_PARAMETER WHERE CODDLERID = ? ";
 				Object[] params = new Object[] { coddler.getId() };
 				jdbctemplate.update(sqlDelete, params);
 				//
 			}
 			//
-			String sql = "SELECT CONTROLLER_CODDLER_SEQ.nextval  AS id  FROM dual";
+			String sql = "SELECT TCONTROLLER_CODDLER_SEQ.nextval  AS id  FROM dual";
 			List<Integer> listLong = jdbctemplate.query(sql, new RowMapper<Integer>() {
 				
 				@Override
@@ -267,9 +285,9 @@ public class CoddlerSchedulerDao {
 			Integer coddlerId = listLong != null && listLong.size() > 0 ? listLong.get(0) : 0;
 			//
 			//
-			String sqlInsert = "INSERT INTO CONTROLLER_CODDLER(Id, MACHINE_ID, TEAM_ID , CODLER_TYPE_ID, NAME, EXECUTABLE_FILE, ACTIVE, TIMEZONE, " //
-					+ " ENABLE_CLEAN_LOGS, ENABLE_CLEAN_IMAGES, LOG_EXP_DAYS, IMAGE_EXP_DAYS) " //
-					+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )  ";
+			String sqlInsert = "INSERT INTO TCONTROLLER_CODDLER(Id, MACHINEID, TEAMID ,  CODLERTYPEID, NAME, EXECUTABLEFILE, ACTIVE, TIMEZONE, " //
+					+ " ENABLECLEANLOGS, ENABLECLEANIMAGES, LOGEXPDAYS, IMAGEEXPDAYS,SITE) " //
+					+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )  ";
 			//
 			jdbctemplate.update(connection -> {
 				PreparedStatement ps = connection.prepareStatement(sqlInsert);
@@ -285,12 +303,13 @@ public class CoddlerSchedulerDao {
 				ps.setBoolean(10, coddler.getEnableCleanImages());
 				ps.setInt(11, coddler.getLogExpDays());
 				ps.setInt(12, coddler.getImageExpDays());
+				ps.setString(13, coddler.getSiteName());
 				return ps;
 			});
 			//
 			if (coddler.getGlobalParameters() != null) {
 				for (Parameter parameter : coddler.getGlobalParameters()) {
-					String sqlInsertParam = "INSERT INTO CONTROLLER_PARAMETER(CODDLER_ID, NAME) VALUES(?, ? )";
+					String sqlInsertParam = "INSERT INTO TCONTROLLER_PARAMETER(CODDLERID, NAME) VALUES(?, ? )";
 					Object[] params = new Object[] { coddlerId, parameter.getParamName() };
 					jdbctemplate.update(sqlInsertParam, params);
 				}
@@ -304,16 +323,16 @@ public class CoddlerSchedulerDao {
 					//
 					//
 					if (coddlerScheduler.getId() != null) {
-						String sqlDelete = "DELETE FROM CONTROLLER_PARAMETER WHERE SCHEDULER_ID = ? ";
+						String sqlDelete = "DELETE FROM TCONTROLLER_PARAMETER WHERE SCHEDULERID = ? ";
 						Object[] params = new Object[] { coddlerScheduler.getId() };
 						jdbctemplate.update(sqlDelete, params);
 						//
-						sqlDelete = "DELETE FROM CONTROLLER_SCHEDULER_FIXED_TIME WHERE SCHEDULER_ID = ? ";
+						sqlDelete = "DELETE FROM TCONTROLLER_SCHFIXTIME WHERE SCHEDULERID = ? ";
 						params = new Object[] { coddlerScheduler.getId() };
 						jdbctemplate.update(sqlDelete, params);
 					}
 					//
-					sql = "SELECT CONTROLLER_SCHEDULER_SEQ.nextval  AS id  FROM dual";
+					sql = "SELECT TCONTROLLER_SCHEDULER_SEQ.nextval  AS id  FROM dual";
 					listLong = jdbctemplate.query(sql, new RowMapper<Integer>() {
 						
 						@Override
@@ -323,7 +342,8 @@ public class CoddlerSchedulerDao {
 					});
 					Integer coddlerSchedulerId = listLong != null && listLong.size() > 0 ? listLong.get(0) : 0;
 					//
-					String sqlInsertScheduler = "INSERT INTO CONTROLLER_SCHEDULER( Id, MACHINE_ID, TEAM_ID ,CODDLER_ID, MODE_TYPE_ID, START_TIME, END_TIME, FREQUENCY_IN_MINUTES ) VALUES ( ? ,?, ?, ?, ?, ? , ?, ?)  ";
+					String sqlInsertScheduler = "INSERT INTO TCONTROLLER_SCHEDULER( Id, MACHINEID, TEAMID ,CODDLERID, MODETYPEID, STARTTIME, ENDTIME, FREQUENCYINMINUTES ) " //
+							+ " VALUES ( ? ,?, ?, ?, ?, ? , ?, ?)  ";
 					//
 					String strStartTime = coddlerScheduler.getStrStartTime();
 					String strEndTime = coddlerScheduler.getStrEndTime();
@@ -348,7 +368,7 @@ public class CoddlerSchedulerDao {
 					//
 					if (coddlerScheduler.getParameters() != null) {
 						for (Parameter parameter : coddlerScheduler.getParameters()) {
-							String sqlInsertParam = "INSERT INTO CONTROLLER_PARAMETER(SCHEDULER_ID, NAME) VALUES(?, ? )";
+							String sqlInsertParam = "INSERT INTO TCONTROLLER_PARAMETER(SCHEDULERID, NAME) VALUES(?, ? )";
 							Object[] params = new Object[] { coddlerSchedulerId, parameter.getParamName() };
 							jdbctemplate.update(sqlInsertParam, params);
 						}
@@ -356,7 +376,7 @@ public class CoddlerSchedulerDao {
 					//
 					if (coddlerScheduler.getFixedTimes() != null) {
 						for (FixedTime fixedTime : coddlerScheduler.getFixedTimes()) {
-							String sqlInsertParam = "INSERT INTO CONTROLLER_SCHEDULER_FIXED_TIME(SCHEDULER_ID, FIXED_TIME) VALUES(?,?)";
+							String sqlInsertParam = "INSERT INTO TCONTROLLER_SCHFIXTIME(SCHEDULERID, FIXEDTIME) VALUES(?,?)";
 							//
 							Timestamp fixedTimeValue = strToTimeStamp(fixedTime.getStrValue());
 							//
@@ -392,13 +412,13 @@ public class CoddlerSchedulerDao {
 	public Configuration getConfiguration(Integer machineId, JdbcTemplate jdbctemplate, Long teamId) {
 		//
 		//
-		String sql = "SELECT MACHINE_ID, TEAM_ID, RESTART_DAY, RESTART_TIME  " //
-				+ " FROM CONTROLLER_CONFIGURATION  " //
-				+ " WHERE MACHINE_ID = ?  ";
+		String sql = "SELECT MACHINEID, TEAMID, RESTARTDAY, RESTARTTIME  " //
+				+ " FROM TCONTROLLER_CONFIGURATION  " //
+				+ " WHERE MACHINEID = ?  ";
 		//
 		//
 		if (teamId != null) {
-			sql += "AND TEAM_ID = ? ";
+			sql += "AND TEAMID = ? ";
 		}
 		//
 		Object[] params = teamId != null ? new Object[] { machineId, teamId } : new Object[] { machineId };
@@ -408,10 +428,10 @@ public class CoddlerSchedulerDao {
 			@Override
 			public Configuration mapRow(ResultSet rs, int rowNum) throws SQLException {
 				Configuration configuration = new Configuration();
-				configuration.setMachineId(rs.getInt("MACHINE_ID"));
-				configuration.setTeamId(rs.getLong("TEAM_ID"));
-				configuration.setDay(rs.getInt("RESTART_DAY"));
-				configuration.setRestartMachine(rs.getTimestamp("RESTART_TIME"));
+				configuration.setMachineId(rs.getInt("MACHINEID"));
+				configuration.setTeamId(rs.getLong("TEAMID"));
+				configuration.setDay(rs.getInt("RESTARTDAY"));
+				configuration.setRestartMachine(rs.getTimestamp("RESTARTTIME"));
 				//
 				configuration.setStrRestartMachine(timeStampToStr(configuration.getRestartMachine()));
 				//
@@ -425,11 +445,11 @@ public class CoddlerSchedulerDao {
 		//
 		JdbcTemplate jdbctemplate = getJdbcTemplate(configuration.getTeamId());
 		//
-		String sqlDelete = "DELETE FROM CONTROLLER_CONFIGURATION WHERE MACHINE_ID = ? AND TEAM_ID = ? ";
+		String sqlDelete = "DELETE FROM TCONTROLLER_CONFIGURATION WHERE MACHINEID = ? AND TEAMID = ? ";
 		Object[] params = new Object[] { configuration.getMachineId(), configuration.getTeamId() };
 		jdbctemplate.update(sqlDelete, params);
 		//
-		String sqlInsert = "INSERT INTO CONTROLLER_CONFIGURATION(Id, MACHINE_ID, TEAM_ID , RESTART_DAY , RESTART_TIME ) VALUES ( CONTROLLER_CONFIGURATION_SEQ.nextval ,?, ?, ?, ? )  ";
+		String sqlInsert = "INSERT INTO TCONTROLLER_CONFIGURATION(Id, MACHINEID, TEAMID , RESTARTDAY , RESTARTTIME ) VALUES ( TCONTROLLER_CONFIGURATION_SEQ.nextval ,?, ?, ?, ? )  ";
 		//
 		jdbctemplate.update(connection -> {
 			PreparedStatement ps = connection.prepareStatement(sqlInsert);
@@ -445,32 +465,46 @@ public class CoddlerSchedulerDao {
 		//
 	}
 	
-	public Integer saveMachineId(String machineId) {
+	public Integer saveMachineId(String machineId) throws Exception {
 		//
 		Integer returnId = null;
 		//
+		Integer failure = 0;
+		StringBuffer buffer = new StringBuffer("");
 		for (JdbcTemplate jdbctemplate : jobDivaConnectivity.getJdbcsTemplates()) {
-			String sql = "SELECT CONTROLLER_MACHINE_SEQ.nextval  AS id  FROM dual";
-			List<Integer> list = jdbctemplate.query(sql, new RowMapper<Integer>() {
-				
-				@Override
-				public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
-					return rs.getInt("id");
+			try {
+				String sql = "SELECT TCONTROLLER_MACHINE_SEQ.nextval  AS id  FROM dual";
+				logger.info("saveMachineId :: " + sql);
+				List<Integer> list = jdbctemplate.query(sql, new RowMapper<Integer>() {
+					
+					@Override
+					public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+						return rs.getInt("id");
+					}
+				});
+				Integer id = list != null && list.size() > 0 ? list.get(0) : 0;
+				String sqlInsert = "INSERT INTO TCONTROLLER_MACHINE(Id, MACHINE ) VALUES ( ? ,? )  ";
+				logger.info("saveMachineId ::" + sqlInsert);
+				//
+				jdbctemplate.update(connection -> {
+					PreparedStatement ps = connection.prepareStatement(sqlInsert);
+					ps.setInt(1, id);
+					ps.setString(2, machineId);
+					return ps;
+				});
+				//
+				if (returnId == null) {
+					returnId = id;
 				}
-			});
-			Integer id = list != null && list.size() > 0 ? list.get(0) : 0;
-			String sqlInsert = "INSERT INTO CONTROLLER_MACHINE(Id, MACHINE ) VALUES ( ? ,? )  ";
-			//
-			jdbctemplate.update(connection -> {
-				PreparedStatement ps = connection.prepareStatement(sqlInsert);
-				ps.setInt(1, id);
-				ps.setString(2, machineId);
-				return ps;
-			});
-			//
-			if (returnId == null) {
-				returnId = id;
+			} catch (Exception e) {
+				buffer.append(e.getMessage());
+				failure++;
+				logger.info("saveMachineId  Exception :: " + e.getMessage());
 			}
+		}
+		//
+		if (failure.equals(jobDivaConnectivity.getJdbcsTemplates().size())) {
+			throw new Exception(buffer.toString());
 		}
 		//
 		return returnId;

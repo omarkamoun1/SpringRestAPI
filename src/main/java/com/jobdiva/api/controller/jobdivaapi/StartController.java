@@ -63,6 +63,8 @@ public class StartController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("searchStart");
+		//
 		return startService.searchStart(jobDivaSession, jobId, optionalref, jobdivaref, candidateid, candidatefirstname, candidatelastname, candidateemail);
 		//
 	}
@@ -114,6 +116,8 @@ public class StartController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("updateStart");
+		//
 		return startService.updateStart(jobDivaSession, startid, overwrite, startDate, endDate, positiontype, billrate, billratecurrency, billrateunit, payrate, payratecurrency, payrateunit);
 		//
 	}
@@ -147,6 +151,8 @@ public class StartController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("setStart");
 		//
 		return startService.setStart(jobDivaSession, submittalid, recruiterid, startDate, endDate, timezone, internalnotes);
 		//
@@ -189,6 +195,8 @@ public class StartController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("terminateStart");
+		//
 		return startService.terminateStart(jobDivaSession, startid, candidateid, jobId, terminationdate, reason, performancecode, notes, markaspastemployee, markasavailable);
 		//
 	}
@@ -229,6 +237,8 @@ public class StartController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("terminateAssignment");
 		//
 		return startService.terminateAssignment(jobDivaSession, assignmentid, candidateid, jobId, terminationdate, reason, performancecode, notes, markaspastemployee, markasavailable);
 		//

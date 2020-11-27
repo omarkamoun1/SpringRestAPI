@@ -1,20 +1,25 @@
 package com.jobdiva.api.model.authenticate;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
+import com.jobdiva.api.model.accessright.APIPermission;
+
 @SuppressWarnings("serial")
 public class JobDivaSession extends User {
 	
-	private Long	teamId;
-	private String	userName;
-	private String	password;
-	private Integer	environment;
-	private long	recruiterId;
-	private long	leader;
+	private Long				teamId;
+	private String				userName;
+	private String				password;
+	private Integer				environment;
+	private long				recruiterId;
+	private long				leader;
+	private List<APIPermission>	apiPermissions	= new ArrayList<APIPermission>();
 	
 	public JobDivaSession() {
 		super(null, null, new HashSet<JobDivaGrantedAuthority>());
@@ -35,6 +40,28 @@ public class JobDivaSession extends User {
 	public JobDivaSession(String username, Long teamId, String password, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
 		super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
 		this.teamId = teamId;
+	}
+	
+	public Boolean allowAPI(String methodName) {
+		//
+		if (apiPermissions.size() > 0) {
+			//
+			for (APIPermission permission : apiPermissions) {
+				if (methodName.equalsIgnoreCase(permission.getMethodName())) {
+					return true;
+				}
+			}
+			//
+			return false;
+		}
+		//
+		return true;
+	}
+	
+	public void checkForAPIPermission(String methodName) throws Exception {
+		if (!allowAPI(methodName)) {
+			throw new Exception("You are not allowed to access to " + methodName + " API.");
+		}
 	}
 	
 	public Long getTeamId() {
@@ -83,5 +110,13 @@ public class JobDivaSession extends User {
 	
 	public void setLeader(long leader) {
 		this.leader = leader;
+	}
+	
+	public List<APIPermission> getApiPermissions() {
+		return apiPermissions;
+	}
+	
+	public void setApiPermissions(List<APIPermission> apiPermissions) {
+		this.apiPermissions = apiPermissions;
 	}
 }
