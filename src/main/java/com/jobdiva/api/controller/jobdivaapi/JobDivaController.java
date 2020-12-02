@@ -56,8 +56,8 @@ public class JobDivaController extends AbstractJobDivaController {
 			@ApiParam(value = "Candidate ID. If provided, the resume would be added under this candidate. Otherwise, the system will try to match the resume to an existing candidate based on profile in the resume, or create a new candidate record if there is no match", required = false) //
 			@RequestParam(required = false) Long candidateid, //
 			//
-			@ApiParam(value = "Resume Source. This allows to tag the resume with a particular source in JobDiva. The ID can be retrieved from the JobDiva interface under the ‘Manage Resume Sources’", required = false) //
-			@RequestParam(required = false) Integer resumesource, //
+			@ApiParam(value = "Resume Source. This allows to tag the resume with a particular source in JobDiva. The ID can be retrieved from the JobDiva interface under the ‘Manage Resume Sources’", required = true) //
+			@RequestParam(required = true) Integer resumesource, //
 			//
 			@ApiParam(value = "Recruiter ID", required = false) //
 			@RequestParam(required = false) Long recruiterid, //
