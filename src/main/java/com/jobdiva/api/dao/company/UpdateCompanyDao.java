@@ -116,6 +116,7 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 					//
 					if (insertMode) {
 						companyAddressDao.insertCompanyAddress(jobDivaSession, companyid, companyAddress, maxAddressId);
+						maxAddressId++;
 					} else {
 						companyAddressDao.updateCompanyAddress(jobDivaSession, companyid, companyAddress);
 					}
@@ -711,13 +712,16 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 		//
 		updateCompanyOwner(jobDivaSession, companyid, owners);
 		//
-		String sqlUpdate = " UPDATE TCUSTOMERCOMPANY SET " + sqlUpdateFields(fields) + " WHERE ID = :companyId and TEAMID = :teamId ";
-		parameterSource.addValue("companyId", companyid);
-		parameterSource.addValue("teamId", jobDivaSession.getTeamId());
-		//
-		//
-		NamedParameterJdbcTemplate jdbcTemplateObject = new NamedParameterJdbcTemplate(jdbcTemplate.getDataSource());
-		jdbcTemplateObject.update(sqlUpdate, parameterSource);
+		if (fields.size() > 0) {
+			String sqlUpdate = " UPDATE TCUSTOMERCOMPANY SET " + sqlUpdateFields(fields) + " WHERE ID = :companyId and TEAMID = :teamId ";
+			parameterSource.addValue("companyId", companyid);
+			parameterSource.addValue("teamId", jobDivaSession.getTeamId());
+			//
+			//
+			NamedParameterJdbcTemplate jdbcTemplateObject = new NamedParameterJdbcTemplate(jdbcTemplate.getDataSource());
+			jdbcTemplateObject.update(sqlUpdate, parameterSource);
+			//
+		}
 		//
 		return true;
 	}
