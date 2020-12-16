@@ -60,11 +60,13 @@ public class ResumeService {
 		}
 	}
 	
-	public Long uploadContactAttachment(JobDivaSession jobDivaSession, Long contactId, String name, String filename, byte[] filecontent, Integer attachmenttype, String description) throws Exception {
+	public Long uploadContactAttachment(JobDivaSession jobDivaSession, Long contactId, String documentname, String filename, byte[] filecontent, String urllink, String designedform, Integer attachmenttype, String internaldescription,
+			Date expirationdate, Boolean isonboardingdoc, Boolean ismandatory, Boolean requirereturn, Boolean isreadonly, Integer sendto, Boolean ismedicaldoc, String portalinstruction) throws Exception {
 		//
 		try {
 			//
-			Long id = contactAttachmentDao.uploadContactAttachment(jobDivaSession, contactId, name, filename, filecontent, attachmenttype, description);
+			Long id = contactAttachmentDao.uploadContactAttachment(jobDivaSession, contactId, documentname, filename, filecontent, urllink, designedform, attachmenttype, internaldescription, expirationdate, isonboardingdoc, ismandatory,
+					requirereturn, isreadonly, sendto, ismedicaldoc, portalinstruction);
 			//
 			contactAttachmentDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "uploadContactAttachment", "Upload Successful");
 			//

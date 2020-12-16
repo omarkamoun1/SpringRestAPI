@@ -5723,6 +5723,157 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 	}
 	
+	@ApiIgnore
+	@RequestMapping(value = "/NescoDinesolNewApprovedSalaryRecords", method = RequestMethod.GET, produces = "application/json")
+	public IBiData NescoDinesolNewApprovedSalaryRecords(//
+			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
+			@RequestParam(required = true) Date fromDate, //
+			//
+			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
+	) throws Exception {//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		return biDataService.getBIData(jobDivaSession, "Nesco Dinesol New Approved Salary Records", fromDate, toDate, null, alternateFormat);
+		//
+	}
+	
+	@ApiIgnore
+	@RequestMapping(value = "/NescoDinesolSalaryRecordDetail", method = RequestMethod.GET, produces = "application/json")
+	public IBiData NescoDinesolSalaryRecordDetail(//
+			//
+			@ApiParam(value = "Employee Id", required = true) //
+			@RequestParam(required = true) Long employeeId, //
+			//
+			//
+			@ApiParam(value = "Record Id", required = true) //
+			@RequestParam(required = true) Long recordId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
+	) throws Exception {//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		String[] parameters = new String[] { employeeId.toString(), recordId.toString() };
+		//
+		return biDataService.getBIData(jobDivaSession, "Nesco Dinesol Salary Record Detail", null, null, parameters, alternateFormat);
+		//
+	}
+	
+	@ApiIgnore
+	@RequestMapping(value = "/NescoDinesolUpdatedApprovedBillingRecords", method = RequestMethod.GET, produces = "application/json")
+	public IBiData NescoDinesolUpdatedApprovedBillingRecords(//
+			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
+			@RequestParam(required = true) Date fromDate, //
+			//
+			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
+	) throws Exception {//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		return biDataService.getBIData(jobDivaSession, "Nesco Dinesol Updated Approved Billing Records", fromDate, toDate, null, alternateFormat);
+		//
+	}
+	
+	@ApiIgnore
+	@RequestMapping(value = "/NescoDinesolUpdatedApprovedSalaryRecords", method = RequestMethod.GET, produces = "application/json")
+	public IBiData NescoDinesolUpdatedApprovedSalaryRecords(//
+			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
+			@RequestParam(required = true) Date fromDate, //
+			//
+			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
+	) throws Exception {//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		return biDataService.getBIData(jobDivaSession, "Nesco Dinesol Updated Approved Salary Records", fromDate, toDate, null, alternateFormat);
+		//
+	}
+	
+	@ApiIgnore
+	@RequestMapping(value = "/NescoDinesolJobDetail", method = RequestMethod.GET, produces = "application/json")
+	public IBiData NescoDinesolJobDetail(//
+			//
+			@ApiParam(value = "Job Id", required = true) //
+			@RequestParam(required = true) Long jobId, //
+			//
+			@ApiParam(value = "User Fields Name", required = false) //
+			@RequestParam(required = false) String[] userFieldsName, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
+	//
+	) throws Exception {//
+						//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		ArrayList<String> paramLits = new ArrayList<String>();
+		paramLits.add(jobId.toString());
+		if (userFieldsName != null) {
+			for (int i = 0; i < userFieldsName.length; i++) {
+				paramLits.add(userFieldsName[i]);
+			}
+		}
+		//
+		String[] parameters = paramLits.stream().toArray(String[]::new);
+		//
+		//
+		return biDataService.getBIData(jobDivaSession, "Nesco Dinesol Job Detail", null, null, parameters, alternateFormat);
+		//
+	}
+	
+	/// Joseph
+	@ApiIgnore
+	@RequestMapping(value = "/NescoDinesolNewUpdatedTerminations", method = RequestMethod.GET, produces = "application/json")
+	public IBiData NescoDinesolNewUpdatedTerminations(//
+			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
+			@RequestParam(required = true) Date fromDate, //
+			//
+			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
+	) throws Exception {//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		return biDataService.getBIData(jobDivaSession, "Nesco Dinesol New/Updated Terminations", fromDate, toDate, null, alternateFormat);
+		//
+	}
+	
+	@RequestMapping(value = "/NewUpdatedTerminations", method = RequestMethod.GET, produces = "application/json")
+	public IBiData NewUpdatedTerminations(//
+			@ApiParam(value = "From Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
+			@RequestParam(required = true) Date fromDate, //
+			//
+			@ApiParam(value = "To Date Format(MM/dd/yyyy HH:mm:ss)", required = true) //
+			@RequestParam(required = true) Date toDate, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
+	) throws Exception {//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		return biDataService.getBIData(jobDivaSession, "New/Updated Terminations", fromDate, toDate, null, alternateFormat);
+		//
+	}
+	
 	@RequestMapping(value = "/VMSSynchronizationList", method = RequestMethod.GET, produces = "application/json")
 	public IBiData VMSSynchronizationList(//
 			@ApiParam(value = "Site Name", required = true) //
