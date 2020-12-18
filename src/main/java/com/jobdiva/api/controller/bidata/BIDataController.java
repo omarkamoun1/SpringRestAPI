@@ -5890,4 +5890,23 @@ public class BIDataController extends AbstractJobDivaController {
 		return biDataService.getBIData(jobDivaSession, "VMS Synchronization List", null, null, parameters, alternateFormat);
 		//
 	}
+	
+	@RequestMapping(value = "/UserfieldsChangeManagement", method = RequestMethod.GET, produces = "application/json")
+	public IBiData UserfieldsChangeManagement(//
+			//
+			@ApiParam(value = "Candidate Id", required = true) //
+			@RequestParam(required = true) Long candidateId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat //
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		String[] parameters = new String[] { candidateId.toString() };
+		//
+		return biDataService.getBIData(jobDivaSession, "Userfields Change Management", null, null, parameters, alternateFormat);
+		//
+	}
 }
