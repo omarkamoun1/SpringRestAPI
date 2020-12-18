@@ -72,16 +72,18 @@ public class VolcanicDao {
 			});
 			
 			
-			if (desc.get(0)==null) {
-				sql = "select jobdescription from trfq where id = ? and teamid = ?";
-				params = new Object[] { rfqid, teamid };
+			if (desc != null && desc.size() > 0) {
+				if (desc.get(0)==null) {
+					sql = "select jobdescription from trfq where id = ? and teamid = ?";
+					params = new Object[] { rfqid, teamid };
 				
-				desc = jdbcTemplate.query(sql, params, new RowMapper<String>() {
-					@Override
-					public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-						return rs.getString("jobdescription");
-					}
-				});
+					desc = jdbcTemplate.query(sql, params, new RowMapper<String>() {
+						@Override
+						public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+							return rs.getString("jobdescription");
+						}
+					});
+				}
 			}
 			//
 			//
@@ -98,7 +100,7 @@ public class VolcanicDao {
 				else return "{\"response\":{\"status\":\"Fail\",\"reason\":\"Required Field(s) Missing in Database\"}}";
 			}
 			for (int i = 6; i < 29; i++) {
-				if (i==10) data[i] = desc.get(0);
+				if (i==10) data[i] = (desc != null && desc.size() > 0)?desc.get(0):"";
 				//if (i==10) data[i] = "";
 				else if (isInList(list,elements[i]) != -1) data[i] = (String) list.get(isInList(list,elements[i])).get(1);
 				else data[i] = "";
