@@ -79,16 +79,18 @@ public class JobServeUKDao {
 			});
 			
 			
-			if (desc.get(0)==null) {
-				sql = "select jobdescription from trfq where id = ? and teamid = ?";
-				params = new Object[] { rfqid, teamid };
+			if (desc != null && desc.size() > 0) {
+				if (desc.get(0)==null) {
+					sql = "select jobdescription from trfq where id = ? and teamid = ?";
+					params = new Object[] { rfqid, teamid };
 				
-				desc = jdbcTemplate.query(sql, params, new RowMapper<String>() {
-					@Override
-					public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-						return rs.getString("jobdescription");
-					}
-				});
+					desc = jdbcTemplate.query(sql, params, new RowMapper<String>() {
+						@Override
+						public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+							return rs.getString("jobdescription");
+						}
+					});
+				}
 			}
 			//
 			//
@@ -97,7 +99,7 @@ public class JobServeUKDao {
 							 		"telephone","postZipCode","startDate","duration","rate","categories","securityClearance","nbrOfReAds","consultantFirstName","consultantLastName","marketID2","marketID3"};
 		
 			for (int i = 3; i < 13; i++) {
-				if (i==6) data[i] = desc.get(0);
+				if (i==6) data[i] = (desc != null && desc.size() > 0)?desc.get(0):"";
 				else if (isInList(list,elements[i]) != -1) data[i] = (String) list.get(isInList(list,elements[i])).get(1); 
 				else {
 					List<String> failList = new ArrayList<String>();
