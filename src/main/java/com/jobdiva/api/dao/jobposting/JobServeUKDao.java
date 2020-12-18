@@ -68,15 +68,28 @@ public class JobServeUKDao {
 				}
 			});
 			
-			sql = "select jobdescription from trfq where id = ? and teamid = ?";
+			sql = "select posting_description from trfq where id = ? and teamid = ?";
 			params = new Object[] { rfqid, teamid };
 			
 			List<String> desc = jdbcTemplate.query(sql, params, new RowMapper<String>() {
 				@Override
 				public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-					return rs.getString("jobdescription");
+					return rs.getString("posting_description");
 				}
 			});
+			
+			
+			if (desc.get(0)==null) {
+				sql = "select jobdescription from trfq where id = ? and teamid = ?";
+				params = new Object[] { rfqid, teamid };
+				
+				desc = jdbcTemplate.query(sql, params, new RowMapper<String>() {
+					@Override
+					public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+						return rs.getString("jobdescription");
+					}
+				});
+			}
 			//
 			//
 		
