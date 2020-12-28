@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -117,7 +118,17 @@ public class VolcanicDao {
 				data[22] = data[22].replace('_', ',');
 			}
 			
+			data[10] = data[10].replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", "");
+			data[10] = data[10].replaceAll("%C2%92","%27").replaceAll("%C2%93","%22").replaceAll("%C2%94","%22"); 
+			try {
+				data[10] = URLDecoder.decode(data[10], "UTF-8");
+			} catch (Exception e) {
+				data[10] = "";
+			}
+			data[10] = data[10].replace("\"", "\\\"");
+			data[10] = data[10].replace("\r\n", "");
 			data[10] = data[10].replace("\n", "");
+			
 		}
 		
 		data[0] = website;
