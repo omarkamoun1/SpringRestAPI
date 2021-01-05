@@ -180,6 +180,10 @@ public class CompanyController extends AbstractJobDivaController {
 			@ApiParam(value = "Parent company ID", required = false) //
 			@RequestParam(required = false) Long parentcompanyid, //
 			//
+			@ApiParam(value = "Company types to update to. \r\n" //
+					+ "If specified, previous type assignment will be removed", required = false) //
+			@RequestParam(required = false) String[] companytypes, //
+			//
 			@ApiParam(required = false, type = "CompanyAddress", allowMultiple = true) //
 			@RequestParam(required = false) CompanyAddress[] addresses, //
 			//
@@ -228,7 +232,7 @@ public class CompanyController extends AbstractJobDivaController {
 		//
 		jobDivaSession.checkForAPIPermission("updateCompany");
 		//
-		return companyService.updateCompany(jobDivaSession, companyid, name, parentcompanyid, addresses, subguidelines, maxsubmittals, references, drugtest, backgroundcheck, securityclearance, Userfields, discount, discountper, percentagediscount,
+		return companyService.updateCompany(jobDivaSession, companyid, name, parentcompanyid, companytypes,addresses, subguidelines, maxsubmittals, references, drugtest, backgroundcheck, securityclearance, Userfields, discount, discountper, percentagediscount,
 				financials, owners, salespipeline);
 		//
 	}

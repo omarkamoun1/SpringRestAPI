@@ -295,6 +295,10 @@ public class ContactController extends AbstractJobDivaController {
 			@ApiParam(value = "Alternate Email", required = false) //
 			@RequestParam(required = false) String alternateemail, //
 			//
+			@ApiParam(value = "Contact types to update to. \r\n" + //
+					"If specified, previous type assignment will be removed. ", required = false) //
+			@RequestParam(required = false) String[] types, //
+			//
 			@ApiParam(value = "Assistant Name", required = false) //
 			@RequestParam(required = false) String assistantname, //
 			//
@@ -338,7 +342,7 @@ public class ContactController extends AbstractJobDivaController {
 		jobDivaSession.checkForAPIPermission("updateContact");
 		//
 		return contactService.updateContact(jobDivaSession, contactid, firstname, lastname, title, companyid, department, addresses, phones, reportsto, active, primary, email, alternateemail, assistantname, assistantemail, assistantphone,
-				assistantphoneextension, subguidelines, maxsubmittals, references, drugtest, backgroundcheck, securityclearance, Userfields, owners);
+				assistantphoneextension, subguidelines, maxsubmittals, references, drugtest, backgroundcheck, securityclearance, Userfields, owners,types);
 	}
 	
 	@RequestMapping(value = "/createContactNote", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")

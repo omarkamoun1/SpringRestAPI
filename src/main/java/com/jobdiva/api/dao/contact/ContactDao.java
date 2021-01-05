@@ -790,11 +790,24 @@ public class ContactDao extends AbstractJobDivaDao {
 				contactOwner.setRecruiterId(0L);
 				//
 				if (owner.getOwnerId() != null) {
-					List<Contact> contacts = searchContacts(jobDivaSession, jobDivaSession.getTeamId(), owner.getOwnerId(), null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, false);
-					if (contacts == null || contacts.size() == 0) {
+					//
+					sql = "select id from TRECRUITER where GROUPID = ? AND Id = ? ";
+					Object[] params = new Object[] { jobDivaSession.getTeamId(), owner.getOwnerId() };
+					List<Long> list = jdbcTemplate.query(sql, params, new RowMapper<Long>() {
+						
+						@Override
+						public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+							//
+							return rs.getLong("id");
+						}
+					});
+					//
+					if (list != null && list.size() > 0) {
+						contactOwner.setRecruiterId(list.get(0));
+					} else {
 						throw new Exception("Error: Contact owner(" + owner.getOwnerId() + ") does not exist. \r\n");
 					}
-					contactOwner.setRecruiterId(contacts.get(0).getId());
+					//
 				} else {
 					sql = "select id from TRECRUITER where GROUPID = ? and nls_upper(FIRSTNAME) = nls_upper(?) and nls_upper(LASTNAME) = nls_upper(?) ";
 					Object[] params = new Object[] { jobDivaSession.getTeamId(), firstname, lastname };
@@ -1170,7 +1183,7 @@ public class ContactDao extends AbstractJobDivaDao {
 			Long reportsto, Boolean active, Boolean primary, //
 			String email, String alternateemail, String assistantname, String assistantemail, String assistantphone, String assistantphoneextension, //
 			String subguidelines, Integer maxsubmittals, Boolean references, Boolean drugtest, Boolean backgroundcheck, Boolean securityclearance, //
-			Userfield[] userfields, Owner[] owners) throws Exception {
+			Userfield[] userfields, Owner[] owners, String[] types) throws Exception {
 		//
 		checkAdddresses(addresses);
 		//
@@ -1199,11 +1212,15 @@ public class ContactDao extends AbstractJobDivaDao {
 		MapSqlParameterSource parameterSource = new MapSqlParameterSource();
 		//
 		//
-		fields.put("FIRSTNAME", "firstname");
-		parameterSource.addValue("firstname", firstname);
+		if (isNotEmpty(firstname)) {
+			fields.put("FIRSTNAME", "firstname");
+			parameterSource.addValue("firstname", firstname);
+		}
 		//
-		fields.put("LASTNAME", "lastname");
-		parameterSource.addValue("lastname", lastname);
+		if (isNotEmpty(lastname)) {
+			fields.put("LASTNAME", "lastname");
+			parameterSource.addValue("lastname", lastname);
+		}
 		//
 		if (isNotEmpty(title)) {
 			fields.put("TITLE", "title");
@@ -1211,9 +1228,9 @@ public class ContactDao extends AbstractJobDivaDao {
 		}
 		//
 		if (companyid != null) {
-			List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, companyid, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+			List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, companyid );
 			//
-			if (companies.size() == 0 || companies.get(0).getTeamid().equals(jobDivaSession.getTeamId())) {
+			if (companies.size() == 0 ) {
 				throw new Exception("Error: Company " + companyid + " is not found");
 			}
 			//
@@ -1326,17 +1343,45 @@ public class ContactDao extends AbstractJobDivaDao {
 		//
 		updateContactOwners(jobDivaSession, contactid, owners);
 		//
-		fields.put("EDITDATE", "editDate");
-		parameterSource.addValue("editDate", new Timestamp(System.currentTimeMillis()));
 		//
-		String sqlUpdate = " UPDATE TCUSTOMER SET " + sqlUpdateFields(fields) + " WHERE ID = :contactid and teamid = :teamid ";
-		parameterSource.addValue("contactid", contactid);
-		parameterSource.addValue("teamid", jobDivaSession.getTeamId());
 		//
-		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		if (types != null) {
+			Map<String, Long> typeMap = getTypeMap(jobDivaSession.getTeamId());
+			List<Long> typeIds = new ArrayList<Long>();
+			//
+			contactTypeDao.deleteContactTypes(jobDivaSession, contactid);
+			//
+			ArrayList<String> typeList = new ArrayList<String>();
+			for (int i = 0; i < types.length; i++) {
+				if (isNotEmpty(types[i]))
+					typeList.add(types[i].toUpperCase());
+			}
+			for (Map.Entry<String, Long> entry : typeMap.entrySet()) {
+				if (typeList.contains(entry.getKey().toUpperCase())) {
+					typeIds.add(entry.getValue());
+				}
+			}
+			//
+			for (Long typeId : typeIds) {
+				contactTypeDao.addcontactType(jobDivaSession, contactid, typeId);
+			}
+		}
 		//
-		NamedParameterJdbcTemplate jdbcTemplateObject = new NamedParameterJdbcTemplate(jdbcTemplate.getDataSource());
-		jdbcTemplateObject.update(sqlUpdate, parameterSource);
+		//
+		//
+		if (fields.size() > 0) {
+			fields.put("EDITDATE", "editDate");
+			parameterSource.addValue("editDate", new Timestamp(System.currentTimeMillis()));
+			//
+			String sqlUpdate = " UPDATE TCUSTOMER SET " + sqlUpdateFields(fields) + " WHERE ID = :contactid and teamid = :teamid ";
+			parameterSource.addValue("contactid", contactid);
+			parameterSource.addValue("teamid", jobDivaSession.getTeamId());
+			//
+			JdbcTemplate jdbcTemplate = getJdbcTemplate();
+			//
+			NamedParameterJdbcTemplate jdbcTemplateObject = new NamedParameterJdbcTemplate(jdbcTemplate.getDataSource());
+			jdbcTemplateObject.update(sqlUpdate, parameterSource);
+		}
 		//
 		return true;
 	}
@@ -1349,6 +1394,7 @@ public class ContactDao extends AbstractJobDivaDao {
 			Hashtable<Long, ContactOwner> all = new Hashtable<Long, ContactOwner>();
 			int numOfprimary = 0;
 			Set<Long> update = new HashSet<Long>();
+			//
 			for (int i = 0; i < allOwners.size(); i++) { // deal with old owners
 															// and get the
 															// primary recruiter
@@ -1357,6 +1403,8 @@ public class ContactDao extends AbstractJobDivaDao {
 					numOfprimary++;
 				all.put(allOwners.get(i).getRecruiterId(), allOwners.get(i));
 			}
+			//
+			//
 			//
 			JdbcTemplate jdbcTemplate = getJdbcTemplate();
 			//
@@ -1369,11 +1417,22 @@ public class ContactDao extends AbstractJobDivaDao {
 				contactOwner.setRecruiterId(0L);
 				//
 				if (owner.getOwnerId() != null) {
-					List<Contact> contacts = searchContacts(jobDivaSession, jobDivaSession.getTeamId(), owner.getOwnerId(), null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, false);
-					if (contacts == null || contacts.size() == 0) {
+					String sql = "select id from TRECRUITER where GROUPID = ? AND Id = ? ";
+					Object[] params = new Object[] { jobDivaSession.getTeamId(), owner.getOwnerId() };
+					List<Long> list = jdbcTemplate.query(sql, params, new RowMapper<Long>() {
+						
+						@Override
+						public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+							//
+							return rs.getLong("id");
+						}
+					});
+					//
+					if (list != null && list.size() > 0) {
+						contactOwner.setRecruiterId(list.get(0));
+					} else {
 						throw new Exception("Error: Contact owner(" + owner.getOwnerId() + ") does not exist. \r\n");
 					}
-					contactOwner.setRecruiterId(contacts.get(0).getId());
 				} else {
 					Object[] params = new Object[] { jobDivaSession.getTeamId(), owner.getFirstName(), owner.getLastName() };
 					//
@@ -1400,7 +1459,7 @@ public class ContactDao extends AbstractJobDivaDao {
 				if ((Integer) owner.getAction() == 2) {
 					if (all.containsKey(recid)) {
 						ContactOwner localOwner = all.get(recid);
-						String sqlDelete = "DELETE FROM TCUSTOMER_OWNERS WHERE COMPANYID = ? AND RECRUITERID = ? and TEAMID = ? ";
+						String sqlDelete = "DELETE FROM TCUSTOMER_OWNERS WHERE CUSTOMERID = ? AND RECRUITERID = ? and TEAMID = ? ";
 						//
 						Object[] params = new Object[] { localOwner.getCustomerId(), localOwner.getRecruiterId(), jobDivaSession.getTeamId() };
 						//
@@ -1434,10 +1493,9 @@ public class ContactDao extends AbstractJobDivaDao {
 			for (Long u : update) {
 				ContactOwner contactOwner = all.get(u);
 				//
-				if (contactOwner.getInsertMode() != null && contactOwner.getInsertMode()) {
+				int updated = contactOwnerDao.updatecontactOwner(jobDivaSession, contactOwner);
+				if (updated == 0) {
 					contactOwnerDao.insertcontactOwner(jobDivaSession, contactOwner);
-				} else {
-					contactOwnerDao.updatecontactOwner(jobDivaSession, contactOwner);
 				}
 			}
 		}

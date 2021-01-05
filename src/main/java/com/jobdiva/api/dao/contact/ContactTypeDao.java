@@ -52,4 +52,13 @@ public class ContactTypeDao extends AbstractJobDivaDao {
 		//
 		jdbcTemplate.update(sqlInsert, params);
 	}
+	
+	public void deleteContactTypes(JobDivaSession jobDivaSession, Long contactid) {
+		String sqlDelete = " DELETE FROM TCUSTOMER_TYPE WHERE  CUSTOMERID = ? AND TEAMID = ?  ";
+		Object[] params = new Object[] { contactid, jobDivaSession.getTeamId() };
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		jdbcTemplate.update(sqlDelete, params);
+	}
 }

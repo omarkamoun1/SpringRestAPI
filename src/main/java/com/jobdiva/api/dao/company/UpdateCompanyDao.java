@@ -35,6 +35,7 @@ import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.WeekendingType;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.sql.JobDivaSqlLobValue;
+import com.jobdiva.api.utils.StringUtils;
 
 @Component
 public class UpdateCompanyDao extends AbstractJobDivaDao {
@@ -329,6 +330,28 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 		} // don't set TCUSTOMER_OWNERS if not specified?
 	}
 	
+	private void updateCompanyTypes(JobDivaSession jobDivaSession, Long companyid, String[] companytypes) throws Exception {
+		//
+		if (companytypes != null && StringUtils.validateStrArr(companytypes)) {
+			//
+			JdbcTemplate jdbcTemplate = getJdbcTemplate();
+			//
+			List<Long> idsFromCompanyTypeName = getIdsFromCompanyTypeName(jobDivaSession.getTeamId(), companytypes);
+			if (idsFromCompanyTypeName == null || idsFromCompanyTypeName.size() == 0)
+				throw new Exception("Error: None of the company types are valid.");
+			//
+			String sqlDelete = "DELETE FROM TCUSTOMER_COMPANY_TYPE WHERE COMPANYID = ? AND TEAMID = ?";
+			Object[] params = new Object[] { companyid, jobDivaSession.getTeamId() };
+			jdbcTemplate.update(sqlDelete, params);
+			//
+			for (Long typeId : idsFromCompanyTypeName) {
+				String sqlInsert = "INSERT INTO TCUSTOMER_COMPANY_TYPE(TEAMID, COMPANYID, TYPEID) VALUES(?, ? , ?)";
+				params = new Object[] { jobDivaSession.getTeamId(), companyid, typeId };
+				jdbcTemplate.update(sqlInsert, params);
+			}
+		}
+	}
+	
 	private Byte getInvoiceContactPreferenceId(String str) {
 		Byte b = null;
 		if (str.equalsIgnoreCase(ShowOnInvoiceType.ADDRESS.getValue()))
@@ -510,7 +533,7 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 			}
 	}
 	
-	public Boolean updateCompany(JobDivaSession jobDivaSession, Long companyid, String name, Long parentcompanyid, CompanyAddress[] addresses, String subguidelines, //
+	public Boolean updateCompany(JobDivaSession jobDivaSession, Long companyid, String name, Long parentcompanyid, String[] companytypes, CompanyAddress[] addresses, String subguidelines, //
 			Integer maxsubmittals, Boolean references, Boolean drugtest, Boolean backgroundcheck, Boolean securityclearance, Userfield[] userfields, //
 			Double discount, String discountper, Double percentagediscount, FinancialsType financials, Owner[] owners, String nameIndex) throws Exception {
 		//
@@ -711,6 +734,8 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 		updateCompanyUserFields(jobDivaSession, companyid, userfields);
 		//
 		updateCompanyOwner(jobDivaSession, companyid, owners);
+		//
+		updateCompanyTypes(jobDivaSession, companyid, companytypes);
 		//
 		if (fields.size() > 0) {
 			String sqlUpdate = " UPDATE TCUSTOMERCOMPANY SET " + sqlUpdateFields(fields) + " WHERE ID = :companyId and TEAMID = :teamId ";

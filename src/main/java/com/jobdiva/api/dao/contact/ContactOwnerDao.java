@@ -72,7 +72,7 @@ public class ContactOwnerDao extends AbstractJobDivaDao {
 		jdbcTemplate.update(sqlInsert, parameters);
 	}
 	
-	public void updatecontactOwner(JobDivaSession jobDivaSession, ContactOwner contactOwner) {
+	public int updatecontactOwner(JobDivaSession jobDivaSession, ContactOwner contactOwner) {
 		//
 		//
 		String sqlInsert = "UPDATE  TCUSTOMER_OWNERS SET  ISPRIMARYOWNER = ? WHERE  CUSTOMERID = ? AND  RECRUITERID = ? and TEAMID = ?  ";
@@ -80,6 +80,8 @@ public class ContactOwnerDao extends AbstractJobDivaDao {
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
 		Object[] parameters = new Object[] { contactOwner.getIsPrimaryOwner(), contactOwner.getCustomerId(), contactOwner.getRecruiterId(), contactOwner.getTeamId() };
-		jdbcTemplate.update(sqlInsert, parameters);
+		//
+		return jdbcTemplate.update(sqlInsert, parameters);
+		//
 	}
 }

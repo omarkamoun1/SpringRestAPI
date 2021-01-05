@@ -838,6 +838,12 @@ public class AbstractJobDivaDao {
 				//
 				boolean hasOwner = false;
 				//
+				if (jdOwner.getAction() == null) {
+					throw new Exception("Have to set action code to update owner");
+				} else if (!jdOwner.getAction().equals(1) && !jdOwner.getAction().equals(2)) {
+					throw new Exception("Error: Action code should be 1(insert/modify) or 2(delete) ");
+				}
+				//
 				if (jdOwner.getOwnerId() != null) {
 					hasOwner = true;
 				} else {
@@ -848,6 +854,7 @@ public class AbstractJobDivaDao {
 					}
 					if (!hasOwner)
 						throw new Exception("Error: Please set either owner id or owner name(both first name and last name) if intend to declare the owners for contacts. \r\n");
+					//
 					if (jdOwner.getPrimary())
 						primary_cnt++;
 				}

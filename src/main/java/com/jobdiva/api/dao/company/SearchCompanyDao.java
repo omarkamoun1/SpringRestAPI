@@ -120,6 +120,26 @@ public class SearchCompanyDao extends AbstractJobDivaDao {
 		});
 	}
 	
+	public List<Company> searchForCompany(JobDivaSession jobDivaSession, Long companyId) {
+		String sql = " SELECT * FROM TCUSTOMERCOMPANY WHERE TEAMID = ? AND id = ? ";
+		Object[] param = new Object[] { jobDivaSession.getTeamId(), companyId };
+		//
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<Company> companyList = jdbcTemplate.query(sql, param, new RowMapper<Company>() {
+			
+			@Override
+			public Company mapRow(ResultSet rs, int rowNum) throws SQLException {
+				Company company = new Company();
+				company.setId(rs.getLong("Id"));
+				company.setName(rs.getString("name"));
+				return company;
+			}
+		});
+		return companyList;
+	}
+	
 	public List<Company> searchForCompany(JobDivaSession jobDivaSession, Long companyId, String company, String address, String city, String state, String zip, String country, //
 			String phone, String fax, String url, String parentCompany, Boolean showAll, //
 			String[] types, Long ownerIds, String division, String nameIndex) throws Exception {

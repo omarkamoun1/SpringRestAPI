@@ -135,12 +135,12 @@ public class ContactService {
 	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
 	public Boolean updateContact(JobDivaSession jobDivaSession, Long contactid, String firstname, String lastname, String title, Long companyid, String department, ContactAddress[] addresses, PhoneType[] phones, Long reportsto, Boolean active,
 			Boolean primary, String email, String alternateemail, String assistantname, String assistantemail, String assistantphone, String assistantphoneextension, String subguidelines, Integer maxsubmittals, Boolean references, Boolean drugtest,
-			Boolean backgroundcheck, Boolean securityclearance, Userfield[] userfields, Owner[] owners) throws Exception {
+			Boolean backgroundcheck, Boolean securityclearance, Userfield[] userfields, Owner[] owners, String[] types) throws Exception {
 		//
 		try {
 			//
 			Boolean success = contactDao.updateContact(jobDivaSession, contactid, firstname, lastname, title, companyid, department, addresses, phones, reportsto, active, primary, email, alternateemail, assistantname, assistantemail, assistantphone,
-					assistantphoneextension, subguidelines, maxsubmittals, references, drugtest, backgroundcheck, securityclearance, userfields, owners);
+					assistantphoneextension, subguidelines, maxsubmittals, references, drugtest, backgroundcheck, securityclearance, userfields, owners, types);
 			//
 			contactDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateContact", "Update Successful");
 			//
