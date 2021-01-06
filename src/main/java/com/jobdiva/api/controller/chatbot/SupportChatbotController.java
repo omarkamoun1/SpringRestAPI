@@ -19,9 +19,11 @@ import com.jobdiva.api.model.chatbot.ChatbotVisibility;
 import com.jobdiva.api.service.ChatbotDataService;
 
 import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping("/api/chatbot/")
+@ApiIgnore
 @CrossOrigin(origins = "*")
 public class SupportChatbotController extends AbstractJobDivaController {
 	

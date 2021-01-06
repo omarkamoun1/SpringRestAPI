@@ -27,7 +27,7 @@ public class JwtTokenUtil implements Serializable {
 	/** Logger available to subclasses. */
 	protected final Log			logger				= LogFactory.getLog(getClass());
 	//
-	public static final long	JWT_TOKEN_VALIDITY	= 24 * 60 * 60 * 60;
+	public static final long	JWT_TOKEN_VALIDITY	= 24 * 60 * 60;
 	//
 	@Autowired
 	private Environment			env;

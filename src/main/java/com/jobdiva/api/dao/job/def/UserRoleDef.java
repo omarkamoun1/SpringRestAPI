@@ -5,10 +5,10 @@ import com.jobdiva.api.model.UserRole;
 @SuppressWarnings("serial")
 public class UserRoleDef extends UserRole {
 	
-	private Boolean	isSale;
-	private Boolean	isLeadSales;
-	private Boolean	isRecruiter;
-	private Boolean	isLeadRecruiter;
+	private Boolean	isSale			= false;
+	private Boolean	isLeadSales		= false;
+	private Boolean	isRecruiter		= false;
+	private Boolean	isLeadRecruiter	= false;
 	
 	public Boolean getIsSale() {
 		return isSale;

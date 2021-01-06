@@ -1333,7 +1333,9 @@ public class JobDao extends AbstractActivityDao {
 		// Determine jobdiva post based on division ID and team option
 		int jobdivapost_division = -1;
 		if (divisionid != null && divisionid > 0) {
-			sql = "SELECT nvl(POSTTOPORTAL,-1) FROM tdivision WHERE teamid = ? AND id = ?";
+			sql = "SELECT nvl(POSTTOPORTAL,-1) as max_resumes_no " //
+					+ " FROM tdivision " //
+					+ " WHERE teamid = ? AND id = ? "; //
 			params = new Object[] { teamid, divisionid };
 			List<BigDecimal> post_to_portal = jdbcTemplate.query(sql, params, new RowMapper<BigDecimal>() {
 				
@@ -1472,10 +1474,10 @@ public class JobDao extends AbstractActivityDao {
 				//
 				//
 				jobUserDao.insertJobUser(jobid, userRoleDef.getUserId(), teamid, rec_email, userRoleDef.getIsLeadRecruiter(), userRoleDef.getIsSale(), userRoleDef.getIsLeadSales(), userRoleDef.getIsRecruiter(), status);
-				if (userRoleDef.getIsLeadRecruiter())
+				if (userRoleDef.getIsLeadRecruiter() != null && userRoleDef.getIsLeadRecruiter())
 					primaryRecName = userInfos.get("FIRSTNAME") + " " + userInfos.get("LASTNAME"); // for
 				// emails
-				if (userRoleDef.getIsLeadSales())
+				if (userRoleDef.getIsLeadSales() != null && userRoleDef.getIsLeadSales())
 					primarySaleName = userInfos.get("FIRSTNAME") + " " + userInfos.get("LASTNAME"); // for
 				// emails
 				//
@@ -1494,13 +1496,13 @@ public class JobDao extends AbstractActivityDao {
 					throw new Exception("Error: Recruiter(" + userRoleDef.getUserId() + ") is not found. --2 ");
 				// /
 				int role = 0;
-				if (userRoleDef.getIsSale())
+				if (userRoleDef.getIsSale() != null && userRoleDef.getIsSale())
 					role = role | 1;
-				if (userRoleDef.getIsLeadSales())
+				if (userRoleDef.getIsLeadSales() != null && userRoleDef.getIsLeadSales())
 					role = role | 2;
-				if (userRoleDef.getIsRecruiter())
+				if (userRoleDef.getIsRecruiter() != null && userRoleDef.getIsRecruiter())
 					role = role | 4;
-				if (userRoleDef.getIsLeadRecruiter())
+				if (userRoleDef.getIsLeadRecruiter() != null && userRoleDef.getIsLeadRecruiter())
 					role = role | 8;
 				int roleid = 0;
 				switch (role) {
@@ -1604,7 +1606,7 @@ public class JobDao extends AbstractActivityDao {
 		if (users != null) {
 			List<UserRoleDef> userRoleDefs = gettUsersRoleDef(users);
 			for (UserRoleDef userRoleDef : userRoleDefs) {
-				if (userRoleDef.getIsLeadRecruiter())
+				if (userRoleDef.getIsLeadRecruiter() != null && userRoleDef.getIsLeadRecruiter())
 					updateHarvesterAssignment(jobid, teamid, divisionid, userRoleDef.getUserId());
 			}
 		}
