@@ -16,10 +16,12 @@ public class CustomAuthenticationToken extends UsernamePasswordAuthenticationTok
 	private JobDivaConnection			jobDivaConnection;
 	private JdbcTemplate				jdbcTemplate;
 	private NamedParameterJdbcTemplate	namedParameterJdbcTemplate;
+	private Boolean						checkApiPermission	= true;
 	
-	public CustomAuthenticationToken(Object principal, Object credentials, Long clientId) {
+	public CustomAuthenticationToken(Object principal, Object credentials, Long clientId, Boolean checkApiPermission) {
 		super(principal, credentials);
 		this.clientId = clientId;
+		this.checkApiPermission = checkApiPermission;
 		super.setAuthenticated(false);
 	}
 	
@@ -63,5 +65,13 @@ public class CustomAuthenticationToken extends UsernamePasswordAuthenticationTok
 	
 	public void setClientId(Long clientId) {
 		this.clientId = clientId;
+	}
+	
+	public Boolean getCheckApiPermission() {
+		return checkApiPermission;
+	}
+	
+	public void setCheckApiPermission(Boolean checkApiPermission) {
+		this.checkApiPermission = checkApiPermission;
 	}
 }
