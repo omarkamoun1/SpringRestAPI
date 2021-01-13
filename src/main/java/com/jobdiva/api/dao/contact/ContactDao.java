@@ -70,7 +70,7 @@ public class ContactDao extends AbstractJobDivaDao {
 		String sql = "select typeid, typename " //
 				+ " from tcustomertype " //
 				+ " where teamid = ? " //
-				+ " and isdeleted is null ";
+				+ " and ( isdeleted is null or isdeleted = 0 ) ";
 		Object[] params = new Object[] { teamId };
 		//
 		//
@@ -1228,9 +1228,9 @@ public class ContactDao extends AbstractJobDivaDao {
 		}
 		//
 		if (companyid != null) {
-			List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, companyid );
+			List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, companyid);
 			//
-			if (companies.size() == 0 ) {
+			if (companies.size() == 0) {
 				throw new Exception("Error: Company " + companyid + " is not found");
 			}
 			//
@@ -1354,7 +1354,7 @@ public class ContactDao extends AbstractJobDivaDao {
 			ArrayList<String> typeList = new ArrayList<String>();
 			for (int i = 0; i < types.length; i++) {
 				if (isNotEmpty(types[i]))
-					typeList.add(types[i].toUpperCase());
+					typeList.add(types[i].trim().toUpperCase());
 			}
 			for (Map.Entry<String, Long> entry : typeMap.entrySet()) {
 				if (typeList.contains(entry.getKey().toUpperCase())) {

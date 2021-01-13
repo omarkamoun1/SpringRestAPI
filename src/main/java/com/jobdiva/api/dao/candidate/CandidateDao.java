@@ -653,7 +653,7 @@ public class CandidateDao extends AbstractJobDivaDao {
 	
 	public Long createCandidate(JobDivaSession jobDivaSession, String firstName, String lastName, String email, String alternateemail, String address1, String address2, String city, String state, String zipCode, String countryid, String homephone,
 			String workphone, String cellphone, String fax, Double currentsalary, String currentsalaryunit, Double preferredsalary, String preferredsalaryunit, String narrative, //
-			TitleSkillCertification[] titleskillcertifications, String titleskillcertification, Date startdate, Date enddate, Integer years) throws Exception {
+			TitleSkillCertification[] titleskillcertifications, String titleskillcertification, Date startdate, Date enddate, Integer years, Integer resumeSource) throws Exception {
 		//
 		//
 		//
@@ -914,7 +914,7 @@ public class CandidateDao extends AbstractJobDivaDao {
 			}
 			candData.resume = doc;
 			candData.resume.recruiterid = jobDivaSession.getRecruiterId();
-			candData.resume.ResumeSource = "998";
+			candData.resume.ResumeSource = resumeSource != null ? resumeSource + "" : "998";
 			candData.resume.ResumeSourceFlag = 3;
 		} catch (Exception e1) {
 			throw new Exception(e1.getMessage());

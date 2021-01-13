@@ -186,9 +186,8 @@ public class JobDao extends AbstractActivityDao {
 	
 	private void checkJobPriority(JobDivaSession jobDivaSession, String priority, Integer priority_id) throws Exception {
 		logger.info("Verify job priority(" + priority + ")");
-		boolean isValidPriority = false;
-		String sql = "SELECT id FROM tjob_priority WHERE teamid = ? and deleteflag = 0";
-		Object[] params = new Object[] { jobDivaSession.getTeamId() };
+		String sql = "SELECT id FROM tjob_priority WHERE teamid = ? and deleteflag = 0 and id = ?";
+		Object[] params = new Object[] { jobDivaSession.getTeamId(), priority_id };
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
@@ -199,45 +198,81 @@ public class JobDao extends AbstractActivityDao {
 				return rs.getLong("ID");
 			}
 		});
-		for (Long p : userDefinedPriorities) {
-			Integer definedPriority = p.intValue();
-			if (priority_id.equals(definedPriority)) {
-				isValidPriority = true;
-				break;
-			}
-		}
+		boolean isValidPriority = userDefinedPriorities != null && userDefinedPriorities.size() > 0;
+		//
 		if (!isValidPriority)
 			throw new Exception("Error: Invalid Job Priority(" + priority + ")");
 	}
 	
-	private Integer getPriorityId(String priority) throws Exception {
+	private Integer getPriorityId(Long teamId, String priority) throws Exception {
 		Integer priority_id = null;
+		//
 		if (isNotEmpty(priority)) {
+			//
+			priority = priority.trim();
+			//
 			try {
 				priority_id = Integer.parseInt(priority);
 			} catch (NumberFormatException e) {
 			}
+			//
+			Boolean searchByQuery = true;
+			//
 			if (priority_id != null && priority_id.intValue() > 0) {
+				//
+				searchByQuery = false;
+				//
 			} else if (priority.length() == 1) {
+				//
 				char prio = priority.toUpperCase().charAt(0);
+				//
 				switch (prio) {
 					case 'A':
+						searchByQuery = false;
 						priority_id = 1;
 						break;
 					case 'B':
+						searchByQuery = false;
 						priority_id = 2;
 						break;
 					case 'C':
+						searchByQuery = false;
 						priority_id = 3;
 						break;
 					case 'D':
+						searchByQuery = false;
 						priority_id = 4;
 						break;
-					default:
-						throw new Exception("Error: \'" + prio + "\' is not a valid job priority. \r\n");
+					// default:
+					// throw new Exception("Error: \'" + prio + "\' is not a
+					// valid job priority. \r\n");
 				}
-			} else
-				throw new Exception("Error: \'" + priority + "\' is not a valid job priority. \r\n");
+				//
+			}
+			//
+			if (searchByQuery) {
+				//
+				logger.info("Verify Job Id Priority For Custom Job priority(" + priority + ")");
+				//
+				String sql = "SELECT id FROM tjob_priority WHERE teamid = ? and deleteflag = 0 And upper(Name) = upper(?) ";
+				Object[] params = new Object[] { teamId, priority.trim() };
+				//
+				JdbcTemplate jdbcTemplate = getJdbcTemplate();
+				List<Integer> list = jdbcTemplate.query(sql, params, new RowMapper<Integer>() {
+					
+					@Override
+					public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+						return rs.getInt("id");
+					}
+				});
+				//
+				if (list != null && list.size() > 0) {
+					priority_id = list.get(0);
+				} else {
+					throw new Exception("Error: \'" + priority + "\' is not a valid job priority. \r\n");
+				}
+				//
+			}
 		}
 		return priority_id;
 	}
@@ -905,7 +940,7 @@ public class JobDao extends AbstractActivityDao {
 			status = 0;
 		}
 		//
-		Integer priority_id = getPriorityId(priority);
+		Integer priority_id = getPriorityId(jobDivaSession.getTeamId(), priority);
 		//
 		/* Check User Defined Job Priority */
 		if (priority_id != null) {
@@ -1754,7 +1789,7 @@ public class JobDao extends AbstractActivityDao {
 			checkJobStatus(jobDivaSession.getTeamId(), status);
 		}
 		/* Check User Defined Job Priority */
-		Integer priority_id = getPriorityId(priority);
+		Integer priority_id = getPriorityId(jobDivaSession.getTeamId(), priority);
 		if (priority_id != null) {
 			checkJobPriority(jobDivaSession, priority, priority_id);
 		}

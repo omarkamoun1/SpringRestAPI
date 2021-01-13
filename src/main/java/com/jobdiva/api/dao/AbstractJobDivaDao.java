@@ -432,7 +432,7 @@ public class AbstractJobDivaDao {
 	protected List<Long> getIdsFromCompanyTypeName(Long clientId, String[] types) {
 		for (int i = 0; i < types.length; i++) {
 			if (isNotEmpty(types[i]))
-				types[i] = types[i].toUpperCase();
+				types[i] = types[i].trim().toUpperCase();
 		}
 		//
 		String sql = "select id, TYPENAME " //
@@ -440,7 +440,7 @@ public class AbstractJobDivaDao {
 				+ " where " //
 				+ " TEAMID = :teamid " //
 				+ " and upper(TYPENAME) in (:typenames) " //
-				+ " and deleted = 0";
+				+ " and ( deleted is null or deleted = 0 )";
 		//
 		ArrayList<String> tpeList = arraytoList(types);
 		//
