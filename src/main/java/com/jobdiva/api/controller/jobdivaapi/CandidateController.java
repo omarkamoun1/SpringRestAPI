@@ -165,7 +165,10 @@ public class CandidateController extends AbstractJobDivaController {
 			@RequestParam(required = false) Date enddate, //
 			//
 			@ApiParam(value = "Years", required = false) //
-			@RequestParam(required = false) Integer years //
+			@RequestParam(required = false) Integer years, //
+			//
+			@ApiParam(value = "Resume Source", required = false) //
+			@RequestParam(required = false) Integer resumeSource //
 	//
 	//
 	) throws Exception {
@@ -175,7 +178,7 @@ public class CandidateController extends AbstractJobDivaController {
 		jobDivaSession.checkForAPIPermission("createCandidate");
 		//
 		return candidateService.createCandidate(jobDivaSession, firstName, lastName, email, alternateemail, address1, address2, city, state, zipCode, countryid, homephone, workphone, cellphone, fax, currentsalary, currentsalaryunit, preferredsalary,
-				preferredsalaryunit, narrative, titleskillcertifications, titleskillcertification, startdate, enddate, years);
+				preferredsalaryunit, narrative, titleskillcertifications, titleskillcertification, startdate, enddate, years, resumeSource);
 		//
 	}
 	

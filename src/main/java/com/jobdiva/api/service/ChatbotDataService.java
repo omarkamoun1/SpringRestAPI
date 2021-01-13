@@ -39,7 +39,7 @@ public class ChatbotDataService {
 	
 	public List<ChatbotSocialQuestion> getChatbotSocialQuestions(JobDivaSession session) throws Exception {
 		try {
-			List<ChatbotSocialQuestion> questions = trainingDataDao.getSocialQuestions(session);
+ 			List<ChatbotSocialQuestion> questions = trainingDataDao.getSocialQuestions(session);
 			return questions;
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());

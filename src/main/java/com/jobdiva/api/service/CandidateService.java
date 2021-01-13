@@ -77,12 +77,12 @@ public class CandidateService {
 	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
 	public Long createCandidate(JobDivaSession jobDivaSession, String firstName, String lastName, String email, String alternateemail, String address1, String address2, String city, String state, String zipCode, String countryid, String homephone,
 			String workphone, String cellphone, String fax, Double currentsalary, String currentsalaryunit, Double preferredsalary, String preferredsalaryunit, String narrative, //
-			TitleSkillCertification[] titleskillcertifications, String titleskillcertification, Date startdate, Date enddate, Integer years) throws Exception {
+			TitleSkillCertification[] titleskillcertifications, String titleskillcertification, Date startdate, Date enddate, Integer years, Integer resumeSource) throws Exception {
 		//
 		try {
 			//
 			Long candidateId = candidateDao.createCandidate(jobDivaSession, firstName, lastName, email, alternateemail, address1, address2, city, state, zipCode, countryid, homephone, workphone, cellphone, fax, currentsalary, currentsalaryunit,
-					preferredsalary, preferredsalaryunit, narrative, titleskillcertifications, titleskillcertification, startdate, enddate, years);
+					preferredsalary, preferredsalaryunit, narrative, titleskillcertifications, titleskillcertification, startdate, enddate, years, resumeSource);
 			//
 			candidateDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "createCandidate", "Search Successful");
 			//
