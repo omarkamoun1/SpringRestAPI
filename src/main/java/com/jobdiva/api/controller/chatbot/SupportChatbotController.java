@@ -1,5 +1,8 @@
 package com.jobdiva.api.controller.chatbot;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +19,17 @@ import com.jobdiva.api.model.chatbot.ChatbotQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotSocialQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotUserData;
 import com.jobdiva.api.model.chatbot.ChatbotVisibility;
+import com.jobdiva.api.model.chatbot.ChatbotTag;
+import com.jobdiva.api.model.chatbot.ChatbotTagValue;
 import com.jobdiva.api.service.ChatbotDataService;
+
 
 import io.swagger.annotations.ApiParam;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping("/api/chatbot/")
-@ApiIgnore
+//@ApiIgnore
 @CrossOrigin(origins = "*")
 public class SupportChatbotController extends AbstractJobDivaController {
 	
@@ -81,6 +87,18 @@ public class SupportChatbotController extends AbstractJobDivaController {
 	public ChatbotVisibility getChatbotVisibility() throws Exception {
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		return chatbotDataService.getChatbotVisibility(jobDivaSession);
+	}
+	
+	@GetMapping(value = "/tag-list", produces = "application/json")
+	public List<ChatbotTag> getChatbotTagList() throws Exception {
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		return chatbotDataService.getChatbotTagList(jobDivaSession);
+	}
+	
+	@GetMapping(value = "/tag-values", produces = "application/json")
+	public List<ChatbotTagValue> getChatbotTagVaules() throws Exception {
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		return chatbotDataService.getChatbotTagValues(jobDivaSession);
 	}
 	/**
 	 * @CrossOrigin(origins="*") @GetMapping(value = "/user-profile", produces =

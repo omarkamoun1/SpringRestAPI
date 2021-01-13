@@ -1,5 +1,6 @@
 package com.jobdiva.api.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ import com.jobdiva.api.model.chatbot.ChatbotQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotSocialQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotUserData;
 import com.jobdiva.api.model.chatbot.ChatbotVisibility;
+import com.jobdiva.api.model.chatbot.ChatbotTag;
+import com.jobdiva.api.model.chatbot.ChatbotTagValue;
 
 @Service
 public class ChatbotDataService {
@@ -76,6 +79,24 @@ public class ChatbotDataService {
 	public ChatbotVisibility getChatbotVisibility(JobDivaSession jobDivaSession) throws Exception {
 		try {
 			ChatbotVisibility data = trainingDataDao.checkChatbotVisibility(jobDivaSession);
+			return data;
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public List<ChatbotTag> getChatbotTagList(JobDivaSession jobDivaSession) throws Exception {
+		try {
+			List<ChatbotTag> data = trainingDataDao.getChatbotTagList(jobDivaSession);
+			return data;
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public List<ChatbotTagValue> getChatbotTagValues(JobDivaSession jobDivaSession) throws Exception {
+		try {
+			List<ChatbotTagValue> data = trainingDataDao.getChatbotTagValues(jobDivaSession);
 			return data;
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());

@@ -17,6 +17,8 @@ import com.jobdiva.api.model.chatbot.ChatbotAnswer;
 import com.jobdiva.api.model.chatbot.ChatbotQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotRecruiterData;
 import com.jobdiva.api.model.chatbot.ChatbotSocialQuestion;
+import com.jobdiva.api.model.chatbot.ChatbotTag;
+import com.jobdiva.api.model.chatbot.ChatbotTagValue;
 import com.jobdiva.api.model.chatbot.ChatbotUserData;
 import com.jobdiva.api.model.chatbot.ChatbotVisibility;
 
@@ -331,7 +333,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				if ((0 != (leadervalue & (1 << (i - 1))) || leadervalue == 0) && !(i == 2 && accessControlSet.contains("hide_VMS"))) {
 					allowManagingJobBoardsCriteriaAndProfiles = true;
 				}
-				i = 2;
+				i = 7;
 				boolean allowManagingJobBoardsCriteriaOnly = false;
 				if ((0 != (leadervalue & (1 << (i - 1))) || leadervalue == 0) && !(i == 2 && accessControlSet.contains("hide_VMS"))) {
 					allowManagingJobBoardsCriteriaOnly = true;
@@ -340,7 +342,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				tmp.setAllowManagingJobBoardsCriteriaOnly(allowManagingJobBoardsCriteriaOnly);
 				tmp.setFirstname(rs.getString("firstname"));
 				tmp.setLastname(rs.getString("lastname"));
-				if (rs.getLong("leader") == 1296L) {
+				if (rs.getLong("leader") %16 == 0L) {
 					tmp.setTeamLeader(true);
 				} else {
 					tmp.setTeamLeader(false);
@@ -379,5 +381,47 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		//
 		return list != null && list.size() > 0 ? list.get(0) : null;
 		//
+	}
+	
+	public List<ChatbotTag> getChatbotTagList(JobDivaSession jobDivaSession){
+		String sql = "select id, tag, summary, clientsDefineValue, type from tchatbotsupport_tag";
+		JdbcTemplate jdbcTemplate = getCentralJdbcTemplate();
+		//
+		List<ChatbotTag> list = jdbcTemplate.query(sql, new RowMapper<ChatbotTag>() {
+			
+			@Override
+			public ChatbotTag mapRow(ResultSet rs, int rowNum) throws SQLException {
+				ChatbotTag t = new ChatbotTag();
+				t.setTagid(rs.getInt(1));
+				t.setTag(rs.getString(2));
+				t.setTagTitle(rs.getString(3));
+				t.setClientDefined(rs.getBoolean(4));
+				t.setTagType(rs.getString(5));
+				return t;
+			}
+		});
+		return list;
+	}
+	
+	public List<ChatbotTagValue> getChatbotTagValues(JobDivaSession jobDivaSession){
+		String sql = "select a.tag, b.value, a.type, a.forCondition, a.forAnswer  from tchatbotsupport_tag a, ttag_client b where b.teamid = ? and a.id = b.tagid";
+		JdbcTemplate jdbcTemplate = getCentralJdbcTemplate();
+		long teamid = jobDivaSession.getTeamId();
+		Object[] params = new Object[] {teamid};
+		//
+		List<ChatbotTagValue> list = jdbcTemplate.query(sql, params, new RowMapper<ChatbotTagValue>() {
+			
+			@Override
+			public ChatbotTagValue mapRow(ResultSet rs, int rowNum) throws SQLException {
+				ChatbotTagValue tag = new ChatbotTagValue();
+				tag.setTag(rs.getString(1));
+				tag.setValue(rs.getString(2));
+				tag.setTagType(rs.getString(3));
+				tag.setForCondition(rs.getBoolean(4));
+				tag.setForAnswer(rs.getBoolean(5));
+				return tag;
+			}
+		});
+		return list;
 	}
 }
