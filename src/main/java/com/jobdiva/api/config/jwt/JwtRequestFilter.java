@@ -83,7 +83,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			try {
 				if (jwtTokenUtil.validateToken(jwtToken, divaSession)) {
 					//
-					CustomAuthenticationToken customAuthenticationToken = new CustomAuthenticationToken(divaSession, divaSession.getPassword(), divaSession.getTeamId());
+					CustomAuthenticationToken customAuthenticationToken = new CustomAuthenticationToken(divaSession, divaSession.getPassword(), divaSession.getTeamId(), divaSession.getCheckApiPermission());
 					customAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 					//
 					JdbcTemplate jdbcTemplate = jobDivaConnectivity.getJdbcTemplate(divaSession.getTeamId());

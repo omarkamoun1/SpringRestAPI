@@ -21,6 +21,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "Authentication API", description = "REST API Used For Authentication")
 @RestController
@@ -40,7 +41,7 @@ public class AuthenticationController {
 	//
 	
 	@ApiImplicitParams({ @ApiImplicitParam(name = "password", required = true, dataType = "String", format = "password") })
-	@ApiOperation(value = "Bi Data Information")
+	@ApiOperation(value = "Authenticate")
 	@RequestMapping(value = "/authenticate", method = RequestMethod.GET)
 	public String createAuthenticationToken(
 			//
@@ -54,7 +55,7 @@ public class AuthenticationController {
 			@RequestParam(required = true) String password) throws Exception {
 		//
 		//
-		JobDivaSession jobDivaSession = authenticate(clientid, username, password);
+		JobDivaSession jobDivaSession = authenticate(clientid, username, password, true);
 		//
 		//
 		final String token = jwtTokenUtil.generateToken(jobDivaSession);
@@ -65,11 +66,36 @@ public class AuthenticationController {
 		//
 	}
 	
-	protected JobDivaSession authenticate(Long clientId, String username, String password) throws Exception {
+	@ApiIgnore
+	@RequestMapping(value = "/internalAuthenticate", method = RequestMethod.GET)
+	public String authenticateWithoutCheckPermission(
+			//
+			@ApiParam(value = "Provided by JobDiva", required = true, type = "Long") //
+			@RequestParam(required = true) Long clientid, //
+			//
+			@ApiParam(value = "Account username (email)", required = true, type = "String") //
+			@RequestParam(required = true) String username, //
+			//
+			@ApiParam(value = "Account password", required = true, type = "string", format = "password") //
+			@RequestParam(required = true) String password) throws Exception {
+		//
+		//
+		JobDivaSession jobDivaSession = authenticate(clientid, username, password, false);
+		//
+		//
+		final String token = jwtTokenUtil.generateToken(jobDivaSession);
+		//
+		return token;
+		//
+		//
+		//
+	}
+	
+	protected JobDivaSession authenticate(Long clientId, String username, String password, Boolean checkApiPermission) throws Exception {
 		try {
 			//
 			//
-			Authentication authenticate = authenticationManager.authenticate(new CustomAuthenticationToken(username, password, clientId));
+			Authentication authenticate = authenticationManager.authenticate(new CustomAuthenticationToken(username, password, clientId, checkApiPermission));
 			return (JobDivaSession) authenticate.getPrincipal();
 			//
 			//

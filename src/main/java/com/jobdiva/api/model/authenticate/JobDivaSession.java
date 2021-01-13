@@ -20,7 +20,9 @@ public class JobDivaSession extends User {
 	private long				recruiterId;
 	private long				leader;
 	private List<APIPermission>	apiPermissions	= new ArrayList<APIPermission>();
+	private Boolean				checkApiPermission;
 	
+	//
 	public JobDivaSession() {
 		super(null, null, new HashSet<JobDivaGrantedAuthority>());
 	}
@@ -118,5 +120,13 @@ public class JobDivaSession extends User {
 	
 	public void setApiPermissions(List<APIPermission> apiPermissions) {
 		this.apiPermissions = apiPermissions;
+	}
+	
+	public Boolean getCheckApiPermission() {
+		return checkApiPermission;
+	}
+	
+	public void setCheckApiPermission(Boolean checkApiPermission) {
+		this.checkApiPermission = checkApiPermission;
 	}
 }
