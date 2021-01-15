@@ -19,8 +19,8 @@ public class JobDivaSession extends User {
 	private Integer				environment;
 	private long				recruiterId;
 	private long				leader;
-	private List<APIPermission>	apiPermissions	= new ArrayList<APIPermission>();
-	private Boolean				checkApiPermission;
+	private List<APIPermission>	apiPermissions		= new ArrayList<APIPermission>();
+	private Boolean				checkApiPermission	= true;
 	
 	//
 	public JobDivaSession() {

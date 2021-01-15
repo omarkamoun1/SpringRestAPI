@@ -31,6 +31,9 @@ public class ChatbotQuestion implements java.io.Serializable {
 	@JsonProperty(value = "substituteTagValues", index = 7)
 	private String				substituteTagValues;
 	//
+	@JsonProperty(value = "confidenceLevel", index = 8)
+	private int				confidenceLevel;
+	//
 	private Integer				tmpId;
 	
 	public Integer getTmpId() {
@@ -109,5 +112,13 @@ public class ChatbotQuestion implements java.io.Serializable {
 	
 	public void setSubstituteTagValues(String substituteTagValues) {
 		this.substituteTagValues = substituteTagValues;
+	}
+
+	public int getConfidenceLevel() {
+		return confidenceLevel;
+	}
+	
+	public void setConfidenceLevel(int confidenceLevel) {
+		this.confidenceLevel = confidenceLevel;
 	}
 }
