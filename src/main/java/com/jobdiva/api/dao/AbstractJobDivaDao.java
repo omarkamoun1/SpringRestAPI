@@ -36,6 +36,7 @@ import com.axelon.util.JDLocale;
 import com.jobdiva.api.config.AppProperties;
 import com.jobdiva.api.config.jwt.CustomAuthenticationToken;
 import com.jobdiva.api.dao.def.UserfieldsDef;
+import com.jobdiva.api.dao.setup.JobDivaConnectivity;
 import com.jobdiva.api.dao.team.TeamRowMapper;
 import com.jobdiva.api.model.Job;
 import com.jobdiva.api.model.JobUser;
@@ -72,6 +73,8 @@ public class AbstractJobDivaDao {
 	@Autowired
 	protected AppProperties						appProperties;
 	//
+	@Autowired
+	JobDivaConnectivity							jobDivaConnectivity;
 	//
 	@Autowired
 	protected JdbcTemplate						_jdbcTemplate;
@@ -146,6 +149,10 @@ public class AbstractJobDivaDao {
 	public NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
 		CustomAuthenticationToken customAuthenticationToken = (CustomAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 		return customAuthenticationToken.getNamedParameterJdbcTemplate();
+	}
+	
+	public JdbcTemplate getMinerJdbcTemplate() {
+		return jobDivaConnectivity.getMinerJdbcTemplate();
 	}
 	
 	protected String getUtilServlet() {

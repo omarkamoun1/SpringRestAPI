@@ -41,7 +41,7 @@ public class JobdivaAuthenticationFilter extends UsernamePasswordAuthenticationF
 		if (clientId == null) {
 			clientId = 0L;
 		}
-		return new CustomAuthenticationToken(username, password, clientId);
+		return new CustomAuthenticationToken(username, password, clientId, true);
 	}
 	
 	private Long obtainDomain(HttpServletRequest request) {

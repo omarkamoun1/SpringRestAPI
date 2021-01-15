@@ -59,7 +59,7 @@ public class JobDivaAuthenticateDao extends AbstractJobDivaDao {
 	}
 	
 	//
-	public JobDivaSession authenticate(Long clientid, String username, String password, HashMap<Object, Object> optionsMap) throws Exception {
+	public JobDivaSession authenticate(Long clientid, String username, String password, HashMap<Object, Object> optionsMap, Boolean checkApiPermission) throws Exception {
 		//
 		String sql = null;
 		Object[] param = null;
@@ -116,11 +116,19 @@ public class JobDivaAuthenticateDao extends AbstractJobDivaDao {
 			//
 			jdbcTemplate = jobDivaConnectivity.getJdbcTemplate(clientid);
 			//
-			sql = " select a.id, a.groupid, a.password, b.lastapicall, sysdate clock, a.s1, LEADER " //
-					+ " from trecruiter a, tteam b " + //
-					" where a.groupid=? and a.email=? and a.active=1 and substr(a.permission2_recruiter, 31,1)='1' " + //
-					"   and b.id = a.groupid ";
-			param = new Object[] { clientid, username };
+			if (checkApiPermission) {
+				sql = " select a.id, a.groupid, a.password, b.lastapicall, sysdate clock, a.s1, LEADER " //
+						+ " from trecruiter a, tteam b " + //
+						" where a.groupid=? and a.email=? and a.active=1 and substr(a.permission2_recruiter, 31,1)='1' " + //
+						"   and b.id = a.groupid ";
+				param = new Object[] { clientid, username };
+			} else {
+				sql = " select a.id, a.groupid, a.password, b.lastapicall, sysdate clock, a.s1, LEADER " //
+						+ " from trecruiter a, tteam b " + //
+						" where a.groupid = ? and upper(a.email) = upper( ? ) and a.active=1 " + //
+						"   and b.id = a.groupid ";
+				param = new Object[] { clientid, username };
+			}
 			//
 		}
 		//
@@ -151,7 +159,6 @@ public class JobDivaAuthenticateDao extends AbstractJobDivaDao {
 			String db_password = (String) list.get(1);
 			String salt = (String) list.get(4);
 			//
-			
 			boolean correctPassword = false;
 			if (salt != null) {
 				if (Encryption.hashStringWithSalt(password, salt).equals(db_password))
@@ -176,25 +183,28 @@ public class JobDivaAuthenticateDao extends AbstractJobDivaDao {
 			//
 			//
 			JobDivaSession jobDivaSession = new JobDivaSession(clientid, username, password, env, userId, leader);
+			jobDivaSession.setCheckApiPermission(checkApiPermission);
 			//
-			sql = "select allowedoperation, divisionid from tapipermission where teamid=? and recruiterid=? ";
-			param = new Object[] { clientid, userId };
-			jdbcTemplate.query(sql, param, new RowMapper<Boolean>() {
-				
-				@Override
-				public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
-					String methodName = rs.getString("allowedoperation");
-					Long divisionId = rs.getLong("divisionid");
-					//
-					APIPermission apiPermission = new APIPermission();
-					apiPermission.setDivisionId(divisionId);
-					apiPermission.setMethodName(methodName);
-					//
-					jobDivaSession.getApiPermissions().add(apiPermission);
-					//
-					return false;
-				}
-			});
+			if (checkApiPermission) {
+				sql = "select allowedoperation, divisionid from tapipermission where teamid=? and recruiterid=? ";
+				param = new Object[] { clientid, userId };
+				jdbcTemplate.query(sql, param, new RowMapper<Boolean>() {
+					
+					@Override
+					public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
+						String methodName = rs.getString("allowedoperation");
+						Long divisionId = rs.getLong("divisionid");
+						//
+						APIPermission apiPermission = new APIPermission();
+						apiPermission.setDivisionId(divisionId);
+						apiPermission.setMethodName(methodName);
+						//
+						jobDivaSession.getApiPermissions().add(apiPermission);
+						//
+						return false;
+					}
+				});
+			}
 			//
 			//
 			//

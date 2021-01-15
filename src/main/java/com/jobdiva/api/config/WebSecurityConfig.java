@@ -100,6 +100,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				// dont authenticate this particular request
 				.authorizeRequests().//
 				antMatchers("/api/authenticate").permitAll().//
+				antMatchers("/api/internalAuthenticate").permitAll().//
 				antMatchers("/api/controller/saveMachineId").permitAll().//
 				antMatchers("/api/controller/getCoddlers").permitAll().//
 				antMatchers("/api/controller/getConfiguration").permitAll().//

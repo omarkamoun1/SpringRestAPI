@@ -62,7 +62,7 @@ public class JobDivaUserDetailsAuthenticationProvider extends AbstractUserDetail
 		CustomAuthenticationToken auth = (CustomAuthenticationToken) authentication;
 		UserDetails loadedUser;
 		try {
-			loadedUser = this.userDetailsService.loadUserByUsernameAndClientId(auth.getClientId(), auth.getPrincipal().toString(), auth.getCredentials().toString());
+			loadedUser = this.userDetailsService.loadUserByUsernameAndClientId(auth.getClientId(), auth.getPrincipal().toString(), auth.getCredentials().toString(), auth.getCheckApiPermission());
 		} catch (UsernameNotFoundException notFound) {
 			if (authentication.getCredentials() != null) {
 				String presentedPassword = authentication.getCredentials().toString();

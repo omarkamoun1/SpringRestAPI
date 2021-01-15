@@ -20,6 +20,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import com.jobdiva.api.config.AppProperties;
 import com.zaxxer.hikari.HikariDataSource;
 
 @Component
@@ -31,13 +32,19 @@ public class JobDivaConnectivity {
 	@Autowired
 	JdbcTemplate							jdbcTemplate;
 	//
+	@Autowired
+	AppProperties							appProperties;
+	//
 	List<JobDivaConnection>					divaConnections				= new ArrayList<JobDivaConnection>();
 	//
 	List<JdbcTemplate>						jdbcsTemplates				= Collections.synchronizedList(new ArrayList<JdbcTemplate>());
 	Map<Long, JobDivaConnection>			jobDivaConnections			= Collections.synchronizedMap(new HashMap<Long, JobDivaConnection>());
 	Map<Long, JdbcTemplate>					jdbcTemplates				= Collections.synchronizedMap(new HashMap<Long, JdbcTemplate>());
 	Map<Long, NamedParameterJdbcTemplate>	namedParameterJdbcTemplates	= Collections.synchronizedMap(new HashMap<Long, NamedParameterJdbcTemplate>());
+	//
+	private JdbcTemplate					minerJdbcTemplate;
 	
+	//
 	@PostConstruct
 	public void init() {
 		//
@@ -89,6 +96,7 @@ public class JobDivaConnectivity {
 		//
 		initJdbcTemplates();
 		//
+		initMinerJdbcTemplate();
 		//
 		logger.info("DataBase Connectivity Done.");
 		//
@@ -137,6 +145,28 @@ public class JobDivaConnectivity {
 		//
 		logger.info("JDBC Connectivity Done.");
 		//
+	}
+	
+	@SuppressWarnings("rawtypes")
+	private void initMinerJdbcTemplate() {
+		DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
+		dataSourceBuilder.driverClassName(appProperties.getAxelonDSMinerDriver());
+		dataSourceBuilder.url(appProperties.getAxelonDSMinerSUrl());
+		dataSourceBuilder.username(appProperties.getAxelonDSMinerUserName());
+		dataSourceBuilder.password(appProperties.getAxelonDSMinerPassword());
+		DataSource dataSource = dataSourceBuilder.build();
+		minerJdbcTemplate = new JdbcTemplate(dataSource);
+		//
+		//
+		minerJdbcTemplate.query("SELECT 1 ", new RowMapper<Integer>() {
+			
+			@Override
+			public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getInt(1);
+			}
+		});
+		//
+		logger.info("Miner Jdbc Template Connectivity Done.");
 	}
 	
 	private JdbcTemplate createJdbcTemplate(JobDivaConnection jobDivaConnection) {
@@ -188,5 +218,9 @@ public class JobDivaConnectivity {
 	 */
 	public List<JdbcTemplate> getJdbcsTemplates() {
 		return jdbcsTemplates;
+	}
+	
+	public JdbcTemplate getMinerJdbcTemplate() {
+		return minerJdbcTemplate;
 	}
 }

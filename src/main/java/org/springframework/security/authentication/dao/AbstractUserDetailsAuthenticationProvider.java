@@ -44,6 +44,9 @@ import org.springframework.context.support.MessageSourceAccessor;
 
 import org.springframework.util.Assert;
 
+import com.jobdiva.api.config.jwt.CustomAuthenticationToken;
+import com.jobdiva.api.model.authenticate.JobDivaSession;
+
 /**
  * A base {@link AuthenticationProvider} that allows subclasses to override and
  * work with {@link org.springframework.security.core.userdetails.UserDetails}
@@ -110,7 +113,7 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements Authe
 	 *            or <code>UserCache</code>
 	 * @param authentication
 	 *            the current request that needs to be authenticated
-	 *
+	 *			
 	 * @throws AuthenticationException
 	 *             AuthenticationException if the credentials could not be
 	 *             validated (generally a <code>BadCredentialsException</code>,
@@ -130,6 +133,11 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements Authe
 		String username = (authentication.getPrincipal() == null) ? "NONE_PROVIDED" : authentication.getName();
 		boolean cacheWasUsed = true;
 		UserDetails user = this.userCache.getUserFromCache(username);
+		//
+		if (user != null && user instanceof JobDivaSession && authentication instanceof CustomAuthenticationToken && !((JobDivaSession) user).getCheckApiPermission().equals(((CustomAuthenticationToken) authentication).getCheckApiPermission())) {
+			user = null;
+		}
+		//
 		if (user == null) {
 			cacheWasUsed = false;
 			try {
@@ -188,7 +196,7 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements Authe
 	 *            that was presented to the provider for validation
 	 * @param user
 	 *            that was loaded by the implementation
-	 *
+	 *			
 	 * @return the successful authentication token
 	 */
 	protected Authentication createSuccessAuthentication(Object principal, Authentication authentication, UserDetails user) {
@@ -256,7 +264,7 @@ public abstract class AbstractUserDetailsAuthenticationProvider implements Authe
 	 *
 	 * @return the user information (never <code>null</code> - instead an
 	 *         exception should the thrown)
-	 *
+	 *		
 	 * @throws AuthenticationException
 	 *             if the credentials could not be validated (generally a
 	 *             <code>BadCredentialsException</code>, an
