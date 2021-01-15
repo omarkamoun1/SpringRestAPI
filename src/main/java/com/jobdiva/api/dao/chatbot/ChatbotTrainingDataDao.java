@@ -29,9 +29,9 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		//
 		String sql = "select a.id, a.text, b.questionid, b.text, " //
 				+ " a.ques_ref_id, a.keywords, a.show_as_suggestion, " //
-				+ " a.ques_tag, a.substitute, a.lookup_tag " //
+				+ " a.ques_tag, a.substitute, a.lookup_tag, a.confid" //
 				+ " from tchatbotsupport_question a, tquevariants_support b " //
-				+ " where a.id = b.questionid " //
+				+ " where a.id = b.questionid and a.activate_status = 1" //
 				+ " order by a.ques_ref_id";
 		//
 		JdbcTemplate jdbcTemplate = getCentralJdbcTemplate();
@@ -46,6 +46,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				q.setReferenceID(rs.getInt(5));
 				q.setKeywords(rs.getString(6));
 				q.setShowAsSuggestion(rs.getInt(7));
+				q.setConfidenceLevel(rs.getInt(11));
 				if (rs.getString(8) != null) {
 					q.setQuestionWithTag(rs.getString(8));
 				} else {
@@ -84,6 +85,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				q.setShowAsSuggestion(list.get(i).getShowAsSuggestion());
 				q.setQuestionWithTag(list.get(i).getQuestionWithTag());
 				q.setSubstituteTagValues(list.get(i).getSubstituteTagValues());
+				q.setConfidenceLevel(list.get(i).getConfidenceLevel());
 			}
 			q.addVariation(list.get(i).getVariations().get(0));
 		}
