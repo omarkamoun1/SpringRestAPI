@@ -97,6 +97,11 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				q.setConfidenceLevel(list.get(i).getConfidenceLevel());
 			}
 			q.addVariation(list.get(i).getVariations().get(0));
+			
+			// add last question
+			if ( i == list.size()-1){
+				questions.add(q);
+			}
 		}
 		return questions;
 	}
