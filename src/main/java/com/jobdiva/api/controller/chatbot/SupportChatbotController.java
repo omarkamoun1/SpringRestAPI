@@ -95,10 +95,15 @@ public class SupportChatbotController extends AbstractJobDivaController {
 		return chatbotDataService.getChatbotTagList(jobDivaSession);
 	}
 	
-	@GetMapping(value = "/tag-values", produces = "application/json")
-	public List<ChatbotTagValue> getChatbotTagVaules() throws Exception {
+	@GetMapping(value = "/tag-value", produces = "application/json")
+	public ChatbotTagValue getChatbotTagVaules(
+	@ApiParam(value = "tag", required = true) //
+	@RequestParam(required = true) String tag, //
+	@ApiParam(value = "references", required = false) //
+	@RequestParam(required = false) String[] references //
+	) throws Exception {
 		JobDivaSession jobDivaSession = getJobDivaSession();
-		return chatbotDataService.getChatbotTagValues(jobDivaSession);
+		return chatbotDataService.getChatbotTagValue(jobDivaSession, tag, references);
 	}
 	/**
 	 * @CrossOrigin(origins="*") @GetMapping(value = "/user-profile", produces =

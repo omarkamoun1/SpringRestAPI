@@ -94,9 +94,9 @@ public class ChatbotDataService {
 		}
 	}
 	
-	public List<ChatbotTagValue> getChatbotTagValues(JobDivaSession jobDivaSession) throws Exception {
+	public ChatbotTagValue getChatbotTagValue(JobDivaSession jobDivaSession, String tagName, String references[]) throws Exception {
 		try {
-			List<ChatbotTagValue> data = trainingDataDao.getChatbotTagValues(jobDivaSession);
+			ChatbotTagValue data = trainingDataDao.getChatbotTagValue(jobDivaSession, tagName, references);
 			return data;
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
