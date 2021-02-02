@@ -325,7 +325,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		//
 		//
 		// get permission
-		sql = "select permission, firstname, lastname, leader " //
+		sql = "select permission, firstname, lastname, leader, permission2_recruiter " //
 				+ " from trecruiter "//
 				+ " where groupid = ? and ID = ? ";
 		//
@@ -336,47 +336,88 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			
 			@Override
 			public ChatbotUserData mapRow(ResultSet rs, int rowNum) throws SQLException {
+				System.out.println(recruiterid);
 				ChatbotUserData tmp = new ChatbotUserData();
-				long leadervalue = rs.getLong(1);
+				long permission = rs.getLong(1);
+				Boolean isTeamLeader = !((rs.getInt(4)&16)==0);
+
+	
 				boolean allowManagingJobBoardsCriteriaAndProfiles = false;
 				// if (( 0!=(leadervalue & (1<<(i-1))) || leadervalue==0) &&
 				// !(i==2 &&
 				// accessControlSet.contains("hide_VMS"))){%>true<%}else{%>false<%}
 				String accessControlSet = "";
 				int i = 1;
-				if (0 != (leadervalue & (1 << (i - 1)))) {
+				if (isTeamLeader && 0 != (permission & (1 << (i - 1)))) {
 					allowManagingJobBoardsCriteriaAndProfiles = true;
 				}
 				boolean displayFourDailyEmailProfileOption = false;
 				i = 6;
-				if (0 != (leadervalue & (1 << (i - 1)))){
+				if (isTeamLeader && 0 != (permission & (1 << (i - 1)))){
 					displayFourDailyEmailProfileOption = true;
 				}
 				i = 7;
 				boolean allowManagingJobBoardsCriteriaOnly = false;
-				if (0 != (leadervalue & (1 << (i - 1)))) {
+				if (isTeamLeader && 0 != (permission & (1 << (i - 1)))) {
 					allowManagingJobBoardsCriteriaOnly = true;
+				}
+				String permission2 = rs.getString("permission2_recruiter");
+//				private boolean allowAssignOnboardingToNotLinkedJob;//42
+//				private boolean allowManagingOnboarding;//13
+//				private boolean allowAccessCompletedOnboarding;//6
+//				private boolean allowAccessCompletedOnboardingForHires;//7
+//				private boolean allowAccessCompletedOnboardingForPrimaryJobs;//8
+//				private boolean allowAccessCompletedOnboardingForMyJobs;//9
+//				private boolean allowAccessCompletedOnboardingForAllJobs;//10
+//				private boolean allowAccessCompletedOnboardingForDivision;//11
+				System.out.println(permission);
+				System.out.println(permission2);
+				if(permission2!=null && !permission2.isEmpty()) {
+					if(permission2.charAt(42)=='1')
+						tmp.setAllowAssignOnboardingToNotLinkedJob(true);
+					if(permission2.charAt(13)=='1')
+						tmp.setAllowManagingOnboarding(true);
+					if(permission2.charAt(6)=='1')
+						tmp.setAllowAccessCompletedOnboarding(true);
+					if(permission2.charAt(7)=='1')
+						tmp.setAllowAccessCompletedOnboardingForHires(true);
+					if(permission2.charAt(8)=='1')
+						tmp.setAllowAccessCompletedOnboardingForPrimaryJobs(true);
+					if(permission2.charAt(9)=='1')
+						tmp.setAllowAccessCompletedOnboardingForMyJobs(true);
+					if(permission2.charAt(10)=='1')
+						tmp.setAllowAccessCompletedOnboardingForAllJobs(true);
+					if(permission2.charAt(11)=='1')
+						tmp.setAllowAccessCompletedOnboardingForDivision(true);
 				}
 				tmp.setAllowManagingJobBoardsCriteriaAndProfiles(allowManagingJobBoardsCriteriaAndProfiles);
 				tmp.setAllowManagingJobBoardsCriteriaOnly(allowManagingJobBoardsCriteriaOnly);
+				tmp.setDisplayTheFourDailyEmailProfileOption(displayFourDailyEmailProfileOption);
 				tmp.setFirstname(rs.getString("firstname"));
 				tmp.setLastname(rs.getString("lastname"));
-				if (rs.getLong("leader") %16 == 0L) {
-					tmp.setTeamLeader(true);
-				} else {
-					tmp.setTeamLeader(false);
-				}
+				tmp.setTeamLeader(isTeamLeader);
 				return tmp;
 			}
 		});
 		//
 		if (list.size() > 0) {
-			data.setAllowManagingJobBoardsCriteriaAndProfiles(list.get(0).isAllowManagingJobBoardsCriteriaAndProfiles());
-			data.setAllowManagingJobBoardsCriteriaOnly(list.get(0).isAllowManagingJobBoardsCriteriaOnly());
-			data.setDisplayTheFourDailyEmailProfileOption(list.get(0).isDisplayTheFourDailyEmailProfileOption());
-			data.setFirstname(list.get(0).getFirstname());
-			data.setLastname(list.get(0).getLastname());
-			data.setTeamLeader(list.get(0).isTeamLeader());
+			ChatbotUserData tmp = list.get(0);
+			
+			data.setAllowAssignOnboardingToNotLinkedJob(tmp.isAllowAssignOnboardingToNotLinkedJob());
+			data.setAllowManagingOnboarding(tmp.isAllowManagingOnboarding());
+			data.setAllowAccessCompletedOnboarding(tmp.isAllowAccessCompletedOnboarding());
+			data.setAllowAccessCompletedOnboardingForHires(tmp.isAllowAccessCompletedOnboardingForHires());
+			data.setAllowAccessCompletedOnboardingForPrimaryJobs(tmp.isAllowAccessCompletedOnboardingForPrimaryJobs());
+			data.setAllowAccessCompletedOnboardingForMyJobs(tmp.isAllowAccessCompletedOnboardingForMyJobs());
+			data.setAllowAccessCompletedOnboardingForAllJobs(tmp.isAllowAccessCompletedOnboardingForAllJobs());
+			data.setAllowAccessCompletedOnboardingForDivision(tmp.isAllowAccessCompletedOnboardingForDivision());
+			
+			data.setAllowManagingJobBoardsCriteriaAndProfiles(tmp.isAllowManagingJobBoardsCriteriaAndProfiles());
+			data.setAllowManagingJobBoardsCriteriaOnly(tmp.isAllowManagingJobBoardsCriteriaOnly());
+			data.setDisplayTheFourDailyEmailProfileOption(tmp.isDisplayTheFourDailyEmailProfileOption());
+			data.setFirstname(tmp.getFirstname());
+			data.setLastname(tmp.getLastname());
+			data.setTeamLeader(tmp.isTeamLeader());
 		}
 		//
 		return data;
@@ -640,21 +681,23 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 	    //return 
 	    ChatbotTagValue tagValue = new ChatbotTagValue();
 	    String tagType = "TEXT";
-	    Long webid = Long.valueOf(references[0]);
-	    String JobBoardName = "";
-	    String sql = "select distinct b.username from twebsites a, twebsites_detail b where b.teamid=? and a.id=? and a.id = b.webid";
+	    String JobBoardName = "{";
+	    String sql = "select distinct a.websitename, a.id from twebsites a, twebsites_detail b where b.teamid=? and a.id = b.webid";
 	    JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
-	    Object[] params = new Object[] {teamid, webid}; 
+	    Object[] params = new Object[] {teamid}; 
 	    List<String> list = jdbcTemplate.query(sql, params, new RowMapper<String>() {
 	        @Override
 	        public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-	            return rs.getString(1);
+	            return "\""+rs.getString(1)+"\":"+rs.getLong(2);
 	        }
 	    });
 	    for(int i=0;i<list.size();i++) {
 	    	JobBoardName += list.get(i);
-	    	if(i!=list.size()-1) {
+	    	if(i<list.size()-1) {
 	    		JobBoardName +=", ";
+	    	}
+	    	else {
+	    		JobBoardName += "}";
 	    	}
 	    }
 	    tagValue.setValue(JobBoardName);
@@ -667,7 +710,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 	    ChatbotTagValue tagValue = new ChatbotTagValue();
 	    String tagType = "TEXT";
 	    Long webid = Long.valueOf(references[0]);
-	    String startTime = "";
+	    String startTime = "[\"";
 	    String sql = "select date_format(time, '%H:%i') from tschedule where teamid=? and webid=? order by date_format(time, '%H:%i')";
 	    JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
 	    Object[] params = new Object[] {teamid, webid}; 
@@ -680,8 +723,11 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 	    for(int i=0;i<dateList.size();i++) {
 	    	String startDate = dateList.get(i);
 	    	startTime = startTime + startDate;
-	    	if(i!=dateList.size()-1) {
-	    		startTime = startTime + ", ";
+	    	if(i<dateList.size()-1) {
+	    		startTime = startTime + "\", \"";
+	    	}
+	    	else {
+	    		startTime = startTime + "\"]";
 	    	}
 	    }
 	    tagValue.setValue(startTime);
@@ -694,19 +740,26 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 	    ChatbotTagValue tagValue = new ChatbotTagValue();
 	    String tagType = "TEXT";
 	    Long webid = Long.valueOf(references[0]);
-	    String startTime = "";
-	    String sql = "select username from twebsites_detail where teamid=? and webid=? and machine_no=?";
+	    String jobBoard = "{";
+	    String sql = "select username, machine_no from twebsites_detail where teamid=? and webid=?";
 	    JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
 	    Object[] params = new Object[] {teamid, webid}; 
 	    List<String> list = jdbcTemplate.query(sql, params, new RowMapper<String>() {
 	        @Override
 	        public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-	        	return rs.getString(1);
+	        	return "\""+rs.getString(1)+"\":"+rs.getLong(1);
 	        }
 	    });
-	    if(list.size()>0) {
-		    tagValue.setValue(list.get(0));
+	    for(int i=0;i<list.size();i++) {
+	    	String username = list.get(i);
+	    	if(i<list.size()-1) {
+	    		jobBoard = username+",";
+	    	}
+	    	else
+	    		jobBoard = username +"}";
+	    	
 	    }
+	    tagValue.setValue(jobBoard);
 	    tagValue.setTag(tagName);
 	    tagValue.setTagType(tagType);
 	    return tagValue; 
@@ -931,10 +984,11 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 	    tagValue.setTagType(tagType);
 		return tagValue;
 	}
+	
 	public ChatbotTagValue getCoddlerName(Long teamid, String tagName, String[] references ) {
 		ChatbotTagValue tagValue =new ChatbotTagValue();
 		String tagType = "TEXT";
-		String site = "";
+		String site = "[\"";
 		String sql = "select site from tspiderswebsites where teamid=? and nvl(deleted,0)=0";
 	    JdbcTemplate jdbcTemplate = getJdbcTemplate();
 	    Object[] params = new Object[] {teamid}; 
@@ -947,7 +1001,9 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 	    for(int i=0;i<siteList.size();i++) {
 	    	site=site+siteList.get(i);
 	    	if(i!=siteList.size()-1)
-	    		site = site+", ";
+	    		site = site+"\", \"";
+	    	else
+	    	    site = site +"\"]";
 	    }
 	    tagValue.setValue(site);
 	    tagValue.setTag(tagName);
@@ -1000,7 +1056,6 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 	    tagValue.setTagType(tagType);
 		return tagValue;
 	}
-
 	
 	public static String decode(String str_input, String str_key) {
 //		String str_key = "zhangjintao";
