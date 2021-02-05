@@ -20,9 +20,8 @@ public class ChatbotUserData implements java.io.Serializable {
 	private boolean allowAccessCompletedOnboardingForMyJobs;//9
 	private boolean allowAccessCompletedOnboardingForAllJobs;//10
 	private boolean allowAccessCompletedOnboardingForDivision;//11
+	private boolean allowUnassignIndividualDocuments;//120
 
-
-	private boolean allowUnassginAccessIndividualDocumentsFromAssigned;
 	
 	private String	firstname;
 	private String	lastname;
@@ -179,12 +178,11 @@ public class ChatbotUserData implements java.io.Serializable {
 		return allowAccessCompletedOnboardingForAllJobs;
 	}
 	
-	public void setAllowUnassignAccessIndividualDocumentsForAssigned(Boolean allowUnassignAccessIndividualDocumentsForAssigned) {
-		this.allowUnassginAccessIndividualDocumentsFromAssigned = allowUnassignAccessIndividualDocumentsForAssigned;
+	public void setAllowUnassignAccessIndividualDocuments(Boolean allowUnassignIndividualDocuments) {
+		this.allowUnassignIndividualDocuments = allowUnassignIndividualDocuments;
 	}
 	
-	public boolean allowUnassignAccessIndividualDocumentsForAssigned() {
-		return allowUnassginAccessIndividualDocumentsFromAssigned;
-		
+	public boolean isAllowUnassignAccessIndividualDocuments() {
+		return allowUnassignIndividualDocuments;
 	}
 }

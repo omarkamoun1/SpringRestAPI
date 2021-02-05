@@ -389,6 +389,8 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 						tmp.setAllowAccessCompletedOnboardingForAllJobs(true);
 					if(permission2.charAt(11)=='1')
 						tmp.setAllowAccessCompletedOnboardingForDivision(true);
+					if(permission2.charAt(120)=='1')
+						tmp.setAllowUnassignAccessIndividualDocuments(true);
 				}
 				tmp.setAllowManagingJobBoardsCriteriaAndProfiles(allowManagingJobBoardsCriteriaAndProfiles);
 				tmp.setAllowManagingJobBoardsCriteriaOnly(allowManagingJobBoardsCriteriaOnly);
@@ -411,7 +413,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			data.setAllowAccessCompletedOnboardingForMyJobs(tmp.isAllowAccessCompletedOnboardingForMyJobs());
 			data.setAllowAccessCompletedOnboardingForAllJobs(tmp.isAllowAccessCompletedOnboardingForAllJobs());
 			data.setAllowAccessCompletedOnboardingForDivision(tmp.isAllowAccessCompletedOnboardingForDivision());
-			
+			data.setAllowUnassignAccessIndividualDocuments(tmp.isAllowUnassignAccessIndividualDocuments());
 			data.setAllowManagingJobBoardsCriteriaAndProfiles(tmp.isAllowManagingJobBoardsCriteriaAndProfiles());
 			data.setAllowManagingJobBoardsCriteriaOnly(tmp.isAllowManagingJobBoardsCriteriaOnly());
 			data.setDisplayTheFourDailyEmailProfileOption(tmp.isDisplayTheFourDailyEmailProfileOption());
@@ -468,23 +470,22 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 	public ChatbotTagValue isMachineDownloadingResumes(Long teamid,String tagName, String[] references) {
 	    ChatbotTagValue tagValue = new ChatbotTagValue();
 	    Long webid = Long.valueOf(references[0]);
-	    Long machineNo = Long.valueOf(references[1]);
 	    String tagType = "BINARY";
-	    String sql = "select 1 from twebdatapersistance where teamid=? and webid=? and machine_no=?";
+	    String sql = "select count(*) from twebsites_detail a where teamid = ? and harvest =1  and (webid, machine_no) not in (select webid, machine_no from twebdatapersistance where b.teamid =a.teamid) ";
 	    JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
-	    Object[] params = new Object[] {teamid, webid, machineNo}; 
+	    Object[] params = new Object[] {teamid, teamid}; 
 	    List<ChatbotTagValue> list = jdbcTemplate.query(sql, params, new RowMapper<ChatbotTagValue>() {
 	        @Override
 	        public ChatbotTagValue mapRow(ResultSet rs, int rowNum) throws SQLException {
 	            ChatbotTagValue tag = new ChatbotTagValue();
-				tag.setValue("true");
+				tag.setValue("false");
 	            return tag;
 	        }
 	    });
 	    if(list.size()>0) {
 	    	tagValue = list.get(0);
 	    } else {
-	    	tagValue.setValue("false");
+	    	tagValue.setValue("trues");
 	    }
 	    tagValue.setTag(tagName);
 	    tagValue.setTagType(tagType);
@@ -555,11 +556,11 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 	            ChatbotTagValue tag = new ChatbotTagValue();
 	            Long status_id = rs.getLong(1);
 	            if(status_id == 0) {
-	            	tag.setValue("inactive");
+	            	tag.setValue("INACTIVE");
 	            } else if (status_id == 1L) {
-	            	tag.setValue("active");
+	            	tag.setValue("ACTIVE");
 	            } else if (status_id == 2L) {
-	            	tag.setValue("halted");
+	            	tag.setValue("HALTED");
 	            }
 	            return tag;
 	        }
@@ -768,7 +769,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 	public ChatbotTagValue getNumberOfNonDownloadingMachines(Long teamid, String tagName, String[] references) {
 	    ChatbotTagValue tagValue = new ChatbotTagValue();
 	    String tagType = "TEXT";
-	    String sql = "select count(distinct machine_no) from twebsites_detail a where a.teamid=? and a.machine_no not in (select distinct machine_no from twebdatapersistance where teamid=a.teamid)";
+	    String sql = "select count(distinct machine_no) from twebsites_detail a where a.teamid=? and a.harvest=1 and (a.webid, a.machine_no) not in (select distinct webid, machine_no from twebdatapersistance where teamid=a.teamid)";
 	    JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
 	    Object[] params = new Object[] {teamid}; 
 	    List<Long> list = jdbcTemplate.query(sql, params, new RowMapper<Long>() {
@@ -929,11 +930,10 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 	public ChatbotTagValue isCoddlerWorking(Long teamid, String tagName, String[] references ) {
 		ChatbotTagValue tagValue =new ChatbotTagValue();
 		String tagType = "BINARY";
-		String site = references[0];
 		Boolean isWorking = false;
-		String sql = "select (datelastrun - DATE'1970-01-01') * 86400 from tspiderswebsites where teamid=? and upper(site)=upper(?)";
+		String sql = "select nvl((datelastrun - DATE'1970-01-01') * 86400, 0) from tspiderswebsites where teamid=? and active = 1 and nvl(deleted,0)=0 ";
 	    JdbcTemplate jdbcTemplate = getJdbcTemplate();
-	    Object[] params = new Object[] {teamid, site}; 
+	    Object[] params = new Object[] {teamid}; 
 	    List<Date> dateList = jdbcTemplate.query(sql, params, new RowMapper<Date>() {
 	        @Override
 	        public Date mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -961,7 +961,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		ChatbotTagValue tagValue =new ChatbotTagValue();
 		String tagType = "NUMBER";
 		Long numberOfNonWorkingCoddler = 0L;
-		String sql = "select (datelastrun - DATE'1970-01-01') * 86400 from tspiderswebsites where teamid=? and nvl(deleted,0)=0";
+		String sql = "select nvl((datelastrun - DATE'1970-01-01') * 86400, 0) from tspiderswebsites where teamid=? and active = 1 and nvl(deleted,0)=0";
 	    JdbcTemplate jdbcTemplate = getJdbcTemplate();
 	    Object[] params = new Object[] {teamid}; 
 	    List<Date> dateList = jdbcTemplate.query(sql, params, new RowMapper<Date>() {
@@ -1016,7 +1016,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		String tagType = "TEXT";
 		String site = references[0];
 		Boolean isWorking = false;
-		String sql = "select nvl(active,0), (datelastrun - DATE'1970-01-01') * 86400, loginfailures, maxloginattempts from tspiderswebsites where teamid=? and upper(site)=upper(?)";
+		String sql = "select nvl(active,0), nvl((datelastrun - DATE'1970-01-01') * 86400, 0), loginfailures, maxloginattempts from tspiderswebsites where teamid=? and upper(site)=upper(?)";
 	    JdbcTemplate jdbcTemplate = getJdbcTemplate();
 	    Object[] params = new Object[] {teamid, site}; 
 	    List<String> dateList = jdbcTemplate.query(sql, params, new RowMapper<String>() {
@@ -1028,11 +1028,11 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 	        	long loginfailures = rs.getLong(3);
 	        	long maxloginattemps = rs.getLong(4);
 	        	if(isActive==0) {
-	        		status = "inactive";
+	        		status = "INACTIVE";
 	        	}
 	        	else {
 	        		if(loginfailures>=maxloginattemps) {
-	        			status = "halted";
+	        			status = "HALTED";
 	        		}
 	        		else {
 	        	    	Date lastRunDate = new Date(dateLastRun);
@@ -1040,18 +1040,43 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 	        	        calendar.setTime(lastRunDate);
 	        	    	calendar.add(Calendar.HOUR_OF_DAY, 2);
 	        	    	if(calendar.getTime().compareTo(new java.util.Date())<0) {
-	        	    		status = "not working";
+	        	    		status = "NOT_WORKING";
 	        	    	}
 	        	    	else
-	        	    		status = "working";
+	        	    		status = "WORKING";
 	        		}
 	        		
 	        	}
 	        	return status;
 	        }
 	    });
-
-	    tagValue.setValue(dateList.get(0));
+	    if(dateList.size()>0)
+	    	tagValue.setValue(dateList.get(0));
+	    tagValue.setTag(tagName);
+	    tagValue.setTagType(tagType);
+		return tagValue;
+	}
+	
+	public ChatbotTagValue isMachineAtClient(Long teamid, String tagName, String[] references) {
+		ChatbotTagValue tagValue = new ChatbotTagValue();
+		String tagType = "BINARY";
+		String site = references[0];
+		String sql = "select upper(computer_name), ip_address from tspidersmachinestats where teamid=? and upper(site)=upper(?)";
+	    Object[] params = new Object[] {teamid, site}; 
+	    JdbcTemplate jdbcTemplate = getJdbcTemplate();
+	    List<String> dateList = jdbcTemplate.query(sql, params, new RowMapper<String>() {
+	        @Override
+	        public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+	        	String atClient = "true";
+	        	String computer_name = rs.getString(1);
+	        	String ip_address = rs.getString(2);
+	        	if(computer_name.startsWith("w10_") && ip_address.startsWith("10.10"))
+	        		atClient = "false";
+	        	return atClient;
+	        }
+	    });
+	    if(dateList.size()>0)
+	    	tagValue.setValue(dateList.get(0));
 	    tagValue.setTag(tagName);
 	    tagValue.setTagType(tagType);
 		return tagValue;
@@ -1130,7 +1155,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 	            	tagValue = getCoddlerStatus(teamid, tag, references);
 	                break;
 	            case("[[MACHINE_AT_CLIENT]]"):
-//	            	tagValue = isMachineAtClient(teamid, tag, references);
+	            	tagValue = isMachineAtClient(teamid, tag, references);
 	                break;
 	            case("[[CODDLER_NAME]]"):
 //	            	tagValue = isMachineAtClient(teamid, tag, references);
