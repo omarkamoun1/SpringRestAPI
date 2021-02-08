@@ -22,6 +22,10 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import com.axelon.recruiter.CustomerCompanyData;
+import com.axelon.recruiter.CustomerData;
+import com.axelon.shared.CacheServer_Stub;
+import com.axelon.shared.NamedServer;
 import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.dao.company.SearchCompanyDao;
 import com.jobdiva.api.model.Company;
@@ -845,7 +849,28 @@ public class ContactDao extends AbstractJobDivaDao {
 		contactNote.setDateCreated(datecreated);
 		contactNoteDao.insertUpdateContactNote(jobDivaSession, contactNote);
 		//
+		updateCacheServerForCreateContact(jobDivaSession, contactId, types);
+		//
 		return contactId;
+	}
+	
+	private void updateCacheServerForCreateContact(JobDivaSession jobDivaSession, Long contactId, String[] types) {
+		Long teamid = jobDivaSession.getTeamId();
+		String envType = getEnvironmentType();
+		CustomerData customerData = prepareCustomerData(contactId, types, teamid.longValue());
+		try {
+			CacheServer_Stub cache_server = (CacheServer_Stub) NamedServer.findService("CacheServer", envType);
+			if (cache_server.exists("SUPPLIER_LIST:TEAM" + teamid) && customerData.types.contains(Long.valueOf(4L)))
+				NamedServer.addToAll("SUPPLIER_LIST:TEAM" + teamid, customerData, envType);
+			if (cache_server.exists("CONTACTS_LIST:TEAM" + teamid))
+				NamedServer.addToAll("CONTACTS_LIST:TEAM" + teamid, customerData, envType);
+			CustomerCompanyData custcompData = new CustomerCompanyData(customerData.companyid);
+			custcompData.company_name = customerData.company_name;
+			if (customerData.companyid > 0L && cache_server.exists("COMPANY_LIST:TEAM" + teamid))
+				NamedServer.addToAll("COMPANY_LIST:TEAM" + teamid, custcompData, envType);
+		} catch (Exception e) {
+			this.logger.error("Update Cache Server For Create Contact[" + contactId + " ] " + e.getMessage());
+		}
 	}
 	
 	private void checkAdddresses(ContactAddress[] addresses) throws Exception {
@@ -954,7 +979,7 @@ public class ContactDao extends AbstractJobDivaDao {
 				String[] exts = { contact.getWorkphoneExt(), contact.getCellPhoneExt(), contact.getHomePhoneExt(), contact.getContactFaxExt() };
 				String typeStr = contact.getPhoneTypes();
 				//
-				if (typeStr.length() < 4)
+				if (typeStr == null || typeStr.length() < 4)
 					typeStr = "WCHF";
 				//
 				String[] types = { typeStr.substring(0, 1).equals(" ") ? "W" : typeStr.substring(0, 1), //
@@ -1383,7 +1408,95 @@ public class ContactDao extends AbstractJobDivaDao {
 			jdbcTemplateObject.update(sqlUpdate, parameterSource);
 		}
 		//
+		updateCacheServerForUpdateContact(jobDivaSession, contactid, types);
+		//
 		return true;
+	}
+	
+	private CustomerData prepareCustomerData(Long contactId, String[] contactTypes, long teamid) {
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		String sql = "SELECT * FROM TCUSTOMER WHERE teamid = ? AND ID = ? ";
+		Object[] params = { teamid, contactId };
+		List<CustomerData> list = jdbcTemplate.query(sql, params, new RowMapper<CustomerData>() {
+			
+			@Override
+			public CustomerData mapRow(ResultSet rs, int rowNum) throws SQLException {
+				//
+				//
+				CustomerData customerData = new CustomerData(contactId);
+				customerData.max_subs = rs.getInt("MAXSUBMITALS");
+				customerData.isPrimaryContact = rs.getInt("ISPRIMARYCONTACT");
+				customerData.active = rs.getInt("ACTIVE");
+				customerData.refcheck = rs.getInt("REFCHECK");
+				customerData.drugtest = rs.getInt("DRUGTEST");
+				customerData.backcheck = rs.getInt("BACKCHECK");
+				customerData.secclearance = rs.getInt("SECCLEARANCE");
+				customerData.first_name = rs.getString("FIRSTNAME");
+				customerData.last_name = rs.getString("LASTNAME");
+				customerData.address1 = rs.getString("ADDRESS1");
+				customerData.address2 = rs.getString("ADDRESS2");
+				customerData.city = rs.getString("CITY");
+				customerData.state = rs.getString("STATE");
+				customerData.zipcode = rs.getString("ZIPCODE");
+				customerData.country_id = rs.getString("COUNTRYID");
+				customerData.email = rs.getString("EMAIL");
+				customerData.alternate_email = rs.getString("ALTERNATE_EMAIL");
+				customerData.company_name = rs.getString("COMPANYNAME");
+				customerData.companyid = rs.getLong("COMPANYID");
+				customerData.department_name = rs.getString("DEPARTMENTNAME");
+				customerData.work_phone = rs.getString("WORKPHONE");
+				customerData.work_phone_ext = rs.getString("WORKPHONEEXT");
+				customerData.cell_phone = rs.getString("CELLPHONE");
+				customerData.cell_phone_ext = rs.getString("CELLPHONEEXT");
+				customerData.home_phone = rs.getString("HOMEPHONE");
+				customerData.home_phone_ext = rs.getString("HOMEPHONEEXT");
+				customerData.contact_fax = rs.getString("CONTACTFAX");
+				customerData.contact_fax_ext = rs.getString("CONTACTFAXEXT");
+				customerData.phone_types = rs.getString("PHONETYPES");
+				customerData.contact_notes = rs.getString("CONTACTNOTES");
+				customerData.title = rs.getString("TITLE");
+				ArrayList<Long> types = new ArrayList<Long>();
+				if (contactTypes != null) {
+					for (String typeName : contactTypes) {
+						if (typeName.equalsIgnoreCase("HIRING MANAGER"))
+							types.add(1L);
+						else if (typeName.equalsIgnoreCase("REFERENCE"))
+							types.add(2L);
+						else if (typeName.equalsIgnoreCase("PROSPECT"))
+							types.add(3L);
+						else if (typeName.equalsIgnoreCase("SUPPLIER"))
+							types.add(4L);
+					}
+				}
+				customerData.types = types;
+				customerData.discount = rs.getDouble("DISCOUNT");
+				customerData.discountType = rs.getInt("DISCOUNT_TYPE");
+				customerData.discountPct = rs.getDouble("DISCOUNTPCT");
+				customerData.customer_options = rs.getLong("CUSTOMER_OPTION");
+				// customerData.Attributes
+				return customerData;
+			}
+		});
+		return (list != null && list.size() > 0) ? list.get(0) : null;
+	}
+	
+	private void updateCacheServerForUpdateContact(JobDivaSession jobDivaSession, Long contactid, String[] types) {
+		Long teamid = jobDivaSession.getTeamId();
+		String envType = getEnvironmentType();
+		CustomerData customerData = prepareCustomerData(contactid, types, teamid.longValue());
+		try {
+			CacheServer_Stub cache_server = (CacheServer_Stub) NamedServer.findService("CacheServer", envType);
+			if (cache_server.exists("SUPPLIER_LIST:TEAM" + teamid) && customerData.types.contains(Long.valueOf(4L))) {
+				NamedServer.removeFromAll("SUPPLIER_LIST:TEAM" + teamid, customerData.getID(), envType);
+				NamedServer.addToAll("SUPPLIER_LIST:TEAM" + teamid, customerData, envType);
+			}
+			if (cache_server.exists("CONTACTS_LIST:TEAM" + teamid)) {
+				NamedServer.removeFromAll("CONTACTS_LIST:TEAM" + teamid, customerData.getID(), envType);
+				NamedServer.addToAll("CONTACTS_LIST:TEAM" + teamid, customerData, envType);
+			}
+		} catch (Exception e) {
+			this.logger.error("Update Cache Server For Update Contact[" + contactid + " ] " + e.getMessage());
+		}
 	}
 	
 	private void updateContactOwners(JobDivaSession jobDivaSession, Long contactid, Owner[] owners) throws Exception {

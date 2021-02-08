@@ -18,4 +18,4 @@ mvn install:install-file -DcreateChecksum=true -Dpackaging=jar -Dfile=lib/robot.
 
 
 
-mvn install:install-file -DcreateChecksum=true -Dpackaging=jar -Dfile=lib/shared_data.jar -DgroupId=com.jobdiva.shared -DartifactId=shared_data -Dversion=1.0.6
+mvn install:install-file -DcreateChecksum=true -Dpackaging=jar -Dfile=lib/shared_data.jar -DgroupId=com.jobdiva.shared -DartifactId=shared_data -Dversion=1.0.9

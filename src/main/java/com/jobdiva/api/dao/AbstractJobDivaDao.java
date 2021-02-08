@@ -74,7 +74,7 @@ public class AbstractJobDivaDao {
 	protected AppProperties						appProperties;
 	//
 	@Autowired
-	JobDivaConnectivity							jobDivaConnectivity;
+	protected JobDivaConnectivity				jobDivaConnectivity;
 	//
 	@Autowired
 	protected JdbcTemplate						_jdbcTemplate;

@@ -24,7 +24,7 @@ public class JobDivaSession extends User {
 	
 	//
 	public JobDivaSession() {
-		super(null, null, new HashSet<JobDivaGrantedAuthority>());
+		super("a", "a", new HashSet<JobDivaGrantedAuthority>());
 	}
 	
 	public JobDivaSession(Long teamId, String userName, String password, Integer environment, long recruiterId, long leader) {

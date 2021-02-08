@@ -22,11 +22,9 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import lombok.extern.slf4j.Slf4j;
-
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
-@Slf4j
+// @Slf4j
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	
 	/**

@@ -257,18 +257,15 @@ public class ContactNoteDao extends AbstractJobDivaDao {
 			});
 			Long typeId = 0L;
 			for (Long value : list) {
-				if (value != null)
+				if (value != null) {
 					typeId = value;
-				break;
+					break;
+				}
 			}
 			//
-			if (typeId == 0L)
-				try {
-					throw new Exception("Error: Invalid Action Type(" + action + ").");
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					// e.printStackTrace();
-				}
+			if (typeId == 0L) {
+				throw new Exception("Error: Invalid Action Type(" + action + ").");
+			}
 			//
 			fields.put("TYPE", "typeId");
 			parameterSource.addValue("typeId", typeId);

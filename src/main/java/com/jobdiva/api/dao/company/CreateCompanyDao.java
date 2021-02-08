@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -11,6 +12,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
+import com.axelon.recruiter.CustomerCompanyData;
+import com.axelon.shared.CacheServer_Stub;
+import com.axelon.shared.NamedServer;
 import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.model.CompanyOwner;
 import com.jobdiva.api.model.Owner;
@@ -431,6 +435,25 @@ public class CreateCompanyDao extends AbstractJobDivaDao {
 		//
 		updateCompanyOwner(jobDivaSession, companyId, owners);
 		//
+		updateCacheServer(jobDivaSession, companyId, companyname, companytypes);
+		//
 		return companyId;
+	}
+	
+	private void updateCacheServer(JobDivaSession jobDivaSession, Long companyId, String companyName, String[] companytypes) {
+		try {
+			Long teamid = jobDivaSession.getTeamId();
+			String envType = getEnvironmentType();
+			CustomerCompanyData custcompData = new CustomerCompanyData(companyId.longValue());
+			custcompData.company_name = companyName;
+			CacheServer_Stub cache_server = (CacheServer_Stub) NamedServer.findService("CacheServer", envType);
+			if (cache_server.exists("COMPANY_LIST:TEAM" + teamid))
+				NamedServer.addToAll("COMPANY_LIST:TEAM" + teamid, custcompData, envType);
+			if (companytypes != null && Arrays.<String> stream(companytypes).anyMatch("SUPPLIER"::equals))
+				if (cache_server.exists("SUPPLIERCOMPANY_LIST:TEAM" + teamid))
+					NamedServer.addToAll("SUPPLIERCOMPANY_LIST:TEAM" + teamid, custcompData, envType);
+		} catch (Exception e) {
+			this.logger.error("Update Cache Server For Create Company[" + companyId + " / " + companyName + "] " + e.getMessage());
+		}
 	}
 }

@@ -48,6 +48,11 @@ public class JobDivaConnectivity {
 	@PostConstruct
 	public void init() {
 		//
+		//
+		//
+		System.getenv().forEach((k, v) -> this.logger.info("SYSTEM ENVIRONMENTS ==> " + k + ":" + v));
+		//
+		//
 		logger.info("Setup DataBase Connectivity");
 		//
 		String sql = "SELECT ID," //
@@ -222,5 +227,9 @@ public class JobDivaConnectivity {
 	
 	public JdbcTemplate getMinerJdbcTemplate() {
 		return minerJdbcTemplate;
+	}
+	
+	public JdbcTemplate getCentralTemplate() {
+		return jdbcTemplate;
 	}
 }

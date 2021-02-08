@@ -1,6 +1,5 @@
 package com.jobdiva.api.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +10,10 @@ import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.chatbot.ChatbotAnswer;
 import com.jobdiva.api.model.chatbot.ChatbotQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotSocialQuestion;
-import com.jobdiva.api.model.chatbot.ChatbotUserData;
-import com.jobdiva.api.model.chatbot.ChatbotVisibility;
 import com.jobdiva.api.model.chatbot.ChatbotTag;
 import com.jobdiva.api.model.chatbot.ChatbotTagValue;
+import com.jobdiva.api.model.chatbot.ChatbotUserData;
+import com.jobdiva.api.model.chatbot.ChatbotVisibility;
 
 @Service
 public class ChatbotDataService {
@@ -42,7 +41,7 @@ public class ChatbotDataService {
 	
 	public List<ChatbotSocialQuestion> getChatbotSocialQuestions(JobDivaSession session) throws Exception {
 		try {
- 			List<ChatbotSocialQuestion> questions = trainingDataDao.getSocialQuestions(session);
+			List<ChatbotSocialQuestion> questions = trainingDataDao.getSocialQuestions(session);
 			return questions;
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());

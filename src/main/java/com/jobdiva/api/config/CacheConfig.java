@@ -10,7 +10,6 @@ import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.UserCache;
-import org.springframework.security.core.userdetails.cache.SpringCacheBasedUserCache;
 
 @Configuration
 @EnableCaching
@@ -26,6 +25,9 @@ public class CacheConfig {
 	@Bean
 	public UserCache userCache() throws Exception {
 		Cache cache = (Cache) cacheManager().getCache("userCache");
-		return new SpringCacheBasedUserCache(cache);
+		//
+		// return new SpringCacheBasedUserCache(cache);
+		// //
+		return new JobdivaCacheBasedUserCache(cache);
 	}
 }

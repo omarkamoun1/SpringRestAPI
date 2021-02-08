@@ -1792,8 +1792,8 @@ public class BIDataController extends AbstractJobDivaController {
 	
 	@RequestMapping(value = "/PortalJobsList", method = RequestMethod.GET, produces = "application/json")
 	public IBiData PortalJobsList(//
-			@ApiParam(value = "Company Id", required = true) //
-			@RequestParam(required = true) Long companyId, //
+			@ApiParam(value = "Portal ID", required = true) //
+			@RequestParam(required = true) Long portalID, //
 			//
 			@ApiParam(value = "Alternate Format", required = false) //
 			@RequestParam(required = false) Boolean alternateFormat //
@@ -1802,7 +1802,7 @@ public class BIDataController extends AbstractJobDivaController {
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		String[] parameters = new String[] { companyId.toString() };
+		String[] parameters = new String[] { portalID.toString() };
 		//
 		return biDataService.getBIData(jobDivaSession, "Portal Jobs List", null, null, parameters, alternateFormat);
 		//

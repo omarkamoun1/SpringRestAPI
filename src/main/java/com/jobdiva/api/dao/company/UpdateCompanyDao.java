@@ -21,6 +21,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.stereotype.Component;
 
+import com.axelon.recruiter.CustomerCompanyData;
+import com.axelon.shared.CacheServer_Stub;
+import com.axelon.shared.NamedServer;
 import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.model.BillingUnitType;
 import com.jobdiva.api.model.CompanyAddress;
@@ -748,6 +751,25 @@ public class UpdateCompanyDao extends AbstractJobDivaDao {
 			//
 		}
 		//
+		updateCacheServer(jobDivaSession, companyid, name);
+		//
 		return true;
+	}
+	
+	private void updateCacheServer(JobDivaSession jobDivaSession, Long companyid, String name) {
+		try {
+			Long teamid = jobDivaSession.getTeamId();
+			String envType = getEnvironmentType();
+			CacheServer_Stub cache_server = (CacheServer_Stub) NamedServer.findService("CacheServer", envType);
+			this.logger.info("updateCacheServer :: " + ((cache_server != null) ? cache_server.toString() : "NULL"));
+			CustomerCompanyData custcompData = new CustomerCompanyData(companyid.longValue());
+			custcompData.company_name = name;
+			if (cache_server.exists("COMPANY_LIST:TEAM" + teamid)) {
+				NamedServer.removeFromAll("COMPANY_LIST:TEAM" + teamid, custcompData.id, envType);
+				NamedServer.addToAll("COMPANY_LIST:TEAM" + teamid, custcompData, envType);
+			}
+		} catch (Exception e) {
+			this.logger.error("Update Cache Server For Update Company[" + companyid + " / " + name + "] " + e.getMessage());
+		}
 	}
 }
