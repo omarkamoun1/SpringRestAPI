@@ -1136,6 +1136,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			}
 		});
 		Long machineNo = -1L;
+		harvestStatus.webid = webid;
 		harvestStatus.accounts = new ArrayList<ChatbotHarvestAccount>();
 		harvestStatus.machines = new ArrayList<ChatbotHarvestMachine>();
 		for(int i=0;i<dataList.size();i++) {
