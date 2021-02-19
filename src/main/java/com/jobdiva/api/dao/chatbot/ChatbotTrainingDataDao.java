@@ -18,6 +18,9 @@ import com.jobdiva.api.mapper.ChatbotQuestionRowMapper;
 import com.jobdiva.api.mapper.ChatbotSocialQuestionRowMapper;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.chatbot.ChatbotAnswer;
+import com.jobdiva.api.model.chatbot.ChatbotHarvestAccount;
+import com.jobdiva.api.model.chatbot.ChatbotHarvestMachine;
+import com.jobdiva.api.model.chatbot.ChatbotHarvestStatus;
 import com.jobdiva.api.model.chatbot.ChatbotQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotRecruiterData;
 import com.jobdiva.api.model.chatbot.ChatbotSocialQuestion;
@@ -545,10 +548,10 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		ChatbotTagValue tagValue = new ChatbotTagValue();
 		String tagType = "TEXT";
 		Long webid = Long.valueOf(references[0]);
-		Long machineNo = Long.valueOf(references[1]);
-		String sql = "select coalesce(harvest, 0) from twebsites_detail where teamid=? and webid=? and machine_no=?";
+		String username = references[1];
+		String sql = "select coalesce(harvest, 0) from twebsites_detail where teamid=? and webid=? and upper(username)=upper(?)";
 		JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
-		Object[] params = new Object[] { teamid, webid, machineNo };
+		Object[] params = new Object[] { teamid, webid, username };
 		List<ChatbotTagValue> list = jdbcTemplate.query(sql, params, new RowMapper<ChatbotTagValue>() {
 			
 			@Override
@@ -578,10 +581,10 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		ChatbotTagValue tagValue = new ChatbotTagValue();
 		String tagType = "NUMBER";
 		Long webid = Long.valueOf(references[0]);
-		Long machineNo = Long.valueOf(references[1]);
-		String sql = "select harvestlimit from twebsites_detail where teamid=? and webid=? and machine_no=?";
+		String username = references[1];
+		String sql = "select harvestlimit from twebsites_detail where teamid=? and webid=? and upper(username)=upper(?)";
 		JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
-		Object[] params = new Object[] { teamid, webid, machineNo };
+		Object[] params = new Object[] { teamid, webid, username };
 		List<ChatbotTagValue> list = jdbcTemplate.query(sql, params, new RowMapper<ChatbotTagValue>() {
 			
 			@Override
@@ -606,9 +609,10 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		ChatbotTagValue tagValue = new ChatbotTagValue();
 		String tagType = "BINARY";
 		Long webid = Long.valueOf(references[0]);
-		String sql = "select 1 from tharvestercriteria where teamid=? and webid=? limit 1";
+		String username = references[1];
+		String sql = "select 1 from tharvestercriteria where teamid=? and webid=? and upper(username) = upper(?) limit 1";
 		JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
-		Object[] params = new Object[] { teamid, webid };
+		Object[] params = new Object[] { teamid, webid, username };
 		List<ChatbotTagValue> list = jdbcTemplate.query(sql, params, new RowMapper<ChatbotTagValue>() {
 			
 			@Override
@@ -644,7 +648,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		String tagType = "BINARY";
 		Long webid = Long.valueOf(references[0]);
 		String username = references[1];
-		String sql = "select UNIX_TIMESTAMP(time) from tschedule where teamid=? and webid=? and upper(username) = upper(?)";
+		String sql = "select UNIX_TIMESTAMP(time) from tschedule where teamid=? and webid=? and upper(username) = upper(?) and active = 1";
 		JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
 		Object[] params = new Object[] { teamid, webid, username };
 		List<Date> dateList = jdbcTemplate.query(sql, params, new RowMapper<Date>() {
@@ -709,10 +713,11 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		ChatbotTagValue tagValue = new ChatbotTagValue();
 		String tagType = "TEXT";
 		Long webid = Long.valueOf(references[0]);
-		String startTime = "[\"";
-		String sql = "select date_format(time, '%H:%i') from tschedule where teamid=? and webid=? order by date_format(time, '%H:%i')";
+		String username = references[1];
+		String startTime = "";
+		String sql = "select date_format(time, '%H:%i') from tschedule where teamid=? and webid=? and upper(username) = upper(?) order by date_format(time, '%H:%i')";
 		JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
-		Object[] params = new Object[] { teamid, webid };
+		Object[] params = new Object[] { teamid, webid, username };
 		List<String> dateList = jdbcTemplate.query(sql, params, new RowMapper<String>() {
 			
 			@Override
@@ -721,6 +726,8 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			}
 		});
 		for (int i = 0; i < dateList.size(); i++) {
+			if(i==0)
+				startTime = "[\"";
 			String startDate = dateList.get(i);
 			startTime = startTime + startDate;
 			if (i < dateList.size() - 1) {
@@ -784,11 +791,11 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		return tagValue;
 	}
 	
-	public Boolean hasRecentResume(Long teamid, Long webid) {
+	public Boolean hasRecentResume(Long teamid, Long webid, String username) {
 		Boolean hasRecentResume = false;
-		String sql = "select datecreated from trfqresume where teamid=? and webid=?";
+		String sql = "select datecreated from trfqresume where teamid=? and webid=? and upper(username)=upper(?)";
 		JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
-		Object[] params = new Object[] { teamid, webid };
+		Object[] params = new Object[] { teamid, webid, username };
 		List<Date> dateList = jdbcTemplate.query(sql, params, new RowMapper<Date>() {
 			
 			@Override
@@ -812,9 +819,10 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		ChatbotTagValue tagValue = new ChatbotTagValue();
 		String tagType = "BINARY";
 		Long webid = Long.valueOf(references[0]);
-		String sql = "select UNIX_TIMESTAMP(time) from tschedule where teamid=? and webid=?";
+		String username = references[1];
+		String sql = "select UNIX_TIMESTAMP(time) from tschedule where teamid=? and webid=? and upper(username)=upper(?)";
 		JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
-		Object[] params = new Object[] { teamid, webid };
+		Object[] params = new Object[] { teamid, webid, username };
 		List<Date> dateList = jdbcTemplate.query(sql, params, new RowMapper<Date>() {
 			
 			@Override
@@ -845,7 +853,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			if (notWithInSchedule) {
 				tagValue.setValue("true");
 			} else {
-				sql = "select UNIX_TIMESTAMP(datecreated) from tharvesteractivity where teamid=? and webid=?";
+				sql = "select UNIX_TIMESTAMP(datecreated) from tharvesteractivity where teamid=? and webid=? and upper(username) = upper(?)";
 				List<Date> dateList2 = jdbcTemplate.query(sql, params, new RowMapper<Date>() {
 					
 					@Override
@@ -868,7 +876,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 						tagValue.setValue("false");
 					}
 				} else {
-					if (hasRecentResume(teamid, webid))
+					if (hasRecentResume(teamid, webid, username))
 						tagValue.setValue("false");
 					else
 						tagValue.setValue("true");
@@ -882,14 +890,13 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		return tagValue;
 	}
 	
-	@SuppressWarnings("deprecation")
 	public ChatbotTagValue getCATTest(Long teamid, String tagName, String[] references) {
 		ChatbotTagValue tagValue = new ChatbotTagValue();
 		String tagType = "BINARY";
 		Boolean passCATTest = false;
 		Long webid = Long.valueOf(references[0]);
 		String username = references[1];
-		String sql = "select password from twebsites_detail where teamid=? and webid=? and username=?";
+		String sql = "select password from twebsites_detail a, twebsites b where a.teamid=? and a.webid=? and a.webid = b.id and a.username=? and upper(b.url) like '%MONSTER%'";
 		Object[] params = new Object[] { teamid, webid, username };
 		JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
 		List<String> passwordList = jdbcTemplate.query(sql, params, new RowMapper<String>() {
@@ -907,6 +914,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			parameter.setName("cat");
 			parameter.setName(decoded_password);
 			String CAT_URL = "http://rsx.monster.com/query.ashx?q=java&rpcr=10038-50&mdatemaxage=788400&pagesize=20&ver=1.7&cat=" + URLEncoder.encode(decoded_password);
+			System.out.println(CAT_URL);
 			try {
 				Response catResponse = proxyClient.proxyAPI("GET", CAT_URL, null, new ProxyParameter[] { parameter }, null);
 				String responseBody = catResponse.getBody();
@@ -1086,7 +1094,6 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			byte[] key = str_key.getBytes();
 			int src_len = src.length, key_len = key.length;
 			byte[] des = new byte[src_len];
-			// int j = 0;
 			for (int i = 0; i < src_len; i++) {
 				des[i] = (byte) (src[i] ^ key[i % (key_len)]);
 			}
@@ -1096,11 +1103,83 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		}
 	}
 	
+	public ChatbotHarvestMachine getHarvestMachine(Long teamid, Long webid, Long machineNo) {
+		ChatbotHarvestMachine harvestMachine = new ChatbotHarvestMachine();
+		String[] referecens = {String.valueOf(machineNo)};
+		ChatbotTagValue machineIssue = hasMachineIssue(teamid, null, referecens);
+		harvestMachine.machineNo = machineNo;
+		harvestMachine.hasMachineIssue = machineIssue.getValue().equals("true");
+		ChatbotTagValue isMachineInstalled = isMachineInstalled(teamid, null, referecens);
+		harvestMachine.isMachineInstalled = isMachineInstalled.getValue().equals("true");
+		return harvestMachine;
+	}
+	
+	
+	public ChatbotHarvestStatus getChatbotHarvestStatus(JobDivaSession jobDivaSession, Long webid) {
+		ChatbotHarvestStatus harvestStatus = new ChatbotHarvestStatus(); 
+		Long teamid = jobDivaSession.getTeamId();
+		harvestStatus.teamid = teamid;
+		String sql =  "SELECT b.websitename, b.active, b.harvest, a.harvest, a.username, a.machine_no FROM twebsites_detail a, twebsites b where a.webid = b.id and coalesce(deleted,0) = 0 and a.teamid=? and a.webid=? order by machine_no";
+		Object[] params = new Object[] {teamid, webid};
+		JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
+		List<Object[]> dataList = jdbcTemplate.query(sql, params, new RowMapper<Object[]>() {
+			@Override
+			public Object[] mapRow(ResultSet rs, int rowNum) throws SQLException {
+				Object[] data = new Object[6];
+				data[0] = rs.getString(1);
+				data[1] = rs.getLong(2);
+				data[2] = rs.getLong(3);
+				data[3] = rs.getLong(4);
+				data[4] = rs.getString(5);
+				data[5] = rs.getLong(6);
+				return data;
+			}
+		});
+		Long machineNo = -1L;
+		harvestStatus.accounts = new ArrayList<ChatbotHarvestAccount>();
+		harvestStatus.machines = new ArrayList<ChatbotHarvestMachine>();
+		for(int i=0;i<dataList.size();i++) {
+			Object[] data = dataList.get(i);
+			if(i==0) {
+				harvestStatus.name = (String) data[0];
+				harvestStatus.active = (Long) data[1];
+				harvestStatus.harvest = (Long) data[2];				
+			}
+			Long tmp_machineNo = (Long) data[5];
+
+			if(tmp_machineNo!=machineNo) {
+				machineNo = tmp_machineNo;
+				ChatbotHarvestMachine harvestMachine = new ChatbotHarvestMachine();
+				String[] references = {String.valueOf(machineNo)};
+				ChatbotTagValue machineIssue = hasMachineIssue(teamid, null, references);
+				harvestMachine.machineNo = machineNo;
+				harvestMachine.hasMachineIssue = machineIssue.getValue().equals("true");
+				ChatbotTagValue isMachineInstalled = isMachineInstalled(teamid, null, references);
+				harvestMachine.isMachineInstalled = isMachineInstalled.getValue().equals("true");
+				harvestStatus.machines.add(harvestMachine);
+			}
+			ChatbotHarvestAccount harvestAccount = new ChatbotHarvestAccount();
+			String accountName = (String)data[4];
+			harvestAccount.name = accountName;
+			harvestAccount.harvest = (Long) data[3];
+			String[] references = {String.valueOf(webid), accountName};
+			harvestAccount.status = getJobBoardStatus(teamid, null, references).getValue();
+			harvestAccount.downloaddLimitPerDay = Long.valueOf(getDownloadLimitPerDay(teamid, null, references).getValue());
+			harvestAccount.hasRecentResume = hasRecentResume(teamid, webid, accountName);
+			harvestAccount.hasNotDownloadSessionStarted = hasNotDownloadSessionStarted(teamid,null, references).getValue().equals("true");
+			harvestAccount.downloadStartTime = getDownloadStartTime(teamid, null, references).getValue();
+			harvestAccount.hasOverLappingTime = hasOverLappingTime(teamid, null, references).getValue().equals("true");
+			harvestAccount.CATTest = getCATTest(teamid, null, references).getValue();
+			harvestAccount.hasJobBoardCriteria = hasJobBoardSearchCriteria(teamid, null, references).getValue().equals("true");
+			harvestStatus.accounts.add(harvestAccount);
+		}
+		return harvestStatus;
+	}
+	
 	public ChatbotTagValue getChatbotTagValue(JobDivaSession jobDivaSession, String tag, String[] references) {
 		ChatbotTagValue tagValue = null;
 		Long teamid = jobDivaSession.getTeamId();
 		if (tag != null && !tag.isEmpty()) {
-			// Object[] params = new Object[2];
 			switch (tag) {
 				case ("[[MACHINE_DOWNLOADING_RESUMES]]"):
 					tagValue = isMachineDownloadingResumes(teamid, tag, references);
