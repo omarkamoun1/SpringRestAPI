@@ -9,6 +9,7 @@ import com.jobdiva.api.dao.chatbot.ChatbotTrainingDataDao;
 import com.jobdiva.api.model.SessionInfo;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.chatbot.ChatbotAnswer;
+import com.jobdiva.api.model.chatbot.ChatbotHarvestStatus;
 import com.jobdiva.api.model.chatbot.ChatbotQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotSocialQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotTag;
@@ -85,6 +86,15 @@ public class ChatbotDataService {
 	public ChatbotVisibility getChatbotVisibility(JobDivaSession jobDivaSession) throws Exception {
 		try {
 			ChatbotVisibility data = trainingDataDao.checkChatbotVisibility(jobDivaSession);
+			return data;
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public ChatbotHarvestStatus getChatbotHarvestStatus(JobDivaSession jobDivaSession, Long webid) throws Exception {
+		try {
+			ChatbotHarvestStatus data = trainingDataDao.getChatbotHarvestStatus(jobDivaSession, webid);
 			return data;
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());

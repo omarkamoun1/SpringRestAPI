@@ -13,6 +13,7 @@ import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.model.SessionInfo;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.chatbot.ChatbotAnswer;
+import com.jobdiva.api.model.chatbot.ChatbotHarvestStatus;
 import com.jobdiva.api.model.chatbot.ChatbotQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotSocialQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotTag;
@@ -86,6 +87,14 @@ public class SupportChatbotController extends AbstractJobDivaController {
 	public ChatbotVisibility getChatbotVisibility() throws Exception {
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		return chatbotDataService.getChatbotVisibility(jobDivaSession);
+	}
+	
+	@GetMapping(value = "/harvest-status", produces = "application/json")
+	public ChatbotHarvestStatus getHarvestStatus(@ApiParam(value = "webid", required = true) //
+	@RequestParam(required = false) Long webid //
+	) throws Exception {
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		return chatbotDataService.getChatbotHarvestStatus(jobDivaSession, webid);
 	}
 	
 	@GetMapping(value = "/tag-list", produces = "application/json")
