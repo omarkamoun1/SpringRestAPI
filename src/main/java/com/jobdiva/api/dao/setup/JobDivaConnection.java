@@ -4,6 +4,7 @@ import java.util.List;
 
 public class JobDivaConnection {
 	
+	private Integer		id;
 	private String		connectionString;
 	private String		connectionThin;
 	private String		userName;
@@ -17,6 +18,14 @@ public class JobDivaConnection {
 	private String		universalServlet;
 	private String		flexStaffingServlet;
 	private List<Long>	teamIds;
+	
+	public Integer getId() {
+		return id;
+	}
+	
+	public void setId(Integer id) {
+		this.id = id;
+	}
 	
 	public String getConnectionString() {
 		return connectionString;

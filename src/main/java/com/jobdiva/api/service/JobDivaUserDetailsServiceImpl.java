@@ -18,13 +18,33 @@ public class JobDivaUserDetailsServiceImpl implements JobDivaUserDetailsService 
 	
 	@Override
 	public UserDetails loadUserByUsernameAndClientId(Long clientId, String username, String password, Boolean checkApiPermission) throws Exception {
+		//
 		if (StringUtils.isAnyBlank(username) || clientId == null) {
 			throw new UsernameNotFoundException("Username and domain must be provided");
 		}
+		//
 		User user = jobDivaAuthenticateDao.authenticate(clientId, username, password, null, checkApiPermission);
+		//
 		if (user == null) {
 			throw new UsernameNotFoundException(String.format("Username not found for Client, username=%s, domain=%s", username, clientId));
 		}
+		//
+		return user;
+	}
+	
+	@Override
+	public UserDetails loadUserByUsername(String username, String password) throws UsernameNotFoundException, Exception {
+		//
+		if (StringUtils.isAnyBlank(username)) {
+			throw new UsernameNotFoundException("Username must be provided");
+		}
+		//
+		User user = jobDivaAuthenticateDao.authenticate(username, password);
+		//
+		if (user == null) {
+			throw new UsernameNotFoundException(String.format("Username not found for Client, username=%s ", username));
+		}
+		//
 		return user;
 	}
 }

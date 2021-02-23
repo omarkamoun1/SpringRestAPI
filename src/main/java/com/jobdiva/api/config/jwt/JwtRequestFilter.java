@@ -60,7 +60,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			} catch (IllegalArgumentException e) {
 				logger.error("Unable to get JWT Token");
 			} catch (ExpiredJwtException e) {
-				logger.error("JWT Token has expired");
+				logger.error("JWT Token has expired [" + username + "]");
 			}
 		} else {
 			// logger.warn("JWT Token does not begin with Bearer String");
@@ -106,10 +106,27 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 					userCache.removeUserFromCache(username);
 				}
 			} catch (Exception e) {
-				logger.error("Unable to get JWT Token or JWT Token has expired");
+				logger.error("Unable to get JWT Token or JWT Token has expired [" + username + "]");
 			}
 		}
-		chain.doFilter(request, response);
+		try {
+			chain.doFilter(request, response);
+		} catch (Exception e) {
+			logger.error(" JwtRequestFilter Error : " + getRequestInfo(request, username, requestTokenHeader));
+			throw e;
+		}
+	}
+	
+	private String getRequestInfo(HttpServletRequest request, String userName, String requestTokenHeader) {
+		try {
+			String requestInfo = "[" + userName + "][" + request.getRemoteHost() + "]" + //
+					"[" + request.getRemoteAddr() + "]" + //
+					"[" + request.getRequestURI() + "]" + //
+					"[" + request.getQueryString() + "][" + requestTokenHeader + "]";
+			return requestInfo;
+		} catch (Exception e) {
+			return e.getMessage();
+		}
 	}
 	
 	public void setUserCache(UserCache userCache) {

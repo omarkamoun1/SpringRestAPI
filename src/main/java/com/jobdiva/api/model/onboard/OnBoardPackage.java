@@ -14,8 +14,7 @@ public class OnBoardPackage implements Serializable {
 	private Long					id;
 	private String					name;
 	private List<OnBoardDocument>	documents;
-	private Boolean					hirePackage			= false;
-	private Boolean					supplementalPackage	= false;
+	private String					packageType;
 	
 	public void addDocument(OnBoardDocument onBoardDocument) {
 		if (this.documents == null)
@@ -47,19 +46,11 @@ public class OnBoardPackage implements Serializable {
 		this.documents = documents;
 	}
 	
-	public Boolean getHirePackage() {
-		return this.hirePackage;
+	public String getPackageType() {
+		return packageType;
 	}
 	
-	public void setHirePackage(Boolean hirePackage) {
-		this.hirePackage = hirePackage;
-	}
-	
-	public Boolean getSupplementalPackage() {
-		return this.supplementalPackage;
-	}
-	
-	public void setSupplementalPackage(Boolean supplementalPackage) {
-		this.supplementalPackage = supplementalPackage;
+	public void setPackageType(String packageType) {
+		this.packageType = packageType;
 	}
 }

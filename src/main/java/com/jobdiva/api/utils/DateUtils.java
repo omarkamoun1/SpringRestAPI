@@ -65,4 +65,17 @@ public class DateUtils {
 		cal.set(Calendar.MILLISECOND, 0);
 		return cal.getTime();
 	}
+	
+	public static Date toPropertyDate(String strDate) throws Exception {
+		if (strDate != null) {
+			try {
+				SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+				return dateFormat.parse(strDate);
+			} catch (Exception e) {
+				SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+				return dateFormat.parse(strDate);
+			}
+		}
+		return null;
+	}
 }

@@ -42,7 +42,7 @@ public class AbstractJobDivaController {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (!(authentication instanceof AnonymousAuthenticationToken)) {
 			JobDivaSession jobDivaSession = (JobDivaSession) authentication.getPrincipal();
-			if (jobDivaSession.isAccountNonExpired()) {
+			if (jobDivaSession != null && jobDivaSession.isAccountNonExpired()) {
 				//
 				// remove temporary the checkAccountAbuse
 				// if (!checkAccountAbuse(jobDivaSession)) {

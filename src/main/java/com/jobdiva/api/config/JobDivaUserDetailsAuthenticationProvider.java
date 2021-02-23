@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
 
 import com.jobdiva.api.config.jwt.CustomAuthenticationToken;
+import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.service.api.JobDivaUserDetailsService;
 
 public class JobDivaUserDetailsAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
@@ -59,10 +60,19 @@ public class JobDivaUserDetailsAuthenticationProvider extends AbstractUserDetail
 	
 	@Override
 	protected UserDetails retrieveUser(String username, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
-		CustomAuthenticationToken auth = (CustomAuthenticationToken) authentication;
 		UserDetails loadedUser;
 		try {
-			loadedUser = this.userDetailsService.loadUserByUsernameAndClientId(auth.getClientId(), auth.getPrincipal().toString(), auth.getCredentials().toString(), auth.getCheckApiPermission());
+			//
+			CustomAuthenticationToken auth = (CustomAuthenticationToken) authentication;
+			//
+			if (auth.getAuthenticateWithoutClientId()) {
+				loadedUser = this.userDetailsService.loadUserByUsername(auth.getPrincipal().toString(), auth.getCredentials().toString());
+				//
+			} else {
+				//
+				loadedUser = this.userDetailsService.loadUserByUsernameAndClientId(auth.getClientId(), auth.getPrincipal().toString(), auth.getCredentials().toString(), auth.getCheckApiPermission());
+			}
+			//
 		} catch (UsernameNotFoundException notFound) {
 			if (authentication.getCredentials() != null) {
 				String presentedPassword = authentication.getCredentials().toString();
@@ -85,7 +95,16 @@ public class JobDivaUserDetailsAuthenticationProvider extends AbstractUserDetail
 		// authentication events after cache expiry contain the details
 		CustomAuthenticationToken result = new CustomAuthenticationToken(principal, authentication.getCredentials(), authoritiesMapper.mapAuthorities(user.getAuthorities()));
 		result.setDetails(authentication.getDetails());
-		result.setClientId(((CustomAuthenticationToken) authentication).getClientId());
+		//
+		Long clientId = ((CustomAuthenticationToken) authentication).getClientId();
+		if ((clientId == null || clientId <= 0) && user instanceof JobDivaSession) {
+			clientId = ((JobDivaSession) user).getTeamId();
+		}
+		//
+		//
+		result.setClientId(clientId);
+		//
+		result.setJobDivaConnection(((CustomAuthenticationToken) authentication).getJobDivaConnection());
 		result.setJdbcTemplate(((CustomAuthenticationToken) authentication).getJdbcTemplate());
 		result.setNamedParameterJdbcTemplate(((CustomAuthenticationToken) authentication).getNamedParameterJdbcTemplate());
 		return result;

@@ -417,7 +417,7 @@ public class CandidateController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		jobDivaSession.checkForAPIPermission("createCandidateNoteWithCreateDate");
+		// jobDivaSession.checkForAPIPermission("createCandidateNoteWithCreateDate");
 		//
 		return candidateService.createCandidateNote(jobDivaSession, candidateid, note, recruiterid, action, actionDate, link2AnOpenJob, link2AContact, setAsAuto, createDate);
 		//

@@ -75,11 +75,11 @@ public class JobdivaCacheBasedUserCache implements UserCache {
 		}
 		this.removeUserFromCache(user.getUsername());
 		//
-		deletefromDbCache(user.getUsername());
 	}
 	
 	public void removeUserFromCache(String username) {
 		cache.evict(username);
+		deletefromDbCache(username);
 	}
 	
 	private void deletefromDbCache(String userName) {

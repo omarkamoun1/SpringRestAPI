@@ -814,6 +814,7 @@ public class JobDao extends AbstractActivityDao {
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
+		// logger.info("insert Job jdbcTemplate " + jdbcTemplate);
 		Long jobId = null;
 		String sql = "SELECT RFQID.nextval AS jobId FROM dual";
 		List<Long> listLong = jdbcTemplate.query(sql, new RowMapper<Long>() {
@@ -827,11 +828,16 @@ public class JobDao extends AbstractActivityDao {
 			jobId = listLong.get(0);
 		}
 		//
+		// logger.info("insert Job jobId " + jobId);
+		//
 		String sqlInsert = " INSERT INTO TRFQ (ID, " + sqlInsertFields(new ArrayList<String>(fields.keySet())) + ") VALUES (" + jobId + " ," + sqlInsertValues(fields) + ") ";
+		//
+		// logger.info("insert Job jobId " + sqlInsert);
 		//
 		NamedParameterJdbcTemplate jdbcTemplateObject = new NamedParameterJdbcTemplate(jdbcTemplate.getDataSource());
 		jdbcTemplateObject.update(sqlInsert, parameterSource);
 		//
+		// logger.info("inserted Job jobId " + jobId);
 		// get the value of the generated id
 		return jobId;
 		//
@@ -1070,7 +1076,7 @@ public class JobDao extends AbstractActivityDao {
 			} else
 				payRateChar = payRateUnit.charAt(0);
 		} else {
-			payRateUnit = "h";
+			payRateChar = 'h';
 		}
 		//
 		if (isNotEmpty(billRateUnit)) {
@@ -1091,7 +1097,7 @@ public class JobDao extends AbstractActivityDao {
 			} else
 				billRateChar = billRateUnit.charAt(0);
 		} else {
-			billRateUnit = "h";
+			billRateChar = 'h';
 		}
 		//
 		job.setRateper(payRateChar);
@@ -1131,6 +1137,7 @@ public class JobDao extends AbstractActivityDao {
 						@Override
 						public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
 							//
+							job.setCustomerId(contact.getContactId());
 							job.setCompanyId(rs.getLong("COMPANYID"));
 							job.setDepartment(rs.getString("COMPANYNAME"));
 							job.setFirstName(rs.getString("FIRSTNAME"));
@@ -1439,6 +1446,9 @@ public class JobDao extends AbstractActivityDao {
 		}
 		//
 		Long jobId = insertJob(jobDivaSession, job);
+		//
+		// logger.info("After Insert Job jobId " + jobId);
+		//
 		job.setId(jobId);
 		if (jobdivapost_division > 0) {
 			String sqlInsert = "insert into trfq_csp (teamid, rfqid, portalid, dateposted) values (?,?,?, sysdate)";
@@ -1732,15 +1742,26 @@ public class JobDao extends AbstractActivityDao {
 		//
 		//
 		if (v_assigned.size() > 0 && jobid != null) {
-			logger.info("Emails will be sent to " + v_assigned.size() + " users. \r\n");
-			try {
-				sendAssignNotification(v_assigned, null, job, teamid, primaryRecName, primarySaleName, description, rfqno_team, rfq_refno);
-			} catch (Exception e) {
-				// e.printStackTrace();
-			}
+			// logger.info("Emails will be sent to " + v_assigned.size() + "
+			// users. \r\n");
+			sendAssignNotificationInThread(jobDivaSession, description, job, v_assigned, primaryRecName, primarySaleName, rfqno_team, rfq_refno);
 		}
 		return jobid;
 		//
+	}
+	
+	private void sendAssignNotificationInThread(JobDivaSession jobDivaSession, String description, Job job, Vector<RecruiterObject> v_assigned, String primaryRecName, String primarySaleName, String rfqno_team, String rfq_refno) throws Exception {
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					sendAssignNotification(v_assigned, null, job, jobDivaSession.getTeamId(), primaryRecName, primarySaleName, description, rfqno_team, rfq_refno);
+				} catch (Exception e) {
+					logger.info("sendAssignNotificationInThread " + v_assigned.size() + " users. ERROR :: " + e.getMessage());
+				}
+			}
+		}).start();
 	}
 	
 	private String getJobStatusName(Integer status, Long teamid) {
@@ -1901,10 +1922,24 @@ public class JobDao extends AbstractActivityDao {
 					Long roleid = contactRoleType.getRoleId();
 					if (isRecruiter(roleid))
 						throw new Exception("Error: Invalid role type(" + roleid + ") of job contact(" + contactRoleType.getContactId() + "). \r\n");
+					//
 					// verify contact
-					Contact contact = contactDao.getContact(jobDivaSession, contactRoleType.getContactId());
-					if (contact == null || contact.getTeamId() != teamid)
+					sql = " SELECT ID FROM TCUSTOMER WHERE ID = ? and teamid = ? ";
+					params = new Object[] { contactRoleType.getContactId(), jobDivaSession.getTeamId() };
+					List<Long> list = jdbcTemplate.query(sql, params, new RowMapper<Long>() {
+						
+						@Override
+						public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+							//
+							return rs.getLong("ID");
+						}
+					});
+					//
+					// Contact contact = contactDao.getContact(jobDivaSession,
+					// contactRoleType.getContactId());
+					if (list == null || list.size() == 0)
 						throw new Exception("Error: Contact(" + contactRoleType.getContactId() + ") is not found. Can not add this contact to the job. \r\n");
+					//
 					//
 					// insert or modify or delete a contact from the job
 					sql = "SELECT  * FROM TRFQ_CUSTOMERS  where RFQID = ?  and TEAMID = ?  and CUSTOMERID = ? ";
@@ -1953,13 +1988,14 @@ public class JobDao extends AbstractActivityDao {
 				//
 				//
 				if (job.getCustomerId() != customerid) {
-					sql = " SELECT COMPANYID, COMPANYNAME, FIRSTNAME, LASTNAME FROM TCUSTOMER WHERE ID = ? and teamid = ? ";
-					params = new Object[] { job.getCustomerId(), jobDivaSession.getTeamId() };
+					sql = " SELECT ID, COMPANYID, COMPANYNAME, FIRSTNAME, LASTNAME FROM TCUSTOMER WHERE ID = ? and teamid = ? ";
+					params = new Object[] { customerid, jobDivaSession.getTeamId() };
 					jdbcTemplate.query(sql, params, new RowMapper<Boolean>() {
 						
 						@Override
 						public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
 							//
+							job.setCustomerId(rs.getLong("ID"));
 							job.setCompanyId(rs.getLong("COMPANYID"));
 							job.setDepartment(rs.getString("COMPANYNAME"));
 							job.setFirstName(rs.getString("FIRSTNAME"));

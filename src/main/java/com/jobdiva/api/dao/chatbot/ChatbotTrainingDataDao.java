@@ -16,6 +16,7 @@ import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.dao.proxy.ProxyAPIDao;
 import com.jobdiva.api.mapper.ChatbotQuestionRowMapper;
 import com.jobdiva.api.mapper.ChatbotSocialQuestionRowMapper;
+import com.jobdiva.api.model.SessionInfo;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.chatbot.ChatbotAnswer;
 import com.jobdiva.api.model.chatbot.ChatbotQuestion;
@@ -30,6 +31,14 @@ import com.jobdiva.api.model.proxy.Response;
 
 @Component
 public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
+	
+	public SessionInfo getSession(JobDivaSession session) throws Exception {
+		SessionInfo sessionInfo = new SessionInfo();
+		sessionInfo.setUserName(session.getUserName());
+		sessionInfo.setFirstName(session.getFirstName());
+		sessionInfo.setLastName(session.getLastName());
+		return sessionInfo;
+	}
 	
 	public List<ChatbotQuestion> getQuestions(JobDivaSession jobDivaSession) {
 		//

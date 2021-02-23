@@ -101,6 +101,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.authorizeRequests().//
 				antMatchers("/api/authenticate").permitAll().//
 				antMatchers("/api/internalAuthenticate").permitAll().//
+				antMatchers("/api/appAuthenticate").permitAll().//
+				antMatchers("/api/log").permitAll().//
 				antMatchers("/api/controller/saveMachineId").permitAll().//
 				antMatchers("/api/controller/getCoddlers").permitAll().//
 				antMatchers("/api/controller/getConfiguration").permitAll().//

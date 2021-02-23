@@ -21,7 +21,7 @@ import com.jobdiva.api.model.onboard.SuppPackage;
  *
  */
 @Component
-public class SaveOnBoardDao extends OnBoardDao {
+public class SaveOnBoardDao extends AbstractOnBoardDao {
 	
 	private void checkRequiredDocuments(JobDivaSession jobDivaSession, InterviewSchedule interviewSchedule) throws Exception {
 		String sql = "select  t2.ID as tabid,  t2.name as tabname,  " //
@@ -190,7 +190,7 @@ public class SaveOnBoardDao extends OnBoardDao {
 			for (OnBoardDocument candidateDocument : interviewSchedule.getCandidateDocuments()) {
 				long docid = candidateDocument.getId().longValue();
 				int att_type = 0;
-				int doctype = candidateDocument.getDocumentType().intValue();
+				int doctype = getIntDocumentType(candidateDocument.getDocumentType());
 				String key = att_type + "_" + docid;
 				//
 				if (prevSavedDocs.containsKey(key)) {

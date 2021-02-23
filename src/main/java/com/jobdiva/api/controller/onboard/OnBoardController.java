@@ -22,7 +22,6 @@ import com.jobdiva.api.service.OnBoardService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * @author Joseph Chidiac
@@ -32,24 +31,27 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @RequestMapping({ "/api/onboard/" })
 @Api(value = "Onboarding API", description = "REST API Used For Onboarding")
-@ApiIgnore
+// @ApiIgnore
 public class OnBoardController extends AbstractJobDivaController {
 	
 	@Autowired
 	OnBoardService onBoardService;
 	
-	@ApiOperation("Hire Type List")
-	@RequestMapping(value = { "/getHireTypes" }, method = { RequestMethod.GET }, produces = { "application/json" })
-	public List<HireType> getHireTypes() throws Exception {
+	@ApiOperation("Get Package List")
+	@RequestMapping(value = { "/getPackageList" }, method = { RequestMethod.GET }, produces = { "application/json" })
+	public List<HireType> getPackageList() throws Exception {
 		JobDivaSession jobDivaSession = getJobDivaSession();
-		return this.onBoardService.getHireTypes(jobDivaSession);
+		return this.onBoardService.getPackageList(jobDivaSession);
 	}
 	
-	@ApiOperation("Get packages by hire type")
-	@RequestMapping(value = { "/getPackages" }, method = { RequestMethod.GET }, produces = { "application/json" })
-	public List<OnBoardPackage> getPackages(@ApiParam(value = "Hire Type Id", required = true) @RequestParam(required = true) Long hireTypeId) throws Exception {
+	@ApiOperation("Get packages detail")
+	@RequestMapping(value = { "/getPackagesDetail" }, method = { RequestMethod.GET }, produces = { "application/json" })
+	public List<OnBoardPackage> getPackagesDetail(
+	// @ApiParam(value = "Hire Type Id", required = true) @RequestParam(required
+	// = true) Long hireTypeId
+	) throws Exception {
 		JobDivaSession jobDivaSession = getJobDivaSession();
-		return this.onBoardService.getPackages(jobDivaSession, hireTypeId);
+		return this.onBoardService.getPackagesDetail(jobDivaSession);
 	}
 	
 	@ApiOperation("Get Documents By Company")

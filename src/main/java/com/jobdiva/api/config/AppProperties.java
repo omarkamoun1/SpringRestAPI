@@ -6,6 +6,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class AppProperties {
 	
+	//
+	@Value("${spring.datasource.maximum.pool.size}")
+	private Integer	maximumPoolSize					= 20;
+	//
+	@Value("${spring.datasource.validation.timeout}")
+	private Integer	validationTimeout				= 5000;
+	//
+	@Value("${spring.datasource.max.lifetime}")
+	private Long	maxLifetime						= 1800000L;
+	//
+	@Value("${spring.datasource.idle.timeout}")
+	private Long	idleTimeout						= 600000L;
+	//
 	@Value("${servlet.bidata.ip}")
 	private String	servletBiDataIp;
 	//
@@ -191,6 +204,38 @@ public class AppProperties {
 	//
 	@Value("${jobserveuk.url}")
 	private String	jobserveukUrl;
+	
+	public Integer getMaximumPoolSize() {
+		return maximumPoolSize;
+	}
+	
+	public void setMaximumPoolSize(Integer maximumPoolSize) {
+		this.maximumPoolSize = maximumPoolSize;
+	}
+	
+	public Integer getValidationTimeout() {
+		return validationTimeout;
+	}
+	
+	public void setValidationTimeout(Integer validationTimeout) {
+		this.validationTimeout = validationTimeout;
+	}
+	
+	public Long getMaxLifetime() {
+		return maxLifetime;
+	}
+	
+	public void setMaxLifetime(Long maxLifetime) {
+		this.maxLifetime = maxLifetime;
+	}
+	
+	public Long getIdleTimeout() {
+		return idleTimeout;
+	}
+	
+	public void setIdleTimeout(Long idleTimeout) {
+		this.idleTimeout = idleTimeout;
+	}
 	
 	public String getServletBiDataIp() {
 		return servletBiDataIp;

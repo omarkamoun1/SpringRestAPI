@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jobdiva.api.controller.AbstractJobDivaController;
+import com.jobdiva.api.model.SessionInfo;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.chatbot.ChatbotAnswer;
 import com.jobdiva.api.model.chatbot.ChatbotQuestion;
@@ -19,7 +20,6 @@ import com.jobdiva.api.model.chatbot.ChatbotTagValue;
 import com.jobdiva.api.model.chatbot.ChatbotUserData;
 import com.jobdiva.api.model.chatbot.ChatbotVisibility;
 import com.jobdiva.api.service.ChatbotDataService;
-import com.jobdiva.api.service.LogService;
 
 import io.swagger.annotations.ApiParam;
 import springfox.documentation.annotations.ApiIgnore;
@@ -31,15 +31,13 @@ import springfox.documentation.annotations.ApiIgnore;
 public class SupportChatbotController extends AbstractJobDivaController {
 	
 	@Autowired
-	ChatbotDataService	chatbotDataService;
+	ChatbotDataService chatbotDataService;
 	//
-	@Autowired
-	LogService			logService;
 	
 	@ApiIgnore
 	@GetMapping(value = "/getSession", produces = "application/json")
-	public JobDivaSession getSession() throws Exception {
-		return getJobDivaSession();
+	public SessionInfo getSession() throws Exception {
+		return chatbotDataService.getSession(getJobDivaSession());
 	}
 	
 	@GetMapping(value = "/questions", produces = "application/json")
@@ -105,10 +103,4 @@ public class SupportChatbotController extends AbstractJobDivaController {
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		return chatbotDataService.getChatbotTagValue(jobDivaSession, tag, references);
 	}
-	/**
-	 * @CrossOrigin(origins="*") @GetMapping(value = "/user-profile", produces =
-	 *                           "application/json") public ChatbotRecruiterData
-	 *                           getRecruiterData() { return chatbotDataService
-	 *                           }
-	 ***/
 }

@@ -4,12 +4,14 @@ import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jobdiva.api.controller.AbstractJobDivaController;
+import com.jobdiva.api.model.UploadResume;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.proxy.ProxyHeader;
 import com.jobdiva.api.model.proxy.ProxyParameter;
@@ -17,12 +19,14 @@ import com.jobdiva.api.model.proxy.Response;
 import com.jobdiva.api.service.JobService;
 import com.jobdiva.api.service.ProxyAPIService;
 import com.jobdiva.api.service.ResumeService;
+import com.jobdiva.api.utils.DateUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 @CrossOrigin
 @RestController
@@ -40,9 +44,10 @@ public class JobDivaController extends AbstractJobDivaController {
 	@Autowired
 	ProxyAPIService	proxyAPIService;
 	
-	@RequestMapping(value = "/uploadResume", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiIgnore
+	@RequestMapping(value = "/linkedInUploadResume", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Upload Resume")
-	public Long uploadResume( //
+	public Long linkedInUploadResume( //
 			//
 			@ApiParam(value = "File name", required = true) //
 			@RequestParam(required = true) String filename, //
@@ -71,7 +76,44 @@ public class JobDivaController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		// jobDivaSession.checkForAPIPermission("uploadResume");
+		//
+		return resumeService.uploadResume(jobDivaSession, filename, filecontent, textfile, candidateid, resumesource, recruiterid, resumeDate);
+		//
+	}
+	
+	//
+	@RequestMapping(value = "/uploadResume", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Upload Resume")
+	public Long uploadResume( //
+			//
+			@ApiParam(value = //
+			" filename : File Name \r\n"//
+					+ " filecontent : Resume file content \r\n"//
+					+ " textfile : Alternate text resume \r\n"//
+					+ " candidateid : If provided, the resume would be added under this candidate. Otherwise, the system will try to match the resume to an existing candidate based on profile in the resume, or create a new candidate record if there is no match \r\n" //
+					+ " resumesource: This allows to tag the resume with a particular source  in JobDiva. The ID can be retrieved from the JobDiva interface under the  ‘Manage Resume Sources’ \r\n" //
+					+ " recruiterid : Recruiter ID \r\n" //
+					+ " resumeDate : String Format [MM/dd/yyyy HH:mm:ss] ") //
+			@RequestBody UploadResume uploadResume //
+	//
+	//
+	//
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
 		jobDivaSession.checkForAPIPermission("uploadResume");
+		//
+		String filename = uploadResume.getFilename();
+		byte[] filecontent = uploadResume.getFilecontent();
+		String textfile = uploadResume.getTextfile();
+		Long candidateid = uploadResume.getCandidateid();
+		Integer resumesource = uploadResume.getResumesource();
+		Long recruiterid = uploadResume.getRecruiterid();
+		//
+		Date resumeDate = DateUtils.toPropertyDate(uploadResume.getResumeDate());
 		//
 		return resumeService.uploadResume(jobDivaSession, filename, filecontent, textfile, candidateid, resumesource, recruiterid, resumeDate);
 		//

@@ -156,7 +156,10 @@ public class CandidateHRRecordDao extends AbstractJobDivaDao {
 		if (suffix != null && suffix.length() > 10)
 			message.append("Error: suffix should be shorter than 10 chars. ");
 		//
-		if (maritalstatus != null && (maritalstatus < 0 || maritalstatus > 8))
+		// if (maritalstatus != null && (maritalstatus < 0 || maritalstatus >
+		// 8))
+		// Modif By Sarah Chahine
+		if (maritalstatus != null && (maritalstatus < 0 || maritalstatus > 9))
 			message.append("Error: invalid marital status(" + maritalstatus + "). ");
 		//
 		if (ssn != null && ssn.length() != 9)

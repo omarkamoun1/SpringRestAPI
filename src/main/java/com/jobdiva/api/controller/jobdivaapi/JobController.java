@@ -1,7 +1,6 @@
 package com.jobdiva.api.controller.jobdivaapi;
 
 import java.util.Date;
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;

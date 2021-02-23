@@ -5,6 +5,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserCache;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -39,6 +40,8 @@ public class AuthenticationController {
 	@Autowired
 	JwtTokenUtil					jwtTokenUtil;
 	//
+	@Autowired
+	private UserCache				userCache;
 	
 	@ApiImplicitParams({ @ApiImplicitParam(name = "password", required = true, dataType = "String", format = "password") })
 	@ApiOperation(value = "Authenticate")
@@ -54,6 +57,7 @@ public class AuthenticationController {
 			@ApiParam(value = "Account password", required = true, type = "string", format = "password") //
 			@RequestParam(required = true) String password) throws Exception {
 		//
+		userCache.removeUserFromCache(username);
 		//
 		JobDivaSession jobDivaSession = authenticate(clientid, username, password, true);
 		//
@@ -80,6 +84,8 @@ public class AuthenticationController {
 			@RequestParam(required = true) String password) throws Exception {
 		//
 		//
+		userCache.removeUserFromCache(username);
+		//
 		JobDivaSession jobDivaSession = authenticate(clientid, username, password, false);
 		//
 		//
@@ -95,7 +101,47 @@ public class AuthenticationController {
 		try {
 			//
 			//
+			userCache.removeUserFromCache(username);
+			//
 			Authentication authenticate = authenticationManager.authenticate(new CustomAuthenticationToken(username, password, clientId, checkApiPermission));
+			return (JobDivaSession) authenticate.getPrincipal();
+			//
+			//
+		} catch (DisabledException e) {
+			throw new Exception("USER_DISABLED", e);
+		} catch (BadCredentialsException e) {
+			throw new Exception("INVALID_CREDENTIALS", e);
+		}
+	}
+	
+	@ApiIgnore
+	@RequestMapping(value = "/appAuthenticate", method = RequestMethod.GET)
+	public String appAuthenticate(
+			//
+			@ApiParam(value = "Account username (email)", required = true, type = "String") //
+			@RequestParam(required = true) String username, //
+			//
+			@ApiParam(value = "Account password", required = true, type = "string", format = "password") //
+			@RequestParam(required = true) String password) throws Exception {
+		//
+		//
+		userCache.removeUserFromCache(username);
+		//
+		JobDivaSession jobDivaSession = checkAuthenticate(username, password);
+		//
+		//
+		final String token = jwtTokenUtil.generateToken(jobDivaSession);
+		//
+		return token;
+		//
+		//
+	}
+	
+	protected JobDivaSession checkAuthenticate(String username, String password) throws Exception {
+		try {
+			//
+			//
+			Authentication authenticate = authenticationManager.authenticate(new CustomAuthenticationToken(username, password, true));
 			return (JobDivaSession) authenticate.getPrincipal();
 			//
 			//

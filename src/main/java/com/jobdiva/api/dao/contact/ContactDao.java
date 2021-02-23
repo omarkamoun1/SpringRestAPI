@@ -140,20 +140,18 @@ public class ContactDao extends AbstractJobDivaDao {
 				+ " a.reportsto " //
 				+ " from ";
 		//
-		sql += " TCUSTOMER a  left join  TCUSTOMERADDRESS ca on a.teamid = ca.teamid and a.id = ca.contactid and ca.DEFAULT_ADDRESS = 1  and ca.deleted = 0";
+		sql += " TCUSTOMER a  left join  TCUSTOMERADDRESS ca on a.teamid = ca.teamid and a.id = ca.contactid and ca.DEFAULT_ADDRESS = 1  and ca.deleted = 0 ";
 		//
 		sql += " where a.teamid = ? AND a.ID = ?  " //
 		;
 		//
-		ArrayList<Object> paramList = new ArrayList<Object>();
-		paramList.add(jobDivaSession.getTeamId());
-		paramList.add(contactId);
+		Object[] params = new Object[] { jobDivaSession.getTeamId(), contactId };
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
-		List<Contact> jobContacts = jdbcTemplate.query(sql, paramList.toArray(), new ContactRowMapper());
+		List<Contact> jobContacts = jdbcTemplate.query(sql, params, new ContactRowMapper());
 		//
-		return jobContacts != null && !jobContacts.isEmpty() ? jobContacts.get(0) : null;
+		return jobContacts != null && jobContacts.size() > 0 ? jobContacts.get(0) : null;
 	}
 	
 	//

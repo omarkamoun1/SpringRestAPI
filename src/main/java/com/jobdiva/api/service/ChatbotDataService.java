@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jobdiva.api.dao.chatbot.ChatbotTrainingDataDao;
+import com.jobdiva.api.model.SessionInfo;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.chatbot.ChatbotAnswer;
 import com.jobdiva.api.model.chatbot.ChatbotQuestion;
@@ -20,6 +21,12 @@ public class ChatbotDataService {
 	
 	@Autowired
 	ChatbotTrainingDataDao trainingDataDao;
+	
+	
+	public SessionInfo getSession(JobDivaSession session) throws Exception {
+		return trainingDataDao.getSession(session);
+	}
+	
 	
 	public List<ChatbotQuestion> getChatbotQuestions(JobDivaSession session) throws Exception {
 		try {

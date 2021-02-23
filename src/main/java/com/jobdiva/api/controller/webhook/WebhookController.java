@@ -21,7 +21,6 @@ import com.jobdiva.api.model.webhook.WebhookInfo;
 import com.jobdiva.api.service.WebhookService;
 
 import io.swagger.annotations.Api;
-import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * @author Joseph Chidiac
@@ -31,7 +30,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @RequestMapping({ "/api/webhook/" })
 @Api(value = "Webhook API", description = "REST API Used For Webhook")
-@ApiIgnore
+// @ApiIgnore
 public class WebhookController extends AbstractJobDivaController {
 	
 	@Autowired

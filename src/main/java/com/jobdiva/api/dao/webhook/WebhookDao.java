@@ -21,13 +21,15 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.arizon.shared.Encryption;
 import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.model.webhook.WebhookInfo;
 
 @Component
 public class WebhookDao extends AbstractJobDivaDao {
 	
-	static final String HMAC_SHA1 = "HmacSHA1";
+	static final String	HMAC_SHA1		= "HmacSHA1";
+	static final String	JOBDIVA_SECRET	= "JobDiva2021WebHook";
 	
 	protected String calcHmacSha256(String clientSecret, String payload) throws Exception {
 		//
@@ -45,6 +47,14 @@ public class WebhookDao extends AbstractJobDivaDao {
 		return expected;
 	}
 	
+	private String encryptClientSecret(String clientSecret) {
+		return Encryption.encrypt(clientSecret);
+	}
+	
+	private String decryptClientSecret(String clientSecret) {
+		return Encryption.decrypt(clientSecret);
+	}
+	
 	public WebhookInfo getWebhookConfiguration(Long teamId) {
 		JdbcTemplate jdbcTemplate = this.jobDivaConnectivity.getJdbcTemplate(teamId);
 		String sql = "SELECT ID, CLIENT_SECRET, CLIENT_URL, ACTIVE FROM TWEBHOOK_CONFIGURATION where TEAMID = ? ";
@@ -57,7 +67,7 @@ public class WebhookDao extends AbstractJobDivaDao {
 				WebhookInfo webhookInfo = new WebhookInfo();
 				webhookInfo.setId(rs.getLong("ID"));
 				webhookInfo.setClientUrl(rs.getString("CLIENT_URL"));
-				webhookInfo.setClientSecret(rs.getString("CLIENT_SECRET"));
+				webhookInfo.setClientSecret(decryptClientSecret(rs.getString("CLIENT_SECRET")));
 				webhookInfo.setActive(rs.getBoolean("ACTIVE"));
 				//
 				return webhookInfo;
@@ -103,6 +113,8 @@ public class WebhookDao extends AbstractJobDivaDao {
 	}
 	
 	public Boolean updateWebhookConfiguration(Long teamId, String clientSecret, String clientUrl, Boolean active) {
+		//
+		clientSecret = encryptClientSecret(clientSecret);
 		//
 		JdbcTemplate jdbcTemplate = this.jobDivaConnectivity.getJdbcTemplate(teamId);
 		active = (active != null) ? active.booleanValue() : false;

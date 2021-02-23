@@ -996,7 +996,8 @@ public class AbstractJobDivaDao {
 	protected void sendAssignNotification(Vector<RecruiterObject> v_assigned, Vector<RecruiterObject> v_deassigned, Job job, long teamid, String primaryRecName, String primarySaleName, String description, String rfqno_team, String rfq_refno)
 			throws Exception {
 		//
-		logger.debug("........................ sendAssignNotification for " + job.getId());
+		// logger.info("........................ sendAssignNotification for " +
+		// job.getId());
 		//
 		String teamregion = "en_US";
 		Team team = getTeamById(teamid);
@@ -1004,13 +1005,18 @@ public class AbstractJobDivaDao {
 			teamregion = team.getRegionCode();
 		//
 		JDLocale regionFormat = new JDLocale(teamregion, DateFormat.SHORT, -1, null, 2, 0); // MM/dd/yyyy
+		//
 		if (v_assigned != null && v_assigned.size() > 0) {
+			//
 			com.axelon.mail.SMTPServer mailServer = new com.axelon.mail.SMTPServer();
+			//
 			mailServer.setHost(appProperties.getSmtpServerLocation());
 			mailServer.setLogFileName("./email.log"); // ?
 			mailServer.setContentType(SMTPServer.CONTENT_TYPE_HTML);
+			//
 			String CompanyName = StringUtils.deNull(job.getDepartment());
 			String emailSubject = "You have just been assigned to Job Reference # " + rfq_refno;
+			//
 			if (CompanyName.equals("") == false)
 				emailSubject += " for " + CompanyName;
 			//
@@ -1018,8 +1024,12 @@ public class AbstractJobDivaDao {
 			//
 			for (RecruiterObject rec : (Vector<RecruiterObject>) v_assigned) {
 				try {
+					//
+					logger.info(" sendAssignNotification for [" + appProperties.getSmtpServerLocation() + "] [" + rec.email + "/JobAssignment@jobdiva.com]" + emailSubject);
+					//
 					mailServer.sendMail(rec.email, "JobAssignment@jobdiva.com", emailSubject, emailBody);
-					logger.debug("Emails sent to " + rec.email);
+					//
+					logger.info("Emails sent to " + rec.email);
 				} catch (Exception ex) {
 					logger.debug("Could not send assigned email to =" + rec.email);
 					// ex.printStackTrace();

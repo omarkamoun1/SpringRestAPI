@@ -27,8 +27,8 @@ public class OnBoardService {
 	@Autowired
 	SaveOnBoardDao	saveOnBoardDao;
 	
-	public List<HireType> getHireTypes(JobDivaSession jobDivaSession) {
-		return this.onBoardDao.getHireTypes(jobDivaSession);
+	public List<HireType> getPackageList(JobDivaSession jobDivaSession) {
+		return this.onBoardDao.getPackageList(jobDivaSession);
 	}
 	
 	public List<OnBoardDocument> getDocumentsByCompany(JobDivaSession jobDivaSession, Long companyId) {
@@ -39,8 +39,8 @@ public class OnBoardService {
 		return this.onBoardDao.getDocumentsByContact(jobDivaSession, clientId);
 	}
 	
-	public List<OnBoardPackage> getPackages(JobDivaSession jobDivaSession, Long hireTypeId) {
-		return this.onBoardDao.getPackages(jobDivaSession, hireTypeId);
+	public List<OnBoardPackage> getPackagesDetail(JobDivaSession jobDivaSession) {
+		return this.onBoardDao.getPackagesDetail(jobDivaSession);
 	}
 	
 	public List<OnBoardLocationPackage> getJobLocationDocuments(JobDivaSession jobDivaSession, Long jobId) {

@@ -35,6 +35,7 @@ import com.jobdiva.api.convertor.JsonToTimeSheetEntryFormatTypeConverter;
 import com.jobdiva.api.convertor.JsonToTimesheetEntryConverter;
 import com.jobdiva.api.convertor.JsonToTimezoneConverter;
 import com.jobdiva.api.convertor.JsonToTitleSkillCertificationConverter;
+import com.jobdiva.api.convertor.JsonToUplaodResumeConverter;
 import com.jobdiva.api.convertor.JsonToUserFieldConverter;
 import com.jobdiva.api.convertor.JsonToUserRoleConverter;
 import com.jobdiva.api.convertor.JsonToWeekendingTypeConverter;
@@ -112,6 +113,7 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
 		registry.addConverter(new JsonToProxyParameterConverter());
 		//
 		registry.addConverter(new JsonToSocialNetworkTypeConverter());
+		registry.addConverter(new JsonToUplaodResumeConverter());
 	}
 	
 	private ApiInfo metaData() {

@@ -3,8 +3,6 @@ package com.jobdiva.api.dao.onboard;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -12,7 +10,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
-import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.onboard.HireType;
 import com.jobdiva.api.model.onboard.OnBoardDocument;
@@ -24,15 +21,15 @@ import com.jobdiva.api.model.onboard.OnBoardPackage;
  *
  */
 @Component
-public class OnBoardDao extends AbstractJobDivaDao {
+public class OnBoardDao extends AbstractOnBoardDao {
 	
-	public List<HireType> getHireTypes(JobDivaSession jobDivaSession) {
+	public List<HireType> getPackageList(JobDivaSession jobDivaSession) {
 		String sql = "SELECT ID, NAME " //
 				+ " FROM tonboarding_tab " //
 				+ " where teamid = ? " //
 				+ " and nvl(deleted,0) = 0 " //
 				+ " and ID > 0 " //
-				+ " and ID <= 100  " //
+				// + " and ID <= 100 " //
 				+ " order by upper(NAME) ";
 		Object[] params = { jobDivaSession.getTeamId() };
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
@@ -41,16 +38,21 @@ public class OnBoardDao extends AbstractJobDivaDao {
 			@Override
 			public HireType mapRow(ResultSet rs, int rowNum) throws SQLException {
 				//
+				Long id = rs.getLong("ID");
 				HireType hireType = new HireType();
-				hireType.setId(rs.getLong("ID"));
+				hireType.setId(id);
 				hireType.setName(rs.getString("NAME"));
+				//
+				String packageType = id <= 100 ? "Hire Package" : "Supplemental Package";
+				hireType.setPackageType(packageType);
+				//
 				return hireType;
 			}
 		});
 		return list;
 	}
 	
-	public List<OnBoardPackage> getPackages(JobDivaSession jobDivaSession, Long hireTypeId) {
+	public List<OnBoardPackage> getPackagesDetail(JobDivaSession jobDivaSession) {
 		//
 		String sql = "select  " //
 				+ " t2.ID as tabid,  " //
@@ -62,19 +64,29 @@ public class OnBoardDao extends AbstractJobDivaDao {
 				+ " t3.require_return,  " //
 				+ " t3.readonly,  " //
 				+ " nvl(t3.send_to,0) as send_to, " //
+				+ " t3.description, t3.instruction, t3.ismedical ," //
 				+ " t3.doctype  " //
-				+ " from  tonboardings_mapping t1, tonboarding_tab t2, tonboardings t3  " //
-				+ " where t1.tabid(+) = t2.id  " //
-				+ " and t1.teamid(+) = t2.teamid  " //
-				+ " and t2.teamid = ?  " //
-				+ " and nvl(t2.deleted ,0) = 0  " //
-				+ " and t1.docid=t3.id  " //
-				+ " and t2.teamid = t3.teamid  " //
-				+ " and nvl(t3.deleted,0) = 0   " //
-				+ " and ( t2.id = ?  OR t2.id > ? )  " //
+				+ " FROM tonboarding_tab t2  " //
+				+ " LEFT OUTER JOIN tonboardings_mapping t1 ON t1.tabid = t2.id AND t1.teamid = t2.teamid  " //
+				+ " LEFT OUTER JOIN tonboardings t3 ON t1.docid = t3.id AND t2.teamid = t3.teamid  " //
+				+ " WHERE t2.teamid = ? " //
+				+ " AND nvl(t2.deleted,0) = 0 " //
+				+ " AND nvl(t3.deleted,0) = 0 " //
+				+ " AND ( t2.id  > ?  ) " //
+				//
+				// + " from tonboardings_mapping t1, tonboarding_tab t2,
+				// tonboardings t3 " //
+				// + " where t1.tabid(+) = t2.id " //
+				// + " and t1.teamid(+) = t2.teamid " //
+				// + " and t2.teamid = ? " //
+				// + " and nvl(t2.deleted ,0) = 0 " //
+				// + " and t1.docid=t3.id " //
+				// + " and t2.teamid = t3.teamid " //
+				// + " and nvl(t3.deleted,0) = 0 " //
+				// + " and ( t2.id = ? OR t2.id > ? ) " //
 				+ " order by upper(t2.name), upper(t3.name) ";
 		//
-		Object[] params = { jobDivaSession.getTeamId(), hireTypeId, 100 };
+		Object[] params = { jobDivaSession.getTeamId(), 0 };
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
@@ -97,34 +109,50 @@ public class OnBoardDao extends AbstractJobDivaDao {
 					onBoardPackage.setName(rs.getString("tabname"));
 					map.put(packageName, onBoardPackage);
 					packages.add(onBoardPackage);
-					if (localHireTypeId != null && localHireTypeId.equals(hireTypeId)) {
-						onBoardPackage.setHirePackage(true);
+					//
+					String packageType = null;
+					if (localHireTypeId != null && localHireTypeId <= 100) {// .equals(hireTypeId))
+																			// {
+						packageType = "hirePackage";
+						// onBoardPackage.setHirePackage(true);
 					} else {
-						onBoardPackage.setSupplementalPackage(true);
+						packageType = "supplementalPackage";
+						// onBoardPackage.setSupplementalPackage(true);
 					}
+					onBoardPackage.setPackageType(packageType);
 				}
 				//
-				OnBoardDocument onBoardDocument = new OnBoardDocument();
-				onBoardDocument.setId(rs.getLong("docid"));
-				onBoardDocument.setName(rs.getString("docname"));
-				onBoardDocument.setMandatory(rs.getBoolean("require_distribution"));
-				onBoardDocument.setDocumentType(rs.getInt("doctype"));
-				//
-				onBoardPackage.addDocument(onBoardDocument);
+				Long docId = rs.getLong("docid");
+				if (docId != null && docId > 0) {
+					OnBoardDocument onBoardDocument = new OnBoardDocument();
+					onBoardDocument.setId(docId);
+					onBoardDocument.setName(rs.getString("docname"));
+					onBoardDocument.setMandatory(rs.getBoolean("require_distribution"));
+					onBoardDocument.setReturnRequired(rs.getBoolean("require_return"));
+					onBoardDocument.setDocumentType(getStringDocumentType(rs.getInt("doctype")));
+					onBoardDocument.setReadonly(rs.getBoolean("readonly"));
+					onBoardDocument.setSendTo(getStringSendTo(rs.getInt("send_to")));
+					onBoardDocument.setInternalDescription(rs.getString("description"));
+					onBoardDocument.setPortalInstruction(rs.getString("instruction"));
+					onBoardDocument.setMedical(rs.getBoolean("ismedical"));
+					//
+					///
+					onBoardPackage.addDocument(onBoardDocument);
+				}
 				//
 				return null;
 			}
 		});
 		//
 		//
-		Collections.sort(packages, new Comparator<OnBoardPackage>() {
-			
-			@Override
-			public int compare(OnBoardPackage o1, OnBoardPackage o2) {
-				//
-				return o1.getId().compareTo(hireTypeId);
-			}
-		});
+		// Collections.sort(packages, new Comparator<OnBoardPackage>() {
+		//
+		// @Override
+		// public int compare(OnBoardPackage o1, OnBoardPackage o2) {
+		// //
+		// return o2.getId().compareTo(o1.getId());
+		// }
+		// });
 		//
 		//
 		//
@@ -170,7 +198,7 @@ public class OnBoardDao extends AbstractJobDivaDao {
 		//
 		//
 		//
-		sql = " select id, description, filename, require_return, readonly, mandatory, nvl(send_to,0) as send_to, doctype  " //
+		sql = " select id, description, filename, require_return, readonly, mandatory, nvl(send_to,0) as send_to, doctype, ismedical, instruction  " //
 				+ " from tcompanyattachments  " //
 				+ " where teamid = ?  " //
 				+ " and companyid = ?  " //
@@ -189,7 +217,12 @@ public class OnBoardDao extends AbstractJobDivaDao {
 				onBoardDocument.setId(rs.getLong("id"));
 				onBoardDocument.setName(rs.getString("description"));
 				onBoardDocument.setMandatory(rs.getBoolean("mandatory"));
-				onBoardDocument.setDocumentType(rs.getInt("doctype"));
+				onBoardDocument.setDocumentType(getStringDocumentType(rs.getInt("doctype")));
+				onBoardDocument.setReturnRequired(rs.getBoolean("require_return"));
+				onBoardDocument.setReadonly(rs.getBoolean("readonly"));
+				onBoardDocument.setSendTo(getStringSendTo(rs.getInt("send_to")));
+				onBoardDocument.setMedical(rs.getBoolean("ismedical"));
+				onBoardDocument.setPortalInstruction(rs.getString("instruction"));
 				//
 				return onBoardDocument;
 			}
@@ -199,7 +232,7 @@ public class OnBoardDao extends AbstractJobDivaDao {
 		//
 		List<OnBoardDocument> parentCompanyList = null;
 		if (parentcompanyid > 0L) {
-			sql = " select id, description, filename, require_return, readonly, mandatory, nvl(send_to,0) as send_to, doctype  " //
+			sql = " select id, description, filename, require_return, readonly, mandatory, nvl(send_to,0) as send_to, doctype, ismedical, instruction  " //
 					+ " from tcompanyattachments  " //
 					+ " where teamid = ?  " //
 					+ " and companyid = ?  " //
@@ -216,7 +249,12 @@ public class OnBoardDao extends AbstractJobDivaDao {
 					onBoardDocument.setId(rs.getLong("id"));
 					onBoardDocument.setName(rs.getString("description"));
 					onBoardDocument.setMandatory(rs.getBoolean("mandatory"));
-					onBoardDocument.setDocumentType(rs.getInt("doctype"));
+					onBoardDocument.setDocumentType(getStringDocumentType(rs.getInt("doctype")));
+					onBoardDocument.setReturnRequired(rs.getBoolean("require_return"));
+					onBoardDocument.setReadonly(rs.getBoolean("readonly"));
+					onBoardDocument.setSendTo(getStringSendTo(rs.getInt("send_to")));
+					onBoardDocument.setMedical(rs.getBoolean("ismedical"));
+					onBoardDocument.setPortalInstruction(rs.getString("instruction"));
 					//
 					return onBoardDocument;
 				}
@@ -235,7 +273,7 @@ public class OnBoardDao extends AbstractJobDivaDao {
 	
 	public List<OnBoardDocument> getDocumentsByContact(JobDivaSession jobDivaSession, Long contactId) {
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
-		String sql = "select id, description, filename, thefile, mandatory, nvl(send_to,0) as send_to, doctype  " //
+		String sql = "select id, description, filename, thefile, require_return, mandatory, readonly, nvl(send_to,0) as send_to, doctype , ismedical, instruction " //
 				+ " from tcontactattachments  " //
 				+ " where teamid = ?  " //
 				+ " and contactid = ?  " //
@@ -250,10 +288,15 @@ public class OnBoardDao extends AbstractJobDivaDao {
 				//
 				OnBoardDocument onBoardDocument = new OnBoardDocument();
 				//
-				onBoardDocument.setDocumentType(rs.getInt("doctype"));
+				onBoardDocument.setDocumentType(getStringDocumentType(rs.getInt("doctype")));
 				onBoardDocument.setId(rs.getLong("id"));
 				onBoardDocument.setName(rs.getString("description"));
 				onBoardDocument.setMandatory(rs.getBoolean("mandatory"));
+				onBoardDocument.setReturnRequired(rs.getBoolean("require_return"));
+				onBoardDocument.setReadonly(rs.getBoolean("readonly"));
+				onBoardDocument.setSendTo(getStringSendTo(rs.getInt("send_to")));
+				onBoardDocument.setMedical(rs.getBoolean("ismedical"));
+				onBoardDocument.setPortalInstruction(rs.getString("instruction"));
 				//
 				return onBoardDocument;
 				//
@@ -304,7 +347,7 @@ public class OnBoardDao extends AbstractJobDivaDao {
 			OnBoardLocationPackage onBoardPackage = new OnBoardLocationPackage();
 			onBoardPackage.setCityPackage(true);
 			//
-			sql = " select id, name, filename, require_return, readonly, 0 mandatory, nvl(send_to,0) as send_to, doctype " //
+			sql = " select id, name, filename, require_return, readonly, 0 mandatory, nvl(send_to,0) as send_to, doctype, description, instruction,ismedical " //
 					+ " from tonboardings  " //
 					+ " where teamid= ?  " //
 					+ " and nvl(deleted,0) = 0  " //
@@ -320,10 +363,17 @@ public class OnBoardDao extends AbstractJobDivaDao {
 				public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
 					//
 					OnBoardDocument onBoardDocument = new OnBoardDocument();
-					onBoardDocument.setDocumentType(0);
+					onBoardDocument.setDocumentType(getStringDocumentType(0));
 					onBoardDocument.setId(rs.getLong("id"));
 					onBoardDocument.setName(rs.getString("name"));
 					onBoardDocument.setMandatory(rs.getBoolean("mandatory"));
+					onBoardDocument.setReturnRequired(rs.getBoolean("require_return"));
+					onBoardDocument.setReadonly(rs.getBoolean("readonly"));
+					onBoardDocument.setSendTo(getStringSendTo(rs.getInt("send_to")));
+					onBoardDocument.setInternalDescription(rs.getString("description"));
+					onBoardDocument.setPortalInstruction(rs.getString("instruction"));
+					onBoardDocument.setMedical(rs.getBoolean("ismedical"));
+					//
 					onBoardPackage.addDocument(onBoardDocument);
 					//
 					return true;
@@ -337,7 +387,7 @@ public class OnBoardDao extends AbstractJobDivaDao {
 		if (state != null && state.length() > 0) {
 			OnBoardLocationPackage onBoardPackage = new OnBoardLocationPackage();
 			onBoardPackage.setStatePackage(true);
-			sql = " select id, name, filename, require_return, readonly, 0 mandatory, nvl(send_to,0) as send_to, doctype "//
+			sql = " select id, name, filename, require_return, readonly, 0 mandatory, nvl(send_to,0) as send_to, doctype, description, instruction,ismedical "//
 					+ " from tonboardings  " //
 					+ " where teamid = ?  " //
 					+ " and nvl(deleted,0) = 0  " //
@@ -355,10 +405,17 @@ public class OnBoardDao extends AbstractJobDivaDao {
 					//
 					//
 					OnBoardDocument onBoardDocument = new OnBoardDocument();
-					onBoardDocument.setDocumentType(0);
+					onBoardDocument.setDocumentType(getStringDocumentType(0));
 					onBoardDocument.setId(rs.getLong("id"));
 					onBoardDocument.setName(rs.getString("name"));
 					onBoardDocument.setMandatory(rs.getBoolean("mandatory"));
+					onBoardDocument.setReturnRequired(rs.getBoolean("require_return"));
+					onBoardDocument.setReadonly(rs.getBoolean("readonly"));
+					onBoardDocument.setSendTo(getStringSendTo(rs.getInt("send_to")));
+					onBoardDocument.setInternalDescription(rs.getString("description"));
+					onBoardDocument.setPortalInstruction(rs.getString("instruction"));
+					onBoardDocument.setMedical(rs.getBoolean("ismedical"));
+					//
 					onBoardPackage.addDocument(onBoardDocument);
 					//
 					return null;
@@ -372,7 +429,7 @@ public class OnBoardDao extends AbstractJobDivaDao {
 		if (country != null && country.length() > 0) {
 			OnBoardLocationPackage onBoardPackage = new OnBoardLocationPackage();
 			onBoardPackage.setCountryPackage(true);
-			sql = " select id, name, filename, require_return, readonly, 0 mandatory, nvl(send_to,0) as send_to, doctype " //
+			sql = " select id, name, filename, require_return, readonly, 0 mandatory, nvl(send_to,0) as send_to, doctype, description, instruction, ismedical " //
 					+ " from tonboardings  " //
 					+ " where teamid = ?  " //
 					+ " and nvl(deleted,0) = 0  " //
@@ -388,10 +445,17 @@ public class OnBoardDao extends AbstractJobDivaDao {
 				public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
 					//
 					OnBoardDocument onBoardDocument = new OnBoardDocument();
-					onBoardDocument.setDocumentType(0);
+					onBoardDocument.setDocumentType(getStringDocumentType(0));
 					onBoardDocument.setId(rs.getLong("id"));
 					onBoardDocument.setName(rs.getString("name"));
 					onBoardDocument.setMandatory(rs.getBoolean("mandatory"));
+					onBoardDocument.setReturnRequired(rs.getBoolean("require_return"));
+					onBoardDocument.setReadonly(rs.getBoolean("readonly"));
+					onBoardDocument.setSendTo(getStringSendTo(rs.getInt("send_to")));
+					onBoardDocument.setInternalDescription(rs.getString("description"));
+					onBoardDocument.setPortalInstruction(rs.getString("instruction"));
+					onBoardDocument.setMedical(rs.getBoolean("ismedical"));
+					//
 					onBoardPackage.addDocument(onBoardDocument);
 					//
 					return true;

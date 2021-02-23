@@ -3,6 +3,8 @@ package com.jobdiva.api.service;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -23,17 +25,20 @@ import com.jobdiva.api.model.authenticate.JobDivaSession;
 @Service
 public class JobService {
 	
-	@Autowired
-	JobDao				jobDao;
+	protected final Logger	logger	= LoggerFactory.getLogger(this.getClass());
+	//
 	//
 	@Autowired
-	JobUserDao			jobUserDao;
+	JobDao					jobDao;
 	//
 	@Autowired
-	JobNoteDao			jobNoteDao;
+	JobUserDao				jobUserDao;
 	//
 	@Autowired
-	JobApplicationDao	jobApplicationDao;
+	JobNoteDao				jobNoteDao;
+	//
+	@Autowired
+	JobApplicationDao		jobApplicationDao;
 	
 	public List<Job> searchJobs(JobDivaSession jobDivaSession, Long jobId, String jobdivaref, String optionalref, String city, String[] state, String title, Long contactid, Long companyId, String companyname, Integer status, String[] jobtype,
 			Date issuedatefrom, Date issuedateto, Date startdatefrom, Date startdateto, String zipcode, Integer zipcodeRadius, String countryId) throws Exception {
@@ -126,7 +131,10 @@ public class JobService {
 			//
 		} catch (Exception e) {
 			//
+			logger.info("Exception When  Insert Job  " + e.getMessage());
 			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "createJob", "Create Failed, " + e.getMessage());
+			//
+			e.printStackTrace();
 			//
 			throw new Exception(e.getMessage());
 			//

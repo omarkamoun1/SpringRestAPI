@@ -21,6 +21,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.jobdiva.api.config.AppProperties;
+import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 @Component
@@ -78,6 +79,7 @@ public class JobDivaConnectivity {
 			public JobDivaConnection mapRow(ResultSet rs, int rowNum) throws SQLException {
 				JobDivaConnection jobDivaConnection = new JobDivaConnection();
 				//
+				jobDivaConnection.setId(rs.getInt("ID"));
 				jobDivaConnection.setConnectionString(rs.getString("CONNECT_STRING"));
 				jobDivaConnection.setConnectionThin(rs.getString("CONNECT_THIN"));
 				jobDivaConnection.setUserName(rs.getString("CONNECT_USER"));
@@ -174,7 +176,7 @@ public class JobDivaConnectivity {
 		logger.info("Miner Jdbc Template Connectivity Done.");
 	}
 	
-	private JdbcTemplate createJdbcTemplate(JobDivaConnection jobDivaConnection) {
+	protected JdbcTemplate old__createJdbcTemplate(JobDivaConnection jobDivaConnection) {
 		//
 		DataSourceBuilder<?> dataSourceBuilder = DataSourceBuilder.create();
 		dataSourceBuilder.driverClassName("oracle.jdbc.OracleDriver");
@@ -195,6 +197,40 @@ public class JobDivaConnectivity {
 				return rs.getInt(1);
 			}
 		});
+		//
+		return jdbcTemplate;
+	}
+	
+	private HikariConfig hikariConfig(String poolName, String driverClassName, String url, String userName, String password) {
+		HikariConfig config = new HikariConfig();
+		config.setPoolName(poolName);
+		config.setDriverClassName(driverClassName);
+		config.setJdbcUrl(url);
+		config.setUsername(userName);
+		config.setPassword(password);
+		config.setMaximumPoolSize(appProperties.getMaximumPoolSize());
+		config.setAutoCommit(true);
+		config.setConnectionTestQuery("SELECT 1 FROM DUAL");
+		// config.setLeakDetectionThreshold(THREE_MINS);
+		config.setValidationTimeout(appProperties.getValidationTimeout());
+		config.setMaxLifetime(appProperties.getMaxLifetime());
+		config.setIdleTimeout(appProperties.getIdleTimeout());
+		return config;
+	}
+	
+	private JdbcTemplate createJdbcTemplate(JobDivaConnection jobDivaConnection) {
+		//
+		String poolName = jobDivaConnection.getEnvironmentType() + "_" + jobDivaConnection.getId();
+		String url = "jdbc:oracle:thin:@" + jobDivaConnection.getConnectionThin();
+		String password = jobDivaConnection.getPasword();
+		String userName = jobDivaConnection.getUserName();
+		String driverClassName = "oracle.jdbc.OracleDriver";
+		HikariConfig hikariConfig = hikariConfig(poolName, driverClassName, url, userName, password);
+		//
+		HikariDataSource hikariDataSource = new HikariDataSource(hikariConfig);
+		//
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(hikariDataSource);
+		//
 		//
 		return jdbcTemplate;
 	}
