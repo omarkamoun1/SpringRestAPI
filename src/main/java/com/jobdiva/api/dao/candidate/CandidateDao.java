@@ -206,7 +206,7 @@ public class CandidateDao extends AbstractJobDivaDao {
 		//
 		if (qualifications != null) {
 			for (int i = 0; i < qualifications.length; i++) {
-				if (qualifications[i].getCatId() < 1 || isNotEmpty(qualifications[i].getDcatNames()))
+				if (qualifications[i].getCatId() < 1 || isEmpty(qualifications[i].getDcatNames()))
 					throw new Exception(String.format("Error: Invalid userfield id(%d) or userfield value(%s). \r\n", qualifications[i].getCatId(), qualifications[i].getDcatNames()));
 			}
 		}
