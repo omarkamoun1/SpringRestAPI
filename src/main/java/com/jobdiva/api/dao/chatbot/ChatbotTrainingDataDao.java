@@ -4,9 +4,14 @@ import java.net.URLEncoder;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -430,6 +435,11 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			data.setFirstname(tmp.getFirstname());
 			data.setLastname(tmp.getLastname());
 			data.setTeamLeader(tmp.isTeamLeader());
+			HashMap<Long, String> notUsedHirePackage = getNotUsedHirePackages(teamid);
+			if(notUsedHirePackage.size()>0) {
+				data.hasUnusedHirePackage = true;
+				data.unusedHirePackagesName = notUsedHirePackage.entrySet().stream().map(e->e.getValue()).collect(Collectors.joining(", ","",""));
+			}
 		}
 		//
 		return data;
@@ -612,6 +622,47 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		tagValue.setTag(tagName);
 		tagValue.setTagType(tagType);
 		return tagValue;
+	}
+	
+	public Long getResumeCountsToday(Long teamid, Long webid, String username) {
+		long resumeCounts = 0;
+		try {
+			String sql = "select sum(resumecount) from twebdatapersistance where teamid = ? and webid=? and username=? and indate between str_to_date(?,'%Y-%m-%d %H:%i:%s') and str_to_date(?,'%Y-%m-%d %H:%i:%s')";
+			JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
+			String strTimeZone = getStrTimeZone(teamid);
+			TimeZone tz = TimeZone.getTimeZone(strTimeZone);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			sdf.setTimeZone(tz);
+			sdf2.setTimeZone(tz);
+			String dateStartStr = sdf.format(new java.util.Date());
+			String dateEndStr = dateStartStr + " 23:59:59";
+			java.util.Date dateStart = sdf.parse(dateStartStr);
+			java.util.Date dateEnd = sdf2.parse(dateEndStr);
+			sdf2.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+			dateStartStr = sdf2.format(dateStart);
+			dateEndStr = sdf2.format(dateEnd);
+			System.out.println(dateStartStr);
+			System.out.println(dateEndStr);
+			Object[] params = new Object[] { teamid, webid, username, dateStartStr, dateEndStr };
+			List<Long> list = jdbcTemplate.query(sql, params, new RowMapper<Long>() {
+				
+				@Override
+				public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+					return rs.getLong(1);
+				}
+			});
+			System.out.println(list.get(0));
+			if(list.size()>0) {
+				resumeCounts = list.get(0);
+			}
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+
+		return resumeCounts;
+		
 	}
 	
 	public ChatbotTagValue hasJobBoardSearchCriteria(Long teamid, String tagName, String[] references) {
@@ -799,6 +850,29 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		tagValue.setTag(tagName);
 		tagValue.setTagType(tagType);
 		return tagValue;
+	}
+	
+	public HashMap<Long, String>getNotUsedHirePackages(Long teamid) {
+		HashMap<Long, String> unusedPackageList = new HashMap<Long, String>();
+		String sql ="select tt.id, tt.name from tonboarding_tab tt where tt.teamid = ?  and tt.deleted = 0 and tt.id<100 and tt.id not in (select t1.tabid from tonboardings_mapping t1, tonboardings t2 "
+				+ " where t1.teamid=? and t1.docid=t2.id and t2.teamid = t1.teamid and (-1 = 0 or t2.DELETED = 0) ) order by upper(tt.name) asc";
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		Object[] params = new Object[] {teamid, teamid};
+		List<Object[]> listData = jdbcTemplate.query(sql, params, new RowMapper<Object[]>() {
+			@Override
+			public Object[] mapRow(ResultSet rs, int rowNum) throws SQLException{
+				Object[] data = new Object[2];
+				data[0] = rs.getLong(1);
+				data[1] = rs.getString(2);
+				return data;
+			}
+		});
+		for(int i=0;i<listData.size();i++) {
+			Object[] data = listData.get(i);
+			unusedPackageList.put((Long) data[0], (String) data[1]);
+		}
+		unusedPackageList.entrySet().stream().map(e->"\""+e.getKey()+"\":\""+e.getValue().replace("\"", "\\\"")+"\"").collect(Collectors.joining(",","{","}"));
+		return unusedPackageList;
 	}
 	
 	public Boolean hasRecentResume(Long teamid, Long webid, String username) {
@@ -1193,6 +1267,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			harvestAccount.hasOverLappingTime = hasOverLappingTime(teamid, null, references).getValue().equals("true");
 			harvestAccount.CATTest = getCATTest(teamid, null, references).getValue();
 			harvestAccount.hasJobBoardCriteria = hasJobBoardSearchCriteria(teamid, null, references).getValue().equals("true");
+			harvestAccount.resumeCountsToday = getResumeCountsToday(teamid, webid, accountName);
 			harvestStatus.accounts.add(harvestAccount);
 		}
 		return harvestStatus;
@@ -1253,6 +1328,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			harvestAccount.hasOverLappingTime = hasOverLappingTime(teamid, null, references).getValue().equals("true");
 			harvestAccount.CATTest = getCATTest(teamid, null, references).getValue();
 			harvestAccount.hasJobBoardCriteria = hasJobBoardSearchCriteria(teamid, null, references).getValue().equals("true");
+			harvestAccount.resumeCountsToday = getResumeCountsToday(teamid, webid, accountName);
 			accountList.add(harvestAccount);
 		}
 		return accountList;
@@ -1320,6 +1396,23 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		}
 		return machineList;
 		
+	}
+	
+	public String getStrTimeZone(Long teamid) {
+		String strTimeZone = "America/New_York";
+		Object[] params = new Object[] {teamid};
+		String sql = "select strtimezone from tteam where id= ?";
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		List<String> dataList = jdbcTemplate.query(sql, params, new RowMapper<String>() {
+			@Override
+			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getString(1);
+			}
+		});
+		if(dataList.size()>0) {
+			strTimeZone = dataList.get(0);
+		}
+		return strTimeZone;
 	}
 	
 	public ChatbotTagValue getChatbotTagValue(JobDivaSession jobDivaSession, String tag, String[] references) {
