@@ -116,6 +116,8 @@ public class VolcanicDao {
 			if (data[22].length() >=3) {
 				data[22] = data[22].substring(1, data[22].length()-1);
 				data[22] = data[22].replace('_', ',');
+			} else {
+				data[22] = "";
 			}
 			
 			data[10] = data[10].replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", "");
