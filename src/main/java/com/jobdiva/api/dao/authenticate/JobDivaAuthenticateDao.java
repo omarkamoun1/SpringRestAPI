@@ -176,6 +176,12 @@ public class JobDivaAuthenticateDao extends AbstractJobDivaDao {
 				jdbcTemplate = jobDivaConnectivity.getJdbcTemplate(teamId);
 			}
 			//
+			//
+			if (jdbcTemplate == null) {
+				throw new Error("Invalid username/password");
+			}
+			//
+			//
 			sql = " select a.id, a.groupid, a.password, b.lastapicall, sysdate clock, a.s1, LEADER , a.firstname, a.lastname " //
 					+ " from trecruiter a, tteam b " + //
 					" where  a.email=? and a.active=1 " + //
