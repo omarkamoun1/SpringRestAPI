@@ -9,6 +9,8 @@ import com.jobdiva.api.dao.chatbot.ChatbotTrainingDataDao;
 import com.jobdiva.api.model.SessionInfo;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.chatbot.ChatbotAnswer;
+import com.jobdiva.api.model.chatbot.ChatbotHarvestAccount;
+import com.jobdiva.api.model.chatbot.ChatbotHarvestMachineStatus;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestStatus;
 import com.jobdiva.api.model.chatbot.ChatbotQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotSocialQuestion;
@@ -101,9 +103,27 @@ public class ChatbotDataService {
 		}
 	}
 	
+	public List<ChatbotHarvestAccount> getHarvestAccountStatus(JobDivaSession jobDivaSession, Long webid, Long machineNo) throws Exception {
+		try {
+			List<ChatbotHarvestAccount> data = trainingDataDao.getHarvesetAccountStatus(jobDivaSession, webid, machineNo);
+			return data;
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
 	public List<ChatbotTag> getChatbotTagList(JobDivaSession jobDivaSession) throws Exception {
 		try {
 			List<ChatbotTag> data = trainingDataDao.getChatbotTagList(jobDivaSession);
+			return data;
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public List<ChatbotHarvestMachineStatus> getHarvestMachineStatus(JobDivaSession jobDivaSession) throws Exception {
+		try {
+			List<ChatbotHarvestMachineStatus> data = trainingDataDao.getHarvestMachineStatus(jobDivaSession);
 			return data;
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());

@@ -13,6 +13,8 @@ import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.model.SessionInfo;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.chatbot.ChatbotAnswer;
+import com.jobdiva.api.model.chatbot.ChatbotHarvestAccount;
+import com.jobdiva.api.model.chatbot.ChatbotHarvestMachineStatus;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestStatus;
 import com.jobdiva.api.model.chatbot.ChatbotQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotSocialQuestion;
@@ -27,7 +29,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping("/api/chatbot/")
-@ApiIgnore
+//@ApiIgnore
 @CrossOrigin(origins = "*")
 public class SupportChatbotController extends AbstractJobDivaController {
 	
@@ -91,10 +93,26 @@ public class SupportChatbotController extends AbstractJobDivaController {
 	
 	@GetMapping(value = "/harvest-status", produces = "application/json")
 	public ChatbotHarvestStatus getHarvestStatus(@ApiParam(value = "webid", required = true) //
-	@RequestParam(required = false) Long webid //
+	@RequestParam(required = true) Long webid //
 	) throws Exception {
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		return chatbotDataService.getChatbotHarvestStatus(jobDivaSession, webid);
+	}
+	
+	@GetMapping(value = "/harvest-machine-status", produces = "application/json")
+	public List<ChatbotHarvestMachineStatus> getHarvestStatus() throws Exception {
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		return chatbotDataService.getHarvestMachineStatus(jobDivaSession);
+	}
+	
+	@GetMapping(value = "/harvest-account-status", produces = "application/json")
+	public List<ChatbotHarvestAccount> getHarvestAccountStatus(@ApiParam(value = "webid", required = false) //
+	@RequestParam(required = false) Long webid, //
+	@ApiParam(value = "machineNo", required = false) //
+	@RequestParam(required = false) Long machineNo //
+	) throws Exception {
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		return chatbotDataService.getHarvestAccountStatus(jobDivaSession, webid, machineNo);
 	}
 	
 	@GetMapping(value = "/tag-list", produces = "application/json")

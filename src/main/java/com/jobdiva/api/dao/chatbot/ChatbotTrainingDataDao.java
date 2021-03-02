@@ -4,9 +4,14 @@ import java.net.URLEncoder;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -21,6 +26,7 @@ import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.chatbot.ChatbotAnswer;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestAccount;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestMachine;
+import com.jobdiva.api.model.chatbot.ChatbotHarvestMachineStatus;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestStatus;
 import com.jobdiva.api.model.chatbot.ChatbotQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotRecruiterData;
@@ -429,6 +435,11 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			data.setFirstname(tmp.getFirstname());
 			data.setLastname(tmp.getLastname());
 			data.setTeamLeader(tmp.isTeamLeader());
+			HashMap<Long, String> notUsedHirePackage = getNotUsedHirePackages(teamid);
+			if(notUsedHirePackage.size()>0) {
+				data.hasUnusedHirePackage = true;
+				data.unusedHirePackagesName = notUsedHirePackage.entrySet().stream().map(e->e.getValue()).collect(Collectors.joining(", ","",""));
+			}
 		}
 		//
 		return data;
@@ -479,9 +490,9 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		ChatbotTagValue tagValue = new ChatbotTagValue();
 		// Long webid = Long.valueOf(references[0]);
 		String tagType = "BINARY";
-		String sql = "select count(*) from twebsites_detail a where teamid = ? and harvest =1  and (webid, machine_no) not in (select webid, machine_no from twebdatapersistance where b.teamid =a.teamid) ";
+		String sql = "select count(*) from twebsites_detail a where teamid = ? and harvest =1  and (webid, machine_no) not in (select webid, machine_no from twebdatapersistance where teamid =a.teamid) ";
 		JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
-		Object[] params = new Object[] { teamid, teamid };
+		Object[] params = new Object[] { teamid };
 		List<ChatbotTagValue> list = jdbcTemplate.query(sql, params, new RowMapper<ChatbotTagValue>() {
 			
 			@Override
@@ -611,6 +622,47 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		tagValue.setTag(tagName);
 		tagValue.setTagType(tagType);
 		return tagValue;
+	}
+	
+	public Long getResumeCountsToday(Long teamid, Long webid, String username) {
+		long resumeCounts = 0;
+		try {
+			String sql = "select sum(resumecount) from twebdatapersistance where teamid = ? and webid=? and username=? and indate between str_to_date(?,'%Y-%m-%d %H:%i:%s') and str_to_date(?,'%Y-%m-%d %H:%i:%s')";
+			JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
+			String strTimeZone = getStrTimeZone(teamid);
+			TimeZone tz = TimeZone.getTimeZone(strTimeZone);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			sdf.setTimeZone(tz);
+			sdf2.setTimeZone(tz);
+			String dateStartStr = sdf.format(new java.util.Date());
+			String dateEndStr = dateStartStr + " 23:59:59";
+			java.util.Date dateStart = sdf.parse(dateStartStr);
+			java.util.Date dateEnd = sdf2.parse(dateEndStr);
+			sdf2.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+			dateStartStr = sdf2.format(dateStart);
+			dateEndStr = sdf2.format(dateEnd);
+			System.out.println(dateStartStr);
+			System.out.println(dateEndStr);
+			Object[] params = new Object[] { teamid, webid, username, dateStartStr, dateEndStr };
+			List<Long> list = jdbcTemplate.query(sql, params, new RowMapper<Long>() {
+				
+				@Override
+				public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+					return rs.getLong(1);
+				}
+			});
+			System.out.println(list.get(0));
+			if(list.size()>0) {
+				resumeCounts = list.get(0);
+			}
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+
+		return resumeCounts;
+		
 	}
 	
 	public ChatbotTagValue hasJobBoardSearchCriteria(Long teamid, String tagName, String[] references) {
@@ -763,15 +815,15 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			
 			@Override
 			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-				return "\"" + rs.getString(1) + "\":" + rs.getLong(1);
+				return "\"" + rs.getString(1) + "\":" + rs.getLong(2);
 			}
 		});
 		for (int i = 0; i < list.size(); i++) {
 			String username = list.get(i);
 			if (i < list.size() - 1) {
-				jobBoard = username + ",";
+				jobBoard += username + ",";
 			} else
-				jobBoard = username + "}";
+				jobBoard += username + "}";
 		}
 		tagValue.setValue(jobBoard);
 		tagValue.setTag(tagName);
@@ -798,6 +850,29 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		tagValue.setTag(tagName);
 		tagValue.setTagType(tagType);
 		return tagValue;
+	}
+	
+	public HashMap<Long, String>getNotUsedHirePackages(Long teamid) {
+		HashMap<Long, String> unusedPackageList = new HashMap<Long, String>();
+		String sql ="select tt.id, tt.name from tonboarding_tab tt where tt.teamid = ?  and tt.deleted = 0 and tt.id<100 and tt.id not in (select t1.tabid from tonboardings_mapping t1, tonboardings t2 "
+				+ " where t1.teamid=? and t1.docid=t2.id and t2.teamid = t1.teamid and (-1 = 0 or t2.DELETED = 0) ) order by upper(tt.name) asc";
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		Object[] params = new Object[] {teamid, teamid};
+		List<Object[]> listData = jdbcTemplate.query(sql, params, new RowMapper<Object[]>() {
+			@Override
+			public Object[] mapRow(ResultSet rs, int rowNum) throws SQLException{
+				Object[] data = new Object[2];
+				data[0] = rs.getLong(1);
+				data[1] = rs.getString(2);
+				return data;
+			}
+		});
+		for(int i=0;i<listData.size();i++) {
+			Object[] data = listData.get(i);
+			unusedPackageList.put((Long) data[0], (String) data[1]);
+		}
+		unusedPackageList.entrySet().stream().map(e->"\""+e.getKey()+"\":\""+e.getValue().replace("\"", "\\\"")+"\"").collect(Collectors.joining(",","{","}"));
+		return unusedPackageList;
 	}
 	
 	public Boolean hasRecentResume(Long teamid, Long webid, String username) {
@@ -1128,33 +1203,41 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		ChatbotHarvestStatus harvestStatus = new ChatbotHarvestStatus(); 
 		Long teamid = jobDivaSession.getTeamId();
 		harvestStatus.teamid = teamid;
-		String sql =  "SELECT b.websitename, b.active, b.harvest, a.harvest, a.username, a.machine_no FROM twebsites_detail a, twebsites b where a.webid = b.id and coalesce(deleted,0) = 0 and a.teamid=? and a.webid=? order by machine_no";
-		Object[] params = new Object[] {teamid, webid};
+		String sql =  "SELECT b.websitename, b.active, b.harvest, a.harvest, a.username, a.machine_no, a.webid FROM twebsites_detail a, twebsites b where a.webid = b.id and coalesce(deleted,0) = 0 and a.teamid=? ";
+		Object[] params = new Object[] {teamid};
+		if(webid !=null) {
+			sql += " and a.webid=?";
+			params = new Object[] {teamid, webid};
+		}
+		sql += " order by machine_no";
 		JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
 		List<Object[]> dataList = jdbcTemplate.query(sql, params, new RowMapper<Object[]>() {
 			@Override
 			public Object[] mapRow(ResultSet rs, int rowNum) throws SQLException {
-				Object[] data = new Object[6];
+				Object[] data = new Object[7];
 				data[0] = rs.getString(1);
 				data[1] = rs.getLong(2);
 				data[2] = rs.getLong(3);
 				data[3] = rs.getLong(4);
 				data[4] = rs.getString(5);
 				data[5] = rs.getLong(6);
+				data[6] = rs.getLong(7);
 				return data;
 			}
 		});
 		Long machineNo = -1L;
-		harvestStatus.webid = webid;
 		harvestStatus.accounts = new ArrayList<ChatbotHarvestAccount>();
 		harvestStatus.machines = new ArrayList<ChatbotHarvestMachine>();
 		for(int i=0;i<dataList.size();i++) {
 			Object[] data = dataList.get(i);
+			webid = (Long)data[6];
 			if(i==0) {
 				harvestStatus.name = (String) data[0];
 				harvestStatus.active = (Long) data[1];
-				harvestStatus.harvest = (Long) data[2];				
+				harvestStatus.harvest = (Long) data[2];		
+				harvestStatus.webid = webid;
 			}
+
 			Long tmp_machineNo = (Long) data[5];
 
 			if(tmp_machineNo!=machineNo) {
@@ -1173,6 +1256,9 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			harvestAccount.name = accountName;
 			harvestAccount.harvest = (Long) data[3];
 			String[] references = {String.valueOf(webid), accountName};
+			harvestAccount.machineNO = machineNo;
+			harvestAccount.webid = webid;
+			harvestAccount.websitename = harvestStatus.name;
 			harvestAccount.status = getJobBoardStatus(teamid, null, references).getValue();
 			harvestAccount.downloaddLimitPerDay = Long.valueOf(getDownloadLimitPerDay(teamid, null, references).getValue());
 			harvestAccount.hasRecentResume = hasRecentResume(teamid, webid, accountName);
@@ -1181,9 +1267,152 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			harvestAccount.hasOverLappingTime = hasOverLappingTime(teamid, null, references).getValue().equals("true");
 			harvestAccount.CATTest = getCATTest(teamid, null, references).getValue();
 			harvestAccount.hasJobBoardCriteria = hasJobBoardSearchCriteria(teamid, null, references).getValue().equals("true");
+			harvestAccount.resumeCountsToday = getResumeCountsToday(teamid, webid, accountName);
 			harvestStatus.accounts.add(harvestAccount);
 		}
 		return harvestStatus;
+	}
+	
+	public List<ChatbotHarvestAccount> getHarvesetAccountStatus(JobDivaSession jobDivaSession, Long webid, Long machineNo ){
+		List<ChatbotHarvestAccount> accountList = new ArrayList<ChatbotHarvestAccount>();
+		String sql =  "SELECT b.websitename, b.active, b.harvest, a.harvest, a.username, a.machine_no, a.webid FROM twebsites_detail a, twebsites b where a.webid = b.id and coalesce(deleted,0) = 0 and a.teamid=? ";
+		if(webid!=null) {
+			sql += " and a.webid = ?";
+		} 
+		if(machineNo!=null) {
+			sql += " and a.machine_no = ?";
+		}
+		Long teamid = jobDivaSession.getTeamId();
+		ArrayList<Object> params = new ArrayList<Object>();
+		params.add(teamid);
+		if(webid!=null) {
+			params.add(webid);
+		}
+		if(machineNo!=null) {
+			params.add(machineNo);
+		}
+		JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
+		List<Object[]> dataList = jdbcTemplate.query(sql, params.toArray(), new RowMapper<Object[]>() {
+			@Override
+			public Object[] mapRow(ResultSet rs, int rowNum) throws SQLException {
+				Object[] data = new Object[7];
+				data[0] = rs.getString(1);
+				data[1] = rs.getLong(2);
+				data[2] = rs.getLong(3);
+				data[3] = rs.getLong(4);
+				data[4] = rs.getString(5);
+				data[5] = rs.getLong(6);
+				data[6] = rs.getLong(7);
+				return data;
+			}
+		});
+
+		for(int i=0;i<dataList.size();i++) {
+			Object[] data = dataList.get(i);
+			ChatbotHarvestAccount harvestAccount = new ChatbotHarvestAccount();
+			String accountName = (String)data[4];
+			String websitename = (String)data[0];
+			machineNo = (Long) data[5];
+			webid = (Long) data[6];
+			harvestAccount.name = accountName;
+			harvestAccount.harvest = (Long) data[3];			
+			String[] references = {String.valueOf(webid), accountName};
+			harvestAccount.machineNO = machineNo;
+			harvestAccount.webid = webid;
+			harvestAccount.websitename = websitename;
+			harvestAccount.status = getJobBoardStatus(teamid, null, references).getValue();
+			harvestAccount.downloaddLimitPerDay = Long.valueOf(getDownloadLimitPerDay(teamid, null, references).getValue());
+			harvestAccount.hasRecentResume = hasRecentResume(teamid, webid, accountName);
+			harvestAccount.hasNotDownloadSessionStarted = hasNotDownloadSessionStarted(teamid,null, references).getValue().equals("true");
+			harvestAccount.downloadStartTime = getDownloadStartTime(teamid, null, references).getValue();
+			harvestAccount.hasOverLappingTime = hasOverLappingTime(teamid, null, references).getValue().equals("true");
+			harvestAccount.CATTest = getCATTest(teamid, null, references).getValue();
+			harvestAccount.hasJobBoardCriteria = hasJobBoardSearchCriteria(teamid, null, references).getValue().equals("true");
+			harvestAccount.resumeCountsToday = getResumeCountsToday(teamid, webid, accountName);
+			accountList.add(harvestAccount);
+		}
+		return accountList;
+		
+	}
+	
+	public List<ChatbotHarvestMachineStatus> getHarvestMachineStatus(JobDivaSession jobDivaSession) {
+		List<ChatbotHarvestMachineStatus> machineList = new ArrayList<ChatbotHarvestMachineStatus>();
+		Long teamid = jobDivaSession.getTeamId();
+		String sql =  "SELECT b.websitename, b.active, b.harvest, a.harvest, a.username, a.machine_no, a.webid FROM twebsites_detail a, twebsites b where a.webid = b.id and coalesce(deleted,0) = 0 and a.teamid=? order by machine_no, websitename, username";
+		Object[] params = new Object[] {teamid};
+		JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
+		List<Object[]> dataList = jdbcTemplate.query(sql, params, new RowMapper<Object[]>() {
+			@Override
+			public Object[] mapRow(ResultSet rs, int rowNum) throws SQLException {
+				Object[] data = new Object[7];
+				data[0] = rs.getString(1);
+				data[1] = rs.getLong(2);
+				data[2] = rs.getLong(3);
+				data[3] = rs.getLong(4);
+				data[4] = rs.getString(5);
+				data[5] = rs.getLong(6);
+				data[6] = rs.getLong(7);
+				return data;
+			}
+		});
+		Long machineNo = -1L;
+		ChatbotHarvestMachineStatus machineStatus = null;
+		for(int i=0;i<dataList.size();i++) {
+			Object[] data = dataList.get(i);
+			Long tmp_machineNo = (Long) data[5];
+			if(tmp_machineNo!=machineNo) {
+				if(machineStatus!=null)
+					machineList.add(machineStatus);
+				machineNo = tmp_machineNo;
+				machineStatus = new ChatbotHarvestMachineStatus();
+				machineStatus.teamid = teamid;
+//				machineStatus.accounts = new ArrayList<ChatbotHarvestAccount>();
+				String[] references = {String.valueOf(machineNo)};
+				ChatbotTagValue machineIssue = hasMachineIssue(teamid, null, references);
+				machineStatus.machineNo = machineNo;
+				machineStatus.hasMachineIssue = machineIssue.getValue().equals("true");
+				ChatbotTagValue isMachineInstalled = isMachineInstalled(teamid, null, references);
+				machineStatus.isMachineInstalled = isMachineInstalled.getValue().equals("true"); 
+			}
+//			ChatbotHarvestAccount harvestAccount = new ChatbotHarvestAccount();
+//			String accountName = (String)data[4];
+//			Long webid = (Long) data[6];
+//			String websitename = (String)data[0];
+//			harvestAccount.name = accountName;
+//			harvestAccount.harvest = (Long) data[3];			
+//			String[] references = {String.valueOf(webid), accountName};
+//			harvestAccount.machineNO = machineNo;
+//			harvestAccount.webid = webid;
+//			harvestAccount.websitename = websitename;
+//			harvestAccount.status = getJobBoardStatus(teamid, null, references).getValue();
+//			harvestAccount.downloaddLimitPerDay = Long.valueOf(getDownloadLimitPerDay(teamid, null, references).getValue());
+//			harvestAccount.hasRecentResume = hasRecentResume(teamid, webid, accountName);
+//			harvestAccount.hasNotDownloadSessionStarted = hasNotDownloadSessionStarted(teamid,null, references).getValue().equals("true");
+//			harvestAccount.downloadStartTime = getDownloadStartTime(teamid, null, references).getValue();
+//			harvestAccount.hasOverLappingTime = hasOverLappingTime(teamid, null, references).getValue().equals("true");
+//			harvestAccount.CATTest = getCATTest(teamid, null, references).getValue();
+//			harvestAccount.hasJobBoardCriteria = hasJobBoardSearchCriteria(teamid, null, references).getValue().equals("true");
+//			machineStatus.accounts.add(harvestAccount);
+		}
+		return machineList;
+		
+	}
+	
+	public String getStrTimeZone(Long teamid) {
+		String strTimeZone = "America/New_York";
+		Object[] params = new Object[] {teamid};
+		String sql = "select strtimezone from tteam where id= ?";
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		List<String> dataList = jdbcTemplate.query(sql, params, new RowMapper<String>() {
+			@Override
+			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getString(1);
+			}
+		});
+		if(dataList.size()>0) {
+			strTimeZone = dataList.get(0);
+		}
+		return strTimeZone;
 	}
 	
 	public ChatbotTagValue getChatbotTagValue(JobDivaSession jobDivaSession, String tag, String[] references) {
@@ -1191,61 +1420,61 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		Long teamid = jobDivaSession.getTeamId();
 		if (tag != null && !tag.isEmpty()) {
 			switch (tag) {
-				case ("[[MACHINE_DOWNLOADING_RESUMES]]"):
+				case ("MACHINE_DOWNLOADING_RESUMES"):
 					tagValue = isMachineDownloadingResumes(teamid, tag, references);
 					break;
-				case ("[[MACHINE_INSTALLED]]"):
+				case ("MACHINE_INSTALLED"):
 					tagValue = isMachineInstalled(teamid, tag, references);
 					break;
-				case ("[[MACHINE_ISSUE]]"):
+				case ("MACHINE_ISSUE"):
 					tagValue = hasMachineIssue(teamid, tag, references);
 					break;
-				case ("[[JOBBOARD_STATUS]]"):
+				case ("JOBBOARD_STATUS"):
 					tagValue = getJobBoardStatus(teamid, tag, references);
 					break;
-				case ("[[DOWNLOAD_LIMIT_PER_DAY]]"):
+				case ("DOWNLOAD_LIMIT_PER_DAY"):
 					tagValue = getDownloadLimitPerDay(teamid, tag, references);
 					break;
-				case ("[[HAS_JOBBOARD_SEARCH_CRITERIA]]"):
+				case ("HAS_JOBBOARD_SEARCH_CRITERIA"):
 					tagValue = hasJobBoardSearchCriteria(teamid, tag, references);
 					break;
-				case ("[[HAS_OVERLAPPING_TIME]]"):
+				case ("HAS_OVERLAPPING_TIME"):
 					tagValue = hasOverLappingTime(teamid, tag, references);
 					break;
-				case ("[[JOBBOARD_NAME]]"):
+				case ("JOBBOARD_NAME"):
 					tagValue = getJobBoardName(teamid, tag, references);
 					break;
-				case ("[[DOWNLOAD_START_TIME]]"):
+				case ("DOWNLOAD_START_TIME"):
 					tagValue = getDownloadStartTime(teamid, tag, references);
 					break;
-				case ("[[JOBBOARD_USERNAME]]"):
+				case ("JOBBOARD_USERNAME"):
 					tagValue = getJobBoardUsername(teamid, tag, references);
 					break;
-				case ("[[NUMBER_OF_NON_DOWNLOADING_MACHINES]]"):
+				case ("NUMBER_OF_NON_DOWNLOADING_MACHINES"):
 					tagValue = getNumberOfNonDownloadingMachines(teamid, tag, references);
 					break;
-				case ("[[SESSION_NOT_STARTED]]"):
+				case ("SESSION_NOT_STARTED"):
 					tagValue = hasNotDownloadSessionStarted(teamid, tag, references);
 					break;
-				case ("[[CAT_TEST]]"):
+				case ("CAT_TEST"):
 					tagValue = getCATTest(teamid, tag, references);
 					break;
-				case ("[[CODDLER_WORKING]]"):
+				case ("CODDLER_WORKING"):
 					tagValue = isCoddlerWorking(teamid, tag, references);
 					break;
-				case ("[[NUMBER_OF_NON_WORKING_CODDLERS]]"):
+				case ("NUMBER_OF_NON_WORKING_CODDLERS"):
 					tagValue = getNumberOfNonWorkingCoddler(teamid, tag, references);
 					break;
-				case ("[[CODDLER_STATUS]]"):
+				case ("CODDLER_STATUS"):
 					tagValue = getCoddlerStatus(teamid, tag, references);
 					break;
-				case ("[[MACHINE_AT_CLIENT]]"):
+				case ("MACHINE_AT_CLIENT"):
 					tagValue = isMachineAtClient(teamid, tag, references);
 					break;
-				case ("[[CODDLER_NAME]]"):
+				case ("CODDLER_NAME"):
 					// tagValue = isMachineAtClient(teamid, tag, references);
 					break;
-				case ("[[CODDLER_USERNAME]]"):
+				case ("CODDLER_USERNAME"):
 					break;
 				default:
 					break;

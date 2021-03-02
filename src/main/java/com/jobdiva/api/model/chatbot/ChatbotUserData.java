@@ -21,6 +21,8 @@ public class ChatbotUserData implements java.io.Serializable {
 	private boolean allowAccessCompletedOnboardingForAllJobs;//10
 	private boolean allowAccessCompletedOnboardingForDivision;//11
 	private boolean allowUnassignIndividualDocuments;//120
+	public boolean hasUnusedHirePackage;
+	public String unusedHirePackagesName;
 
 	
 	private String	firstname;
