@@ -29,7 +29,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping("/api/chatbot/")
-//@ApiIgnore
+@ApiIgnore
 @CrossOrigin(origins = "*")
 public class SupportChatbotController extends AbstractJobDivaController {
 	
