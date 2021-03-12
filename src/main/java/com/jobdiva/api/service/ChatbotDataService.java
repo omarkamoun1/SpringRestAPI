@@ -103,9 +103,9 @@ public class ChatbotDataService {
 		}
 	}
 	
-	public List<ChatbotHarvestAccount> getHarvestAccountStatus(JobDivaSession jobDivaSession, Long webid, Long machineNo) throws Exception {
+	public List<ChatbotHarvestAccount> getHarvestAccountStatus(JobDivaSession jobDivaSession, Long webid, Long machineNo, String harvestStatus) throws Exception {
 		try {
-			List<ChatbotHarvestAccount> data = trainingDataDao.getHarvesetAccountStatus(jobDivaSession, webid, machineNo);
+			List<ChatbotHarvestAccount> data = trainingDataDao.getHarvesetAccountStatus(jobDivaSession, webid, machineNo, harvestStatus);
 			return data;
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());

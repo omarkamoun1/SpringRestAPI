@@ -109,10 +109,12 @@ public class SupportChatbotController extends AbstractJobDivaController {
 	public List<ChatbotHarvestAccount> getHarvestAccountStatus(@ApiParam(value = "webid", required = false) //
 	@RequestParam(required = false) Long webid, //
 	@ApiParam(value = "machineNo", required = false) //
-	@RequestParam(required = false) Long machineNo //
+	@RequestParam(required = false) Long machineNo, //
+	@ApiParam(value = "harvestStatus", required = false) //
+	@RequestParam(required = false) String harvestStatus //
 	) throws Exception {
 		JobDivaSession jobDivaSession = getJobDivaSession();
-		return chatbotDataService.getHarvestAccountStatus(jobDivaSession, webid, machineNo);
+		return chatbotDataService.getHarvestAccountStatus(jobDivaSession, webid, machineNo, harvestStatus);
 	}
 	
 	@GetMapping(value = "/tag-list", produces = "application/json")

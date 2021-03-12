@@ -34,6 +34,7 @@ import com.jobdiva.api.model.chatbot.ChatbotSocialQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotTag;
 import com.jobdiva.api.model.chatbot.ChatbotTagValue;
 import com.jobdiva.api.model.chatbot.ChatbotUserData;
+import com.jobdiva.api.model.chatbot.ChatbotVMSAccount;
 import com.jobdiva.api.model.chatbot.ChatbotVisibility;
 import com.jobdiva.api.model.proxy.ProxyParameter;
 import com.jobdiva.api.model.proxy.Response;
@@ -642,17 +643,13 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			sdf2.setTimeZone(TimeZone.getTimeZone("America/New_York"));
 			dateStartStr = sdf2.format(dateStart);
 			dateEndStr = sdf2.format(dateEnd);
-			System.out.println(dateStartStr);
-			System.out.println(dateEndStr);
 			Object[] params = new Object[] { teamid, webid, username, dateStartStr, dateEndStr };
 			List<Long> list = jdbcTemplate.query(sql, params, new RowMapper<Long>() {
-				
 				@Override
 				public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
 					return rs.getLong(1);
 				}
 			});
-			System.out.println(list.get(0));
 			if(list.size()>0) {
 				resumeCounts = list.get(0);
 			}
@@ -1107,7 +1104,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		String tagType = "TEXT";
 		String site = references[0];
 		// Boolean isWorking = false;
-		String sql = "select nvl(active,0), nvl((datelastrun - DATE'1970-01-01') * 86400, 0), loginfailures, maxloginattempts from tspiderswebsites where teamid=? and upper(site)=upper(?)";
+		String sql = "select nvl(active,0), to_char(datelastrun,'YYYY-MM-DD HH:MI:ss'), loginfailures, maxloginattempts from tspiderswebsites where teamid=? and upper(site)=upper(?)";
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		Object[] params = new Object[] { teamid, site };
 		List<String> dateList = jdbcTemplate.query(sql, params, new RowMapper<String>() {
@@ -1116,7 +1113,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
 				String status = "";
 				int isActive = rs.getInt(1);
-				long dateLastRun = rs.getLong(2);
+				String dateLastRun = rs.getString(2);
 				long loginfailures = rs.getLong(3);
 				long maxloginattemps = rs.getLong(4);
 				if (isActive == 0) {
@@ -1125,14 +1122,26 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 					if (loginfailures >= maxloginattemps) {
 						status = "HALTED";
 					} else {
-						Date lastRunDate = new Date(dateLastRun);
-						Calendar calendar = Calendar.getInstance();
-						calendar.setTime(lastRunDate);
-						calendar.add(Calendar.HOUR_OF_DAY, 2);
-						if (calendar.getTime().compareTo(new java.util.Date()) < 0) {
-							status = "NOT_WORKING";
-						} else
-							status = "WORKING";
+						if(dateLastRun!=null) {
+							SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+							java.util.Date lastRunDate;
+							try {
+								lastRunDate = sdf.parse(dateLastRun);
+								Calendar calendar = Calendar.getInstance();
+								calendar.setTime(lastRunDate);
+								calendar.add(Calendar.HOUR_OF_DAY, 2);
+								if (calendar.getTime().compareTo(new java.util.Date()) < 0) {
+									status = "NOT_WORKING";
+								} else
+									status = "WORKING";
+							} catch (ParseException e) {
+								// TODO Auto-generated catch block
+								status = "NOT_WORKING";
+								e.printStackTrace();
+							}
+
+						}
+
 					}
 				}
 				return status;
@@ -1273,7 +1282,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		return harvestStatus;
 	}
 	
-	public List<ChatbotHarvestAccount> getHarvesetAccountStatus(JobDivaSession jobDivaSession, Long webid, Long machineNo ){
+	public List<ChatbotHarvestAccount> getHarvesetAccountStatus(JobDivaSession jobDivaSession, Long webid, Long machineNo, String harvestStatus ){
 		List<ChatbotHarvestAccount> accountList = new ArrayList<ChatbotHarvestAccount>();
 		String sql =  "SELECT b.websitename, b.active, b.harvest, a.harvest, a.username, a.machine_no, a.webid FROM twebsites_detail a, twebsites b where a.webid = b.id and coalesce(deleted,0) = 0 and a.teamid=? ";
 		if(webid!=null) {
@@ -1281,6 +1290,9 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		} 
 		if(machineNo!=null) {
 			sql += " and a.machine_no = ?";
+		}
+		if("active".equals(harvestStatus)) {
+			sql +=" and coalesce(a.harvest, 0) >0 ";
 		}
 		Long teamid = jobDivaSession.getTeamId();
 		ArrayList<Object> params = new ArrayList<Object>();
@@ -1333,6 +1345,37 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		}
 		return accountList;
 		
+	}
+	
+	public List<ChatbotVMSAccount> getVMSAccount(JobDivaSession jobDivaSession){
+		List<ChatbotVMSAccount> VMSAccountList = new ArrayList<ChatbotVMSAccount>();
+		Long teamid = jobDivaSession.getTeamId();
+		String sql = "select a.site, a.username, a.url, nvl(a.active,0), nvl(a.active_timesheet,0), nvl(a.active_submittal,0), nvl(a.loginfailures,0), nvl(a.maxloginattempts,0), to_char(a.datelastrun,'YYYY-MM-DD HH:MI:ss'), b.computer_name, b.ip_address from tspiderswebsites a, tspidersmachinestats b where a.teamid = b.teamid(+) and a.teamid=1 and a.site = b.site(+) and nvl(a.deleted, 0)=0";
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		ArrayList<Object> params = new ArrayList<Object>();
+		params.add(teamid);
+		List<Object[]> dataList = jdbcTemplate.query(sql, params.toArray(), new RowMapper<Object[]>() {
+			@Override
+			public Object[] mapRow(ResultSet rs, int rowNum) throws SQLException {
+				Object[] data = new Object[11];
+				data[0] = rs.getString(1);
+				data[1] = rs.getString(2);
+				data[2] = rs.getString(3);
+				data[3] = rs.getLong(4);
+				data[4] = rs.getLong(5);
+				data[5] = rs.getLong(6);
+				data[6] = rs.getLong(7);
+				data[7] = rs.getLong(8);
+				data[8] = rs.getString(9);
+				data[9] = rs.getString(10);
+				data[10] = rs.getString(11);
+				return data;
+			}
+		});
+		for(int i=0;i<dataList.size();i++) {
+			
+		}
+		return VMSAccountList;
 	}
 	
 	public List<ChatbotHarvestMachineStatus> getHarvestMachineStatus(JobDivaSession jobDivaSession) {
