@@ -21,6 +21,8 @@ import com.jobdiva.api.model.chatbot.ChatbotSocialQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotTag;
 import com.jobdiva.api.model.chatbot.ChatbotTagValue;
 import com.jobdiva.api.model.chatbot.ChatbotUserData;
+import com.jobdiva.api.model.chatbot.ChatbotVMSAccount;
+import com.jobdiva.api.model.chatbot.ChatbotVMSType;
 import com.jobdiva.api.model.chatbot.ChatbotVisibility;
 import com.jobdiva.api.service.ChatbotDataService;
 
@@ -105,6 +107,12 @@ public class SupportChatbotController extends AbstractJobDivaController {
 		return chatbotDataService.getHarvestMachineStatus(jobDivaSession);
 	}
 	
+	@GetMapping(value = "/vms-status", produces = "application/json")
+	public List<ChatbotVMSAccount> getV() throws Exception {
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		return chatbotDataService.getVMSAccountsStatus(jobDivaSession);
+	}
+	
 	@GetMapping(value = "/harvest-account-status", produces = "application/json")
 	public List<ChatbotHarvestAccount> getHarvestAccountStatus(@ApiParam(value = "webid", required = false) //
 	@RequestParam(required = false) Long webid, //
@@ -131,5 +139,33 @@ public class SupportChatbotController extends AbstractJobDivaController {
 	) throws Exception {
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		return chatbotDataService.getChatbotTagValue(jobDivaSession, tag, references);
+	}
+	
+	@GetMapping(value = "/getVMSTypes", produces = "application/json")
+	public List<ChatbotVMSType> getChatbotVMSTypes() throws Exception {
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		return chatbotDataService.getChatbotVMSTypes(jobDivaSession);
+	}
+	
+	@GetMapping(value = "/setVMSType", produces = "application/json")
+	public Boolean setChatbotVMSType(@ApiParam(value = "vms_name", required = true) //
+	@RequestParam(required = true) String vms_name, //
+	@ApiParam(value = "hasJobCoddler", required = false) //
+	@RequestParam(required = false) Boolean hasJobCoddler, //
+	@ApiParam(value = "hasTimesheetCoddler", required = false) //
+	@RequestParam(required = false) Boolean hasTimesheetCoddler, // 
+	@ApiParam(value = "hasSubmittalCoddler", required = false) //
+	@RequestParam(required = false) Boolean hasSubmittalCoddler 
+	) throws Exception {
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		return chatbotDataService.setChatbotVMSType(jobDivaSession, vms_name, hasJobCoddler, hasTimesheetCoddler, hasSubmittalCoddler);
+	}
+	
+	@GetMapping(value = "/deleteVMSType", produces = "application/json")
+	public Boolean deleteChatbotVMSType(@ApiParam(value = "vms_name", required = true) //
+	@RequestParam(required = true) String vms_name
+	) throws Exception {
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		return chatbotDataService.deleteChatbotVMSType(jobDivaSession, vms_name);
 	}
 }

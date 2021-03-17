@@ -20,7 +20,7 @@ public class ChatbotVMSAccount implements java.io.Serializable {
 	public String url;
 	//
 	@JsonProperty(value = "isHalted", index = 4)
-	public String isHalted;
+	public boolean isHalted;
 	//
 	@JsonProperty(value = "datelastrun", index = 5)
 	public Date datelastrun;
@@ -35,6 +35,9 @@ public class ChatbotVMSAccount implements java.io.Serializable {
 	public boolean activeSumittal;
 	//
 	@JsonProperty(value = "onClientMachine", index = 9)
-	public boolean onClientMachine;
+	public Boolean onClientMachine;
+	//
+	@JsonProperty(value = "status", index = 10)
+	public String status;
 
 }

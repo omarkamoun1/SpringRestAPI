@@ -1,7 +1,6 @@
 package com.jobdiva.api.dao.chatbot;
 
 import java.net.URLEncoder;
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -12,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
+import java.util.Date;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -35,6 +35,7 @@ import com.jobdiva.api.model.chatbot.ChatbotTag;
 import com.jobdiva.api.model.chatbot.ChatbotTagValue;
 import com.jobdiva.api.model.chatbot.ChatbotUserData;
 import com.jobdiva.api.model.chatbot.ChatbotVMSAccount;
+import com.jobdiva.api.model.chatbot.ChatbotVMSType;
 import com.jobdiva.api.model.chatbot.ChatbotVisibility;
 import com.jobdiva.api.model.proxy.ProxyParameter;
 import com.jobdiva.api.model.proxy.Response;
@@ -1347,10 +1348,11 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		
 	}
 	
-	public List<ChatbotVMSAccount> getVMSAccount(JobDivaSession jobDivaSession){
+	public List<ChatbotVMSAccount> getVMSAccountsStatus(JobDivaSession jobDivaSession){
 		List<ChatbotVMSAccount> VMSAccountList = new ArrayList<ChatbotVMSAccount>();
 		Long teamid = jobDivaSession.getTeamId();
-		String sql = "select a.site, a.username, a.url, nvl(a.active,0), nvl(a.active_timesheet,0), nvl(a.active_submittal,0), nvl(a.loginfailures,0), nvl(a.maxloginattempts,0), to_char(a.datelastrun,'YYYY-MM-DD HH:MI:ss'), b.computer_name, b.ip_address from tspiderswebsites a, tspidersmachinestats b where a.teamid = b.teamid(+) and a.teamid=1 and a.site = b.site(+) and nvl(a.deleted, 0)=0";
+		String sql = "select a.site, a.username, a.url, nvl(a.active,0), nvl(a.active_timesheet,0), nvl(a.active_submittal,0), nvl(a.loginfailures,0), nvl(a.maxloginattempts,0), to_char(a.datelastrun,'YYYY-MM-DD HH:MI:ss'), b.computer_name, b.ip_address " +
+		" from tspiderswebsites a, tspidersmachinestats b where a.teamid = b.teamid(+) and a.teamid=? and a.site = b.site(+) and nvl(a.deleted, 0)=0 order by upper(a.site)";
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		ArrayList<Object> params = new ArrayList<Object>();
 		params.add(teamid);
@@ -1373,10 +1375,99 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			}
 		});
 		for(int i=0;i<dataList.size();i++) {
-			
+			Object[] data = dataList.get(i);
+			String site = (String) data[0];
+			String username = (String)data[1];
+			String url = (String) data[2];
+			Long isActive = (Long) data[3];
+			Long isActiveTimesheet = (Long) data[4];
+			Long isActiveSubmittal = (Long) data[5];
+			Long loginfailures = (Long) data[6];
+			Long maxloginattemps = (Long) data[7];
+			String datelastrun = (String) data[8];
+			String computer_name = (String) data[9];
+			String ip_address = (String) data[10];
+
+			ChatbotVMSAccount vmsAccount = new ChatbotVMSAccount();
+			vmsAccount.site = site;
+			vmsAccount.username = username;
+			vmsAccount.active = isActive!=0;
+			vmsAccount.activeTimesheet = isActiveTimesheet!=0;
+			vmsAccount.activeSumittal = isActiveSubmittal!=0;
+			vmsAccount.isHalted = loginfailures!=0 && (loginfailures>=maxloginattemps);
+			vmsAccount.url = url;
+			vmsAccount.teamid = teamid;
+			if(datelastrun!=null&&!datelastrun.isEmpty()) {
+				try {
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					vmsAccount.datelastrun = sdf.parse(datelastrun);
+				}
+				catch(Exception e) {}
+			}
+			if(computer_name!=null&& ip_address!=null) {
+				if ( computer_name.startsWith("w10_") && ip_address.startsWith("10.10")){
+					vmsAccount.onClientMachine = false;
+				}
+				else {
+					vmsAccount.onClientMachine = true;
+				}
+			}
+			else {
+				vmsAccount.onClientMachine = null;
+			}
+			if(!vmsAccount.active) {
+				vmsAccount.status = "inactive";
+			}
+			else {
+				if(vmsAccount.isHalted) {
+					vmsAccount.status = "halted";
+				}
+				else if(vmsAccount.datelastrun!=null) {
+					
+		            Date dateLastRun = vmsAccount.datelastrun;
+		            Date currentLocalDate = new Date();
+					Calendar currentCalendar = Calendar.getInstance();
+					currentCalendar.setFirstDayOfWeek(Calendar.MONDAY);
+					currentCalendar.setTimeZone(TimeZone.getTimeZone(getStrTimeZone(teamid)));
+					currentCalendar.setTime(currentLocalDate);
+					int currentHour = currentCalendar.get(Calendar.HOUR_OF_DAY);
+					//Coddler runs on weekdays from 9am to 9pm in local time
+					if(currentHour < 9){
+						// make currentCalendar 9 pm yesterday
+						currentCalendar.add(Calendar.DATE,-1);
+						currentCalendar.set(Calendar.HOUR_OF_DAY,21);
+						currentCalendar.set(Calendar.MINUTE,0);
+					}
+					else if (currentHour >= 21){
+						// make currentCalendar 9 pm
+						currentCalendar.set(Calendar.HOUR_OF_DAY,21);
+						currentCalendar.set(Calendar.MINUTE,0);
+					}
+					if(currentCalendar.get(Calendar.DAY_OF_WEEK)==Calendar.SATURDAY || currentCalendar.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY){
+						currentCalendar.set(Calendar.DAY_OF_WEEK,Calendar.FRIDAY);
+						currentCalendar.set(Calendar.HOUR_OF_DAY,21);
+						currentCalendar.set(Calendar.MINUTE,0);
+					}
+					currentCalendar.add(Calendar.HOUR_OF_DAY,-2);
+		            if(currentCalendar.getTime().after(dateLastRun)){
+		                vmsAccount.status = "not working";
+					}
+		            else {
+		            	vmsAccount.status = "working";
+		            }
+					
+				}
+	            else {
+	            	vmsAccount.status = "never run";
+	            }
+			}
+			VMSAccountList.add(vmsAccount);
+
+
 		}
 		return VMSAccountList;
 	}
+	
 	
 	public List<ChatbotHarvestMachineStatus> getHarvestMachineStatus(JobDivaSession jobDivaSession) {
 		List<ChatbotHarvestMachineStatus> machineList = new ArrayList<ChatbotHarvestMachineStatus>();
@@ -1439,6 +1530,93 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		}
 		return machineList;
 		
+	}
+	
+	public List<ChatbotVMSType> getChatbotVMSTypes(JobDivaSession jobDivaSession){
+		String sql = "select vms_name, coalesce(job,0), coalesce(timesheet,0), coalesce(submittal,0) from tchatbotsupport_vms_types";
+		JdbcTemplate jdbcTemplate = getCentralJdbcTemplate();
+		Object[] params = null;
+		List<ChatbotVMSType> datalist = jdbcTemplate.query(sql, params, new RowMapper<ChatbotVMSType>() {
+			@Override
+			public ChatbotVMSType mapRow(ResultSet rs, int rowNum) throws SQLException {
+				ChatbotVMSType vms_type = new ChatbotVMSType();
+				vms_type.vms_name = rs.getString(1);
+				vms_type.hasJobCoddler = rs.getLong(2)==1L;
+				vms_type.hasTimesheetCoddler = rs.getLong(3)==1L;
+				vms_type.hasSubmittalCoddler = rs.getLong(4)==1L;
+				return vms_type;
+			}
+		});
+		return datalist;
+	}
+	
+	public boolean setChatbotVMSType(JobDivaSession jobDivaSession, String vms_name, Boolean hasJobCoddler, Boolean hasTimesheetCoddler, Boolean hasSubmittalCoddler) {
+		JdbcTemplate jdbcTemplate = getCentralJdbcTemplate();
+		ArrayList<Object> params = new ArrayList<Object>();
+		String sqlSt1 = "insert into tchatbotsupport_vms_types (vms_name ";
+		String sqlSt2 = " values (? ";
+		String sqlSt3 = " on Duplicate key update  ";
+		params.add(vms_name);
+		if(hasJobCoddler!=null) {
+			params.add(hasJobCoddler);
+			sqlSt1 += ", job ";
+			sqlSt2 += ", ? ";
+			sqlSt3 += " job = ? ";
+		}
+		if(hasTimesheetCoddler!=null) {
+			params.add(hasTimesheetCoddler);
+			sqlSt1 += ", timesheet ";
+			sqlSt2 += ", ? ";
+			if(hasJobCoddler!=null)
+				sqlSt3+=" , ";
+			sqlSt3 += " timesheet = ? ";
+		}
+		if(hasSubmittalCoddler!=null) {
+			params.add(hasSubmittalCoddler);
+			sqlSt1 += ", submittal ";
+			sqlSt2 += ", ? ";
+			if(hasJobCoddler!=null||hasTimesheetCoddler!=null)
+				sqlSt3+=" , ";
+			sqlSt3 += " submittal = ? ";
+		}
+		if(hasJobCoddler!=null) {
+			params.add(hasJobCoddler);
+		}
+		if(hasTimesheetCoddler!=null) {
+			params.add(hasTimesheetCoddler);
+		}
+		if(hasSubmittalCoddler!=null) {
+			params.add(hasSubmittalCoddler);
+		}
+		String sql = sqlSt1 +")"+sqlSt2+")"+sqlSt3;
+		jdbcTemplate.update(sql,params.toArray());
+		return true;
+	}
+	
+	public boolean deleteChatbotVMSType(JobDivaSession jobDivaSession, String vms_name){
+		String sql = "delete from tchatbotsupport_vms_types where vms_name = ?";
+		JdbcTemplate jdbcTemplate = getCentralJdbcTemplate();
+		Object[] params = {vms_name};
+		jdbcTemplate.update(sql, params);
+		return true;
+	}
+	
+	public boolean insertChatbotVMSType(JobDivaSession jobDivaSession){
+		String sql = "select vms_name, coalesce(job,0), coalesce(timesheet,0), coalesce(submittal,0) from tchatbotsupport_vms_types order by upper(vms_name)";
+		JdbcTemplate jdbcTemplate = getCentralJdbcTemplate();
+		Object[] params = null;
+		List<ChatbotVMSType> datalist = jdbcTemplate.query(sql, params, new RowMapper<ChatbotVMSType>() {
+			@Override
+			public ChatbotVMSType mapRow(ResultSet rs, int rowNum) throws SQLException {
+				ChatbotVMSType vms_type = new ChatbotVMSType();
+				vms_type.vms_name = rs.getString(1);
+				vms_type.hasJobCoddler = rs.getLong(2)==1L;
+				vms_type.hasSubmittalCoddler = rs.getLong(3)==1L;
+				vms_type.hasTimesheetCoddler = rs.getLong(4)==1L;
+				return vms_type;
+			}
+		});
+		return true;
 	}
 	
 	public String getStrTimeZone(Long teamid) {
