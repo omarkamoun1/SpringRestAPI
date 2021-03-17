@@ -107,7 +107,7 @@ public class SupportChatbotController extends AbstractJobDivaController {
 	}
 	
 	@GetMapping(value = "/vms-status", produces = "application/json")
-	public List<ChatbotVMSAccount> getV() throws Exception {
+	public List<ChatbotVMSAccount> getVMSAccountsStatus() throws Exception {
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		return chatbotDataService.getVMSAccountsStatus(jobDivaSession);
 	}
