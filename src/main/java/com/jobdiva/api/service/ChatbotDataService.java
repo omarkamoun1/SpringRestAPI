@@ -17,6 +17,8 @@ import com.jobdiva.api.model.chatbot.ChatbotSocialQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotTag;
 import com.jobdiva.api.model.chatbot.ChatbotTagValue;
 import com.jobdiva.api.model.chatbot.ChatbotUserData;
+import com.jobdiva.api.model.chatbot.ChatbotVMSAccount;
+import com.jobdiva.api.model.chatbot.ChatbotVMSType;
 import com.jobdiva.api.model.chatbot.ChatbotVisibility;
 
 @Service
@@ -112,6 +114,15 @@ public class ChatbotDataService {
 		}
 	}
 	
+	public List<ChatbotVMSAccount> getVMSAccountsStatus(JobDivaSession jobDivaSession) throws Exception {
+		try {
+			List<ChatbotVMSAccount> data = trainingDataDao.getVMSAccountsStatus(jobDivaSession);
+			return data;
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
 	public List<ChatbotTag> getChatbotTagList(JobDivaSession jobDivaSession) throws Exception {
 		try {
 			List<ChatbotTag> data = trainingDataDao.getChatbotTagList(jobDivaSession);
@@ -133,6 +144,33 @@ public class ChatbotDataService {
 	public ChatbotTagValue getChatbotTagValue(JobDivaSession jobDivaSession, String tagName, String references[]) throws Exception {
 		try {
 			ChatbotTagValue data = trainingDataDao.getChatbotTagValue(jobDivaSession, tagName, references);
+			return data;
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public List<ChatbotVMSType> getChatbotVMSTypes(JobDivaSession jobDivaSession) throws Exception {
+		try {
+			List<ChatbotVMSType> data = trainingDataDao.getChatbotVMSTypes(jobDivaSession);
+			return data;
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public boolean setChatbotVMSType(JobDivaSession jobDivaSession, String vms_name, Boolean hasJobCoddler, Boolean hasTimeSheetCoddler, Boolean hasSubmittalCoddler) throws Exception {
+		try {
+			Boolean data = trainingDataDao.setChatbotVMSType(jobDivaSession, vms_name, hasJobCoddler, hasTimeSheetCoddler, hasSubmittalCoddler);
+			return data;
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public boolean deleteChatbotVMSType(JobDivaSession jobDivaSession, String vms_name) throws Exception {
+		try {
+			Boolean data = trainingDataDao.deleteChatbotVMSType(jobDivaSession, vms_name);
 			return data;
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());

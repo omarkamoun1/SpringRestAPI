@@ -11,11 +11,11 @@ public class DataBaseContextHolder {
 	
 	private static final ThreadLocal<String> dbContextHolder = new ThreadLocal<>();
 	
-	public void setCurrentDb(String dbType) {
+	public static void setCurrentDb(String dbType) {
 		dbContextHolder.set(dbType);
 	}
 	
-	public String getCurrentDb() {
+	public static String getCurrentDb() {
 		return dbContextHolder.get();
 	}
 	
