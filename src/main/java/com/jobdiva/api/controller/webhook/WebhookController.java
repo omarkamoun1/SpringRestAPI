@@ -1,15 +1,12 @@
 package com.jobdiva.api.controller.webhook;
 
-import java.nio.charset.Charset;
 import java.util.Map;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.apache.commons.codec.binary.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +18,7 @@ import com.jobdiva.api.model.webhook.WebhookInfo;
 import com.jobdiva.api.service.WebhookService;
 
 import io.swagger.annotations.Api;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * @author Joseph Chidiac
@@ -30,15 +28,22 @@ import io.swagger.annotations.Api;
 @RestController
 @RequestMapping({ "/api/webhook/" })
 @Api(value = "Webhook API", description = "REST API Used For Webhook")
-// @ApiIgnore
+@ApiIgnore
 public class WebhookController extends AbstractJobDivaController {
 	
+	protected final Logger	logger	= LoggerFactory.getLogger(this.getClass());
+	//
 	@Autowired
-	WebhookService webhookService;
+	WebhookService			webhookService;
 	
-	@RequestMapping(value = { "/{teamId}" }, method = { RequestMethod.POST }, produces = { "application/json" })
-	public Boolean send(@PathVariable Long teamId, @RequestBody(required = true) String body) throws Exception {
-		return this.webhookService.send(teamId, body);
+	// syncType = job
+	// operation = 1 [Insert] / 2 [Update] / 3 [Delete]
+	@CrossOrigin(origins = "*")
+	@PostMapping(value = "/syncWebhook", produces = "application/json")
+	public Boolean syncWebhook(Long teamId, String syncType, Integer operation, String id) throws Exception {
+		//
+		return webhookService.syncWebhook(teamId, syncType, operation, id);
+		//
 	}
 	
 	@RequestMapping(value = { "/getWebhookConfiguration" }, method = { RequestMethod.GET }, produces = { "application/json" })
@@ -58,11 +63,9 @@ public class WebhookController extends AbstractJobDivaController {
 	
 	@RequestMapping(value = { "/welcome" }, method = { RequestMethod.POST }, produces = { "application/json" })
 	public Boolean welcome(@RequestHeader Map<String, String> headers, @RequestBody String json) throws Exception {
-		String passedSignature = ((String) headers.get("x-hub-signature")).substring(5);
-		Mac hmac = Mac.getInstance("HmacSHA1");
-		hmac.init(new SecretKeySpec("jobdiva".getBytes(Charset.forName("UTF-8")), "HmacSHA1"));
-		String calculatedSignature = Hex.encodeHexString(hmac.doFinal(json.getBytes(Charset.forName("UTF-8"))));
-		System.out.println("Calculated sigSHA1: " + calculatedSignature + " passedSignature: " + passedSignature);
-		return calculatedSignature.equals(passedSignature);
+		//
+		logger.info(" WEBHOOK :: RECIEVED REQUEST ");
+		//
+		return true;
 	}
 }

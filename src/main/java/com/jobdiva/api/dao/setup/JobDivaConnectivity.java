@@ -44,6 +44,8 @@ public class JobDivaConnectivity {
 	Map<Long, NamedParameterJdbcTemplate>	namedParameterJdbcTemplates	= Collections.synchronizedMap(new HashMap<Long, NamedParameterJdbcTemplate>());
 	//
 	private JdbcTemplate					minerJdbcTemplate;
+	private JdbcTemplate					attachmentJdbcTemplate;
+	private Object							syncObj						= new Object();
 	
 	//
 	@PostConstruct
@@ -267,5 +269,24 @@ public class JobDivaConnectivity {
 	
 	public JdbcTemplate getCentralTemplate() {
 		return jdbcTemplate;
+	}
+	
+	public DataSource createDataSource(String driverClassName, String url, String userName, String password) {
+		DataSourceBuilder<? extends DataSource> dataSourceBuilder = DataSourceBuilder.create();
+		dataSourceBuilder.driverClassName(driverClassName);
+		dataSourceBuilder.url(url);
+		dataSourceBuilder.username(userName);
+		dataSourceBuilder.password(password);
+		return dataSourceBuilder.build();
+	}
+	
+	public JdbcTemplate getAttachmentJdbcTemplate() {
+		synchronized (syncObj) {
+			if (attachmentJdbcTemplate == null) {
+				DataSource dataSource = createDataSource(appProperties.getAttachmentdbDriver(), appProperties.getAttachmentdbUrl(), appProperties.getAttachmentdbUserName(), appProperties.getAttachmentdbPassword());
+				attachmentJdbcTemplate = new JdbcTemplate(dataSource);
+			}
+		}
+		return attachmentJdbcTemplate;
 	}
 }

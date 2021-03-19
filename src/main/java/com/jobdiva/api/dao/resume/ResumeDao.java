@@ -12,10 +12,12 @@ import com.axelon.candidate.CandidateData;
 import com.axelon.candidate.DocumentObjectResume;
 import com.axelon.filedistributor.FileDistributor_Stub;
 import com.axelon.oc4j.ServletRequestData;
+import com.axelon.robot.Robot;
 import com.axelon.shared.Application;
 import com.axelon.shared.Zipper;
 import com.axelon.wordserver.FileBundle;
 import com.axelon.wordserver.RMIWordServer_Stub;
+import com.jobdiva.api.config.AppProperties;
 import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.servlet.ServletTransporter;
@@ -114,8 +116,11 @@ public class ResumeDao extends AbstractJobDivaDao {
 			//
 			Long longResumeDate = resumeDate != null ? resumeDate.getTime() : System.currentTimeMillis();
 			//
+			// Robot.PARSE_ALL // Robot.PARSE_ALL_EU
 			args[1] = String.valueOf(longResumeDate); //
-			args[2] = "16511"; // Robot.PARSE_ALL
+			args[2] = (appProperties.getApiServerEnvironment().equalsIgnoreCase(AppProperties.UK_ENVIRONEMNT) ? Robot.PARSE_ALL_EU : Robot.PARSE_ALL) + ""; // "16511";
+																																							// //
+																																							// Robot.PARSE_ALL
 			args[3] = String.valueOf(jobDivaSession.getTeamId());
 			//
 			ServletRequestData srd = new ServletRequestData(0, null, args);

@@ -24,7 +24,7 @@ import com.jobdiva.api.model.onboard.OnBoardPackage;
 public class OnBoardDao extends AbstractOnBoardDao {
 	
 	public List<HireType> getPackageList(JobDivaSession jobDivaSession) {
-		String sql = "SELECT ID, NAME " //
+		String sql = "SELECT ID, NAME, DESCRIPTION, UPDATEDBY, UPDATEDON " //
 				+ " FROM tonboarding_tab " //
 				+ " where teamid = ? " //
 				+ " and nvl(deleted,0) = 0 " //
@@ -45,6 +45,10 @@ public class OnBoardDao extends AbstractOnBoardDao {
 				//
 				String packageType = id <= 100 ? "Hire Package" : "Supplemental Package";
 				hireType.setPackageType(packageType);
+				//
+				hireType.setDescription(rs.getString("DESCRIPTION"));
+				hireType.setLastUpdatedBy(rs.getLong("UPDATEDBY"));
+				hireType.setLastUpdatedOn(rs.getDate("UPDATEDON"));
 				//
 				return hireType;
 			}
@@ -197,8 +201,27 @@ public class OnBoardDao extends AbstractOnBoardDao {
 		}
 		//
 		//
+		List<OnBoardDocument> companyList = getOnBoardDocumentByCompanyId(jobDivaSession, companyId, jdbcTemplate);
 		//
-		sql = " select id, description, filename, require_return, readonly, mandatory, nvl(send_to,0) as send_to, doctype, ismedical, instruction  " //
+		List<OnBoardDocument> parentCompanyList = null;
+		if (parentcompanyid > 0L) {
+			parentCompanyList = getOnBoardDocumentByCompanyId(jobDivaSession, parentcompanyid, jdbcTemplate);
+		}
+		//
+		List<OnBoardDocument> globalList = new ArrayList<>();
+		//
+		globalList.addAll(companyList);
+		//
+		if (parentCompanyList != null)
+			globalList.addAll(parentCompanyList);
+		//
+		return globalList;
+	}
+	
+	private List<OnBoardDocument> getOnBoardDocumentByCompanyId(JobDivaSession jobDivaSession, Long companyId, JdbcTemplate jdbcTemplate) {
+		String sql;
+		Object[] params;
+		sql = " select id, description, filename, require_return, readonly, mandatory, nvl(send_to,0) as send_to, doctype, ismedical, remark, instruction  " //
 				+ " from tcompanyattachments  " //
 				+ " where teamid = ?  " //
 				+ " and companyid = ?  " //
@@ -222,58 +245,19 @@ public class OnBoardDao extends AbstractOnBoardDao {
 				onBoardDocument.setReadonly(rs.getBoolean("readonly"));
 				onBoardDocument.setSendTo(getStringSendTo(rs.getInt("send_to")));
 				onBoardDocument.setMedical(rs.getBoolean("ismedical"));
+				onBoardDocument.setInternalDescription(rs.getString("remark"));
 				onBoardDocument.setPortalInstruction(rs.getString("instruction"));
 				//
 				return onBoardDocument;
 			}
 		});
 		//
-		//
-		//
-		List<OnBoardDocument> parentCompanyList = null;
-		if (parentcompanyid > 0L) {
-			sql = " select id, description, filename, require_return, readonly, mandatory, nvl(send_to,0) as send_to, doctype, ismedical, instruction  " //
-					+ " from tcompanyattachments  " //
-					+ " where teamid = ?  " //
-					+ " and companyid = ?  " //
-					+ " and onboarding = 1  " //
-					+ " and nvl(deleted,0) = 0  " //
-					+ " order by upper(description) ";
-			params = new Object[] { jobDivaSession.getTeamId(), Long.valueOf(parentcompanyid) };
-			parentCompanyList = jdbcTemplate.query(sql, params, new RowMapper<OnBoardDocument>() {
-				
-				@Override
-				public OnBoardDocument mapRow(ResultSet rs, int rowNum) throws SQLException {
-					//
-					OnBoardDocument onBoardDocument = new OnBoardDocument();
-					onBoardDocument.setId(rs.getLong("id"));
-					onBoardDocument.setName(rs.getString("description"));
-					onBoardDocument.setMandatory(rs.getBoolean("mandatory"));
-					onBoardDocument.setDocumentType(getStringDocumentType(rs.getInt("doctype")));
-					onBoardDocument.setReturnRequired(rs.getBoolean("require_return"));
-					onBoardDocument.setReadonly(rs.getBoolean("readonly"));
-					onBoardDocument.setSendTo(getStringSendTo(rs.getInt("send_to")));
-					onBoardDocument.setMedical(rs.getBoolean("ismedical"));
-					onBoardDocument.setPortalInstruction(rs.getString("instruction"));
-					//
-					return onBoardDocument;
-				}
-			});
-		}
-		//
-		List<OnBoardDocument> globalList = new ArrayList<>();
-		//
-		globalList.addAll(companyList);
-		//
-		if (parentCompanyList != null)
-			globalList.addAll(parentCompanyList);
-		//
-		return globalList;
+		return companyList;
 	}
 	
 	public List<OnBoardDocument> getDocumentsByContact(JobDivaSession jobDivaSession, Long contactId) {
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
-		String sql = "select id, description, filename, thefile, require_return, mandatory, readonly, nvl(send_to,0) as send_to, doctype , ismedical, instruction " //
+		String sql = "select id, description, filename, thefile, require_return, mandatory, readonly, nvl(send_to,0) as send_to, doctype , ismedical, remark ,instruction " //
 				+ " from tcontactattachments  " //
 				+ " where teamid = ?  " //
 				+ " and contactid = ?  " //
@@ -296,6 +280,7 @@ public class OnBoardDao extends AbstractOnBoardDao {
 				onBoardDocument.setReadonly(rs.getBoolean("readonly"));
 				onBoardDocument.setSendTo(getStringSendTo(rs.getInt("send_to")));
 				onBoardDocument.setMedical(rs.getBoolean("ismedical"));
+				onBoardDocument.setInternalDescription(rs.getString("remark"));
 				onBoardDocument.setPortalInstruction(rs.getString("instruction"));
 				//
 				return onBoardDocument;
@@ -340,6 +325,7 @@ public class OnBoardDao extends AbstractOnBoardDao {
 			city = location.get(0);
 			state = location.get(1);
 			country = location.get(2);
+			//
 		}
 		//
 		//
@@ -393,7 +379,7 @@ public class OnBoardDao extends AbstractOnBoardDao {
 					+ " and nvl(deleted,0) = 0  " //
 					+ " and archived = 0  " //
 					+ " and state = ?  " //
-					+ " and city is null  " //
+					// + " and city is null " //
 					+ " order by upper(name) ";
 			//
 			params = new Object[] { jobDivaSession.getTeamId(), state };
@@ -435,8 +421,8 @@ public class OnBoardDao extends AbstractOnBoardDao {
 					+ " and nvl(deleted,0) = 0  " //
 					+ " and archived = 0  " //
 					+ " and country = ?  " //
-					+ " and state is null  " //
-					+ " and city is null  " //
+					// + " and state is null " //
+					// + " and city is null " //
 					+ " order by upper(name) ";
 			params = new Object[] { jobDivaSession.getTeamId(), country };
 			jdbcTemplate.query(sql, params, new RowMapper<Boolean>() {

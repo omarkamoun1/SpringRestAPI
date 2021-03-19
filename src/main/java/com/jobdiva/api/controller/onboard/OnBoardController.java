@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jobdiva.api.controller.AbstractJobDivaController;
+import com.jobdiva.api.model.OnboardingCandidateDocument;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.onboard.HireType;
 import com.jobdiva.api.model.onboard.InterviewSchedule;
@@ -80,5 +81,31 @@ public class OnBoardController extends AbstractJobDivaController {
 	public Long saveOnboarding(@RequestBody InterviewSchedule interviewSchedule) throws Exception {
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		return this.onBoardService.saveOnboarding(jobDivaSession, interviewSchedule);
+	}
+	
+	@RequestMapping(value = "/uploadCandidateOnboardingDocument", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Upload Candidate Onboarding Document")
+	public Long uploadCandidateOnboardingDocument( //
+			//
+			@ApiParam(value = //
+			"candidateid     : Candidate internal JobDiva ID \r\n" //
+					+ "name           : Nickname of the uploaded attachment file \r\n" //
+					+ "filename       : Actual file name with file extension (.pdf, for example) \r\n" //
+					+ "filecontent    : Uploaded file in base64 binary \r\n" //
+					+ "attachmenttype : The type of the attachment \r\n" //
+					+ "description    : Additional description of the file \r\n" //
+					+ "") //
+			@RequestBody OnboardingCandidateDocument OnboardingCandidateDocument
+	//
+	//
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("uploadCandidateOnboardingDocument");
+		//
+		return onBoardService.uploadCandidateOnboardingDocument(jobDivaSession, OnboardingCandidateDocument);
+		//
 	}
 }

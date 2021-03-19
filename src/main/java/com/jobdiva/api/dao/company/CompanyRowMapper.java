@@ -11,7 +11,7 @@ public class CompanyRowMapper implements RowMapper<Company> {
 	
 	@Override
 	public Company mapRow(ResultSet rs, int rowNum) throws SQLException {
-		Company company = new Company();
+		Company company = createCompany();
 		//
 		company.setId(rs.getLong("id"));
 		company.setTeamid(rs.getLong("teamid"));
@@ -31,6 +31,11 @@ public class CompanyRowMapper implements RowMapper<Company> {
 		company.setPipelineId(rs.getShort("PIPELINE_ID"));
 		//
 		//
+		return company;
+	}
+	
+	protected Company createCompany() {
+		Company company = new Company();
 		return company;
 	}
 }

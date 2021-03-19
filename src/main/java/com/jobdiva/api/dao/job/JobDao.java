@@ -110,6 +110,10 @@ public class JobDao extends AbstractActivityDao {
 			paramList.add(optionalref.toUpperCase() + "%");
 		}
 		//
+		// if (paramList.size() == 1) {
+		// sql += " AND ROWNUM <= 1000";
+		// }
+		//
 		Object[] params = paramList.toArray();
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();

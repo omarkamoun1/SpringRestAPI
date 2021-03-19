@@ -11,7 +11,7 @@ public class CandidateRowMapper implements RowMapper<Candidate> {
 	
 	@Override
 	public Candidate mapRow(ResultSet rs, int rowNum) throws SQLException {
-		Candidate candidate = new Candidate();
+		Candidate candidate = createCandidate();
 		//
 		candidate.setId(rs.getLong("ID"));
 		candidate.setTeamId(rs.getLong("TEAMID"));
@@ -69,6 +69,11 @@ public class CandidateRowMapper implements RowMapper<Candidate> {
 		candidate.setPhoneTypes(rs.getString("PHONE_TYPES"));
 		candidate.setTimePwchanged(rs.getDate("TIMEPWCHANGED"));
 		//
+		return candidate;
+	}
+	
+	protected Candidate createCandidate() {
+		Candidate candidate = new Candidate();
 		return candidate;
 	}
 }

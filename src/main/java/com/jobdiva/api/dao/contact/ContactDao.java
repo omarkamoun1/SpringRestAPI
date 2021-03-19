@@ -38,6 +38,7 @@ import com.jobdiva.api.model.Owner;
 import com.jobdiva.api.model.PhoneType;
 import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
+import com.jobdiva.api.model.webhook.WebhookContact;
 
 @Component
 public class ContactDao extends AbstractJobDivaDao {
@@ -375,102 +376,106 @@ public class ContactDao extends AbstractJobDivaDao {
 		if (fromAPI && list != null) {
 			for (Contact contact : list) {
 				//
-				String typenames = "";
-				List<ContactType> contactTypes = contactTypeDao.getContactTypes(contact.getId(), jobDivaSession.getTeamId());
-				for (ContactType contactType : contactTypes) {
-					long typeid = contactType.getId();
-					for (Map.Entry<String, Long> entry : typeMap.entrySet()) {
-						if (typeid == entry.getValue().longValue())
-							typenames += entry.getKey() + "|";
-					}
-				}
-				contact.setContactType(typenames);
-				//
-				//
-				String sql = "select firstname, lastname from TCUSTOMER where teamid = ? and id = ? ";
-				Object[] parameters = new Object[] { teamId, contact.getId() };
-				//
-				JdbcTemplate jdbcTemplate = getJdbcTemplate();
-				//
-				List<String> reportToList = jdbcTemplate.query(sql, parameters, new RowMapper<String>() {
-					
-					@Override
-					public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-						//
-						//
-						String firstName = rs.getString("firstname");
-						String lastName = rs.getString("lastname");
-						//
-						String name = firstName;
-						if (lastName != null)
-							name += " " + lastName;
-						return name;
-					}
-				});
-				if (reportToList != null && reportToList.size() > 0) {
-					contact.setReportsToName(reportToList.get(0));
-				}
-				//
-				String phonetype = contact.getPhoneTypes();// .substring(0, 4);
-				for (int j = 0; j < 4; j++) {
-					if (phonetype == null)
-						phonetype = "WCHF";
-					else if (phonetype.length() < 4)
-						break;
-					String strPhone = "";
-					char t = phonetype.charAt(j);
-					switch (t) { // take care of space!
-						case 'W':
-							strPhone = "Work Phone: ";
-							break;
-						case 'C':
-							strPhone = "Mobile Phone: ";
-							break;
-						case 'H':
-							strPhone = "Home Phone: ";
-							break;
-						case 'F':
-							strPhone = "Work Fax: ";
-							break;
-						case 'P':
-							strPhone = "Pager: ";
-							break;
-						case 'M':
-							strPhone = "Main Phone: ";
-							break;
-						case 'X':
-							strPhone = "Home Fax: ";
-							break;
-						case 'D':
-							strPhone = "Direct Phone: ";
-							break;
-						case 'O':
-							strPhone = "Other Phone: ";
-							break;
-					}
-					switch (j) {
-						case 0:
-							strPhone += (contact.getWorkPhone() == null ? "" : (contact.getWorkPhone()) + (contact.getWorkphoneExt() == null ? "" : " ext(" + contact.getWorkphoneExt() + ")"));
-							contact.setPhone1(strPhone);
-							break;
-						case 1:
-							strPhone += (contact.getCellPhone() == null ? "" : (contact.getCellPhone()) + (contact.getCellPhoneExt() == null ? "" : " ext(" + contact.getCellPhoneExt() + ")"));
-							contact.setPhone2(strPhone);
-							break;
-						case 2:
-							strPhone += (contact.getHomePhone() == null ? "" : (contact.getHomePhone()) + (contact.getHomePhoneExt() == null ? "" : " ext(" + contact.getHomePhoneExt() + ")"));
-							contact.setPhone3(strPhone);
-							break;
-						case 3:
-							strPhone += (contact.getContactFax() == null ? "" : (contact.getHomePhone()) + (contact.getContactFaxExt() == null ? "" : " ext(" + contact.getContactFaxExt() + ")"));
-							contact.setPhone4(strPhone);
-							break;
-					}
-				}
+				assignContact(jobDivaSession, teamId, typeMap, contact);
 			}
 		}
 		return list;
 		//
+	}
+	
+	private void assignContact(JobDivaSession jobDivaSession, Long teamId, Map<String, Long> typeMap, Contact contact) {
+		String typenames = "";
+		List<ContactType> contactTypes = contactTypeDao.getContactTypes(contact.getId(), jobDivaSession.getTeamId());
+		for (ContactType contactType : contactTypes) {
+			long typeid = contactType.getId();
+			for (Map.Entry<String, Long> entry : typeMap.entrySet()) {
+				if (typeid == entry.getValue().longValue())
+					typenames += entry.getKey() + "|";
+			}
+		}
+		contact.setContactType(typenames);
+		//
+		//
+		String sql = "select firstname, lastname from TCUSTOMER where teamid = ? and id = ? ";
+		Object[] parameters = new Object[] { teamId, contact.getId() };
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<String> reportToList = jdbcTemplate.query(sql, parameters, new RowMapper<String>() {
+			
+			@Override
+			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+				//
+				//
+				String firstName = rs.getString("firstname");
+				String lastName = rs.getString("lastname");
+				//
+				String name = firstName;
+				if (lastName != null)
+					name += " " + lastName;
+				return name;
+			}
+		});
+		if (reportToList != null && reportToList.size() > 0) {
+			contact.setReportsToName(reportToList.get(0));
+		}
+		//
+		String phonetype = contact.getPhoneTypes();// .substring(0, 4);
+		for (int j = 0; j < 4; j++) {
+			if (phonetype == null)
+				phonetype = "WCHF";
+			else if (phonetype.length() < 4)
+				break;
+			String strPhone = "";
+			char t = phonetype.charAt(j);
+			switch (t) { // take care of space!
+				case 'W':
+					strPhone = "Work Phone: ";
+					break;
+				case 'C':
+					strPhone = "Mobile Phone: ";
+					break;
+				case 'H':
+					strPhone = "Home Phone: ";
+					break;
+				case 'F':
+					strPhone = "Work Fax: ";
+					break;
+				case 'P':
+					strPhone = "Pager: ";
+					break;
+				case 'M':
+					strPhone = "Main Phone: ";
+					break;
+				case 'X':
+					strPhone = "Home Fax: ";
+					break;
+				case 'D':
+					strPhone = "Direct Phone: ";
+					break;
+				case 'O':
+					strPhone = "Other Phone: ";
+					break;
+			}
+			switch (j) {
+				case 0:
+					strPhone += (contact.getWorkPhone() == null ? "" : (contact.getWorkPhone()) + (contact.getWorkphoneExt() == null ? "" : " ext(" + contact.getWorkphoneExt() + ")"));
+					contact.setPhone1(strPhone);
+					break;
+				case 1:
+					strPhone += (contact.getCellPhone() == null ? "" : (contact.getCellPhone()) + (contact.getCellPhoneExt() == null ? "" : " ext(" + contact.getCellPhoneExt() + ")"));
+					contact.setPhone2(strPhone);
+					break;
+				case 2:
+					strPhone += (contact.getHomePhone() == null ? "" : (contact.getHomePhone()) + (contact.getHomePhoneExt() == null ? "" : " ext(" + contact.getHomePhoneExt() + ")"));
+					contact.setPhone3(strPhone);
+					break;
+				case 3:
+					strPhone += (contact.getContactFax() == null ? "" : (contact.getHomePhone()) + (contact.getContactFaxExt() == null ? "" : " ext(" + contact.getContactFaxExt() + ")"));
+					contact.setPhone4(strPhone);
+					break;
+			}
+		}
 	}
 	
 	public Long createContact(JobDivaSession jobDivaSession, String company, String firstname, String lastname, String title, String department, PhoneType[] phones, ContactAddress[] addresses, String email, String alternateemail, String[] types,
@@ -1610,5 +1615,63 @@ public class ContactDao extends AbstractJobDivaDao {
 				}
 			}
 		}
+	}
+	
+	//
+	public WebhookContact getWebhookContact(JobDivaSession jobDivaSession, Long contactId) {
+		String sql = "Select distinct " //
+				+ " a.id, " //
+				+ " a.TEAMID, " //
+				+ " a.firstname, " //
+				+ " a.lastname, " //
+				+ " a.companyname, " //
+				+ " a.departmentname, " //
+				+ " a.workphone, " //
+				+ " a.homephone, " //
+				+ " a.email," // //
+				+ " a.companyid, " //
+				+ " a.title, " //
+				+ " a.cellphone, " //
+				+ " a.contactfax, " //
+				+ " a.phonetypes, " //
+				+ " ca.address1, " //
+				+ " ca.address2, " //
+				+ " ca.city, " //
+				+ " ca.state," // //
+				+ " ca.zipcode, " //
+				+ " ca.countryid, " //
+				+ " a.ALTERNATE_EMAIL, " //
+				+ " a.assistantname, " //
+				+ " a.assistantemail, " //
+				+ " a.assistantphone, " //
+				+ " a.assistantphoneext," //
+				+ " a.workphoneext, " //
+				+ " a.cellphoneext, " //
+				+ " a.homephoneext, " //
+				+ " a.contactfaxext, " //
+				+ " a.reportsto " //
+				+ " from ";
+		//
+		sql += " TCUSTOMER a  left join  TCUSTOMERADDRESS ca on a.teamid = ca.teamid and a.id = ca.contactid and ca.DEFAULT_ADDRESS = 1  and ca.deleted = 0 ";
+		//
+		sql += " where a.teamid = ? AND a.ID = ?  " //
+		;
+		//
+		Object[] params = new Object[] { jobDivaSession.getTeamId(), contactId };
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<Contact> webhookContacts = jdbcTemplate.query(sql, params, new WebhookContactRowMapper());
+		//
+		if (webhookContacts != null && webhookContacts.size() > 0) {
+			WebhookContact webhookContact = (WebhookContact) webhookContacts.get(0);
+			//
+			Map<String, Long> typeMap = getTypeMap(jobDivaSession.getTeamId());
+			//
+			assignContact(jobDivaSession, contactId, typeMap, webhookContact);
+			//
+			return webhookContact;
+		}
+		return null;
 	}
 }

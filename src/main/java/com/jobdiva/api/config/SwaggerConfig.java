@@ -8,20 +8,25 @@ import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
 import com.jobdiva.api.convertor.JsonToAttachmentConverter;
 import com.jobdiva.api.convertor.JsonToBillingUnitTypeConverter;
+import com.jobdiva.api.convertor.JsonToCandidateAttachementConverter;
 import com.jobdiva.api.convertor.JsonToCandidateQualConverter;
 import com.jobdiva.api.convertor.JsonToCompanyAddressConverter;
 import com.jobdiva.api.convertor.JsonToContactAddressConverter;
+import com.jobdiva.api.convertor.JsonToContactAttachementConverter;
 import com.jobdiva.api.convertor.JsonToContactRoleTypeConverter;
 import com.jobdiva.api.convertor.JsonToEducationQualConverter;
+import com.jobdiva.api.convertor.JsonToEventNotificationConverter;
 import com.jobdiva.api.convertor.JsonToExpenseEntryConverter;
 import com.jobdiva.api.convertor.JsonToExperienceQualConverter;
 import com.jobdiva.api.convertor.JsonToFrequencyTypeConverter;
 import com.jobdiva.api.convertor.JsonToGroupInvoiceByTypeConverter;
+import com.jobdiva.api.convertor.JsonToOnboardinCandidateDocumentConverter;
 import com.jobdiva.api.convertor.JsonToOwnerConverter;
 import com.jobdiva.api.convertor.JsonToPhoneConverter;
 import com.jobdiva.api.convertor.JsonToProxyHeaderConverter;
@@ -114,6 +119,10 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
 		//
 		registry.addConverter(new JsonToSocialNetworkTypeConverter());
 		registry.addConverter(new JsonToUplaodResumeConverter());
+		registry.addConverter(new JsonToCandidateAttachementConverter());
+		registry.addConverter(new JsonToContactAttachementConverter());
+		registry.addConverter(new JsonToEventNotificationConverter());
+		registry.addConverter(new JsonToOnboardinCandidateDocumentConverter());
 	}
 	
 	private ApiInfo metaData() {
@@ -133,5 +142,10 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
 		//
 		registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
 		//
+	}
+	
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		// registry.addInterceptor(new RequestInterceptor());
 	}
 }

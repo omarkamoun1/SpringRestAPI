@@ -9,7 +9,7 @@ public class JsonToTimezoneConverter implements Converter<String, Timezone> {
 	@Override
 	public Timezone convert(String source) {
 		for (Timezone timezone : Timezone.values()) {
-			if (timezone.getValue().equalsIgnoreCase(source)) {
+			if (timezone.getName().equalsIgnoreCase(source)) {
 				return timezone;
 			}
 		}

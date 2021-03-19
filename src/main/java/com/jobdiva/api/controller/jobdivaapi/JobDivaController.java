@@ -11,11 +11,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jobdiva.api.controller.AbstractJobDivaController;
+import com.jobdiva.api.model.CandidateAttachment;
+import com.jobdiva.api.model.ContactAttachment;
 import com.jobdiva.api.model.UploadResume;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.proxy.ProxyHeader;
 import com.jobdiva.api.model.proxy.ProxyParameter;
 import com.jobdiva.api.model.proxy.Response;
+import com.jobdiva.api.service.JobDivaSessionService;
 import com.jobdiva.api.service.JobService;
 import com.jobdiva.api.service.ProxyAPIService;
 import com.jobdiva.api.service.ResumeService;
@@ -36,13 +39,30 @@ public class JobDivaController extends AbstractJobDivaController {
 	
 	//
 	@Autowired
-	ResumeService	resumeService;
+	ResumeService			resumeService;
 	//
 	@Autowired
-	JobService		jobService;
+	JobService				jobService;
 	//
 	@Autowired
-	ProxyAPIService	proxyAPIService;
+	ProxyAPIService			proxyAPIService;
+	//
+	@Autowired
+	JobDivaSessionService	jobDivaSessionService;
+	
+	@ApiIgnore
+	@CrossOrigin(origins = "*")
+	@RequestMapping(value = "/refreshToken", method = RequestMethod.GET, produces = "application/json")
+	public String refreshToken( //
+	//
+	) throws Exception {
+		//
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		return jobDivaSessionService.refreshToken(jobDivaSession);
+		//
+	}
 	
 	@ApiIgnore
 	@RequestMapping(value = "/linkedInUploadResume", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
@@ -123,23 +143,15 @@ public class JobDivaController extends AbstractJobDivaController {
 	@ApiOperation(value = "Upload Candidate Attachment")
 	public Long uploadCandidateAttachment( //
 			//
-			@ApiParam(value = "Candidate internal JobDiva ID", required = true) //
-			@RequestParam(required = true) Long candidateid, //
-			//
-			@ApiParam(value = "Nickname of the uploaded attachment file", required = true) //
-			@RequestParam(required = true) String name, //
-			//
-			@ApiParam(value = "Actual file name with file extension (.pdf, for example)", required = true) //
-			@RequestParam(required = true) String filename, //
-			//
-			@ApiParam(value = "Uploaded file in base64 binary", required = true) //
-			@RequestParam(required = true) byte[] filecontent, //
-			//
-			@ApiParam(value = "The type of the attachment", required = true) //
-			@RequestParam(required = true) Integer attachmenttype, //
-			//
-			@ApiParam(value = "Additional description of the file", required = false) //
-			@RequestParam(required = false) String description //
+			@ApiParam(value = //
+			"candidateid     : Candidate internal JobDiva ID \r\n" //
+					+ "name           : Nickname of the uploaded attachment file \r\n" //
+					+ "filename       : Actual file name with file extension (.pdf, for example) \r\n" //
+					+ "filecontent    : Uploaded file in base64 binary \r\n" //
+					+ "attachmenttype : The type of the attachment \r\n" //
+					+ "description    : Additional description of the file \r\n" //
+					+ "") //
+			@RequestBody CandidateAttachment candidateAttachment
 	//
 	//
 	//
@@ -148,6 +160,13 @@ public class JobDivaController extends AbstractJobDivaController {
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		jobDivaSession.checkForAPIPermission("uploadCandidateAttachment");
+		//
+		Long candidateid = candidateAttachment.getCandidateid(); //
+		String name = candidateAttachment.getName();//
+		String filename = candidateAttachment.getFilename();//
+		byte[] filecontent = candidateAttachment.getFilecontent(); //
+		Integer attachmenttype = candidateAttachment.getAttachmenttype();//
+		String description = candidateAttachment.getDescription();//
 		//
 		return resumeService.uploadCandidateAttachment(jobDivaSession, candidateid, name, filename, filecontent, attachmenttype, description);
 		//
@@ -158,57 +177,29 @@ public class JobDivaController extends AbstractJobDivaController {
 	@ApiOperation(value = "Upload Contact Attachment")
 	public Long uploadContactAttachment( //
 			//
-			@ApiParam(value = "Contact internal JobDiva ID", required = true) //
-			@RequestParam(required = true) Long contactId, //
-			//
-			@ApiParam(value = "Nickname of the uploaded attachment file", required = false) //
-			@RequestParam(required = false) String documentname, //
-			//
-			@ApiParam(value = "Actual file name with file extension (.pdf, for example)", required = false) //
-			@RequestParam(required = false) String filename, //
-			//
-			@ApiParam(value = "Uploaded file in base64 binary", required = false) //
-			@RequestParam(required = false) byte[] filecontent, //
-			//
-			@ApiParam(value = "URL link", required = false) //
-			@RequestParam(required = false) String urllink, //
-			//
-			@ApiParam(value = "Designed form", required = false) //
-			@RequestParam(required = false) String designedform, //
-			@ApiParam(value = "The type of the attachment", required = false) //
-			@RequestParam(required = false) Integer attachmenttype, //
-			//
-			@ApiParam(value = "Internal description of the file", required = false) //
-			@RequestParam(required = false) String internaldescription, //
-			//
-			@ApiParam(value = "Expiration date of the attachment Format [MM/dd/yyyy HH:mm:ss]", required = false) //
-			@RequestParam(required = false) Date expirationdate, //
-			//
-			@ApiParam(value = "If the attachment is an On-boarding document.\r\n" + //
-					"Set to be true, the following parameters will be considered", required = false) //
-			@RequestParam(required = false) Boolean isonboardingdoc, //
-			//
-			@ApiParam(value = "If the attachment is mandatory", required = false) //
-			@RequestParam(required = false) Boolean ismandatory, //
-			//
-			@ApiParam(value = "If the attachment must be completed and returned", required = false) //
-			@RequestParam(required = false) Boolean requirereturn, //
-			//
-			@ApiParam(value = "If the attachment is read only", required = false) //
-			@RequestParam(required = false) Boolean isreadonly, //
-			//
-			@ApiParam(value = "Where the attachment will be sent to.\r\n" + //
-					"Valid values include:\r\n" + //
-					"• 0: Will be sent to Candidate\r\n" + //
-					"• 1: Will be sent to Supplier\r\n" + //
-					"• 2: For Internal Use Only", required = false) //
-			@RequestParam(required = false) Integer sendto, //
-			//
-			@ApiParam(value = "If the attachment is medical-related document", required = false) //
-			@RequestParam(required = false) Boolean ismedicaldoc, //
-			//
-			@ApiParam(value = "Portal instruction", required = false) //
-			@RequestParam(required = false) String portalinstruction //
+			@ApiParam(value = //
+			"contactId 				: Contact internal JobDiva ID \r\n"//
+					+ "documentname 		: Nickname of the uploaded attachment file\r\n"//
+					+ "filename 			: Actual file name with file extension (.pdf, for example)\r\n"//
+					+ "filecontent 			: Uploaded file in base64 binary \r\n"//
+					+ "urllink 				: URL link \r\n"//
+					+ "designedform 		: Designed form \r\n"//
+					+ "attachmenttype 		: The type of the attachment \r\n" //
+					+ "internaldescription  : Internal description of the file \r\n"//
+					+ "expirationdate 		: Expiration date of the attachment Format [MM/dd/yyyy HH:mm:ss] \r\n" //
+					+ "isonboardingdoc 		: If the attachment is an On-boarding document.\r\n Set to be true, the following parameters will be considered \r\n" //
+					+ "ismandatory 			: If the attachment is mandatory \r\n"//
+					+ "requirereturn 		: If the attachment must be completed and returned \r\n"//
+					+ "isreadonly 			: If the attachment is read only \r\n"//
+					+ "sendto 				: Where the attachment will be sent to. Valid values include:\r\n "//
+					+ " • 0: Will be sent to Candidate\r\n "//
+					+ " • 1: Will be sent to Supplier\r\n "//
+					+ " • 2: For Internal Use Only \r\n"//
+					+ "ismedicaldoc 		: If the attachment is medical-related document \r\n"//
+					+ "portalinstruction 	: Portal instruction \r\n"//
+					+ "") //
+			@RequestBody ContactAttachment contactAttachment
+	//
 	//
 	//
 	//
@@ -218,6 +209,26 @@ public class JobDivaController extends AbstractJobDivaController {
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		jobDivaSession.checkForAPIPermission("uploadContactAttachment");
+		//
+		Long contactId = contactAttachment.getContactId();
+		String documentname = contactAttachment.getDocumentname();
+		String filename = contactAttachment.getFilename();
+		byte[] filecontent = contactAttachment.getFilecontent();
+		String urllink = contactAttachment.getUrllink();
+		String designedform = contactAttachment.getDesignedform();
+		Integer attachmenttype = contactAttachment.getAttachmenttype();
+		String internaldescription = contactAttachment.getInternaldescription();
+		//
+		//
+		Date expirationdate = DateUtils.toPropertyDate(contactAttachment.getExpirationdate());
+		Boolean isonboardingdoc = contactAttachment.getIsonboardingdoc();
+		Boolean ismandatory = contactAttachment.getIsmandatory();
+		Boolean requirereturn = contactAttachment.getRequirereturn();
+		Boolean isreadonly = contactAttachment.getIsreadonly();
+		Integer sendto = contactAttachment.getSendto();
+		Boolean ismedicaldoc = contactAttachment.getIsmedicaldoc();
+		String portalinstruction = contactAttachment.getPortalinstruction();
+		//
 		//
 		return resumeService.uploadContactAttachment(jobDivaSession, contactId, documentname, filename, filecontent, urllink, designedform, attachmenttype, internaldescription, expirationdate, isonboardingdoc, ismandatory, requirereturn, isreadonly,
 				sendto, ismedicaldoc, portalinstruction);

@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import com.jobdiva.api.dao.onboard.OnBoardDao;
 import com.jobdiva.api.dao.onboard.SaveOnBoardDao;
+import com.jobdiva.api.dao.onboard.UploadOnboardingDocumentDao;
+import com.jobdiva.api.model.OnboardingCandidateDocument;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.onboard.HireType;
 import com.jobdiva.api.model.onboard.InterviewSchedule;
@@ -22,10 +24,13 @@ import com.jobdiva.api.model.onboard.OnBoardPackage;
 public class OnBoardService {
 	
 	@Autowired
-	OnBoardDao		onBoardDao;
+	OnBoardDao					onBoardDao;
 	//
 	@Autowired
-	SaveOnBoardDao	saveOnBoardDao;
+	SaveOnBoardDao				saveOnBoardDao;
+	//
+	@Autowired
+	UploadOnboardingDocumentDao	uploadOnboardingDocumentDao;
 	
 	public List<HireType> getPackageList(JobDivaSession jobDivaSession) {
 		return this.onBoardDao.getPackageList(jobDivaSession);
@@ -49,5 +54,11 @@ public class OnBoardService {
 	
 	public Long saveOnboarding(JobDivaSession jobDivaSession, InterviewSchedule interviewSchedule) throws Exception {
 		return this.saveOnBoardDao.saveOnboarding(jobDivaSession, interviewSchedule);
+	}
+	
+	public Long uploadCandidateOnboardingDocument(JobDivaSession jobDivaSession, OnboardingCandidateDocument onboardingCandidateDocument) throws Exception {
+		//
+		return uploadOnboardingDocumentDao.uploadCandidateOnboardingDocument(jobDivaSession, onboardingCandidateDocument);
+		//
 	}
 }

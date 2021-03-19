@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.model.CompanyUDF;
+import com.jobdiva.api.model.webhook.WebhookUDF;
 
 @Component
 public class SearchCompanyUDFDao extends AbstractJobDivaDao {
@@ -38,6 +39,34 @@ public class SearchCompanyUDFDao extends AbstractJobDivaDao {
 				companyAddress.setUserfieldValue(rs.getString("USERFIELD_VALUE"));
 				companyAddress.setDatecreated(rs.getDate("DATECREATED"));
 				return companyAddress;
+			}
+		});
+		return list;
+	}
+	
+	public List<WebhookUDF> getCompanyWebhookUDF(Long companyId, Long teamId) {
+		String sql = " Select "//
+				+ " USERFIELD_ID , "//
+				+ " TEAMID, " //
+				+ " USERFIELD_VALUE, " //
+				+ " DATECREATED  " //
+				+ " FROM TCOMPANY_USERFIELDS " //
+				+ " WHERE COMPANYID = ? and TEAMID = ? ";
+		//
+		Object[] params = new Object[] { companyId, teamId };
+		//
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<WebhookUDF> list = jdbcTemplate.query(sql, params, new RowMapper<WebhookUDF>() {
+			
+			@Override
+			public WebhookUDF mapRow(ResultSet rs, int rowNum) throws SQLException {
+				WebhookUDF webhookUDF = new WebhookUDF();
+				webhookUDF.setUserFieldId(rs.getInt("USERFIELD_ID"));
+				webhookUDF.setUserfieldValue(rs.getString("USERFIELD_VALUE"));
+				webhookUDF.setDateCreated(rs.getDate("DATECREATED"));
+				return webhookUDF;
 			}
 		});
 		return list;

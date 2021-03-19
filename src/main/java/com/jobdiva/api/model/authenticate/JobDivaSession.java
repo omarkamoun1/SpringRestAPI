@@ -23,6 +23,8 @@ public class JobDivaSession extends User {
 	private Boolean				checkApiPermission	= true;
 	private String				firstName;
 	private String				lastName;
+	private Long				userOptions;
+	private String				regionCode;
 	
 	//
 	public JobDivaSession() {
@@ -146,5 +148,21 @@ public class JobDivaSession extends User {
 	
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
+	}
+	
+	public Long getUserOptions() {
+		return userOptions;
+	}
+	
+	public void setUserOptions(Long userOptions) {
+		this.userOptions = userOptions;
+	}
+	
+	public String getRegionCode() {
+		return regionCode;
+	}
+	
+	public void setRegionCode(String regionCode) {
+		this.regionCode = regionCode;
 	}
 }

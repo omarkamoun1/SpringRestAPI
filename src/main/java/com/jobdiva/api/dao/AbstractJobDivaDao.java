@@ -36,6 +36,7 @@ import com.axelon.util.JDLocale;
 import com.jobdiva.api.config.AppProperties;
 import com.jobdiva.api.config.jwt.CustomAuthenticationToken;
 import com.jobdiva.api.dao.def.UserfieldsDef;
+import com.jobdiva.api.dao.setup.JobDivaConnection;
 import com.jobdiva.api.dao.setup.JobDivaConnectivity;
 import com.jobdiva.api.dao.team.TeamRowMapper;
 import com.jobdiva.api.model.Job;
@@ -1246,5 +1247,44 @@ public class AbstractJobDivaDao {
 			logger.info("getJobUsers [" + jobId + "] [" + teamId + "] [" + recruiterId + "] EMPTY LIST");
 		}
 		return list;
+	}
+	
+	protected Vector<String> getTeamRegion(JdbcTemplate jdbcTemplate, long teamid) {
+		String sql = "select strtimezone, region_code from tteam where id=? ";
+		Object[] params = new Object[] { teamid };
+		List<Vector<String>> list = jdbcTemplate.query(sql, params, new RowMapper<Vector<String>>() {
+			
+			@Override
+			public Vector<String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+				//
+				Vector<String> v = new Vector<String>();
+				if (rs.getString(1) != null && rs.getString(1).length() > 0)
+					v.add(rs.getString(1));
+				else
+					v.add("America/New_York");
+				if (rs.getString(2) != null && rs.getString(2).length() > 0)
+					v.add(rs.getString(2));
+				else
+					v.add("en_US");
+				return v;
+			}
+		});
+		return list != null && list.size() > 0 ? list.get(0) : null;
+	}
+	
+	protected String getApacheAddress(long teamID) throws Exception {
+		JobDivaConnection jobDivaConnection = jobDivaConnectivity.getJobDivaConnection(teamID);
+		if (jobDivaConnection != null) {
+			return "http://" + jobDivaConnection.getApacheLocation();
+		} else {
+			throw new Exception("Not Found For Team " + teamID);
+		}
+	}
+	
+	protected String deNull(String str) {
+		if (str == null)
+			return "";
+		else
+			return str;
 	}
 }

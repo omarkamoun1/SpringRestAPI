@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.model.Company;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
+import com.jobdiva.api.model.webhook.WebhookCompany;
 import com.jobdiva.api.utils.StringUtils;
 
 @Component
@@ -410,13 +411,8 @@ public class SearchCompanyDao extends AbstractJobDivaDao {
 					//
 					String pipelineName = pipelineIdNameMap.get(lcalCompany.getPipelineId());
 					lcalCompany.setNameIndex(pipelineName);
-					// company types
 					//
-					assignCompanyTypes(jobDivaSession, lcalCompany);
-					//
-					assignCompanyOwnsers(jobDivaSession, lcalCompany);
-					//
-					assignCompanyPrimaryContacts(jobDivaSession, lcalCompany);
+					assignCompanyInofs(jobDivaSession, lcalCompany);
 				}
 			}
 			//
@@ -424,6 +420,61 @@ public class SearchCompanyDao extends AbstractJobDivaDao {
 		} catch (Exception e) {
 			//
 			throw new Exception(e.getMessage());
+		}
+	}
+	
+	private void assignCompanyInofs(JobDivaSession jobDivaSession, Company lcalCompany) {
+		// company types
+		//
+		assignCompanyTypes(jobDivaSession, lcalCompany);
+		//
+		assignCompanyOwnsers(jobDivaSession, lcalCompany);
+		//
+		assignCompanyPrimaryContacts(jobDivaSession, lcalCompany);
+	}
+	
+	public WebhookCompany getWebhookCompany(JobDivaSession jobDivaSession, Long companyId) {
+		//
+		try {
+			// Build the query
+			String select = null;
+			StringBuffer tables = new StringBuffer();
+			StringBuffer constrains = new StringBuffer();
+			Hashtable<String, Object> params = new Hashtable<String, Object>();
+			//
+			select = "select distinct a.id, a.teamid, a.name, b.address1, b.address2, b.city, b.state, b.zipcode, b.countryid, b.phone, b.fax, " //
+					+ "b.email, b.url, a.PARENT_COMPANYID, a.PARENT_COMPANY_NAME , a.PIPELINE_ID from";
+			//
+			tables.append(" TCUSTOMERCOMPANY a, TCUSTOMERCOMPANYADDRESSES b");
+			//
+			constrains.append(" where a.teamid = :teamid and b.teamid = a.teamid and a.id = b.COMPANYID  and b.DEFAULT_ADDRESS = 1");
+			//
+			params.put("teamid", jobDivaSession.getTeamId());
+			//
+			//
+			if (companyId != null) {
+				constrains.append(" and a.id = :companyid");
+				params.put("companyid", companyId);
+				// can lookup detailed information from single id
+			}
+			String queryString = select + tables + constrains + "  order by upper(a.name)";
+			//
+			NamedParameterJdbcTemplate namedParameterJdbcTemplate = getNamedParameterJdbcTemplate();
+			//
+			List<Company> list = namedParameterJdbcTemplate.query(queryString, params, new WebhookCompanyRowMapper());
+			//
+			if (list != null) {
+				WebhookCompany webhookCompany = (WebhookCompany) list.get(0);
+				//
+				assignCompanyInofs(jobDivaSession, webhookCompany);
+				//
+				return webhookCompany;
+			}
+			return null;
+			//
+		} catch (Exception e) {
+			logger.error("Get Company [" + companyId + "] :: " + e.getMessage());
+			return null;
 		}
 	}
 }

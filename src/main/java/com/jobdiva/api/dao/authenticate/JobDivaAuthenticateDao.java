@@ -62,7 +62,7 @@ public class JobDivaAuthenticateDao extends AbstractJobDivaDao {
 		//
 		for (JdbcTemplate jdbcTemplate : jobDivaConnectivity.getJdbcsTemplates()) {
 			//
-			String sql = " select a.id, a.groupid, a.password, b.lastapicall, sysdate clock, a.s1, LEADER, a.firstname, a.lastname " //
+			String sql = " select a.id, a.groupid, a.password, b.lastapicall, sysdate clock, a.s1, LEADER, a.firstname, a.lastname, a.USER_OPTIONS, a.REGION_CODE " //
 					+ " from trecruiter a, tteam b " + //
 					" where  a.email=? and a.active=1 " + //
 					"   and b.id = a.groupid ";
@@ -84,6 +84,8 @@ public class JobDivaAuthenticateDao extends AbstractJobDivaDao {
 					//
 					list.add(rs.getString("firstname"));
 					list.add(rs.getString("lastname"));
+					list.add(rs.getLong("USER_OPTIONS"));
+					list.add(rs.getString("REGION_CODE"));
 					//
 					return list;
 				}
@@ -101,6 +103,8 @@ public class JobDivaAuthenticateDao extends AbstractJobDivaDao {
 				//
 				String firstname = (String) list.get(7);
 				String lastname = (String) list.get(8);
+				Long userOption = (Long) list.get(9);
+				String regionCode = (String) list.get(10);
 				//
 				boolean correctPassword = false;
 				if (salt != null) {
@@ -119,6 +123,8 @@ public class JobDivaAuthenticateDao extends AbstractJobDivaDao {
 						JobDivaSession jobDivaSession = new JobDivaSession(clientid, username, password, env, userId, leader);
 						jobDivaSession.setFirstName(firstname);
 						jobDivaSession.setLastName(lastname);
+						jobDivaSession.setUserOptions(userOption);
+						jobDivaSession.setRegionCode(regionCode);
 						return jobDivaSession;
 					}
 				}
@@ -182,7 +188,7 @@ public class JobDivaAuthenticateDao extends AbstractJobDivaDao {
 			}
 			//
 			//
-			sql = " select a.id, a.groupid, a.password, b.lastapicall, sysdate clock, a.s1, LEADER , a.firstname, a.lastname " //
+			sql = " select a.id, a.groupid, a.password, b.lastapicall, sysdate clock, a.s1, LEADER , a.firstname, a.lastname, a.USER_OPTIONS, a.REGION_CODE " //
 					+ " from trecruiter a, tteam b " + //
 					" where  a.email=? and a.active=1 " + //
 					"   and b.id = a.groupid ";
@@ -193,13 +199,13 @@ public class JobDivaAuthenticateDao extends AbstractJobDivaDao {
 			jdbcTemplate = jobDivaConnectivity.getJdbcTemplate(clientid);
 			//
 			if (checkApiPermission) {
-				sql = " select a.id, a.groupid, a.password, b.lastapicall, sysdate clock, a.s1, LEADER , a.firstname, a.lastname " //
+				sql = " select a.id, a.groupid, a.password, b.lastapicall, sysdate clock, a.s1, LEADER , a.firstname, a.lastname, a.USER_OPTIONS, a.REGION_CODE " //
 						+ " from trecruiter a, tteam b " + //
 						" where a.groupid=? and a.email=? and a.active=1 and substr(a.permission2_recruiter, 31,1)='1' " + //
 						"   and b.id = a.groupid ";
 				param = new Object[] { clientid, username };
 			} else {
-				sql = " select a.id, a.groupid, a.password, b.lastapicall, sysdate clock, a.s1, LEADER , a.firstname, a.lastname " //
+				sql = " select a.id, a.groupid, a.password, b.lastapicall, sysdate clock, a.s1, LEADER , a.firstname, a.lastname, a.USER_OPTIONS, a.REGION_CODE " //
 						+ " from trecruiter a, tteam b " + //
 						" where a.groupid = ? and upper(a.email) = upper( ? ) and a.active=1 " + //
 						"   and b.id = a.groupid ";
@@ -223,6 +229,8 @@ public class JobDivaAuthenticateDao extends AbstractJobDivaDao {
 				//
 				list.add(rs.getString("firstname"));
 				list.add(rs.getString("lastname"));
+				list.add(rs.getLong("USER_OPTIONS"));
+				list.add(rs.getString("REGION_CODE"));
 				return list;
 			}
 		});
@@ -263,11 +271,15 @@ public class JobDivaAuthenticateDao extends AbstractJobDivaDao {
 			//
 			String firstname = (String) list.get(7);
 			String lastname = (String) list.get(8);
+			Long userOption = (Long) list.get(9);
+			String regionCode = (String) list.get(10);
 			//
 			JobDivaSession jobDivaSession = new JobDivaSession(clientid, username, password, env, userId, leader);
 			jobDivaSession.setCheckApiPermission(checkApiPermission);
 			jobDivaSession.setFirstName(firstname);
 			jobDivaSession.setLastName(lastname);
+			jobDivaSession.setUserOptions(userOption);
+			jobDivaSession.setRegionCode(regionCode);
 			//
 			if (checkApiPermission) {
 				sql = "select allowedoperation, divisionid from tapipermission where teamid=? and recruiterid=? ";

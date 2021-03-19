@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.model.CandidateUDF;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
+import com.jobdiva.api.model.webhook.WebhookUDF;
 
 @Component
 public class CandidateUDFDao extends AbstractJobDivaDao {
@@ -36,6 +37,34 @@ public class CandidateUDFDao extends AbstractJobDivaDao {
 				CandidateUDF contactUDF = new CandidateUDF();
 				contactUDF.setCandidateId(rs.getLong("CANDIDATEID"));
 				contactUDF.setTeamid(rs.getLong("TEAMID"));
+				contactUDF.setUserFieldId(rs.getInt("USERFIELD_ID"));
+				contactUDF.setUserfieldValue(rs.getString("USERFIELD_VALUE"));
+				contactUDF.setDateCreated(rs.getDate("DATECREATED"));
+				return contactUDF;
+			}
+		});
+		return list;
+	}
+	
+	public List<WebhookUDF> getContactWebhookUDF(Long candidateId, Long teamId) {
+		String sql = " Select "//
+				+ " TEAMID , "//
+				+ " CANDIDATEID, " //
+				+ " USERFIELD_ID , " //
+				+ " USERFIELD_VALUE ," //
+				+ " DATECREATED " //
+				+ " FROM TCANDIDATE_USERFIELDS " //
+				+ " WHERE CANDIDATEID = ?  AND TEAMID = ? ";
+		//
+		Object[] params = new Object[] { candidateId, teamId };
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<WebhookUDF> list = jdbcTemplate.query(sql, params, new RowMapper<WebhookUDF>() {
+			
+			@Override
+			public WebhookUDF mapRow(ResultSet rs, int rowNum) throws SQLException {
+				WebhookUDF contactUDF = new WebhookUDF();
 				contactUDF.setUserFieldId(rs.getInt("USERFIELD_ID"));
 				contactUDF.setUserfieldValue(rs.getString("USERFIELD_VALUE"));
 				contactUDF.setDateCreated(rs.getDate("DATECREATED"));

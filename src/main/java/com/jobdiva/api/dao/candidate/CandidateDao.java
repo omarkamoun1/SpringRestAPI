@@ -40,6 +40,7 @@ import com.jobdiva.api.model.QualificationOption;
 import com.jobdiva.api.model.SocialNetworkType;
 import com.jobdiva.api.model.TitleSkillCertification;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
+import com.jobdiva.api.model.webhook.WebhookCandidate;
 import com.jobdiva.api.servlet.ServletTransporter;
 import com.jobdiva.api.sql.JobDivaSqlLobValue;
 import com.jobdiva.api.utils.StringUtils;
@@ -91,7 +92,7 @@ public class CandidateDao extends AbstractJobDivaDao {
 		String sql = " Select "//
 				+ " ID " //
 				+ " FROM TCANDIDATE " //
-				+ " WHERE  TEAMID = ? AND ROWNUM <= 5";
+				+ " WHERE  TEAMID = ? AND ROWNUM <= 1000 ";
 		//
 		ArrayList<Object> paramList = new ArrayList<Object>();
 		paramList.add(jobDivaSession.getTeamId());
@@ -349,72 +350,76 @@ public class CandidateDao extends AbstractJobDivaDao {
 		//
 		List<Candidate> list = jdbcTemplate.query(queryStringFinal, params, new CandidateRowMapper());
 		//
-		assignCandidatePhones(list);
+		assignCandidatesPhones(list);
 		//
 		return list;
 		//
 	}
 	
-	private void assignCandidatePhones(List<Candidate> list) {
+	private void assignCandidatesPhones(List<Candidate> list) {
 		for (Candidate candidate : list) {
-			String phoneTypes = candidate.getPhoneTypes();
-			for (int j = 0; j < 4; j++) {
-				//
-				if (phoneTypes == null)
-					phoneTypes = "0123";
-				else if (phoneTypes.length() < 4)
+			assignCandidatePhones(candidate);
+		}
+	}
+	
+	private void assignCandidatePhones(Candidate candidate) {
+		String phoneTypes = candidate.getPhoneTypes();
+		for (int j = 0; j < 4; j++) {
+			//
+			if (phoneTypes == null)
+				phoneTypes = "0123";
+			else if (phoneTypes.length() < 4)
+				break;
+			//
+			String strPhone = "";
+			char t = phoneTypes.charAt(j);
+			switch (t) { // take care of space!
+				case '0':
+					strPhone = "Work Phone: ";
 					break;
-				//
-				String strPhone = "";
-				char t = phoneTypes.charAt(j);
-				switch (t) { // take care of space!
-					case '0':
-						strPhone = "Work Phone: ";
-						break;
-					case '1':
-						strPhone = "Home Phone: ";
-						break;
-					case '2':
-						strPhone = "Mobile Phone: ";
-						break;
-					case '3':
-						strPhone = "Home Fax: ";
-						break;
-					case '4':
-						strPhone = "Work Fax: ";
-						break;
-					case '5':
-						strPhone = "Pager: ";
-						break;
-					case '6':
-						strPhone = "Main Phone: ";
-						break;
-					case '7':
-						strPhone = "Direct Phone: ";
-						break;
-					case '8':
-						strPhone = "Other Phone: ";
-						break;
-				}
-				//
-				switch (j) {
-					case 0:
-						strPhone += (candidate.getWorkPhone() == null ? "" : candidate.getWorkPhone()) + " ext(" + (candidate.getWorkphoneExt() == null ? "" : candidate.getWorkphoneExt()) + ")";
-						candidate.setPhone1(strPhone);
-						break;
-					case 1:
-						strPhone += (candidate.getHomePhone() == null ? "" : candidate.getHomePhone()) + " ext(" + (candidate.getHomephoneExt() == null ? "" : candidate.getHomephoneExt()) + ")";
-						candidate.setPhone2(strPhone);
-						break;
-					case 2:
-						strPhone += (candidate.getCellPhone() == null ? "" : candidate.getCellPhone()) + " ext(" + (candidate.getCellphoneExt() == null ? "" : candidate.getCellphoneExt()) + ")";
-						candidate.setPhone3(strPhone);
-						break;
-					case 3:
-						strPhone += (candidate.getFax() == null ? "" : candidate.getFax()) + " ext(" + (candidate.getFax() == null ? "" : candidate.getFaxExt()) + ")";
-						candidate.setPhone4(strPhone);
-						break;
-				}
+				case '1':
+					strPhone = "Home Phone: ";
+					break;
+				case '2':
+					strPhone = "Mobile Phone: ";
+					break;
+				case '3':
+					strPhone = "Home Fax: ";
+					break;
+				case '4':
+					strPhone = "Work Fax: ";
+					break;
+				case '5':
+					strPhone = "Pager: ";
+					break;
+				case '6':
+					strPhone = "Main Phone: ";
+					break;
+				case '7':
+					strPhone = "Direct Phone: ";
+					break;
+				case '8':
+					strPhone = "Other Phone: ";
+					break;
+			}
+			//
+			switch (j) {
+				case 0:
+					strPhone += (candidate.getWorkPhone() == null ? "" : candidate.getWorkPhone()) + " ext(" + (candidate.getWorkphoneExt() == null ? "" : candidate.getWorkphoneExt()) + ")";
+					candidate.setPhone1(strPhone);
+					break;
+				case 1:
+					strPhone += (candidate.getHomePhone() == null ? "" : candidate.getHomePhone()) + " ext(" + (candidate.getHomephoneExt() == null ? "" : candidate.getHomephoneExt()) + ")";
+					candidate.setPhone2(strPhone);
+					break;
+				case 2:
+					strPhone += (candidate.getCellPhone() == null ? "" : candidate.getCellPhone()) + " ext(" + (candidate.getCellphoneExt() == null ? "" : candidate.getCellphoneExt()) + ")";
+					candidate.setPhone3(strPhone);
+					break;
+				case 3:
+					strPhone += (candidate.getFax() == null ? "" : candidate.getFax()) + " ext(" + (candidate.getFax() == null ? "" : candidate.getFaxExt()) + ")";
+					candidate.setPhone4(strPhone);
+					break;
 			}
 		}
 	}
@@ -1324,5 +1329,25 @@ public class CandidateDao extends AbstractJobDivaDao {
 		}
 		//
 		return true;
+	}
+	
+	public WebhookCandidate getWebhookCandidate(JobDivaSession jobDivaSession, Long candidateId) {
+		String sql = " Select * "//
+				+ " FROM TCANDIDATE " //
+				+ " WHERE ID = ?  AND TEAMID = ? ";
+		//
+		Object[] params = new Object[] { candidateId, jobDivaSession.getTeamId() };
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<Candidate> list = jdbcTemplate.query(sql, params, new WebhookCandidateRowMapper());
+		if (list != null && list.size() > 0) {
+			WebhookCandidate webhookCandidate = (WebhookCandidate) list.get(0);
+			//
+			assignCandidatePhones(webhookCandidate);
+			//
+			return webhookCandidate;
+		}
+		return null;
 	}
 }

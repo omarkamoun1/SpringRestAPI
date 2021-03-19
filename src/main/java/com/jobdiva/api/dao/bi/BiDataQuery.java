@@ -201,7 +201,7 @@ public class BiDataQuery {
 		return data;
 	}
 	
-	private static Vector<String[]> processOutput(Connection con, ResultSet rs, long clientID, Map<String, String> aliasToColNameMap) throws SQLException {
+	public static Vector<String[]> processOutput(Connection con, ResultSet rs, long clientID, Map<String, String> aliasToColNameMap) throws SQLException {
 		String[] cols = null;
 		//
 		Vector<String[]> data = new Vector<String[]>();

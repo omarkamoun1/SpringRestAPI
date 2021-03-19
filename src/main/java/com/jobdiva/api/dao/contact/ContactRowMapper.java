@@ -11,7 +11,7 @@ public class ContactRowMapper implements RowMapper<Contact> {
 	
 	@Override
 	public Contact mapRow(ResultSet rs, int rowNum) throws SQLException {
-		Contact contact = new Contact();
+		Contact contact = createContact();
 		//
 		try {
 			contact.setId(rs.getLong("id"));
@@ -47,6 +47,11 @@ public class ContactRowMapper implements RowMapper<Contact> {
 		} catch (Exception e) {
 		}
 		//
+		return contact;
+	}
+	
+	protected Contact createContact() {
+		Contact contact = new Contact();
 		return contact;
 	}
 }

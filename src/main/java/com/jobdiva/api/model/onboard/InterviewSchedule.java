@@ -3,6 +3,8 @@ package com.jobdiva.api.model.onboard;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * @author Joseph Chidiac
  *
@@ -10,19 +12,34 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class InterviewSchedule implements Serializable {
 	
-	private Long					candidateId;
-	private String					label;
-	private String					remark;
-	private Long					hireTypeId;
-	private Long					supplierId;
-	private Long					jobId;
-	private List<OnBoardDocument>	candidateDocuments;
-	private List<SuppPackage>		supplementalPackages;
+	@JsonProperty(value = "candidateId", index = 0)
+	private Long				candidateId;
+	//
+	@JsonProperty(value = "jobId", index = 1)
+	private Long				jobId;
+	//
+	@JsonProperty(value = "label", index = 2)
+	private String				label;
+	//
+	@JsonProperty(value = "hireTypeId", index = 3)
+	private Long				hireTypeId;
+	//
+	@JsonProperty(value = "remark", index = 4)
+	private String				remark;
+	//
+	@JsonProperty(value = "supplierId", index = 5)
+	private Long				supplierId;
+	//
+	@JsonProperty(value = "candidateDocuments", index = 6)
+	private List<Long>			candidateDocuments;
+	//
+	@JsonProperty(value = "supplementalPackages", index = 7)
+	private List<SuppPackage>	supplementalPackages;
 	
 	public Boolean checkDocumentExistsInCandidateDocuments(Long tabid, Long docId) {
 		if (this.candidateDocuments != null)
-			for (OnBoardDocument onBoardDocument : this.candidateDocuments) {
-				if (onBoardDocument.getId() != null && onBoardDocument.getId().equals(docId))
+			for (Long onBoardDocId : this.candidateDocuments) {
+				if (onBoardDocId != null && onBoardDocId.equals(docId))
 					return true;
 			}
 		return false;
@@ -88,11 +105,11 @@ public class InterviewSchedule implements Serializable {
 		this.jobId = jobId;
 	}
 	
-	public List<OnBoardDocument> getCandidateDocuments() {
+	public List<Long> getCandidateDocuments() {
 		return this.candidateDocuments;
 	}
 	
-	public void setCandidateDocuments(List<OnBoardDocument> candidateDocuments) {
+	public void setCandidateDocuments(List<Long> candidateDocuments) {
 		this.candidateDocuments = candidateDocuments;
 	}
 	

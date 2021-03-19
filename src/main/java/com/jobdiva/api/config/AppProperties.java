@@ -6,204 +6,208 @@ import org.springframework.stereotype.Component;
 @Component
 public class AppProperties {
 	
+	public final static String	UK_ENVIRONEMNT					= "uk";
 	//
 	@Value("${spring.datasource.maximum.pool.size}")
-	private Integer	maximumPoolSize					= 20;
+	private Integer				maximumPoolSize					= 20;
 	//
 	@Value("${spring.datasource.validation.timeout}")
-	private Integer	validationTimeout				= 5000;
+	private Integer				validationTimeout				= 5000;
 	//
 	@Value("${spring.datasource.max.lifetime}")
-	private Long	maxLifetime						= 1800000L;
+	private Long				maxLifetime						= 1800000L;
 	//
 	@Value("${spring.datasource.idle.timeout}")
-	private Long	idleTimeout						= 600000L;
+	private Long				idleTimeout						= 600000L;
 	//
 	@Value("${servlet.bidata.ip}")
-	private String	servletBiDataIp;
+	private String				servletBiDataIp;
 	//
 	@Value("${servlet.date.format}")
-	private String	servletDateFormat;
+	private String				servletDateFormat;
 	//
 	//
 	@Value("${servlet.jdhibernate}")
-	private String	jdHibernateServlet;
+	private String				jdHibernateServlet;
 	//
 	@Value("${app.ws.location}")
-	private String	appWsLocation;
+	private String				appWsLocation;
 	//
 	@Value("${load.balance.servlet.location}")
-	private String	loadBalanceServletLocation;
+	private String				loadBalanceServletLocation;
 	//
 	// @Value("{jobdiva.environment.production}")
-	private Boolean	jobDivaEnvironmentProduction	= false;
+	private Boolean				jobDivaEnvironmentProduction	= false;
 	//
 	@Value("${smtp.server.location}")
-	private String	smtpServerLocation;
+	private String				smtpServerLocation;
 	//
 	@Value("${apache.location}")
-	private String	apacheLocation;
+	private String				apacheLocation;
 	//
 	//
 	//
 	@Value("${MainDS1.datasource.driver}")
-	private String	mainDS1Driver;
+	private String				mainDS1Driver;
 	//
 	@Value("${MainDS1.datasource.url}")
-	private String	mainDS1Url;
+	private String				mainDS1Url;
 	//
 	@Value("${MainDS1.datasource.username}")
-	private String	mainDS1UserName;
+	private String				mainDS1UserName;
 	//
 	@Value("${MainDS1.datasource.password}")
-	private String	mainDS1Password;
+	private String				mainDS1Password;
 	//
 	//
 	//
 	@Value("${MainDS2.datasource.driver}")
-	private String	mainDS2Driver;
+	private String				mainDS2Driver;
 	//
 	@Value("${MainDS2.datasource.url}")
-	private String	mainDS2Url;
+	private String				mainDS2Url;
 	//
 	@Value("${MainDS2.datasource.username}")
-	private String	mainDS2UserName;
+	private String				mainDS2UserName;
 	//
 	@Value("${MainDS2.datasource.password}")
-	private String	mainDS2Password;
+	private String				mainDS2Password;
 	//
 	//
 	//
 	@Value("${mysqldb.datasource.driver}")
-	private String	mysqldbDriver;
+	private String				mysqldbDriver;
 	//
 	@Value("${mysqldb.datasource.url}")
-	private String	mysqldbUrl;
+	private String				mysqldbUrl;
 	//
 	@Value("${mysqldb.datasource.username}")
-	private String	mysqldbUserName;
+	private String				mysqldbUserName;
 	//
 	@Value("${mysqldb.datasource.password}")
-	private String	mysqldbPassword;
+	private String				mysqldbPassword;
 	//
 	//
 	//
 	//
 	@Value("${AxelonDSMiner.datasource.driver}")
-	private String	axelonDSMinerDriver;
+	private String				axelonDSMinerDriver;
 	//
 	@Value("${AxelonDSMiner.datasource.url}")
-	private String	axelonDSMinerSUrl;
+	private String				axelonDSMinerSUrl;
 	//
 	@Value("${AxelonDSMiner.datasource.username}")
-	private String	axelonDSMinerUserName;
+	private String				axelonDSMinerUserName;
 	//
 	@Value("${AxelonDSMiner.datasource.password}")
-	private String	axelonDSMinerPassword;
+	private String				axelonDSMinerPassword;
 	//
 	//
 	//
 	//
 	@Value("${DocDS1.datasource.driver}")
-	private String	docDS1Driver;
+	private String				docDS1Driver;
 	//
 	@Value("${DocDS1.datasource.url}")
-	private String	docDS1Url;
+	private String				docDS1Url;
 	//
 	@Value("${DocDS1.datasource.username}")
-	private String	docDS1UserName;
+	private String				docDS1UserName;
 	//
 	@Value("${DocDS1.datasource.password}")
-	private String	docDS1Password;
+	private String				docDS1Password;
 	//
 	//
 	//
 	//
 	@Value("${DocDS3.datasource.driver}")
-	private String	docDS3Driver;
+	private String				docDS3Driver;
 	//
 	@Value("${DocDS3.datasource.url}")
-	private String	docDS3Url;
+	private String				docDS3Url;
 	//
 	@Value("${DocDS3.datasource.username}")
-	private String	docDS3UserName;
+	private String				docDS3UserName;
 	//
 	@Value("${DocDS3.datasource.password}")
-	private String	docDS3Password;
+	private String				docDS3Password;
 	//
 	//
 	@Value("${DocDS4.datasource.driver}")
-	private String	docDS4Driver;
+	private String				docDS4Driver;
 	//
 	@Value("${DocDS4.datasource.url}")
-	private String	docDS4Url;
+	private String				docDS4Url;
 	//
 	@Value("${DocDS4.datasource.username}")
-	private String	docDS4UserName;
+	private String				docDS4UserName;
 	//
 	@Value("${DocDS4.datasource.password}")
-	private String	docDS4Password;
+	private String				docDS4Password;
 	//
 	//
 	@Value("${DocDS5.datasource.driver}")
-	private String	docDS5Driver;
+	private String				docDS5Driver;
 	//
 	@Value("${DocDS5.datasource.url}")
-	private String	docDS5Url;
+	private String				docDS5Url;
 	//
 	@Value("${DocDS5.datasource.username}")
-	private String	docDS5UserName;
+	private String				docDS5UserName;
 	//
 	@Value("${DocDS5.datasource.password}")
-	private String	docDS5Password;
+	private String				docDS5Password;
 	//
 	//
 	//
 	//
 	@Value("${emailsavedb.datasource.driver}")
-	private String	emailsavedbDriver;
+	private String				emailsavedbDriver;
 	//
 	@Value("${emailsavedb.datasource.url}")
-	private String	emailsavedbUrl;
+	private String				emailsavedbUrl;
 	//
 	@Value("${emailsavedb.datasource.username}")
-	private String	emailsavedbUserName;
+	private String				emailsavedbUserName;
 	//
 	@Value("${emailsavedb.datasource.password}")
-	private String	emailsavedbPassword;
+	private String				emailsavedbPassword;
 	//
 	//
 	//
 	//
 	@Value("${emailsave2db.datasource.driver}")
-	private String	emailsave2dbDriver;
+	private String				emailsave2dbDriver;
 	//
 	@Value("${emailsave2db.datasource.url}")
-	private String	emailsave2dbUrl;
+	private String				emailsave2dbUrl;
 	//
 	@Value("${emailsave2db.datasource.username}")
-	private String	emailsave2dbUserName;
+	private String				emailsave2dbUserName;
 	//
 	@Value("${emailsave2db.datasource.password}")
-	private String	emailsave2dbPassword;
+	private String				emailsave2dbPassword;
 	//
 	//
 	//
 	//
 	@Value("${attachmentdb.datasource.driver}")
-	private String	attachmentdbDriver;
+	private String				attachmentdbDriver;
 	//
 	@Value("${attachmentdb.datasource.url}")
-	private String	attachmentdbUrl;
+	private String				attachmentdbUrl;
 	//
 	@Value("${attachmentdb.datasource.username}")
-	private String	attachmentdbUserName;
+	private String				attachmentdbUserName;
 	//
 	@Value("${attachmentdb.datasource.password}")
-	private String	attachmentdbPassword;
+	private String				attachmentdbPassword;
 	//
 	@Value("${jobserveuk.url}")
-	private String	jobserveukUrl;
+	private String				jobserveukUrl;
+	//
+	@Value("${api.server.environment}")
+	private String				apiServerEnvironment;
 	
 	public Integer getMaximumPoolSize() {
 		return maximumPoolSize;
@@ -657,7 +661,11 @@ public class AppProperties {
 		return this.jobserveukUrl;
 	}
 	
-	public void setJobserveukUrl(String jobserveukUrl) {
-		this.jobserveukUrl = jobserveukUrl;
+	public String getApiServerEnvironment() {
+		return apiServerEnvironment;
+	}
+	
+	public void setApiServerEnvironment(String apiServerEnvironment) {
+		this.apiServerEnvironment = apiServerEnvironment;
 	}
 }

@@ -58,6 +58,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	//
 	@Autowired
 	private JobDivaUserDetailsService	jobDivaUserDetailsService;
+	//
 	
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
@@ -107,6 +108,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				antMatchers("/api/controller/getCoddlers").permitAll().//
 				antMatchers("/api/controller/getConfiguration").permitAll().//
 				antMatchers("/api/jobdiva/proxyAPI").permitAll().//
+				//
+				antMatchers("/api/webhook/syncWebhook").permitAll().//
+				antMatchers("/api/webhook/welcome").permitAll().//
+				//
 				antMatchers(AUTH_WHITELIST).permitAll().
 				// antMatchers("/api/bi/*").hasRole("BAR").
 				// all other requests need to be authenticated

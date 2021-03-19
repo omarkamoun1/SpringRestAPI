@@ -1,22 +1,24 @@
 package com.jobdiva.api.dao.contact;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
-import com.axelon.oc4j.ServletRequestData;
-import com.axelon.rfq.rfqAttachment;
 import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
-import com.jobdiva.api.servlet.ServletTransporter;
 
 @Component
 public class ContactAttachmentDao extends AbstractJobDivaDao {
-	
-	private String getContactAttachmentServlet() {
-		String LOADBALANCERSERVLETLOCATION = appProperties.getLoadBalanceServletLocation();
-		return LOADBALANCERSERVLETLOCATION + "/recruiter/servlet/ContactAttachmentInsertServlet";
-	}
 	
 	public Long uploadContactAttachment(JobDivaSession jobDivaSession, Long contactId, String documentName, String fileName, byte[] fileContent, String urlLink, String designedForm, Integer attachmentType, String internalDescription,
 			Date expirationDate, Boolean isOnboarding, Boolean isMandatory, Boolean requireReturn, Boolean isReadOnly, Integer sendTo, Boolean isMedicalDoc, String portalInstruction) throws Exception {
@@ -31,21 +33,22 @@ public class ContactAttachmentDao extends AbstractJobDivaDao {
 		//
 		int documentType = BINARY_FILE;
 		//
-		if (!urlLink.isEmpty()) {
+		if (urlLink != null && !urlLink.isEmpty()) {
 			documentType = URL_LINK;
 			if (documentName.isEmpty())
 				message.append("Error: documentname is empty. ");
 			if (urlLink.isEmpty() || !urlLink.contains("."))
 				message.append("Error: Invalid urlLink. ");
-		} else if (!designedForm.isEmpty()) {
+		} else if (designedForm != null && !designedForm.isEmpty()) {
 			documentType = DESIGNED_FORM;
 			documentName = "";
 			if (designedForm.isEmpty())
 				message.append("Error: designedform is empty. ");
 		} else {
-			if (documentName.isEmpty())
+			if (documentName == null || documentName.isEmpty())
 				message.append("Error: documentname is empty. ");
-			if (fileName.isEmpty() || !fileName.contains("."))
+			//
+			if (fileName == null || fileName.isEmpty() || !fileName.contains("."))
 				message.append("Error: Invalid filename. ");
 		}
 		//
@@ -72,86 +75,142 @@ public class ContactAttachmentDao extends AbstractJobDivaDao {
 		}
 		//
 		//
+		//
+		//
+		JdbcTemplate jdbctemplate = getJdbcTemplate();
+		//
+		//
+		byte[] bytes = null;
+		int linked_for = isOnboarding != null && isOnboarding ? 1 : 0;
+		String filename = "";
+		if (documentType == BINARY_FILE) {
+			filename = fileName;
+			bytes = fileContent;
+		} else if (documentType == URL_LINK) {
+			filename = urlLink;
+		} else if (documentType == DESIGNED_FORM) {
+			filename = designedForm;
+		}
+		String localDocumentName = documentName;
+		String localFileName = filename;
+		Boolean localrequireReturn = requireReturn;
+		Boolean localisMandatory = isMandatory;
+		Integer localsendTo = sendTo;
+		Boolean localisReadOnly = isReadOnly;
+		Boolean localisMedicalDoc = isMedicalDoc;
+		Integer localdocumentType = documentType;
 		try {
-			rfqAttachment att = new rfqAttachment();
-			att.LC_id = jobDivaSession.getTeamId(); // placeholder for teamid
-			att.recruiterid = jobDivaSession.getRecruiterId();
-			att.id = contactId;
-			att.doctype = documentType;
-			att.description = documentName;
-			//
-			if (documentType == BINARY_FILE) {
-				att.filename = fileName;
-				att.bytes = fileContent;
-			} else if (documentType == URL_LINK) {
-				att.filename = urlLink;
-			} else if (documentType == DESIGNED_FORM) {
-				att.filename = designedForm;
-			}
-			//
-			att.attachment_type = attachmentType != null ? attachmentType : 0;
-			att.setRemark(internalDescription);
-			att.dateexpire = expirationDate != null ? expirationDate.getTime() : 0;
-			att.linked_for = isOnboarding != null && isOnboarding ? 1 : 0;
-			att.mandatory = isMandatory != null && isMandatory ? 1 : 0;
-			att.require_return = requireReturn != null && requireReturn ? 1 : 0;
-			att.readonly = isReadOnly != null && isReadOnly ? 1 : 0;
-			att.send_to = sendTo != null ? sendTo : 0;
-			att.ismedical = isMedicalDoc != null && isMedicalDoc ? 1 : 0;
-			att.instruction = portalInstruction;
-			att.linked_id = 0; // Insert Document
-			att.show_des = 0;
-			att.setSource(0);
-			//
-			//
-			ServletRequestData srd = new ServletRequestData(0, null, att);
-			Object retObj = ServletTransporter.callServlet(getContactAttachmentServlet(), srd);
-			//
-			//
-			if (retObj instanceof Exception) {
-				message.append("Error occurs when uploading attachment.");
-				throw (Exception) retObj;
-			}
-			//
-			//
-			Long attachmentId = (Long) retObj;
-			switch (attachmentId.intValue()) {
-				case -2:
+			// con=getDbConnection();
+			if (linked_for == 1) { // onboarding doc name check
+				String sql = " select id from tcontactattachments "//
+						+ "where teamid = ? "//
+						+ "and contactid = ? "//
+						+ "and upper(filename) = ? "//
+						+ "and onboarding = 1 " //
+						+ "and nvl(deleted,0) = 0 ";
+				//
+				Object[] params = new Object[] { jobDivaSession.getTeamId(), contactId, filename.toUpperCase() };
+				//
+				List<Long> list = jdbctemplate.query(sql, params, new RowMapper<Long>() {
+					
+					@Override
+					public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+						return rs.getLong("id");
+					}
+				});
+				//
+				if (list != null && list.size() > 0) {
 					message.append("This file has already been uploaded as an on-boarding document.");
-					break;
-				case -4:
-					message.append("'Read Only' documents should not contain web form tags.");
-					break;
-				case -100:
-					message.append("This PDF's compatibility requirements are set at 'Acrobat 9.0 or higher' under its Security Settings. " //
-							+ "You can proceed using this document as is, but if you require its fields to auto-populate with special tags, " //
-							+ "adjust this setting to 'Acrobat 7.0 or later' and upload again.");
-					break;
-				case -110:
-					message.append("This document is password secured. " //
-							+ "You can proceed using this document as is, but if you require its fields to auto-populate with special tags, " //
-							+ "please remove this security and upload again.");
-					break;
-				case -120:
-					message.append("This document is password secured. " //
-							+ "You can proceed using this document as is, but if you require its fields to auto-populate with special tags, " //
-							+ "please remove this security and upload again.");
-					break;
-				case -3:
-					message.append("This document contains an unusual formatting (e.g. a font script in a foreign language). " //
-							+ "You can proceed using this document as is, but if you require its fields to auto-populate with special tags, " //
-							+ "please remove these unusual formats and upload again.");
-					break;
-				default:
-					break;
+					throw new Exception("This file has already been uploaded as an on-boarding document.");
+				}
+				//
 			}
 			//
 			//
-			if (message.length() > 0)
-				throw new Exception("Error uploading attachment. ");
 			//
 			//
-			return attachmentId;
+			//
+			// get the id
+			String sql = "select PROFILE_RETAGID.nextval as id from dual";
+			List<Long> list = jdbctemplate.query(sql, new RowMapper<Long>() {
+				
+				@Override
+				public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+					return rs.getLong("id");
+				}
+			});
+			//
+			long id = list != null && list.size() > 0 ? list.get(0) : -1;
+			//
+			// insert the row
+			String sqlInsert = "insert into tcontactattachments(id,teamid,contactid,description,filename,thefile, onboarding, require_return, mandatory, remark,ESIGNATURE_TYPE, attachment_type, send_to, instruction, readonly, ismedical, dateexpire, recruiterid, doctype) " //
+					+ "values(?,?,?,?,?,empty_blob(),?,?,?,?,?,?,?,?,?,?,?,?,?)";
+			//
+			jdbctemplate.update(new PreparedStatementCreator() {
+				
+				@Override
+				public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+					PreparedStatement pstmt = connection.prepareStatement(sqlInsert);
+					//
+					pstmt.setLong(1, id);
+					pstmt.setLong(2, jobDivaSession.getTeamId());
+					pstmt.setLong(3, contactId);
+					pstmt.setString(4, localDocumentName);
+					pstmt.setString(5, localFileName);
+					pstmt.setInt(6, linked_for);
+					pstmt.setInt(7, localrequireReturn != null && localrequireReturn ? 1 : 0);
+					pstmt.setInt(8, localisMandatory != null && localisMandatory ? 1 : 0);
+					pstmt.setString(9, internalDescription);
+					pstmt.setInt(10, 0);
+					pstmt.setInt(11, attachmentType != null ? attachmentType : 0);
+					pstmt.setInt(12, localsendTo != null ? localsendTo : 0);
+					pstmt.setString(13, portalInstruction);
+					pstmt.setInt(14, localisReadOnly != null && localisReadOnly ? 1 : 0);
+					pstmt.setInt(15, localisMedicalDoc != null && localisMedicalDoc ? 1 : 0);
+					pstmt.setTimestamp(16, new Timestamp(expirationDate != null ? expirationDate.getTime() : 0));
+					pstmt.setLong(17, jobDivaSession.getRecruiterId());
+					pstmt.setInt(18, localdocumentType);
+					//
+					return pstmt;
+				}
+			});
+			//
+			//
+			//
+			///
+			// update to insert the file
+			if (documentType == 0 && bytes != null) {
+				sql = "select thefile from tcontactattachments where id = ? and teamid=? for update";
+				//
+				Object[] params = new Object[] { id, jobDivaSession.getTeamId() };
+				//
+				byte[] localBytes = bytes;
+				//
+				jdbctemplate.query(sql, params, new RowMapper<Boolean>() {
+					
+					@SuppressWarnings("deprecation")
+					@Override
+					public Boolean mapRow(ResultSet rs, int rowNum) throws SQLException {
+						//
+						java.io.OutputStream outstream = null;
+						oracle.sql.BLOB blob = (oracle.sql.BLOB) rs.getBlob(1);
+						if (blob != null) {
+							outstream = blob.getBinaryOutputStream();
+							try {
+								outstream.write(localBytes);
+								outstream.flush();
+								outstream.close();
+							} catch (IOException e) {
+								e.printStackTrace();
+							} finally {
+							}
+						}
+						//
+						return true;
+					}
+				});
+			}
+			return id;
 			//
 		} catch (Exception e) {
 			String exceptrion = "Upload Failed \r\n" + "Error: " + message.toString();

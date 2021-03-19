@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.onboard.InterviewSchedule;
-import com.jobdiva.api.model.onboard.OnBoardDocument;
 import com.jobdiva.api.model.onboard.SuppPackage;
 
 /**
@@ -63,12 +62,15 @@ public class SaveOnBoardDao extends AbstractOnBoardDao {
 						if (!exist) {
 							misssingDocuments.add(docName + "\r\n");
 						}
-					} else {
-						Boolean exist = interviewSchedule.checkDocumentExistsSupppackages(tabid, docId);
-						if (!exist) {
-							misssingDocuments.add(docName + "\r\n");
-						}
 					}
+					// else {
+					// Boolean exist =
+					// interviewSchedule.checkDocumentExistsSupppackages(tabid,
+					// docId);
+					// if (!exist) {
+					// misssingDocuments.add(docName + "\r\n");
+					// }
+					// }
 				}
 				//
 				//
@@ -187,22 +189,26 @@ public class SaveOnBoardDao extends AbstractOnBoardDao {
 		//
 		if (interviewSchedule.getCandidateDocuments() != null) {
 			//
-			for (OnBoardDocument candidateDocument : interviewSchedule.getCandidateDocuments()) {
-				long docid = candidateDocument.getId().longValue();
-				int att_type = 0;
-				int doctype = getIntDocumentType(candidateDocument.getDocumentType());
-				String key = att_type + "_" + docid;
-				//
-				if (prevSavedDocs.containsKey(key)) {
-					sql = "update tcandidate_onboarding  set deleted = 0  where teamid = ?  and id = ?  and deleted=1";
-					params = new Object[] { jobDivaSession.getTeamId(), prevSavedDocs.get(key) };
+			HashMap<Long, Integer> documentTypesByIds = getDocumentTypesByIds(jobDivaSession, interviewSchedule.getCandidateDocuments());
+			//
+			for (Long candidateDocId : interviewSchedule.getCandidateDocuments()) {
+				if (candidateDocId != null) {
+					int att_type = 0;
+					Integer doctype = documentTypesByIds.get(candidateDocId);
+					doctype = doctype != null ? doctype : 0;
+					String key = att_type + "_" + candidateDocId;
+					//
+					if (prevSavedDocs.containsKey(key)) {
+						sql = "update tcandidate_onboarding  set deleted = 0  where teamid = ?  and id = ?  and deleted=1";
+						params = new Object[] { jobDivaSession.getTeamId(), prevSavedDocs.get(key) };
+						jdbcTemplate.update(sql, params);
+						continue;
+					}
+					//
+					sql = "insert into tcandidate_onboarding(id, teamid, candidateid, interviewid, recruiterid, datecreated, att_type,docid,onboardingstatus, deleted, doctype)  values (ONBOARD_SEQ.nextval, ?, ?, ?, ?, sysdate, ?, ?, 0, 0, ?)";
+					params = new Object[] { jobDivaSession.getTeamId(), interviewSchedule.getCandidateId(), preonbId, recruiterId, Integer.valueOf(att_type), candidateDocId, Integer.valueOf(doctype) };
 					jdbcTemplate.update(sql, params);
-					continue;
 				}
-				//
-				sql = "insert into tcandidate_onboarding(id, teamid, candidateid, interviewid, recruiterid, datecreated, att_type,docid,onboardingstatus, deleted, doctype)  values (ONBOARD_SEQ.nextval, ?, ?, ?, ?, sysdate, ?, ?, 0, 0, ?)";
-				params = new Object[] { jobDivaSession.getTeamId(), interviewSchedule.getCandidateId(), preonbId, recruiterId, Integer.valueOf(att_type), Long.valueOf(docid), Integer.valueOf(doctype) };
-				jdbcTemplate.update(sql, params);
 			}
 		}
 		//
@@ -215,20 +221,26 @@ public class SaveOnBoardDao extends AbstractOnBoardDao {
 		if (interviewSchedule.getSupplementalPackages() != null) {
 			//
 			for (SuppPackage suppPackage : interviewSchedule.getSupplementalPackages()) {
-				sql = " insert into tinterview_suppackage(teamid, candidateid, interviewid, suppkgid, doclist) values( ?, ?, ?, ?, ?) ";
-				params = new Object[] { teamid, interviewSchedule.getCandidateId(), preonbId, suppPackage.getPackageId(), getDocList(suppPackage) };
-				jdbcTemplate.update(sql, params);
+				String docs = getDocList(suppPackage);
+				if (docs != null && !docs.isEmpty()) {
+					Long subPckjId = suppPackage.getPackageId() != null ? suppPackage.getPackageId() : 0;
+					sql = " insert into tinterview_suppackage(teamid, candidateid, interviewid, suppkgid, doclist) values( ?, ?, ?, ?, ?) ";
+					params = new Object[] { teamid, interviewSchedule.getCandidateId(), preonbId, subPckjId, };
+					jdbcTemplate.update(sql, params);
+				}
 			}
 		}
 		//
 		return preonbId;
 	}
 	
-	private boolean updatePackageStatus(JdbcTemplate jdbcTemplate, Long teamid, Long candidateId, Long preonbId) {
+	protected boolean updatePackageStatus(JdbcTemplate jdbcTemplate, Long teamid, Long candidateId, Long preonbId) {
 		int iscompleted = 0;
 		try {
 			//
-			String sql = " (select t1.id, t1.teamid, t1.onboardingstatus  from tcandidate_onboarding t1, tonboardings t2 where t1.candidateid = ? and t1.teamid = ? and t1.interviewid=? and t1.att_type = 0 and t1.docid = t2.id and t1.teamid = t2.teamid and nvl(t1.deleted,0)=0 and t2.require_return=1 and t1.onboardingstatus<>1 ) union (select t1.id, t1.teamid, t1.onboardingstatus  from tcandidate_onboarding t1, tcompanyattachments t2 where t1.candidateid = ? and t1.teamid = ? and t1.interviewid=? and (t1.att_type = 1 or t1.att_type=2) and t1.docid = t2.id and t1.teamid = t2.teamid and nvl(t1.deleted,0)=0 and t2.require_return=1 and t1.onboardingstatus<>1 ) union (select t1.id, t1.teamid, t1.onboardingstatus  from tcandidate_onboarding t1, tcontactattachments t2 where t1.candidateid = ? and t1.teamid = ? and t1.interviewid=? and t1.att_type = 3 and t1.docid = t2.id and t1.teamid = t2.teamid and nvl(t1.deleted,0)=0 and t2.require_return=1 and t1.onboardingstatus<>1  )";
+			String sql = " (select t1.id, t1.teamid, t1.onboardingstatus  from tcandidate_onboarding t1, tonboardings t2 where t1.candidateid = ? and t1.teamid = ? and t1.interviewid=? and t1.att_type = 0 and t1.docid = t2.id and t1.teamid = t2.teamid and nvl(t1.deleted,0)=0 and t2.require_return=1 and t1.onboardingstatus<>1 ) " //
+					+ " union (select t1.id, t1.teamid, t1.onboardingstatus  from tcandidate_onboarding t1, tcompanyattachments t2 where t1.candidateid = ? and t1.teamid = ? and t1.interviewid=? and (t1.att_type = 1 or t1.att_type=2) and t1.docid = t2.id and t1.teamid = t2.teamid and nvl(t1.deleted,0)=0 and t2.require_return=1 and t1.onboardingstatus<>1 ) " //
+					+ " union (select t1.id, t1.teamid, t1.onboardingstatus  from tcandidate_onboarding t1, tcontactattachments t2 where t1.candidateid = ? and t1.teamid = ? and t1.interviewid=? and t1.att_type = 3 and t1.docid = t2.id and t1.teamid = t2.teamid and nvl(t1.deleted,0)=0 and t2.require_return=1 and t1.onboardingstatus<>1  )";
 			sql = "select nvl(min(decode(a.onboardingstatus, 2, 0, (select count(id) from tcandidate_onboarding_docs where onboardingid=a.id and teamid=a.teamid and nvl(deleted,0)=0))), 1) as id from (" + sql + ") a ";
 			//
 			Object[] params = { candidateId, teamid, preonbId, candidateId, teamid, preonbId, candidateId, teamid, preonbId };
@@ -248,6 +260,8 @@ public class SaveOnBoardDao extends AbstractOnBoardDao {
 			sql = " update tpreonboardings set pkgcompleted = ? where teamid = ? and candidateid = ? and id = ? ";
 			//
 			params = new Object[] { Integer.valueOf(iscompleted), teamid, candidateId, preonbId };
+			//
+			jdbcTemplate.update(sql, params);
 			//
 		} catch (Exception e) {
 			this.logger.info("updatePackageStatus [" + teamid + "/" + candidateId + "/" + preonbId + "] Error :: " + e.getMessage());

@@ -37,7 +37,6 @@ public class SupportChatbotController extends AbstractJobDivaController {
 	ChatbotDataService chatbotDataService;
 	//
 	
-	@ApiIgnore
 	@GetMapping(value = "/getSession", produces = "application/json")
 	public SessionInfo getSession() throws Exception {
 		return chatbotDataService.getSession(getJobDivaSession());
@@ -108,8 +107,8 @@ public class SupportChatbotController extends AbstractJobDivaController {
 	@GetMapping(value = "/harvest-account-status", produces = "application/json")
 	public List<ChatbotHarvestAccount> getHarvestAccountStatus(@ApiParam(value = "webid", required = false) //
 	@RequestParam(required = false) Long webid, //
-	@ApiParam(value = "machineNo", required = false) //
-	@RequestParam(required = false) Long machineNo //
+			@ApiParam(value = "machineNo", required = false) //
+			@RequestParam(required = false) Long machineNo //
 	) throws Exception {
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		return chatbotDataService.getHarvestAccountStatus(jobDivaSession, webid, machineNo);

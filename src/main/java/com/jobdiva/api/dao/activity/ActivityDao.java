@@ -92,14 +92,18 @@ public class ActivityDao extends AbstractActivityDao {
 			sql += " and RFQID = :rfqid";
 			paramList.put("rfqid", jobId);
 		} else {
-			List<Long> jobs = jobDao.getJobIds(jobDivaSession, jobdivaref, optionalref);
-			if (jobs != null && jobs.size() > 0) {
-				sql += " and RFQID IN ( :jobs ) ";
-				paramList.put("jobs", jobs);
-			} else {
-				sql += "  and 1 = 2 ";
+			if (!(isEmpty(jobdivaref) && isEmpty(optionalref))) {
+				List<Long> jobs = jobDao.getJobIds(jobDivaSession, jobdivaref, optionalref);
+				if (jobs != null && jobs.size() > 0) {
+					sql += " and RFQID IN ( :jobs ) ";
+					paramList.put("jobs", jobs);
+				} else {
+					sql += "  and 1 = 2 ";
+				}
 			}
 		}
+		//
+		sql += " AND ROWNUM <= 201 ";
 		//
 		assignCurrencyRate(jobDivaSession);
 		//
