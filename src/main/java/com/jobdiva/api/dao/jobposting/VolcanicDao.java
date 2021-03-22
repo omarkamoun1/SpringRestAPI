@@ -130,7 +130,7 @@ public class VolcanicDao {
 			data[10] = data[10].replace("\"", "\\\"");
 			data[10] = data[10].replace("\r\n", "");
 			data[10] = data[10].replace("\n", "");
-			data[10] = data[10].replaceAll("[^\\p{L}\\p{N}\\p{Z}\\p{Sm}\\p{Sc}\\p{Sk}\\p{Pi}\\p{Pf}\\p{Pc}\\p{Mc}]","");
+			data[10] = data[10].replaceAll("[\\p{C}]","");
 			
 		}
 		
