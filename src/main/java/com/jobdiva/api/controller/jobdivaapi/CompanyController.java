@@ -13,6 +13,7 @@ import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.model.Company;
 import com.jobdiva.api.model.CompanyAddress;
 import com.jobdiva.api.model.FinancialsType;
+import com.jobdiva.api.model.Note;
 import com.jobdiva.api.model.Owner;
 import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
@@ -236,4 +237,22 @@ public class CompanyController extends AbstractJobDivaController {
 				financials, owners, salespipeline);
 		//
 	}
+	
+	@ApiOperation(value = "GetCompanyNotes")
+	@RequestMapping(value = "/getCompanyNotes", method = RequestMethod.GET, produces = "application/json")
+	public List<Note> getCompanyNotes( //
+			//
+			@ApiParam(value = "Company ID", required = true) //
+			@RequestParam(required = true) Long companyid  //
+			//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("getCompanyNotes");
+		//
+		return companyService.getCompanyNotes(jobDivaSession,companyid);
+		//
+	} //
+	
 }
