@@ -9,12 +9,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.jobdiva.api.dao.company.CompanyAddressDao;
 import com.jobdiva.api.dao.company.CreateCompanyDao;
+import com.jobdiva.api.dao.company.GetCompanyNotesDao;
 import com.jobdiva.api.dao.company.SearchCompanyDao;
 import com.jobdiva.api.dao.company.SearchCompanyUDFDao;
 import com.jobdiva.api.dao.company.UpdateCompanyDao;
 import com.jobdiva.api.model.Company;
 import com.jobdiva.api.model.CompanyAddress;
 import com.jobdiva.api.model.FinancialsType;
+import com.jobdiva.api.model.Note;
 import com.jobdiva.api.model.Owner;
 import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
@@ -36,6 +38,9 @@ public class CompanyService {
 	//
 	@Autowired
 	UpdateCompanyDao	updateCompanyDao;
+	//
+	@Autowired
+	GetCompanyNotesDao getCompanyNotesDao;
 	
 	public List<Company> searchForCompany(JobDivaSession jobDivaSession, Long companyId, String company, String address, String city, String state, String zip, String country, String phone, String fax, String url, String parentCompany,
 			Boolean showAll, String[] types, Long ownerIds, String division, String salespipeline) throws Exception {
@@ -105,6 +110,24 @@ public class CompanyService {
 		} catch (Exception e) {
 			//
 			updateCompanyDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateCompany", "Update Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+	public List<Note> getCompanyNotes(JobDivaSession jobDivaSession, Long companyid) throws Exception {
+		//
+		try {
+			List<Note> notes = getCompanyNotesDao.getNotes(jobDivaSession, companyid);
+			//
+			getCompanyNotesDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getCompanyNotes", "Get Notes Successful");
+			//
+			return notes;
+			//
+		} catch (Exception e) {
+			//
+			getCompanyNotesDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getCompanyNotes", "Get Notes Failed, " + e.getMessage());
 			//
 			throw new Exception(e.getMessage());
 		}
