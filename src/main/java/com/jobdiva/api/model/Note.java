@@ -1,24 +1,24 @@
 package com.jobdiva.api.model;
 import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.swagger.annotations.ApiModel;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
+@ApiModel()
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder({ "id", "recruiterName", "date", "recruiterId", "content" })
 @SuppressWarnings("serial")
 public class Note implements java.io.Serializable {
 	
-	@JsonProperty(value = "id", index = 0)
+
 	private Long					id;
 	
-	@JsonProperty(value = "recruiter name", index = 1)
 	private String					recruiterName;
+
+	private Date				    date;
 	
-	@JsonProperty(value = "date", index = 2)
-	private Date				 date;
-	
-	@JsonProperty(value = "recruiter id", index = 3)
 	private Long					recruiterId;
 	
-	@JsonProperty(value = "content", index = 4)
 	private String					content;
 	
 	

@@ -1,4 +1,5 @@
 package com.jobdiva.api.dao.company;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -11,7 +12,7 @@ import com.jobdiva.api.model.authenticate.JobDivaSession;
 
 
 @Component
-public class GetCompanyNotesDao extends AbstractJobDivaDao {
+public class CompanyNotesDao extends AbstractJobDivaDao {
 	
 	
 	public List <Note> getNotes(JobDivaSession jobDivaSession, Long companyId) {
@@ -39,5 +40,36 @@ public class GetCompanyNotesDao extends AbstractJobDivaDao {
 		return  notes;
 		
 	}
+	
+	public Long addNote(JobDivaSession jobDivaSession, Long userId, Long companyId, String note) {
+ 		final Long noteid;
+ 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+ 		String sql="SELECT compnoteid.nextval AS noteId from dual";
+ 		List<Long> listLong = jdbcTemplate.query(sql, new RowMapper<Long>() {
+ 			@Override
+ 			public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+ 				return rs.getLong("noteId");
+ 			}
+ 		});
+ 		if (listLong != null && listLong.size() > 0) {
+ 		   noteid = listLong.get(0);
+ 		}
+ 		else 
+ 		   noteid = null;
+ 		String insertSql = "insert into tcustomercompanynotes " +
+ 			    "(companyid, noteid, datecreated, recruiterid, type, note, recruiter_teamid) " +
+ 			    "values (?,?,sysdate,?,?,?,?)";
+ 		jdbcTemplate.update(connection -> {
+ 			PreparedStatement ps = connection.prepareStatement(insertSql, new String[] { "noteid" });
+ 			ps.setLong(1, companyId);
+ 			ps.setLong(2, noteid);
+ 			ps.setLong(3, userId);
+ 			ps.setLong(4, 0);
+ 			ps.setString(5,note);
+ 			ps.setLong(6, jobDivaSession.getTeamId());
+ 			return ps;
+ 		});
+ 		return noteid;
+ 	}
 	
 }

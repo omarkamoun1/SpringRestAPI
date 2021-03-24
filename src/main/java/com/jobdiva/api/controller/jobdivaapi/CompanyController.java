@@ -238,7 +238,7 @@ public class CompanyController extends AbstractJobDivaController {
 		//
 	}
 	
-	@ApiOperation(value = "GetCompanyNotes")
+	@ApiOperation(value = "Get Company Notes")
 	@RequestMapping(value = "/getCompanyNotes", method = RequestMethod.GET, produces = "application/json")
 	public List<Note> getCompanyNotes( //
 			//
@@ -251,8 +251,35 @@ public class CompanyController extends AbstractJobDivaController {
 		//
 		jobDivaSession.checkForAPIPermission("getCompanyNotes");
 		//
-		return companyService.getCompanyNotes(jobDivaSession,companyid);
+		return companyService.getCompanyNotes(jobDivaSession, companyid);
 		//
 	} //
+	
+
+ 	@ApiOperation(value = "Add Company Note")
+ 	@RequestMapping(value = "/addCompanyNote", method = RequestMethod.POST, produces = "application/json")
+ 	public Long addCompanyNote( //
+ 			//
+ 			@ApiParam(value = "User ID", required = true) //
+ 			@RequestParam(required = true) Long userid,  //
+ 			//
+ 			//
+ 			@ApiParam(value = "Company ID", required = true) //
+ 			@RequestParam(required = true) Long companyid, //
+ 			//
+ 			//
+ 			@ApiParam(value = "Note", required = true) //
+ 			@RequestParam(required = true) String note //
+ 			//
+ 	) throws Exception {
+ 		//
+ 		JobDivaSession jobDivaSession = getJobDivaSession();
+ 		//
+ 		jobDivaSession.checkForAPIPermission("getCompanyNote");
+ 		//
+ 		return companyService.addCompanyNote(jobDivaSession, userid, companyid, note);
+ 		//
+ 	} //
+
 	
 }

@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.jobdiva.api.dao.company.CompanyAddressDao;
 import com.jobdiva.api.dao.company.CreateCompanyDao;
-import com.jobdiva.api.dao.company.GetCompanyNotesDao;
+import com.jobdiva.api.dao.company.CompanyNotesDao;
 import com.jobdiva.api.dao.company.SearchCompanyDao;
 import com.jobdiva.api.dao.company.SearchCompanyUDFDao;
 import com.jobdiva.api.dao.company.UpdateCompanyDao;
@@ -40,7 +40,7 @@ public class CompanyService {
 	UpdateCompanyDao	updateCompanyDao;
 	//
 	@Autowired
-	GetCompanyNotesDao getCompanyNotesDao;
+	CompanyNotesDao  companyNotesDao;
 	
 	public List<Company> searchForCompany(JobDivaSession jobDivaSession, Long companyId, String company, String address, String city, String state, String zip, String country, String phone, String fax, String url, String parentCompany,
 			Boolean showAll, String[] types, Long ownerIds, String division, String salespipeline) throws Exception {
@@ -119,17 +119,35 @@ public class CompanyService {
 	public List<Note> getCompanyNotes(JobDivaSession jobDivaSession, Long companyid) throws Exception {
 		//
 		try {
-			List<Note> notes = getCompanyNotesDao.getNotes(jobDivaSession, companyid);
+			List<Note> notes = companyNotesDao.getNotes(jobDivaSession, companyid);
 			//
-			getCompanyNotesDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getCompanyNotes", "Get Notes Successful");
+			companyNotesDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getCompanyNotes", "Get Company Notes Successful");
 			//
 			return notes;
 			//
 		} catch (Exception e) {
 			//
-			getCompanyNotesDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getCompanyNotes", "Get Notes Failed, " + e.getMessage());
+			companyNotesDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getCompanyNotes", "Get Company Notes Failed, " + e.getMessage());
 			//
 			throw new Exception(e.getMessage());
 		}
+	}
+	
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+ 	public Long addCompanyNote(JobDivaSession jobDivaSession, Long userid, Long companyid, String note) throws Exception {
+ 		//
+ 		try {
+ 			Long noteid = companyNotesDao.addNote(jobDivaSession, userid, companyid, note);
+ 			//
+ 			companyNotesDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "addCompanyNotes", "Add Company Notes Successful");
+ 			//
+ 			return noteid;
+ 			//
+ 		} catch (Exception e) {
+ 			//
+ 			companyNotesDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "addCompanyNotes", "Add Company Notes Failed, " + e.getMessage());
+ 			//
+ 			throw new Exception(e.getMessage());
+ 		}
 	}
 }
