@@ -112,14 +112,18 @@ public class JobController extends AbstractJobDivaController {
 			@RequestParam(required = false) Integer zipcodeRadius, //
 			//
 			@ApiParam(value = "Country ID", required = false) //
-			@RequestParam(required = false) String countryId //
+			@RequestParam(required = false) String countryId, //
+			//
+			@ApiParam(value = "Filter by recruiter id of the user", required = false) //
+			@RequestParam(required = false) Boolean ismyjob//
+			//
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		jobDivaSession.checkForAPIPermission("SearchJob");
 		//
-		return jobService.searchJobs(jobDivaSession, jobId, jobdivaref, optionalref, city, state, title, contactid, companyId, companyname, status, jobtype, issuedatefrom, issuedateto, startdatefrom, startdateto, zipcode, zipcodeRadius, countryId);
+		return jobService.searchJobs(jobDivaSession, jobId, jobdivaref, optionalref, city, state, title, contactid, companyId, companyname, status, jobtype, issuedatefrom, issuedateto, startdatefrom, startdateto, zipcode, zipcodeRadius, countryId, ismyjob);
 		//
 	}
 	

@@ -329,7 +329,7 @@ public class JobDao extends AbstractActivityDao {
 	public List<Job> searchJobs(JobDivaSession jobDivaSession, Long jobId, String jobdivaref, String optionalref, String city, String[] states, String title, //
 			Long contactid, Long companyId, String companyname, Integer status, String[] jobTypes, Date issuedatefrom, //
 			Date issuedateto, Date startdatefrom, Date startdateto, //
-			String department, String skill, String zipcode, Integer zipcodeRadius, String countryId) throws Exception {
+			String department, String skill, String zipcode, Integer zipcodeRadius, String countryId, Boolean ismyjob) throws Exception {
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		/* Check if status is user-defined status in this team */
@@ -348,70 +348,82 @@ public class JobDao extends AbstractActivityDao {
 		}
 		//
 		//
+		if(ismyjob==null) ismyjob=false;
 		ArrayList<Object> paramList = new ArrayList<Object>();
 		StringBuilder sql_buff = new StringBuilder();
-		sql_buff.append("select * from trfq where teamid = ? ");
+		sql_buff.append("select * from trfq job1_ ");
+		if(ismyjob)
+		sql_buff.append(", TRECRUITERRFQ jobuser0_ where jobuser0_.RFQID=job1_.ID and ");
+		else 
+		  sql_buff.append(" where ");
+		
+		sql_buff.append(" job1_.teamid = ? ");
 		paramList.add(jobDivaSession.getTeamId());
 		//
 		if (jobId != null) {
-			sql_buff.append(" and id = ? ");
+			sql_buff.append(" and job1_.id = ? ");
 			paramList.add(jobId);
 		}
 		//
+		if(ismyjob){
+			sql_buff.append(" and jobuser0_.RECRUITERID = ? ");
+			paramList.add(jobDivaSession.getRecruiterId());
+		}
+		//
 		if (contactid != null) {
-			sql_buff.append(" and customerid = ? ");
+			sql_buff.append(" and job1_.customerid = ? ");
 			paramList.add(contactid);
 		}
 		//
 		if (companyId != null) {
-			sql_buff.append(" and companyid = ? ");
+			sql_buff.append(" and job1_.companyid = ? ");
 			paramList.add(companyId);
 		} else if (isNotEmpty(companyname)) {
 			List<Long> companies = getCompanyIdsByName(jobDivaSession.getTeamId(), companyname);
 			if (companies != null) {
 				if (companies.size() == 1) {
-					sql_buff.append(" and companyid = ? ");
+					sql_buff.append(" and job1_.companyid = ? ");
 					paramList.add(companies.get(0));
 				} else if (companies.size() > 1) {
-					sql_buff.append(" and companyid in( ? ) ");
+					sql_buff.append(" and job1_.companyid in( ? ) ");
 					paramList.add(companies);
 				}
 			}
 		}
 		//
 		if (isNotEmpty(optionalref)) {
-			sql_buff.append(" and rfqno_team like ? "); // == -> like
+			sql_buff.append(" and job1_.rfqno_team like ? "); // == -> like
 			paramList.add(optionalref + "%");
 		}
 		//
 		if (isNotEmpty(jobdivaref)) {
-			sql_buff.append(" and upper(rfqrefno) like upper(?) ");
+			sql_buff.append(" and upper(job1_.rfqrefno) like upper(?) ");
 			paramList.add(jobdivaref + "%");
 		}
 		//
 		if (isNotEmpty(department)) {
-			sql_buff.append(" and upper(department) like upper(?) ");
+			sql_buff.append(" and upper(job1_.department) like upper(?) ");
 			paramList.add(department + "%");
 		}
 		//
 		if (isNotEmpty(title)) {
-			sql_buff.append(" and nls_upper(rfqtitle) like ? ");
+			sql_buff.append(" and nls_upper(job1_.rfqtitle) like ? ");
 			paramList.add(title.toUpperCase() + "%");
 		}
 		//
 		if (isNotEmpty(city)) {
-			sql_buff.append(" and NLS_UPPER(city) like NLS_UPPER(?)||'%'");
+			sql_buff.append(" and NLS_UPPER(job1_.city) like NLS_UPPER(?)||'%'");
 			paramList.add(city);
 		}
 		//
 		if (isNotEmpty(skill)) {
-			sql_buff.append(" and NLS_UPPER(SKILLS) like NLS_UPPER(?)||'%'");
+			sql_buff.append(" and NLS_UPPER(job1_.SKILLS) like NLS_UPPER(?)||'%'");
 			paramList.add(skill);
 		}
 		//
 		if (states != null) {
 			if (states.length == 1) {
-				sql_buff.append(" and upper(state) = ? ");
+				sql_buff.append(" and upper(job1_.state) = ? ");
 				String state = lookupState(states[0], "US");
 				if (state != null)
 					states[0] = state; // set as it is, if state
@@ -429,34 +441,37 @@ public class JobDao extends AbstractActivityDao {
 					// jobObj.getState() +") can not be updated due to the
 					// mapping unfound.(with countryid(US)) \r\n");
 				}
-				sql_buff.append(" and upper(state) in (select /*+ cardinality(10) */ * from THE (select cast(sf_inlist(?) as sf_inlist_table_type ) from dual ))");
+				sql_buff.append(" and upper(job1_.state) in (select /*+ cardinality(10) */ * from THE (select cast(sf_inlist(?) as sf_inlist_table_type ) from dual ))");
 				paramList.add(Arrays.toString(states).replaceAll("\\[|\\]| ", "").toUpperCase());
 			}
 		}
 		//
 		if (isNotEmpty(city)) {
-			sql_buff.append(" and nls_upper(city) like ? ");
+			sql_buff.append(" and nls_upper(job1_.city) like ? ");
 			paramList.add(city.toUpperCase() + "%");
 		}
 		if (issuedatefrom != null) {
-			sql_buff.append(" and dateissued >= ?  ");
+			sql_buff.append(" and job1_.dateissued >= ?  ");
 			paramList.add(issuedatefrom);
 		}
 		if (issuedateto != null) {
-			sql_buff.append(" and dateissued <= ? ");
+			sql_buff.append(" and job1_.dateissued <= ? ");
 			paramList.add(issuedateto);
 		}
 		if (startdatefrom != null) {
-			sql_buff.append(" and startdate >= ? ");
+			sql_buff.append(" and job1_.startdate >= ? ");
 			paramList.add(startdatefrom);
 		}
 		if (startdateto != null) {
-			sql_buff.append(" and startdate <= ? ");
+			sql_buff.append(" and job1_.startdate <= ? ");
 			paramList.add(startdateto);
 		}
 		if (status != null) {
-			sql_buff.append(" and jobstatus = ? ");
+			sql_buff.append(" and job1_.jobstatus = ? ");
 			paramList.add(status);
+		}
+		if(ismyjob) {
+			
 		}
 		/* Get default and user-defined position type */
 		HashMap<String, Integer> positionTypeIdMap = new HashMap<String, Integer>();
@@ -488,10 +503,10 @@ public class JobDao extends AbstractActivityDao {
 				}
 			}
 			if (jobTypes.length == 1) {
-				sql_buff.append(" and contract = ? ");
+				sql_buff.append(" and job1_.contract = ? ");
 				paramList.add(contract[0]);
 			} else {
-				sql_buff.append("and contract in (select /*+ cardinality(10) */ * from THE (select cast(sf_inlist(?) as sf_inlist_table_type ) from dual)) ");
+				sql_buff.append("and job1_.contract in (select /*+ cardinality(10) */ * from THE (select cast(sf_inlist(?) as sf_inlist_table_type ) from dual)) ");
 				paramList.add(Arrays.toString(contract).replaceAll("\\[|\\]| ", ""));
 			}
 		}
@@ -499,7 +514,7 @@ public class JobDao extends AbstractActivityDao {
 		if (isNotEmpty(zipcode)) {
 			if (zipcodeRadius != null && zipcodeRadius > 0 && isNotEmpty(latitude) && isNotEmpty(longitude)) {
 				// search by radius
-				sql_buff.append(" AND zip_lat BETWEEN ? - (? / 111.045) AND ?  + (? / 111.045) AND " + " zip_lon BETWEEN ? - (? / (111.045 * COS(0.0174532925 * (?)))) AND ? + (? / (111.045 * COS(0.0174532925 * (?)))) ");
+				sql_buff.append(" AND job1_.zip_lat BETWEEN ? - (? / 111.045) AND ?  + (? / 111.045) AND " + " job1_.zip_lon BETWEEN ? - (? / (111.045 * COS(0.0174532925 * (?)))) AND ? + (? / (111.045 * COS(0.0174532925 * (?)))) ");
 				paramList.add(latitude);
 				paramList.add(zipcodeRadius);
 				paramList.add(latitude);
@@ -511,13 +526,13 @@ public class JobDao extends AbstractActivityDao {
 				paramList.add(zipcodeRadius);
 				paramList.add(latitude);
 			} else {
-				sql_buff.append(" AND nls_upper(zipcode) like ? ");
+				sql_buff.append(" AND nls_upper(job1_.zipcode) like ? ");
 				paramList.add(zipcode.toUpperCase() + "%");
 			}
 		}
 		// for testing
 		// sql_buff.append(" AND ROWNUM <= 10");
-		sql_buff.append(" order by dateissued desc");
+		sql_buff.append(" order by job1_.dateissued desc");
 		//
 		String queryString = sql_buff.toString();
 		Object[] params = paramList.toArray();
@@ -1822,7 +1837,7 @@ public class JobDao extends AbstractActivityDao {
 		List<Job> jobs = null;
 		//
 		try {
-			jobs = searchJobs(jobDivaSession, jobid, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+			jobs = searchJobs(jobDivaSession, jobid, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,null);
 		} catch (Exception e) {
 			logger.info("Error: Job " + jobid + " is not found  ERROR: " + e.getMessage());
 		}

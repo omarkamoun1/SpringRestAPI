@@ -41,11 +41,11 @@ public class JobService {
 	JobApplicationDao		jobApplicationDao;
 	
 	public List<Job> searchJobs(JobDivaSession jobDivaSession, Long jobId, String jobdivaref, String optionalref, String city, String[] state, String title, Long contactid, Long companyId, String companyname, Integer status, String[] jobtype,
-			Date issuedatefrom, Date issuedateto, Date startdatefrom, Date startdateto, String zipcode, Integer zipcodeRadius, String countryId) throws Exception {
+			Date issuedatefrom, Date issuedateto, Date startdatefrom, Date startdateto, String zipcode, Integer zipcodeRadius, String countryId, Boolean ismyjob) throws Exception {
 		//
 		try {
 			List<Job> jobs = jobDao.searchJobs(jobDivaSession, jobId, jobdivaref, optionalref, city, state, title, contactid, companyId, companyname, status, jobtype, issuedatefrom, issuedateto, startdatefrom, startdateto, null, null, zipcode,
-					zipcodeRadius, countryId);
+					zipcodeRadius, countryId, ismyjob);
 			//
 			//
 			// if (jobs != null) {
