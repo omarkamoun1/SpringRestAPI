@@ -86,9 +86,29 @@ public class Job implements java.io.Serializable {
 	@JsonProperty(value = "maximum bill rate", index = 24)
 	private BigDecimal				billRateMax;
 	//
-	@JsonProperty(value = "users(last name | first name | role(s))", index = 25)
-	private String					usersNameRole;
+	@JsonProperty(value = "bill rate currency", index = 25)
+	private Integer					billrateCurrency;
 	//
+	@JsonProperty(value = "pay rate currency", index = 26)
+	private Integer					payrateCurrency;
+	//
+	@JsonProperty(value = "rate per", index = 27)
+	private Character				rateper;
+	//
+	@JsonProperty(value = "bill rate per", index = 28)
+	private Character				billRatePer;
+	//
+	@JsonProperty(value = "positions", index = 29)
+	private Short					positions;
+	//
+	@JsonProperty(value = "job priority", index = 20)
+	private Integer					jobPriority;
+	//
+	@JsonProperty(value = "job description", index = 31)
+	private String					jobDescription;
+	//
+	@JsonProperty(value = "users(last name | first name | role(s))", index = 32)
+	private String					usersNameRole;
 	//
 	//
 	//
@@ -104,7 +124,7 @@ public class Job implements java.io.Serializable {
 	private Date					deadLine;
 	//
 	@JsonIgnore
-	private Short					positions;
+	private String					priority;
 	//
 	@JsonIgnore
 	private Boolean					travel;
@@ -113,16 +133,10 @@ public class Job implements java.io.Serializable {
 	private Boolean					overtime;
 	//
 	@JsonIgnore
-	private Character				rateper;
-	//
-	@JsonIgnore
 	private String					rateUnit;
 	//
 	@JsonIgnore
 	private Integer					experience;
-	//
-	@JsonIgnore
-	private String					jobDescription;
 	//
 	@JsonIgnore
 	private Integer					jobStatus;
@@ -236,16 +250,10 @@ public class Job implements java.io.Serializable {
 	private Integer					contract;
 	//
 	@JsonIgnore
-	private String					priority;
-	//
-	@JsonIgnore
 	private Boolean					jobdivaPost;
 	//
 	@JsonIgnore
 	private Boolean					harvestEnable;
-	//
-	@JsonIgnore
-	private Integer					jobPriority;
 	//
 	@JsonIgnore
 	private Long					divisionId;
@@ -273,9 +281,6 @@ public class Job implements java.io.Serializable {
 	//
 	@JsonIgnore
 	private String					postingDescription;
-	//
-	@JsonIgnore
-	private Character				billRatePer;
 	//
 	@JsonIgnore
 	private String					billRateUnit;
@@ -342,12 +347,6 @@ public class Job implements java.io.Serializable {
 	//
 	@JsonIgnore
 	private Date					jobdivaPostDate;
-	//
-	@JsonIgnore
-	private Integer					billrateCurrency;
-	//
-	@JsonIgnore
-	private Integer					payrateCurrency;
 	//
 	@JsonIgnore
 	private Boolean					suppSubGuideline;
