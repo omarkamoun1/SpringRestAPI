@@ -84,7 +84,34 @@ public class VolcanicDao {
 							return rs.getString("jobdescription");
 						}
 					});
+					
+					if (desc != null && desc.size() > 0) {
+						if (desc.get(0) != null) {
+							data[10] = desc.get(0);
+							data[10] = data[10].replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", "");
+						} else {
+							data[10] = "";
+						}
+					} else {
+						return "{\"response\":{\"status\":\"Fail\",\"reason\":\"Error while retrieving description from Database!\"}}";
+					}
+				} else {
+					data[10] = desc.get(0);
+					data[10] = data[10].replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", "");
+					data[10] = data[10].replaceAll("%C2%92","%27").replaceAll("%C2%93","%22").replaceAll("%C2%94","%22"); 
+					try {
+						data[10] = URLDecoder.decode(data[10], "UTF-8");
+					} catch (Exception e) {
+						data[10] = "";
+					}
 				}
+				
+				data[10] = data[10].replace("\"", "\\\"");
+				data[10] = data[10].replace("\r\n", "");
+				data[10] = data[10].replace("\n", "");
+				data[10] = data[10].replaceAll("[\\p{C}]","");
+			} else {
+				return "{\"response\":{\"status\":\"Fail\",\"reason\":\"Error while retrieving description from Database!\"}}";
 			}
 			//
 			//
@@ -101,10 +128,10 @@ public class VolcanicDao {
 				else return "{\"response\":{\"status\":\"Fail\",\"reason\":\"Required Field(s) Missing in Database\"}}";
 			}
 			for (int i = 6; i < 29; i++) {
-				if (i==10) data[i] = (desc != null && desc.size() > 0)?desc.get(0):"";
-				//if (i==10) data[i] = "";
-				else if (isInList(list,elements[i]) != -1) data[i] = (String) list.get(isInList(list,elements[i])).get(1);
-				else data[i] = "";
+				if (i != 10) { //data[i] = (desc != null && desc.size() > 0)?desc.get(0):"";
+					if (isInList(list,elements[i]) != -1) data[i] = (String) list.get(isInList(list,elements[i])).get(1);
+					else data[i] = "";
+				}
 			}
 			
 			// data[5] example: convert (_23_56_44_) to (23,56,44)
@@ -119,18 +146,6 @@ public class VolcanicDao {
 			} else {
 				data[22] = "";
 			}
-			
-			data[10] = data[10].replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", "");
-			data[10] = data[10].replaceAll("%C2%92","%27").replaceAll("%C2%93","%22").replaceAll("%C2%94","%22"); 
-			try {
-				data[10] = URLDecoder.decode(data[10], "UTF-8");
-			} catch (Exception e) {
-				data[10] = "";
-			}
-			data[10] = data[10].replace("\"", "\\\"");
-			data[10] = data[10].replace("\r\n", "");
-			data[10] = data[10].replace("\n", "");
-			data[10] = data[10].replaceAll("[\\p{C}]","");
 			
 		}
 		
