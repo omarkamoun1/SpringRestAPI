@@ -252,9 +252,12 @@ public class HotlistDao extends AbstractJobDivaDao {
 			message.append("description is required. \r\n");
 		}
 		//
-		if ((userIds == null || userIds.size() == 0) && (groupIds == null || groupIds.size() == 0) && (divisionIds == null || divisionIds.size() == 0)) {
-			message.append(" at least userIds, groupIds or divisionIds must be assigned. \r\n");
-		}
+		// if ((userIds == null || userIds.size() == 0) && (groupIds == null ||
+		// groupIds.size() == 0) && (divisionIds == null || divisionIds.size()
+		// == 0)) {
+		// message.append(" at least userIds, groupIds or divisionIds must be
+		// assigned. \r\n");
+		// }
 		//
 		if (message.length() > 0) {
 			throw new Exception("Parameter Check Failed \r\n" + message.toString());
@@ -320,8 +323,8 @@ public class HotlistDao extends AbstractJobDivaDao {
 		workBenchObject.WorkBenchName = name;
 		workBenchObject.Note = description;
 		workBenchObject.Active = 1;
-		workBenchObject.rfqid = linkToJobId;
-		workBenchObject.contactid = linkToHiringManagerId;
+		workBenchObject.rfqid = linkToJobId != null ? linkToJobId : 0L;
+		workBenchObject.contactid = linkToHiringManagerId != null ? linkToHiringManagerId : 0L;
 		//
 		Long[] recruiterList = (Long[]) allUsers.toArray(new Long[allUsers.size()]);
 		//
@@ -742,15 +745,19 @@ public class HotlistDao extends AbstractJobDivaDao {
 	
 	public Long createContactHotlist(JobDivaSession jobDivaSession, String name, Boolean active, Boolean isPrivate, String description, List<Long> sharedWithIds) throws Exception {
 		//
+		isPrivate = isPrivate != null ? isPrivate : false;
+		active = active != null ? active : false;
+		//
 		StringBuffer message = new StringBuffer();
 		//
 		if (name == null || name.trim().isEmpty()) {
 			message.append("name is required. \r\n");
 		}
 		//
-		if (sharedWithIds == null || sharedWithIds.size() == 0) {
-			message.append("sharedWithIds must contains at least one user. \r\n");
-		}
+		// if (sharedWithIds == null || sharedWithIds.size() == 0) {
+		// message.append("sharedWithIds must contains at least one user.
+		// \r\n");
+		// }
 		//
 		if (message.length() > 0) {
 			throw new Exception("Parameter Check Failed \r\n" + message.toString());
@@ -771,15 +778,25 @@ public class HotlistDao extends AbstractJobDivaDao {
 		long id = (list != null && list.size() > 0) ? list.get(0) : 0;
 		//
 		//
-		String sqlInsert = "insert into tcontact_hotlist (id, recruiterid, teamid, name, notes, active, datecreated, type, privatelist) values(?,?,?,?,?,1,SYSDATE,?,?) ";
-		Object[] params = new Object[] { id, jobDivaSession.getRecruiterId(), jobDivaSession.getTeamId(), name, description, active, 0, isPrivate };
+		String sqlInsert = "insert into tcontact_hotlist (id, recruiterid, teamid, name, notes, active, type, privatelist, datecreated) values( ?, ?, ?, ?, ?, ?, ?, ?, SYSDATE) ";
+		Object[] params = new Object[] { id, jobDivaSession.getRecruiterId(), jobDivaSession.getTeamId(), name, description, active, 1, isPrivate };
 		jdbcTemplate.update(sqlInsert, params);
 		//
+		sharedWithIds = sharedWithIds != null ? sharedWithIds : new ArrayList<Long>();
 		//
-		for (Long userId : sharedWithIds) {
-			sqlInsert = "insert into tcontact_hotlist_recruiter (hotlist_id, recruiterid) values(?,?) ";
-			params = new Object[] { id, userId };
-			jdbcTemplate.update(sqlInsert, params);
+		//
+		//
+		if (jobDivaSession.getRecruiterId() > 0 && !sharedWithIds.contains(jobDivaSession.getRecruiterId())) {
+			sharedWithIds.add(jobDivaSession.getRecruiterId());
+		}
+		//
+		//
+		if (sharedWithIds != null) {
+			for (Long userId : sharedWithIds) {
+				sqlInsert = "insert into tcontact_hotlist_recruiter (hotlist_id, recruiterid) values(?,?) ";
+				params = new Object[] { id, userId };
+				jdbcTemplate.update(sqlInsert, params);
+			}
 		}
 		//
 		//
@@ -804,8 +821,10 @@ public class HotlistDao extends AbstractJobDivaDao {
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
-		String sql = "insert into tcontact_hotlist_contacts values(?,?,?,?,sysdate,0,'','') ";
-		Object params[] = new Object[] { hotListid, contactId, jobDivaSession.getTeamId(), jobDivaSession.getRecruiterId() };
+		String sql = "insert into tcontact_hotlist_contacts values(?,?,?,?,sysdate,?,?,?) ";
+		//
+		Object params[] = new Object[] { hotListid, contactId, jobDivaSession.getTeamId(), jobDivaSession.getRecruiterId(), 0, null, null };
+		//
 		jdbcTemplate.update(sql, params);
 		//
 		return true;

@@ -101,8 +101,8 @@ public class HotlistController extends AbstractJobDivaController {
 			@ApiParam(value = "Description", required = false) //
 			@RequestParam(required = false) String description, //
 			//
-			@ApiParam(value = "Shared with", required = true) //
-			@RequestParam(required = true) List<Long> sharedWithIds //
+			@ApiParam(value = "Shared with", required = false) //
+			@RequestParam(required = false) List<Long> sharedWithIds //
 	//
 	) throws Exception {
 		//

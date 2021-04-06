@@ -1285,7 +1285,7 @@ public class ContactDao extends AbstractJobDivaDao {
 			}
 			Contact contact = contacts.get(0);
 			//
-			if (!contact.getCompanyId().equals(companyid))
+			if (companyid != null && companyid > 0 && !contact.getCompanyId().equals(companyid))
 				throw new Exception("Error: Contact(" + contact.getId() + ") and \'reportsto\'(" + reportsto + ") do not belong to the same company.");
 			//
 			fields.put("REPORTSTO", "reportsto");

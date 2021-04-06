@@ -101,7 +101,7 @@ public class Job implements java.io.Serializable {
 	@JsonProperty(value = "positions", index = 29)
 	private Short					positions;
 	//
-	@JsonProperty(value = "job priority", index = 20)
+	@JsonProperty(value = "job priority", index = 30)
 	private Integer					jobPriority;
 	//
 	@JsonProperty(value = "job description", index = 31)

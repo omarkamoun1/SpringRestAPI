@@ -23,6 +23,7 @@ import com.jobdiva.api.service.OnBoardService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * @author Joseph Chidiac
@@ -32,7 +33,7 @@ import io.swagger.annotations.ApiParam;
 @RestController
 @RequestMapping({ "/api/onboard/" })
 @Api(value = "Onboarding API", description = "REST API Used For Onboarding")
-// @ApiIgnore
+@ApiIgnore
 public class OnBoardController extends AbstractJobDivaController {
 	
 	@Autowired

@@ -57,9 +57,9 @@ public class WebhookScheduler {
 	@EventListener(ApplicationReadyEvent.class)
 	public void init() {
 		//
-		initScheduler();
-		//
-		logger.info(" WebhookScheduler init..");
+		// initScheduler();
+		// //
+		// logger.info(" WebhookScheduler init..");
 		//
 	}
 	
