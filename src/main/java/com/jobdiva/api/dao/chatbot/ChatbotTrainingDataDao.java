@@ -308,13 +308,13 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			@Override
 			public ChatbotUserData mapRow(ResultSet rs, int rowNum) throws SQLException {
 				ChatbotUserData tmp = new ChatbotUserData();
-				tmp.setCompanyName(rs.getString("company"));
+				tmp.companyName = rs.getString("company");
 				return tmp;
 			}
 		});
 		//
 		if (list.size() > 0) {
-			data.setCompanyName(list.get(0).getCompanyName());
+			data.companyName = list.get(0).companyName;
 		}
 		//
 		sql = "select t2.apache_location, t2.environment_type "//
@@ -329,15 +329,15 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			@Override
 			public ChatbotUserData mapRow(ResultSet rs, int rowNum) throws SQLException {
 				ChatbotUserData tmp = new ChatbotUserData();
-				tmp.setApacheLocation(rs.getString(1));
-				tmp.setEnvType(rs.getString(2));
+				tmp.apacheLocation = rs.getString(1);
+				tmp.envType = rs.getString(2);
 				return tmp;
 			}
 		});
 		//
 		if (list.size() > 0) {
-			data.setApacheLocation(list.get(0).getApacheLocation());
-			data.setEnvType(list.get(0).getEnvType());
+			data.apacheLocation = (list.get(0).apacheLocation);
+			data.envType = (list.get(0).envType);
 		}
 		//
 		//
@@ -357,6 +357,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				ChatbotUserData tmp = new ChatbotUserData();
 				long permission = rs.getLong(1);
 				Boolean isTeamLeader = !((rs.getInt(4) & 16) == 0);
+				Boolean isSuperUser = !((rs.getInt(4) & 256)==0);
 				boolean allowManagingJobBoardsCriteriaAndProfiles = false;
 				// if (( 0!=(leadervalue & (1<<(i-1))) || leadervalue==0) &&
 				// !(i==2 &&
@@ -391,51 +392,53 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				System.out.println(permission2);
 				if (permission2 != null && !permission2.isEmpty()) {
 					if (permission2.charAt(42) == '1')
-						tmp.setAllowAssignOnboardingToNotLinkedJob(true);
+						tmp.allowAssignOnboardingToNotLinkedJob =true;
 					if (permission2.charAt(13) == '1')
-						tmp.setAllowManagingOnboarding(true);
+						tmp.allowManagingOnboarding = true;
 					if (permission2.charAt(6) == '1')
-						tmp.setAllowAccessCompletedOnboarding(true);
+						tmp.allowAccessCompletedOnboarding = true;
 					if (permission2.charAt(7) == '1')
-						tmp.setAllowAccessCompletedOnboardingForHires(true);
+						tmp.allowAccessCompletedOnboardingForHires = true;
 					if (permission2.charAt(8) == '1')
-						tmp.setAllowAccessCompletedOnboardingForPrimaryJobs(true);
+						tmp.allowAccessCompletedOnboardingForPrimaryJobs = true;
 					if (permission2.charAt(9) == '1')
-						tmp.setAllowAccessCompletedOnboardingForMyJobs(true);
+						tmp.allowAccessCompletedOnboardingForMyJobs = true;
 					if (permission2.charAt(10) == '1')
-						tmp.setAllowAccessCompletedOnboardingForAllJobs(true);
+						tmp.allowAccessCompletedOnboardingForAllJobs = true;
 					if (permission2.charAt(11) == '1')
-						tmp.setAllowAccessCompletedOnboardingForDivision(true);
+						tmp.allowAccessCompletedOnboardingForDivision = true;
 					if (permission2.charAt(120) == '1')
-						tmp.setAllowUnassignAccessIndividualDocuments(true);
+						tmp.allowUnassignIndividualDocuments = true;
 				}
-				tmp.setAllowManagingJobBoardsCriteriaAndProfiles(allowManagingJobBoardsCriteriaAndProfiles);
-				tmp.setAllowManagingJobBoardsCriteriaOnly(allowManagingJobBoardsCriteriaOnly);
-				tmp.setDisplayTheFourDailyEmailProfileOption(displayFourDailyEmailProfileOption);
-				tmp.setFirstname(rs.getString("firstname"));
-				tmp.setLastname(rs.getString("lastname"));
-				tmp.setTeamLeader(isTeamLeader);
+				tmp.allowManagingJobBoardsCriteriaAndProfiles = (allowManagingJobBoardsCriteriaAndProfiles);
+				tmp.allowManagingJobBoardsCriteriaOnly = (allowManagingJobBoardsCriteriaOnly);
+				tmp.displayTheFourDailyEmailProfileOption = (displayFourDailyEmailProfileOption);
+				tmp.firstname = (rs.getString("firstname"));
+				tmp.lastname = (rs.getString("lastname"));
+				tmp.isTeamLeader = (isTeamLeader);
+				tmp.isSuperUser = isSuperUser;
 				return tmp;
 			}
 		});
 		//
 		if (list.size() > 0) {
 			ChatbotUserData tmp = list.get(0);
-			data.setAllowAssignOnboardingToNotLinkedJob(tmp.isAllowAssignOnboardingToNotLinkedJob());
-			data.setAllowManagingOnboarding(tmp.isAllowManagingOnboarding());
-			data.setAllowAccessCompletedOnboarding(tmp.isAllowAccessCompletedOnboarding());
-			data.setAllowAccessCompletedOnboardingForHires(tmp.isAllowAccessCompletedOnboardingForHires());
-			data.setAllowAccessCompletedOnboardingForPrimaryJobs(tmp.isAllowAccessCompletedOnboardingForPrimaryJobs());
-			data.setAllowAccessCompletedOnboardingForMyJobs(tmp.isAllowAccessCompletedOnboardingForMyJobs());
-			data.setAllowAccessCompletedOnboardingForAllJobs(tmp.isAllowAccessCompletedOnboardingForAllJobs());
-			data.setAllowAccessCompletedOnboardingForDivision(tmp.isAllowAccessCompletedOnboardingForDivision());
-			data.setAllowUnassignAccessIndividualDocuments(tmp.isAllowUnassignAccessIndividualDocuments());
-			data.setAllowManagingJobBoardsCriteriaAndProfiles(tmp.isAllowManagingJobBoardsCriteriaAndProfiles());
-			data.setAllowManagingJobBoardsCriteriaOnly(tmp.isAllowManagingJobBoardsCriteriaOnly());
-			data.setDisplayTheFourDailyEmailProfileOption(tmp.isDisplayTheFourDailyEmailProfileOption());
-			data.setFirstname(tmp.getFirstname());
-			data.setLastname(tmp.getLastname());
-			data.setTeamLeader(tmp.isTeamLeader());
+			data.allowAssignOnboardingToNotLinkedJob = (tmp.allowAssignOnboardingToNotLinkedJob);
+			data.allowManagingOnboarding = (tmp.allowAccessCompletedOnboarding);
+			data.allowAccessCompletedOnboarding = (tmp.allowAccessCompletedOnboarding);
+			data.allowAccessCompletedOnboardingForHires = (tmp.allowAccessCompletedOnboardingForHires);
+			data.allowAccessCompletedOnboardingForPrimaryJobs = (tmp.allowAccessCompletedOnboardingForPrimaryJobs);
+			data.allowAccessCompletedOnboardingForMyJobs = (tmp.allowAccessCompletedOnboardingForMyJobs);
+			data.allowAccessCompletedOnboardingForAllJobs = (tmp.allowAccessCompletedOnboardingForAllJobs);
+			data.allowAccessCompletedOnboardingForDivision = (tmp.allowAccessCompletedOnboardingForDivision);
+			data.allowUnassignIndividualDocuments = (tmp.allowUnassignIndividualDocuments);
+			data.allowManagingJobBoardsCriteriaAndProfiles = (tmp.allowManagingJobBoardsCriteriaAndProfiles);
+			data.allowManagingJobBoardsCriteriaOnly = (tmp.allowManagingJobBoardsCriteriaOnly);
+			data.displayTheFourDailyEmailProfileOption = (tmp.displayTheFourDailyEmailProfileOption);
+			data.firstname = (tmp.firstname);
+			data.lastname = (tmp.lastname);
+			data.isTeamLeader= (tmp.isTeamLeader);
+			data.isSuperUser = tmp.isSuperUser;
 			HashMap<Long, String> notUsedHirePackage = getNotUsedHirePackages(teamid);
 			if (notUsedHirePackage.size() > 0) {
 				data.hasUnusedHirePackage = true;
@@ -1335,7 +1338,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 	public List<ChatbotVMSAccount> getVMSAccountsStatus(JobDivaSession jobDivaSession){
 		List<ChatbotVMSAccount> VMSAccountList = new ArrayList<ChatbotVMSAccount>();
 		Long teamid = jobDivaSession.getTeamId();
-		String sql = "select a.site, a.username, a.url, nvl(a.active,0), nvl(a.active_timesheet,0), nvl(a.active_submittal,0), nvl(a.loginfailures,0), nvl(a.maxloginattempts,0), to_char(a.datelastrun,'YYYY-MM-DD HH:MI:ss'), b.computer_name, b.ip_address " +
+		String sql = "select a.site, a.username, a.url, nvl(a.active,0), nvl(a.active_timesheet,0), nvl(a.active_submittal,0), nvl(a.loginfailures,0), nvl(a.maxloginattempts,0), to_char(a.datelastrun,'YYYY-MM-DD HH24:MI:ss'), b.computer_name, b.ip_address " +
 		" from tspiderswebsites a, tspidersmachinestats b where a.teamid = b.teamid(+) and a.teamid=? and a.site = b.site(+) and nvl(a.deleted, 0)=0 order by upper(a.site)";
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		ArrayList<Object> params = new ArrayList<Object>();
@@ -1384,6 +1387,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			if(datelastrun!=null&&!datelastrun.isEmpty()) {
 				try {
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					sdf.setTimeZone(TimeZone.getTimeZone("America/New_York"));
 					vmsAccount.datelastrun = sdf.parse(datelastrun);
 				}
 				catch(Exception e) {}
@@ -1689,11 +1693,6 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 					break;
 				case ("MACHINE_AT_CLIENT"):
 					tagValue = isMachineAtClient(teamid, tag, references);
-					break;
-				case ("CODDLER_NAME"):
-					// tagValue = isMachineAtClient(teamid, tag, references);
-					break;
-				case ("CODDLER_USERNAME"):
 					break;
 				default:
 					break;
