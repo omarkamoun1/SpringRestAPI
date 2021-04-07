@@ -104,10 +104,13 @@ public class Job implements java.io.Serializable {
 	@JsonProperty(value = "job priority", index = 30)
 	private Integer					jobPriority;
 	//
-	@JsonProperty(value = "job description", index = 31)
+	@JsonProperty(value = "priority", index = 31)
+	private String					priority;
+	//
+	@JsonProperty(value = "job description", index = 32)
 	private String					jobDescription;
 	//
-	@JsonProperty(value = "users(last name | first name | role(s))", index = 32)
+	@JsonProperty(value = "users(last name | first name | role(s))", index = 33)
 	private String					usersNameRole;
 	//
 	//
@@ -122,9 +125,6 @@ public class Job implements java.io.Serializable {
 	//
 	@JsonIgnore
 	private Date					deadLine;
-	//
-	@JsonIgnore
-	private String					priority;
 	//
 	@JsonIgnore
 	private Boolean					travel;
