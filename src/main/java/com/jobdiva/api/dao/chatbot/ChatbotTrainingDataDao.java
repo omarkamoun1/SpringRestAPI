@@ -1000,7 +1000,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			ProxyParameter parameter = new ProxyParameter();
 			parameter.setName("cat");
 			parameter.setName(decoded_password);
-			String CAT_URL = "http://rsx.monster.com/query.ashx?q=java&rpcr=10038-50&mdatemaxage=788400&pagesize=20&ver=1.7&cat=" + URLEncoder.encode(decoded_password);
+			String CAT_URL = "https://rsx.monster.com/query.ashx?q=java&rpcr=10038-50&mdatemaxage=788400&pagesize=20&ver=1.7&cat=" + URLEncoder.encode(decoded_password);
 			System.out.println(CAT_URL);
 			try {
 				Response catResponse = proxyClient.proxyAPI("GET", CAT_URL, null, new ProxyParameter[] { parameter }, null);
