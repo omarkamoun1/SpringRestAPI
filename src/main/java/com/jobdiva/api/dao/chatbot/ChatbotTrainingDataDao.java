@@ -112,6 +112,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				q.setShowAsSuggestion(list.get(i).getShowAsSuggestion());
 				q.setQuestionWithTag(list.get(i).getQuestionWithTag());
 				q.setSubstituteTagValues(list.get(i).getSubstituteTagValues());
+				q.setSubstituteTag(list.get(i).isSubstituteTag());
 				q.setConfidenceLevel(list.get(i).getConfidenceLevel());
 			}
 			q.addVariation(list.get(i).getVariations().get(0));
