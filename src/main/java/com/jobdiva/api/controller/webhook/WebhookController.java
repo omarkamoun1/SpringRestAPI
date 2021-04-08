@@ -64,7 +64,7 @@ public class WebhookController extends AbstractJobDivaController {
 	@RequestMapping(value = { "/welcome" }, method = { RequestMethod.POST }, produces = { "application/json" })
 	public Boolean welcome(@RequestHeader Map<String, String> headers, @RequestBody String json) throws Exception {
 		//
-		logger.info(" WEBHOOK :: RECIEVED REQUEST ");
+		logger.info(" WEBHOOK :: RECIEVED REQUEST :: " + json);
 		//
 		return true;
 	}
