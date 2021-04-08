@@ -3,8 +3,12 @@ package com.jobdiva.api.dao.webhook;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -33,11 +37,39 @@ import com.jobdiva.api.model.webhook.WebhookSyncType;
 @Component
 public class WebhookDao extends AbstractJobDivaDao {
 	
-	static final String		HMAC_SHA1		= "HmacSHA1";
-	static final String		JOBDIVA_SECRET	= "JobDiva2021WebHook";
+	static final String				HMAC_SHA1		= "HmacSHA1";
+	static final String				JOBDIVA_SECRET	= "JobDiva2021WebHook";
 	//
 	@Autowired
-	WebhookRequestDataDao	webhookRequestDataDao;
+	WebhookRequestDataDao			webhookRequestDataDao;
+	//
+	private Map<Long, WebhookInfo>	webHooksMap		= Collections.synchronizedMap(new HashMap<Long, WebhookInfo>());
+	//
+	private Object					syncObj			= new Object();
+	//
+	
+	@PostConstruct
+	private void init() {
+		refresh(null);
+	}
+	
+	private void refresh(Long teamId) {
+		synchronized (this.syncObj) {
+			if (teamId != null) {
+				this.webHooksMap.remove(teamId);
+				WebhookInfo webhookInfo = getWebhookConfiguration(teamId);
+				if (webhookInfo != null)
+					this.webHooksMap.put(teamId, webhookInfo);
+			} else {
+				this.webHooksMap.clear();
+				for (JdbcTemplate jdbcTemplate : this.jobDivaConnectivity.getJdbcsTemplates()) {
+					List<WebhookInfo> webhookConfigurations = getWebhookConfiguration(jdbcTemplate);
+					for (WebhookInfo webhookInfo : webhookConfigurations)
+						this.webHooksMap.put(webhookInfo.getTeamId(), webhookInfo);
+				}
+			}
+		}
+	}
 	
 	protected String calcHmacSha256(String clientSecret, String payload) throws Exception {
 		//
@@ -63,20 +95,58 @@ public class WebhookDao extends AbstractJobDivaDao {
 		return Encryption.decrypt(clientSecret);
 	}
 	
+	public List<WebhookInfo> getWebhookConfiguration(JdbcTemplate jdbcTemplate) {
+		//
+		String sql = getWebHookSQL();
+		//
+		List<WebhookInfo> list = jdbcTemplate.query(sql, new RowMapper<WebhookInfo>() {
+			
+			@Override
+			public WebhookInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
+				// WebhookInfo
+				WebhookInfo webhookInfo = mapWebhookResultset(rs);
+				//
+				return webhookInfo;
+			}
+		});
+		return list;
+	}
+	
+	private String getWebHookSQL() {
+		String sql = "SELECT ID, TEAMID, CLIENT_SECRET, CLIENT_URL, ACTIVE, " //
+				+ " ENABLE_JOB , ENABLE_CANDIDATE, ENABLE_COMPANY, ENABLE_CONTACT,  ENABLE_BILLING,  ENABLE_SALARY " //
+				+ " FROM TWEBHOOK_CONFIGURATION ";//
+		return sql;
+	}
+	
+	private WebhookInfo mapWebhookResultset(ResultSet rs) throws SQLException {
+		WebhookInfo webhookInfo = new WebhookInfo();
+		webhookInfo.setId(rs.getLong("ID"));
+		webhookInfo.setTeamId(rs.getLong("TEAMID"));
+		webhookInfo.setClientUrl(rs.getString("CLIENT_URL"));
+		webhookInfo.setClientSecret(decryptClientSecret(rs.getString("CLIENT_SECRET")));
+		webhookInfo.setActive(rs.getBoolean("ACTIVE"));
+		//
+		webhookInfo.setEnableJob(rs.getBoolean("ENABLE_JOB"));
+		webhookInfo.setEnableCandidate(rs.getBoolean("ENABLE_CANDIDATE"));
+		webhookInfo.setEnableCompany(rs.getBoolean("ENABLE_COMPANY"));
+		webhookInfo.setEnableContact(rs.getBoolean("ENABLE_CONTACT"));
+		webhookInfo.setEnableBilling(rs.getBoolean("ENABLE_BILLING"));
+		webhookInfo.setEnableSalary(rs.getBoolean("ENABLE_SALARY"));
+		return webhookInfo;
+	}
+	
 	public WebhookInfo getWebhookConfiguration(Long teamId) {
 		JdbcTemplate jdbcTemplate = this.jobDivaConnectivity.getJdbcTemplate(teamId);
-		String sql = "SELECT ID, CLIENT_SECRET, CLIENT_URL, ACTIVE FROM TWEBHOOK_CONFIGURATION where TEAMID = ? ";
+		String sql = getWebHookSQL() //
+				+ " where TEAMID = ? ";
 		Object[] params = { teamId };
 		List<WebhookInfo> list = jdbcTemplate.query(sql, params, new RowMapper<WebhookInfo>() {
 			
 			@Override
 			public WebhookInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
 				// WebhookInfo
-				WebhookInfo webhookInfo = new WebhookInfo();
-				webhookInfo.setId(rs.getLong("ID"));
-				webhookInfo.setClientUrl(rs.getString("CLIENT_URL"));
-				webhookInfo.setClientSecret(decryptClientSecret(rs.getString("CLIENT_SECRET")));
-				webhookInfo.setActive(rs.getBoolean("ACTIVE"));
+				WebhookInfo webhookInfo = mapWebhookResultset(rs);
 				//
 				return webhookInfo;
 			}
@@ -120,7 +190,7 @@ public class WebhookDao extends AbstractJobDivaDao {
 	
 	public void send(WebhookRequest webhookRequest, String json, Integer counter) {
 		WebhookInfo webhookConfiguration = getWebhookConfiguration(webhookRequest.getTeamId());
-		if (webhookConfiguration != null && webhookConfiguration.getActive() != null && webhookConfiguration.getActive().booleanValue()) {
+		if (webhookConfiguration != null && webhookConfiguration.getActive() != null && webhookConfiguration.getActive()) {
 			String clientSecret = webhookConfiguration.getClientSecret();
 			String url = webhookConfiguration.getClientUrl();
 			//
@@ -191,7 +261,7 @@ public class WebhookDao extends AbstractJobDivaDao {
 		clientSecret = encryptClientSecret(clientSecret);
 		//
 		JdbcTemplate jdbcTemplate = this.jobDivaConnectivity.getJdbcTemplate(teamId);
-		active = (active != null) ? active.booleanValue() : false;
+		active = (active != null) ? active : false;
 		//
 		String sql = "update TWEBHOOK_CONFIGURATION SET CLIENT_SECRET = ? , CLIENT_URL = ? , ACTIVE = ? where TEAMID = ? ";
 		Object[] params = { clientSecret, clientUrl, active, teamId };
@@ -199,8 +269,9 @@ public class WebhookDao extends AbstractJobDivaDao {
 		int updated = jdbcTemplate.update(sql, params);
 		//
 		if (updated == 0) {
-			String sqlInsert = "INSERT INTO TWEBHOOK_CONFIGURATION(ID, TEAMID, CLIENT_SECRET, CLIENT_URL, ACTIVE) values( TWEBHOOK_CONFIGURATION_SEQ.nextval, ?, ?, ?, ?) ";
-			params = new Object[] { teamId, clientSecret, clientUrl, active };
+			String sqlInsert = "INSERT INTO TWEBHOOK_CONFIGURATION(ID, TEAMID, CLIENT_SECRET, CLIENT_URL, ACTIVE, ENABLE_JOB , ENABLE_CANDIDATE, ENABLE_COMPANY, ENABLE_CONTACT,  ENABLE_BILLING,  ENABLE_SALARY) " //
+					+ " values( TWEBHOOK_CONFIGURATION_SEQ.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+			params = new Object[] { teamId, clientSecret, clientUrl, active, true, true, true, true, true, true, };
 			jdbcTemplate.update(sqlInsert, params);
 		}
 		//
@@ -249,16 +320,37 @@ public class WebhookDao extends AbstractJobDivaDao {
 		return null;
 	}
 	
+	private boolean enableSyncType(Long teamId, WebhookSyncType webhookSyncType) {
+		WebhookInfo webhookInfo = this.webHooksMap.get(teamId);
+		if (webhookInfo != null)
+			switch (webhookSyncType) {
+				case JOB:
+					return webhookInfo.getEnableJob();
+				case CANDIDATE:
+					return webhookInfo.getEnableCandidate();
+				case COMPANY:
+					return webhookInfo.getEnableCompany();
+				case CONTACT:
+					return webhookInfo.getEnableContact();
+				case BILLING:
+					return webhookInfo.getEnableBilling();
+				case SALARY:
+					return webhookInfo.getEnableSalary();
+				default:
+					break;
+			}
+		return false;
+	}
+	
 	public void syncWebhook(WebhookRequest webhookRequest) throws Exception {
 		//
 		WebhookSyncType webhookSyncType = WebhookSyncType.getWebhookSyncType(webhookRequest.getSyncType());
 		//
-		validParameters(webhookSyncType, webhookRequest.getOperation(), webhookRequest.getId());
+		if (!enableSyncType(webhookRequest.getTeamId(), webhookSyncType))
+			return;
 		//
-		// WebhookData webhookData = new WebhookData();
-		// webhookData.setOperation(getOperation(webhookRequest.getOperation()));
-		// webhookData.setType(webhookSyncType.getValue());
-		// webhookData.setId(webhookRequest.getId());
+		//
+		validParameters(webhookSyncType, webhookRequest.getOperation(), webhookRequest.getId());
 		//
 		JsonObject jsonObject = new JsonObject();
 		jsonObject.add("type", webhookSyncType.getValue());
@@ -289,11 +381,5 @@ public class WebhookDao extends AbstractJobDivaDao {
 		}
 		send(webhookRequest, jsonObject.toString(), 0);
 		//
-		// JsonMapper jsonMapper = new JsonMapper();
-		// try {
-		// String jsonData = jsonMapper.writeValueAsString(webhookData);
-		// send(webhookRequest, jsonData, 0);
-		// } catch (JsonProcessingException e) {
-		// }
 	}
 }

@@ -208,6 +208,9 @@ public class AppProperties {
 	//
 	@Value("${api.server.environment}")
 	private String				apiServerEnvironment;
+	//
+	@Value("${enable.webhook}")
+	private Boolean				enableWebhook;
 	
 	public Integer getMaximumPoolSize() {
 		return maximumPoolSize;
@@ -667,5 +670,13 @@ public class AppProperties {
 	
 	public void setApiServerEnvironment(String apiServerEnvironment) {
 		this.apiServerEnvironment = apiServerEnvironment;
+	}
+	
+	public Boolean getEnableWebhook() {
+		return enableWebhook;
+	}
+	
+	public void setEnableWebhook(Boolean enableWebhook) {
+		this.enableWebhook = enableWebhook;
 	}
 }

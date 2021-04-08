@@ -6155,7 +6155,7 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 	}
 	
-	@RequestMapping(value = "/ResumeSourceDetail", method = RequestMethod.GET, produces = "application/json")
+	@RequestMapping(value = "/ResumeSourceList", method = RequestMethod.GET, produces = "application/json")
 	public IBiData ResumeSourceDetail(//
 			//
 			@ApiParam(value = "Alternate Format", required = false) //
@@ -6165,7 +6165,7 @@ public class BIDataController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return biDataService.getBIData(jobDivaSession, "Resume Source Detail", null, null, null, alternateFormat);
+		return biDataService.getBIData(jobDivaSession, "Resume Source List", null, null, null, alternateFormat);
 		//
 	}
 	
@@ -6185,6 +6185,44 @@ public class BIDataController extends AbstractJobDivaController {
 		String[] parameters = new String[] { startId.toString() };
 		//
 		return biDataService.getBIData(jobDivaSession, "Start Record Additional Contacts", null, null, parameters, alternateFormat);
+		//
+	}
+	
+	@RequestMapping(value = { "/TaskDetail" }, method = { RequestMethod.GET }, produces = { "application/json" })
+	public IBiData TaskDetail(//
+			//
+			@ApiParam(value = "Task Id", required = true) //
+			@RequestParam(required = true) Long taskId, //
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat)//
+			//
+			throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		String[] parameters = { taskId.toString() };
+		//
+		return this.biDataService.getBIData(jobDivaSession, "Task Detail", null, null, parameters, alternateFormat);
+		//
+	}
+	
+	@RequestMapping(value = { "/EventDetail" }, method = { RequestMethod.GET }, produces = { "application/json" })
+	public IBiData EventDetail(//
+			//
+			@ApiParam(value = "Event Id", required = true) //
+			@RequestParam(required = true) Long eventId,
+			//
+			@ApiParam(value = "Alternate Format", required = false) //
+			@RequestParam(required = false) Boolean alternateFormat) //
+			//
+			throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		String[] parameters = { eventId.toString() };
+		//
+		return this.biDataService.getBIData(jobDivaSession, "Event Detail", null, null, parameters, alternateFormat);
 		//
 	}
 }

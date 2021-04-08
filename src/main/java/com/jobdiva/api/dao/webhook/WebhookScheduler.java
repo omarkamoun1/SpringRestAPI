@@ -19,6 +19,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.stereotype.Component;
 
+import com.jobdiva.api.config.AppProperties;
 import com.jobdiva.api.dao.setup.JobDivaConnectivity;
 import com.jobdiva.api.model.webhook.WebhookRequest;
 
@@ -40,6 +41,9 @@ public class WebhookScheduler {
 	@Autowired
 	WebhookDao				webhookDao;
 	//
+	@Autowired
+	protected AppProperties	appProperties;
+	//
 	protected Timer			webhookTimer;
 	
 	class WebhookFaultTask extends TimerTask {
@@ -57,10 +61,13 @@ public class WebhookScheduler {
 	@EventListener(ApplicationReadyEvent.class)
 	public void init() {
 		//
-		// initScheduler();
-		// //
-		// logger.info(" WebhookScheduler init..");
-		//
+		if (appProperties.getEnableWebhook()) {
+			//
+			initScheduler();
+			//
+			logger.info(" WebhookScheduler init..");
+			//
+		}
 	}
 	
 	protected void initScheduler() {
