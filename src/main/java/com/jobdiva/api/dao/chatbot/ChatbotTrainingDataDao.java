@@ -358,7 +358,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				ChatbotUserData tmp = new ChatbotUserData();
 				long permission = rs.getLong(1);
 				Boolean isTeamLeader = !((rs.getInt(4) & 16) == 0);
-				Boolean isSuperUser = !((rs.getInt(4) & 256)==0);
+				Boolean isSuperUser = !((rs.getInt(4) & 256) == 0);
 				boolean allowManagingJobBoardsCriteriaAndProfiles = false;
 				// if (( 0!=(leadervalue & (1<<(i-1))) || leadervalue==0) &&
 				// !(i==2 &&
@@ -393,7 +393,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				System.out.println(permission2);
 				if (permission2 != null && !permission2.isEmpty()) {
 					if (permission2.charAt(42) == '1')
-						tmp.allowAssignOnboardingToNotLinkedJob =true;
+						tmp.allowAssignOnboardingToNotLinkedJob = true;
 					if (permission2.charAt(13) == '1')
 						tmp.allowManagingOnboarding = true;
 					if (permission2.charAt(6) == '1')
@@ -438,7 +438,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			data.displayTheFourDailyEmailProfileOption = (tmp.displayTheFourDailyEmailProfileOption);
 			data.firstname = (tmp.firstname);
 			data.lastname = (tmp.lastname);
-			data.isTeamLeader= (tmp.isTeamLeader);
+			data.isTeamLeader = (tmp.isTeamLeader);
 			data.isSuperUser = tmp.isSuperUser;
 			HashMap<Long, String> notUsedHirePackage = getNotUsedHirePackages(teamid);
 			if (notUsedHirePackage.size() > 0) {
@@ -977,6 +977,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		return tagValue;
 	}
 	
+	@SuppressWarnings("deprecation")
 	public ChatbotTagValue getCATTest(Long teamid, String tagName, String[] references) {
 		ChatbotTagValue tagValue = new ChatbotTagValue();
 		String tagType = "BINARY";
@@ -1333,18 +1334,18 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			accountList.add(harvestAccount);
 		}
 		return accountList;
-		
 	}
 	
-	public List<ChatbotVMSAccount> getVMSAccountsStatus(JobDivaSession jobDivaSession){
+	public List<ChatbotVMSAccount> getVMSAccountsStatus(JobDivaSession jobDivaSession) {
 		List<ChatbotVMSAccount> VMSAccountList = new ArrayList<ChatbotVMSAccount>();
 		Long teamid = jobDivaSession.getTeamId();
-		String sql = "select a.site, a.username, a.url, nvl(a.active,0), nvl(a.active_timesheet,0), nvl(a.active_submittal,0), nvl(a.loginfailures,0), nvl(a.maxloginattempts,0), to_char(a.datelastrun,'YYYY-MM-DD HH24:MI:ss'), b.computer_name, b.ip_address " +
-		" from tspiderswebsites a, tspidersmachinestats b where a.teamid = b.teamid(+) and a.teamid=? and a.site = b.site(+) and nvl(a.deleted, 0)=0 order by upper(a.site)";
+		String sql = "select a.site, a.username, a.url, nvl(a.active,0), nvl(a.active_timesheet,0), nvl(a.active_submittal,0), nvl(a.loginfailures,0), nvl(a.maxloginattempts,0), to_char(a.datelastrun,'YYYY-MM-DD HH24:MI:ss'), b.computer_name, b.ip_address "
+				+ " from tspiderswebsites a, tspidersmachinestats b where a.teamid = b.teamid(+) and a.teamid=? and a.site = b.site(+) and nvl(a.deleted, 0)=0 order by upper(a.site)";
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		ArrayList<Object> params = new ArrayList<Object>();
 		params.add(teamid);
 		List<Object[]> dataList = jdbcTemplate.query(sql, params.toArray(), new RowMapper<Object[]>() {
+			
 			@Override
 			public Object[] mapRow(ResultSet rs, int rowNum) throws SQLException {
 				Object[] data = new Object[11];
@@ -1362,10 +1363,10 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				return data;
 			}
 		});
-		for(int i=0;i<dataList.size();i++) {
+		for (int i = 0; i < dataList.size(); i++) {
 			Object[] data = dataList.get(i);
 			String site = (String) data[0];
-			String username = (String)data[1];
+			String username = (String) data[1];
 			String url = (String) data[2];
 			Long isActive = (Long) data[3];
 			Long isActiveTimesheet = (Long) data[4];
@@ -1375,88 +1376,75 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			String datelastrun = (String) data[8];
 			String computer_name = (String) data[9];
 			String ip_address = (String) data[10];
-
 			ChatbotVMSAccount vmsAccount = new ChatbotVMSAccount();
 			vmsAccount.site = site;
 			vmsAccount.username = username;
-			vmsAccount.active = isActive!=0;
-			vmsAccount.activeTimesheet = isActiveTimesheet!=0;
-			vmsAccount.activeSumittal = isActiveSubmittal!=0;
-			vmsAccount.isHalted = loginfailures!=0 && (loginfailures>=maxloginattemps);
+			vmsAccount.active = isActive != 0;
+			vmsAccount.activeTimesheet = isActiveTimesheet != 0;
+			vmsAccount.activeSumittal = isActiveSubmittal != 0;
+			vmsAccount.isHalted = loginfailures != 0 && (loginfailures >= maxloginattemps);
 			vmsAccount.url = url;
 			vmsAccount.teamid = teamid;
-			if(datelastrun!=null&&!datelastrun.isEmpty()) {
+			if (datelastrun != null && !datelastrun.isEmpty()) {
 				try {
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					sdf.setTimeZone(TimeZone.getTimeZone("America/New_York"));
 					vmsAccount.datelastrun = sdf.parse(datelastrun);
+				} catch (Exception e) {
 				}
-				catch(Exception e) {}
 			}
-			if(computer_name!=null&& ip_address!=null) {
-				if ( computer_name.startsWith("w10_") && ip_address.startsWith("10.10")){
+			if (computer_name != null && ip_address != null) {
+				if (computer_name.startsWith("w10_") && ip_address.startsWith("10.10")) {
 					vmsAccount.onClientMachine = false;
-				}
-				else {
+				} else {
 					vmsAccount.onClientMachine = true;
 				}
-			}
-			else {
+			} else {
 				vmsAccount.onClientMachine = null;
 			}
-			if(!vmsAccount.active) {
+			if (!vmsAccount.active) {
 				vmsAccount.status = "inactive";
-			}
-			else {
-				if(vmsAccount.isHalted) {
+			} else {
+				if (vmsAccount.isHalted) {
 					vmsAccount.status = "halted";
-				}
-				else if(vmsAccount.datelastrun!=null) {
-					
-		            Date dateLastRun = vmsAccount.datelastrun;
-		            Date currentLocalDate = new Date();
+				} else if (vmsAccount.datelastrun != null) {
+					Date dateLastRun = vmsAccount.datelastrun;
+					Date currentLocalDate = new Date();
 					Calendar currentCalendar = Calendar.getInstance();
 					currentCalendar.setFirstDayOfWeek(Calendar.MONDAY);
 					currentCalendar.setTimeZone(TimeZone.getTimeZone(getStrTimeZone(teamid)));
 					currentCalendar.setTime(currentLocalDate);
 					int currentHour = currentCalendar.get(Calendar.HOUR_OF_DAY);
-					//Coddler runs on weekdays from 9am to 9pm in local time
-					if(currentHour < 9){
+					// Coddler runs on weekdays from 9am to 9pm in local time
+					if (currentHour < 9) {
 						// make currentCalendar 9 pm yesterday
-						currentCalendar.add(Calendar.DATE,-1);
-						currentCalendar.set(Calendar.HOUR_OF_DAY,21);
-						currentCalendar.set(Calendar.MINUTE,0);
-					}
-					else if (currentHour >= 21){
+						currentCalendar.add(Calendar.DATE, -1);
+						currentCalendar.set(Calendar.HOUR_OF_DAY, 21);
+						currentCalendar.set(Calendar.MINUTE, 0);
+					} else if (currentHour >= 21) {
 						// make currentCalendar 9 pm
-						currentCalendar.set(Calendar.HOUR_OF_DAY,21);
-						currentCalendar.set(Calendar.MINUTE,0);
+						currentCalendar.set(Calendar.HOUR_OF_DAY, 21);
+						currentCalendar.set(Calendar.MINUTE, 0);
 					}
-					if(currentCalendar.get(Calendar.DAY_OF_WEEK)==Calendar.SATURDAY || currentCalendar.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY){
-						currentCalendar.set(Calendar.DAY_OF_WEEK,Calendar.FRIDAY);
-						currentCalendar.set(Calendar.HOUR_OF_DAY,21);
-						currentCalendar.set(Calendar.MINUTE,0);
+					if (currentCalendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || currentCalendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+						currentCalendar.set(Calendar.DAY_OF_WEEK, Calendar.FRIDAY);
+						currentCalendar.set(Calendar.HOUR_OF_DAY, 21);
+						currentCalendar.set(Calendar.MINUTE, 0);
 					}
-					currentCalendar.add(Calendar.HOUR_OF_DAY,-2);
-		            if(currentCalendar.getTime().after(dateLastRun)){
-		                vmsAccount.status = "not working";
+					currentCalendar.add(Calendar.HOUR_OF_DAY, -2);
+					if (currentCalendar.getTime().after(dateLastRun)) {
+						vmsAccount.status = "not working";
+					} else {
+						vmsAccount.status = "working";
 					}
-		            else {
-		            	vmsAccount.status = "working";
-		            }
-					
+				} else {
+					vmsAccount.status = "never run";
 				}
-	            else {
-	            	vmsAccount.status = "never run";
-	            }
 			}
 			VMSAccountList.add(vmsAccount);
-
-
 		}
 		return VMSAccountList;
 	}
-	
 	
 	public List<ChatbotHarvestMachineStatus> getHarvestMachineStatus(JobDivaSession jobDivaSession) {
 		List<ChatbotHarvestMachineStatus> machineList = new ArrayList<ChatbotHarvestMachineStatus>();
@@ -1534,18 +1522,19 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		return machineList;
 	}
 	
-	public List<ChatbotVMSType> getChatbotVMSTypes(JobDivaSession jobDivaSession){
+	public List<ChatbotVMSType> getChatbotVMSTypes(JobDivaSession jobDivaSession) {
 		String sql = "select vms_name, coalesce(job,0), coalesce(timesheet,0), coalesce(submittal,0) from tchatbotsupport_vms_types";
 		JdbcTemplate jdbcTemplate = getCentralJdbcTemplate();
 		Object[] params = null;
 		List<ChatbotVMSType> datalist = jdbcTemplate.query(sql, params, new RowMapper<ChatbotVMSType>() {
+			
 			@Override
 			public ChatbotVMSType mapRow(ResultSet rs, int rowNum) throws SQLException {
 				ChatbotVMSType vms_type = new ChatbotVMSType();
 				vms_type.vms_name = rs.getString(1);
-				vms_type.hasJobCoddler = rs.getLong(2)==1L;
-				vms_type.hasTimesheetCoddler = rs.getLong(3)==1L;
-				vms_type.hasSubmittalCoddler = rs.getLong(4)==1L;
+				vms_type.hasJobCoddler = rs.getLong(2) == 1L;
+				vms_type.hasTimesheetCoddler = rs.getLong(3) == 1L;
+				vms_type.hasSubmittalCoddler = rs.getLong(4) == 1L;
 				return vms_type;
 			}
 		});
@@ -1559,62 +1548,63 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		String sqlSt2 = " values (? ";
 		String sqlSt3 = " on Duplicate key update  ";
 		params.add(vms_name);
-		if(hasJobCoddler!=null) {
+		if (hasJobCoddler != null) {
 			params.add(hasJobCoddler);
 			sqlSt1 += ", job ";
 			sqlSt2 += ", ? ";
 			sqlSt3 += " job = ? ";
 		}
-		if(hasTimesheetCoddler!=null) {
+		if (hasTimesheetCoddler != null) {
 			params.add(hasTimesheetCoddler);
 			sqlSt1 += ", timesheet ";
 			sqlSt2 += ", ? ";
-			if(hasJobCoddler!=null)
-				sqlSt3+=" , ";
+			if (hasJobCoddler != null)
+				sqlSt3 += " , ";
 			sqlSt3 += " timesheet = ? ";
 		}
-		if(hasSubmittalCoddler!=null) {
+		if (hasSubmittalCoddler != null) {
 			params.add(hasSubmittalCoddler);
 			sqlSt1 += ", submittal ";
 			sqlSt2 += ", ? ";
-			if(hasJobCoddler!=null||hasTimesheetCoddler!=null)
-				sqlSt3+=" , ";
+			if (hasJobCoddler != null || hasTimesheetCoddler != null)
+				sqlSt3 += " , ";
 			sqlSt3 += " submittal = ? ";
 		}
-		if(hasJobCoddler!=null) {
+		if (hasJobCoddler != null) {
 			params.add(hasJobCoddler);
 		}
-		if(hasTimesheetCoddler!=null) {
+		if (hasTimesheetCoddler != null) {
 			params.add(hasTimesheetCoddler);
 		}
-		if(hasSubmittalCoddler!=null) {
+		if (hasSubmittalCoddler != null) {
 			params.add(hasSubmittalCoddler);
 		}
-		String sql = sqlSt1 +")"+sqlSt2+")"+sqlSt3;
-		jdbcTemplate.update(sql,params.toArray());
+		String sql = sqlSt1 + ")" + sqlSt2 + ")" + sqlSt3;
+		jdbcTemplate.update(sql, params.toArray());
 		return true;
 	}
 	
-	public boolean deleteChatbotVMSType(JobDivaSession jobDivaSession, String vms_name){
+	public boolean deleteChatbotVMSType(JobDivaSession jobDivaSession, String vms_name) {
 		String sql = "delete from tchatbotsupport_vms_types where vms_name = ?";
 		JdbcTemplate jdbcTemplate = getCentralJdbcTemplate();
-		Object[] params = {vms_name};
+		Object[] params = { vms_name };
 		jdbcTemplate.update(sql, params);
 		return true;
 	}
 	
-	public boolean insertChatbotVMSType(JobDivaSession jobDivaSession){
+	public boolean insertChatbotVMSType(JobDivaSession jobDivaSession) {
 		String sql = "select vms_name, coalesce(job,0), coalesce(timesheet,0), coalesce(submittal,0) from tchatbotsupport_vms_types order by upper(vms_name)";
 		JdbcTemplate jdbcTemplate = getCentralJdbcTemplate();
 		Object[] params = null;
-		List<ChatbotVMSType> datalist = jdbcTemplate.query(sql, params, new RowMapper<ChatbotVMSType>() {
+		jdbcTemplate.query(sql, params, new RowMapper<ChatbotVMSType>() {
+			
 			@Override
 			public ChatbotVMSType mapRow(ResultSet rs, int rowNum) throws SQLException {
 				ChatbotVMSType vms_type = new ChatbotVMSType();
 				vms_type.vms_name = rs.getString(1);
-				vms_type.hasJobCoddler = rs.getLong(2)==1L;
-				vms_type.hasSubmittalCoddler = rs.getLong(3)==1L;
-				vms_type.hasTimesheetCoddler = rs.getLong(4)==1L;
+				vms_type.hasJobCoddler = rs.getLong(2) == 1L;
+				vms_type.hasSubmittalCoddler = rs.getLong(3) == 1L;
+				vms_type.hasTimesheetCoddler = rs.getLong(4) == 1L;
 				return vms_type;
 			}
 		});
