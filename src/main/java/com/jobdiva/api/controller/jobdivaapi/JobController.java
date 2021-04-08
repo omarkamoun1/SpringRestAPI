@@ -587,7 +587,7 @@ public class JobController extends AbstractJobDivaController {
 		//
 	}
 	
-	@RequestMapping(value = "/GetAllJobUsers", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@RequestMapping(value = "/GetAllJobUsers", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Get All Job Users")
 	public List<JobUserSimple> GetAllJobUsers( //
 			//
