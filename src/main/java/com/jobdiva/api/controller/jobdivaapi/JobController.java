@@ -14,6 +14,8 @@ import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.model.Attachment;
 import com.jobdiva.api.model.ContactRoleType;
 import com.jobdiva.api.model.Job;
+import com.jobdiva.api.model.JobUser;
+import com.jobdiva.api.model.JobUserSimple;
 import com.jobdiva.api.model.Skill;
 import com.jobdiva.api.model.UserRole;
 import com.jobdiva.api.model.Userfield;
@@ -584,4 +586,23 @@ public class JobController extends AbstractJobDivaController {
 		return jobService.addJobNote(jobDivaSession, jobId, type, recruiterId, shared, note);
 		//
 	}
+	
+	@RequestMapping(value = "/GetAllJobUsers", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Get All Job Users")
+	public List<JobUserSimple> GetAllJobUsers( //
+			//
+			@ApiParam(value = "JobDiva internal ID", required = true) //
+			@RequestParam(required = true) Long jobId //
+			//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("GetAllJobUsers");
+		//
+		return jobService.getAllJobUsers(jobDivaSession, jobId);
+		//
+	}
+	
+	
 }
