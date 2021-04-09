@@ -14,7 +14,6 @@ import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.model.Attachment;
 import com.jobdiva.api.model.ContactRoleType;
 import com.jobdiva.api.model.Job;
-import com.jobdiva.api.model.JobUser;
 import com.jobdiva.api.model.JobUserSimple;
 import com.jobdiva.api.model.Skill;
 import com.jobdiva.api.model.UserRole;
@@ -118,14 +117,15 @@ public class JobController extends AbstractJobDivaController {
 			//
 			@ApiParam(value = "Filter by recruiter id of the user", required = false) //
 			@RequestParam(required = false) Boolean ismyjob//
-			//
+	//
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		jobDivaSession.checkForAPIPermission("SearchJob");
 		//
-		return jobService.searchJobs(jobDivaSession, jobId, jobdivaref, optionalref, city, state, title, contactid, companyId, companyname, status, jobtype, issuedatefrom, issuedateto, startdatefrom, startdateto, zipcode, zipcodeRadius, countryId, ismyjob);
+		return jobService.searchJobs(jobDivaSession, jobId, jobdivaref, optionalref, city, state, title, contactid, companyId, companyname, status, jobtype, issuedatefrom, issuedateto, startdatefrom, startdateto, zipcode, zipcodeRadius, countryId,
+				ismyjob);
 		//
 	}
 	
@@ -593,7 +593,7 @@ public class JobController extends AbstractJobDivaController {
 			//
 			@ApiParam(value = "JobDiva internal ID", required = true) //
 			@RequestParam(required = true) Long jobId //
-			//
+	//
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
@@ -603,6 +603,4 @@ public class JobController extends AbstractJobDivaController {
 		return jobService.getAllJobUsers(jobDivaSession, jobId);
 		//
 	}
-	
-	
 }

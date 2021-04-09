@@ -17,7 +17,6 @@ import com.jobdiva.api.dao.job.JobUserDao;
 import com.jobdiva.api.model.Attachment;
 import com.jobdiva.api.model.ContactRoleType;
 import com.jobdiva.api.model.Job;
-import com.jobdiva.api.model.JobUser;
 import com.jobdiva.api.model.JobUserSimple;
 import com.jobdiva.api.model.Skill;
 import com.jobdiva.api.model.UserRole;
