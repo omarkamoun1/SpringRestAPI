@@ -17,6 +17,8 @@ import com.jobdiva.api.dao.job.JobUserDao;
 import com.jobdiva.api.model.Attachment;
 import com.jobdiva.api.model.ContactRoleType;
 import com.jobdiva.api.model.Job;
+import com.jobdiva.api.model.JobUser;
+import com.jobdiva.api.model.JobUserSimple;
 import com.jobdiva.api.model.Skill;
 import com.jobdiva.api.model.UserRole;
 import com.jobdiva.api.model.Userfield;
@@ -86,6 +88,26 @@ public class JobService {
 		} catch (Exception e) {
 			//
 			jobNoteDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "addJobNote", "Add Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
+		}
+	}
+	
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+	public List<JobUserSimple> getAllJobUsers(JobDivaSession jobDivaSession, Long jobId) throws Exception {
+		//
+		try {
+			//
+			List<JobUserSimple> list = jobUserDao.getAllJobUsers(jobDivaSession, jobId);
+			//
+			jobUserDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobUsers", "Get Successful");
+			//
+			return list;
+			//
+		} catch (Exception e) {
+			//
+			jobUserDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobUsER", "Get Failed, " + e.getMessage());
 			//
 			throw new Exception(e.getMessage());
 			//
