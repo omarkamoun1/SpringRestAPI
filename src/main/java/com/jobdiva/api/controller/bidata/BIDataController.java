@@ -6156,7 +6156,7 @@ public class BIDataController extends AbstractJobDivaController {
 	}
 	
 	@RequestMapping(value = "/ResumeSourceList", method = RequestMethod.GET, produces = "application/json")
-	public IBiData ResumeSourceDetail(//
+	public IBiData ResumeSourceList(//
 			//
 			@ApiParam(value = "Alternate Format", required = false) //
 			@RequestParam(required = false) Boolean alternateFormat //
