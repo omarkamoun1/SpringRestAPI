@@ -981,7 +981,8 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 	public ChatbotTagValue getCATTest(Long teamid, String tagName, String[] references) {
 		ChatbotTagValue tagValue = new ChatbotTagValue();
 		String tagType = "BINARY";
-		Boolean passCATTest = false;
+		Boolean passCATTest = null;
+
 		Long webid = Long.valueOf(references[0]);
 		String username = references[1];
 		String sql = "select password from twebsites_detail a, twebsites b where a.teamid=? and a.webid=? and a.webid = b.id and a.username=? and upper(b.url) like '%MONSTER%'";
@@ -1002,12 +1003,14 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			parameter.setName("cat");
 			parameter.setName(decoded_password);
 			String CAT_URL = "https://rsx.monster.com/query.ashx?q=java&rpcr=10038-50&mdatemaxage=788400&pagesize=20&ver=1.7&cat=" + URLEncoder.encode(decoded_password);
-			System.out.println(CAT_URL);
 			try {
 				Response catResponse = proxyClient.proxyAPI("GET", CAT_URL, null, new ProxyParameter[] { parameter }, null);
 				String responseBody = catResponse.getBody();
 				if (responseBody.indexOf("Resumes") > 0) {
 					passCATTest = true;
+				}
+				else {
+					passCATTest = false;
 				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -1017,7 +1020,23 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		tagValue.setValue(String.valueOf(passCATTest));
 		tagValue.setTag(tagName);
 		tagValue.setTagType(tagType);
+
 		return tagValue;
+	}
+	
+	public Boolean isRsxMonsterAlive() {
+		Boolean isRsxMonsterAlive = false;
+		try {
+			String CAT_URL = "https://rsx.monster.com/query.ashx";
+			ProxyAPIDao proxyClient = new ProxyAPIDao();
+			Response catResponse = proxyClient.proxyAPI("GET", CAT_URL, null, null, null);
+			String responseBody = catResponse.getBody();
+			if(responseBody.indexOf("Monster")>0) {
+				isRsxMonsterAlive = true;
+			}
+		}catch(Exception e) {}
+		
+		return isRsxMonsterAlive;
 	}
 	
 	public ChatbotTagValue isCoddlerWorking(Long teamid, String tagName, String[] references) {
@@ -1232,6 +1251,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		Long machineNo = -1L;
 		harvestStatus.accounts = new ArrayList<ChatbotHarvestAccount>();
 		harvestStatus.machines = new ArrayList<ChatbotHarvestMachine>();
+		Boolean isRsxMonsterAlive = isRsxMonsterAlive();
 		for (int i = 0; i < dataList.size(); i++) {
 			Object[] data = dataList.get(i);
 			webid = (Long) data[6];
@@ -1262,14 +1282,20 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			harvestAccount.webid = webid;
 			harvestAccount.websitename = harvestStatus.name;
 			harvestAccount.status = getJobBoardStatus(teamid, null, references).getValue();
-			harvestAccount.downloaddLimitPerDay = Long.valueOf(getDownloadLimitPerDay(teamid, null, references).getValue());
-			harvestAccount.hasRecentResume = hasRecentResume(teamid, webid, accountName);
-			harvestAccount.hasNotDownloadSessionStarted = hasNotDownloadSessionStarted(teamid, null, references).getValue().equals("true");
-			harvestAccount.downloadStartTime = getDownloadStartTime(teamid, null, references).getValue();
-			harvestAccount.hasOverLappingTime = hasOverLappingTime(teamid, null, references).getValue().equals("true");
-			harvestAccount.CATTest = getCATTest(teamid, null, references).getValue();
-			harvestAccount.hasJobBoardCriteria = hasJobBoardSearchCriteria(teamid, null, references).getValue().equals("true");
-			harvestAccount.resumeCountsToday = getResumeCountsToday(teamid, webid, accountName);
+			if(harvestAccount.status=="ACTIVE") {
+				harvestAccount.downloaddLimitPerDay = Long.valueOf(getDownloadLimitPerDay(teamid, null, references).getValue());
+				harvestAccount.hasRecentResume = hasRecentResume(teamid, webid, accountName);
+				harvestAccount.hasNotDownloadSessionStarted = hasNotDownloadSessionStarted(teamid, null, references).getValue().equals("true");
+				harvestAccount.downloadStartTime = getDownloadStartTime(teamid, null, references).getValue();
+				harvestAccount.hasOverLappingTime = hasOverLappingTime(teamid, null, references).getValue().equals("true");
+				if(isRsxMonsterAlive) {
+					harvestAccount.CATTest = getCATTest(teamid, null, references).getValue();
+				} else {
+					harvestAccount.CATTest = "null";
+				}
+				harvestAccount.hasJobBoardCriteria = hasJobBoardSearchCriteria(teamid, null, references).getValue().equals("true");
+				harvestAccount.resumeCountsToday = getResumeCountsToday(teamid, webid, accountName);
+			}
 			harvestStatus.accounts.add(harvestAccount);
 		}
 		return harvestStatus;
@@ -1309,6 +1335,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				return data;
 			}
 		});
+		Boolean isRsxMonsterAlive = isRsxMonsterAlive();
 		for (int i = 0; i < dataList.size(); i++) {
 			Object[] data = dataList.get(i);
 			ChatbotHarvestAccount harvestAccount = new ChatbotHarvestAccount();
@@ -1323,14 +1350,19 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			harvestAccount.webid = webid;
 			harvestAccount.websitename = websitename;
 			harvestAccount.status = getJobBoardStatus(teamid, null, references).getValue();
-			harvestAccount.downloaddLimitPerDay = Long.valueOf(getDownloadLimitPerDay(teamid, null, references).getValue());
-			harvestAccount.hasRecentResume = hasRecentResume(teamid, webid, accountName);
-			harvestAccount.hasNotDownloadSessionStarted = hasNotDownloadSessionStarted(teamid, null, references).getValue().equals("true");
-			harvestAccount.downloadStartTime = getDownloadStartTime(teamid, null, references).getValue();
-			harvestAccount.hasOverLappingTime = hasOverLappingTime(teamid, null, references).getValue().equals("true");
-			harvestAccount.CATTest = getCATTest(teamid, null, references).getValue();
-			harvestAccount.hasJobBoardCriteria = hasJobBoardSearchCriteria(teamid, null, references).getValue().equals("true");
-			harvestAccount.resumeCountsToday = getResumeCountsToday(teamid, webid, accountName);
+			if(harvestAccount.status=="ACTIVE") {
+				harvestAccount.downloaddLimitPerDay = Long.valueOf(getDownloadLimitPerDay(teamid, null, references).getValue());
+				harvestAccount.hasRecentResume = hasRecentResume(teamid, webid, accountName);
+				harvestAccount.hasNotDownloadSessionStarted = hasNotDownloadSessionStarted(teamid, null, references).getValue().equals("true");
+				harvestAccount.downloadStartTime = getDownloadStartTime(teamid, null, references).getValue();
+				harvestAccount.hasOverLappingTime = hasOverLappingTime(teamid, null, references).getValue().equals("true");
+				if(isRsxMonsterAlive)
+					harvestAccount.CATTest = getCATTest(teamid, null, references).getValue();
+				else
+					harvestAccount.CATTest = "null";
+				harvestAccount.hasJobBoardCriteria = hasJobBoardSearchCriteria(teamid, null, references).getValue().equals("true");
+				harvestAccount.resumeCountsToday = getResumeCountsToday(teamid, webid, accountName);
+			}
 			accountList.add(harvestAccount);
 		}
 		return accountList;
@@ -1487,37 +1519,6 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				ChatbotTagValue isMachineInstalled = isMachineInstalled(teamid, null, references);
 				machineStatus.isMachineInstalled = isMachineInstalled.getValue().equals("true");
 			}
-			// ChatbotHarvestAccount harvestAccount = new
-			// ChatbotHarvestAccount();
-			// String accountName = (String)data[4];
-			// Long webid = (Long) data[6];
-			// String websitename = (String)data[0];
-			// harvestAccount.name = accountName;
-			// harvestAccount.harvest = (Long) data[3];
-			// String[] references = {String.valueOf(webid), accountName};
-			// harvestAccount.machineNO = machineNo;
-			// harvestAccount.webid = webid;
-			// harvestAccount.websitename = websitename;
-			// harvestAccount.status = getJobBoardStatus(teamid, null,
-			// references).getValue();
-			// harvestAccount.downloaddLimitPerDay =
-			// Long.valueOf(getDownloadLimitPerDay(teamid, null,
-			// references).getValue());
-			// harvestAccount.hasRecentResume = hasRecentResume(teamid, webid,
-			// accountName);
-			// harvestAccount.hasNotDownloadSessionStarted =
-			// hasNotDownloadSessionStarted(teamid,null,
-			// references).getValue().equals("true");
-			// harvestAccount.downloadStartTime = getDownloadStartTime(teamid,
-			// null, references).getValue();
-			// harvestAccount.hasOverLappingTime = hasOverLappingTime(teamid,
-			// null, references).getValue().equals("true");
-			// harvestAccount.CATTest = getCATTest(teamid, null,
-			// references).getValue();
-			// harvestAccount.hasJobBoardCriteria =
-			// hasJobBoardSearchCriteria(teamid, null,
-			// references).getValue().equals("true");
-			// machineStatus.accounts.add(harvestAccount);
 		}
 		return machineList;
 	}
