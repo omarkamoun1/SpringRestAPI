@@ -1282,7 +1282,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			harvestAccount.webid = webid;
 			harvestAccount.websitename = harvestStatus.name;
 			harvestAccount.status = getJobBoardStatus(teamid, null, references).getValue();
-			if(harvestAccount.status=="ACTIVE") {
+			if(harvestAccount.status!="INACTIVE") {
 				harvestAccount.downloaddLimitPerDay = Long.valueOf(getDownloadLimitPerDay(teamid, null, references).getValue());
 				harvestAccount.hasRecentResume = hasRecentResume(teamid, webid, accountName);
 				harvestAccount.hasNotDownloadSessionStarted = hasNotDownloadSessionStarted(teamid, null, references).getValue().equals("true");
@@ -1350,7 +1350,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			harvestAccount.webid = webid;
 			harvestAccount.websitename = websitename;
 			harvestAccount.status = getJobBoardStatus(teamid, null, references).getValue();
-			if(harvestAccount.status=="ACTIVE") {
+			if(harvestAccount.status!="INACTIVE") {
 				harvestAccount.downloaddLimitPerDay = Long.valueOf(getDownloadLimitPerDay(teamid, null, references).getValue());
 				harvestAccount.hasRecentResume = hasRecentResume(teamid, webid, accountName);
 				harvestAccount.hasNotDownloadSessionStarted = hasNotDownloadSessionStarted(teamid, null, references).getValue().equals("true");
