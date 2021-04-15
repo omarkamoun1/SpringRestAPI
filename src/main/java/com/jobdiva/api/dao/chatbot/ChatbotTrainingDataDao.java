@@ -23,6 +23,7 @@ import com.jobdiva.api.mapper.ChatbotSocialQuestionRowMapper;
 import com.jobdiva.api.model.SessionInfo;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.chatbot.ChatbotAnswer;
+import com.jobdiva.api.model.chatbot.ChatbotCandidatePackges;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestAccount;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestMachine;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestMachineStatus;
@@ -1691,5 +1692,48 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			}
 		}
 		return tagValue;
+	}
+
+	public ChatbotCandidatePackges getCandidatePackges(JobDivaSession jobDivaSession,String email) {
+		long teamid = jobDivaSession.getTeamId();
+		String sql = "select id , firstname ,lastname from tcandidate where upper(email) = ? and teamid = ? ";
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		Object[] params = new Object[] {email.toUpperCase(),teamid};
+		List<ChatbotCandidatePackges> candidates = jdbcTemplate.query(sql, params, new RowMapper<ChatbotCandidatePackges>() {
+			
+			@Override
+			public ChatbotCandidatePackges mapRow(ResultSet rs, int rowNum) throws SQLException {
+				ChatbotCandidatePackges candidate = new ChatbotCandidatePackges();
+				candidate.candidateID = rs.getLong(1);
+				candidate.candidateName = rs.getString(2)+ " "+ rs.getString(3);
+
+				return candidate;
+			}
+		});
+		//no candidate with this email
+		if (candidates.size() ==0)
+			return new ChatbotCandidatePackges();
+		
+		//candidate exist count the packges
+		ChatbotCandidatePackges candidate = candidates.get(0);
+		Long candId = candidate.candidateID;
+
+		String s2 = "select count(*) from tpreonboardings where candidateid = ? and teamid = ? and nvl(deleted,0)=0";
+		jdbcTemplate = getJdbcTemplate();
+		Object[] params1 = new Object[] {candId,teamid};
+
+		candidates = jdbcTemplate.query(s2, params1, new RowMapper<ChatbotCandidatePackges>() {
+			
+			@Override
+			public ChatbotCandidatePackges mapRow(ResultSet rs, int rowNum) throws SQLException {
+				ChatbotCandidatePackges candidate = new ChatbotCandidatePackges();
+				candidate.activepackges = rs.getInt(1);
+				return candidate;
+			}
+		});
+		
+		candidate.activepackges = candidates.get(0).activepackges;
+		return candidate;		
+
 	}
 }
