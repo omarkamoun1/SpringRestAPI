@@ -46,6 +46,7 @@ public class ChatbotHarvestAccount implements java.io.Serializable {
 	//
 	@JsonProperty(value = "resumeCountsToday", index = 12)
 	public long resumeCountsToday;
-
-
+	//
+	@JsonProperty(value = "resumeSearchsToday", index = 13)
+	public long resumeSearchsToday;
 }

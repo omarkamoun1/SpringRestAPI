@@ -634,19 +634,50 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		try {
 			String sql = "select sum(resumecount) from twebdatapersistance where teamid = ? and webid=? and username=? and indate between str_to_date(?,'%Y-%m-%d %H:%i:%s') and str_to_date(?,'%Y-%m-%d %H:%i:%s')";
 			JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
-			String strTimeZone = getStrTimeZone(teamid);
-			TimeZone tz = TimeZone.getTimeZone(strTimeZone);
+//			String strTimeZone = getStrTimeZone(teamid);
+//			TimeZone tz = TimeZone.getTimeZone(strTimeZone);
+//			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//			sdf.setTimeZone(tz);
+//			sdf2.setTimeZone(tz);
+//			String dateStartStr = sdf.format(new java.util.Date());
+//			String dateEndStr = dateStartStr + " 23:59:59";
+//			java.util.Date dateStart = sdf.parse(dateStartStr);
+//			java.util.Date dateEnd = sdf2.parse(dateEndStr);
+//			sdf2.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+//			dateStartStr = sdf2.format(dateStart);
+//			dateEndStr = sdf2.format(dateEnd);
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			sdf.setTimeZone(tz);
-			sdf2.setTimeZone(tz);
 			String dateStartStr = sdf.format(new java.util.Date());
 			String dateEndStr = dateStartStr + " 23:59:59";
-			java.util.Date dateStart = sdf.parse(dateStartStr);
-			java.util.Date dateEnd = sdf2.parse(dateEndStr);
-			sdf2.setTimeZone(TimeZone.getTimeZone("America/New_York"));
-			dateStartStr = sdf2.format(dateStart);
-			dateEndStr = sdf2.format(dateEnd);
+			dateStartStr = dateStartStr + " 00:00:00";
+			Object[] params = new Object[] { teamid, webid, username, dateStartStr, dateEndStr };
+			List<Long> list = jdbcTemplate.query(sql, params, new RowMapper<Long>() {
+				
+				@Override
+				public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+					return rs.getLong(1);
+				}
+			});
+			System.out.println(list.get(0));
+			if (list.size() > 0) {
+				resumeCounts = list.get(0);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return resumeCounts;
+	}
+	
+	public Long getSearchCountsToday(Long teamid, Long webid, String username) {
+		long resumeCounts = 0;
+		try {
+			String sql = "select sum(*) from tharvesteractivity where teamid = ? and webid=? and username=? and indate between str_to_date(?,'%Y-%m-%d %H:%i:%s') and str_to_date(?,'%Y-%m-%d %H:%i:%s')";
+			JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			String dateStartStr = sdf.format(new java.util.Date());
+			String dateEndStr = dateStartStr + " 23:59:59";
+			dateStartStr = dateStartStr + " 00:00:00";
 			System.out.println(dateStartStr);
 			System.out.println(dateEndStr);
 			Object[] params = new Object[] { teamid, webid, username, dateStartStr, dateEndStr };
@@ -976,6 +1007,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		tagValue.setTagType(tagType);
 		return tagValue;
 	}
+	
 	
 	@SuppressWarnings("deprecation")
 	public ChatbotTagValue getCATTest(Long teamid, String tagName, String[] references) {
