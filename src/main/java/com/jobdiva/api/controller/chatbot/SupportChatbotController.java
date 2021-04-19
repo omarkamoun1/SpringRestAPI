@@ -13,6 +13,7 @@ import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.model.SessionInfo;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.chatbot.ChatbotAnswer;
+import com.jobdiva.api.model.chatbot.ChatbotCandidatePackges;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestAccount;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestMachineStatus;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestStatus;
@@ -164,5 +165,12 @@ public class SupportChatbotController extends AbstractJobDivaController {
 	) throws Exception {
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		return chatbotDataService.deleteChatbotVMSType(jobDivaSession, vms_name);
+	}
+
+	@GetMapping(value = "/get-candidate-packges", produces = "application/json")
+	public ChatbotCandidatePackges getCandidatePackges(@ApiParam(value = "email", required = true) //
+	@RequestParam(required = true) String email) throws Exception {
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		return chatbotDataService.getCandidatePackges(jobDivaSession, email);
 	}
 }

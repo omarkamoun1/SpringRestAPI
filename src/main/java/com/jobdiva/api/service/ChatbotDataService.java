@@ -9,6 +9,7 @@ import com.jobdiva.api.dao.chatbot.ChatbotTrainingDataDao;
 import com.jobdiva.api.model.SessionInfo;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.chatbot.ChatbotAnswer;
+import com.jobdiva.api.model.chatbot.ChatbotCandidatePackges;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestAccount;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestMachineStatus;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestStatus;
@@ -171,6 +172,15 @@ public class ChatbotDataService {
 	public boolean deleteChatbotVMSType(JobDivaSession jobDivaSession, String vms_name) throws Exception {
 		try {
 			Boolean data = trainingDataDao.deleteChatbotVMSType(jobDivaSession, vms_name);
+			return data;
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+	public ChatbotCandidatePackges getCandidatePackges(JobDivaSession jobDivaSession, String email) throws Exception {
+		try {
+			ChatbotCandidatePackges data = trainingDataDao.getCandidatePackges(jobDivaSession, email);
 			return data;
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
