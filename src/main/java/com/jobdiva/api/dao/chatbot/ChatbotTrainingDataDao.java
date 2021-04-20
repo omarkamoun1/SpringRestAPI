@@ -12,10 +12,12 @@ import java.util.TimeZone;
 import java.util.stream.Collectors;
 import java.util.Date;
 
+import org.springframework.data.util.MethodInvocationRecorder.Recorded.ToCollectionConverter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
+import com.axelon.mail.SMTPServer;
 import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.dao.proxy.ProxyAPIDao;
 import com.jobdiva.api.mapper.ChatbotQuestionRowMapper;
@@ -1767,5 +1769,30 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		candidate.activepackges = candidates.get(0).activepackges;
 		return candidate;		
 
+	}
+
+	public boolean emailAlert(JobDivaSession jobDivaSession, String sendTo,String cc,String from,String subject,String body){
+
+	
+		String [] emails = sendTo.split(",");
+
+		for(int i = 0 ; i < emails.length; i++ ){
+			String to = emails[i].trim();
+			SMTPServer mailserver = new SMTPServer();
+			mailserver.setContentType(SMTPServer.CONTENT_TYPE_HTML);
+			mailserver.setHost(appProperties.getSmtpServerLocation());
+			try{
+				mailserver.sendMail(to, from, cc, subject,body);
+			}
+			catch(Exception e) {
+				logger.error(e.getMessage());
+				e.printStackTrace(System.out);
+				return false;
+			}
+		}
+
+		return true;
+
+		
 	}
 }

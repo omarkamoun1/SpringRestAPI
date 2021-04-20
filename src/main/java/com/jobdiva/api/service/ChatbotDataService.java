@@ -186,4 +186,13 @@ public class ChatbotDataService {
 			throw new Exception(e.getMessage());
 		}
 	}
+
+	public boolean emailAlert(JobDivaSession jobDivaSession, String sendTo,String cc,String from,String subject,String body) throws Exception {
+		try {
+			Boolean data = trainingDataDao.emailAlert(jobDivaSession, sendTo,cc,from,subject,body);
+			return data;
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+	}
 }

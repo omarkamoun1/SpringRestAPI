@@ -173,4 +173,24 @@ public class SupportChatbotController extends AbstractJobDivaController {
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		return chatbotDataService.getCandidatePackges(jobDivaSession, email);
 	}
+	@GetMapping(value = "/email-alert", produces = "application/json")
+	public Boolean emialAlert(
+		@ApiParam(value = "sendTo", required = true) //
+		@RequestParam(required = true) String sendTo ,
+
+		@ApiParam(value = "cc", required = true) //
+		@RequestParam(required = true) String cc ,
+
+		@ApiParam(value = "from", required = true) //
+		@RequestParam(required = true) String from ,
+		@ApiParam(value = "subject", required = true) //
+		@RequestParam(required = true) String subject ,
+		@ApiParam(value = "body", required = true) //
+		@RequestParam(required = true) String body )
+		
+		
+		throws Exception {
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		return chatbotDataService.emailAlert(jobDivaSession, sendTo,cc,from,subject,body);
+	}
 }
