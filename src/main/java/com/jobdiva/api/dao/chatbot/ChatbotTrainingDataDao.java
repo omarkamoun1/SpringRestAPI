@@ -1071,7 +1071,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		Long recruiterid = jobDivaSession.getRecruiterId();
 		Boolean isRsxMonsterAlive = false;
 		try {
-			String CAT_URL = "htxtps://rsx.monster.com/query.ashx";
+			String CAT_URL = "https://rsx.monster.com/query.ashx";
 			ProxyAPIDao proxyClient = new ProxyAPIDao();
 			Response catResponse = proxyClient.proxyAPI("GET", CAT_URL, null, null, null);
 			String responseBody = catResponse.getBody();
