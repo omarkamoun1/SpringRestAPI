@@ -15,6 +15,7 @@ import com.jobdiva.api.model.CompanyAddress;
 import com.jobdiva.api.model.FinancialsType;
 import com.jobdiva.api.model.Note;
 import com.jobdiva.api.model.Owner;
+import com.jobdiva.api.model.SimpleContact;
 import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.service.CompanyService;
@@ -281,5 +282,22 @@ public class CompanyController extends AbstractJobDivaController {
  		//
  	} //
 
+	@ApiOperation(value = "Get Company Contacts")
+ 	@RequestMapping(value = "/getCompanyContacts", method = RequestMethod.GET, produces = "application/json")
+ 	public List<SimpleContact> getCompanyContacts( //
+ 			//
+ 			@ApiParam(value = "Company ID", required = true) //
+ 			@RequestParam(required = true) Long companyid //
+ 			//
+ 			//
+ 	) throws Exception {
+ 		//
+ 		JobDivaSession jobDivaSession = getJobDivaSession();
+ 		//
+ 		jobDivaSession.checkForAPIPermission("getCompanyContacts");
+ 		//
+ 		return companyService.getCompanyContacts(jobDivaSession, companyid);
+ 		//
+ 	} //
 	
 }
