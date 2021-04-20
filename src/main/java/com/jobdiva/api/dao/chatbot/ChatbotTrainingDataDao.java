@@ -1059,7 +1059,8 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				e.printStackTrace();
 			}
 		}
-		tagValue.setValue(String.valueOf(passCATTest));
+		if(passCATTest!=null)
+			tagValue.setValue(String.valueOf(passCATTest));
 		tagValue.setTag(tagName);
 		tagValue.setTagType(tagType);
 
@@ -1075,13 +1076,13 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			ProxyAPIDao proxyClient = new ProxyAPIDao();
 			Response catResponse = proxyClient.proxyAPI("GET", CAT_URL, null, null, null);
 			String responseBody = catResponse.getBody();
+			System.out.println(responseBody);
 			if(responseBody.indexOf("Monster")>0) {
 				isRsxMonsterAlive = true;
 			}
 		}catch(Exception e) {
 			logService.log("debug", "SupportChatbot", teamid, recruiterid, null, e.getMessage());
 		}
-		
 		return isRsxMonsterAlive;
 	}
 	
@@ -1297,7 +1298,9 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		Long machineNo = -1L;
 		harvestStatus.accounts = new ArrayList<ChatbotHarvestAccount>();
 		harvestStatus.machines = new ArrayList<ChatbotHarvestMachine>();
-		Boolean isRsxMonsterAlive = isRsxMonsterAlive(jobDivaSession);
+		Boolean isRsxMonsterAlive= false;
+//		isRsxMonsterAlive = isRsxMonsterAlive(jobDivaSession);
+		isRsxMonsterAlive = false;
 		for (int i = 0; i < dataList.size(); i++) {
 			Object[] data = dataList.get(i);
 			webid = (Long) data[6];
@@ -1382,7 +1385,8 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				return data;
 			}
 		});
-		Boolean isRsxMonsterAlive = isRsxMonsterAlive(jobDivaSession);
+		Boolean isRsxMonsterAlive = false;
+//		isRsxMonsterAlive = isRsxMonsterAlive(jobDivaSession);
 		for (int i = 0; i < dataList.size(); i++) {
 			Object[] data = dataList.get(i);
 			ChatbotHarvestAccount harvestAccount = new ChatbotHarvestAccount();
