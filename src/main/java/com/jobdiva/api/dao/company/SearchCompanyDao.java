@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.model.Company;
+import com.jobdiva.api.model.SimpleContact;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.webhook.WebhookCompany;
 import com.jobdiva.api.utils.StringUtils;
@@ -431,6 +432,35 @@ public class SearchCompanyDao extends AbstractJobDivaDao {
 		assignCompanyOwnsers(jobDivaSession, lcalCompany);
 		//
 		assignCompanyPrimaryContacts(jobDivaSession, lcalCompany);
+	}
+	
+	public List<SimpleContact> getCompanyContacts(JobDivaSession jobDivaSession, Long companyId) {
+		
+		String sql = "select ID, FIRSTNAME, LASTNAME" //
+				+ " from TCUSTOMER " //
+				+ " where TEAMID = ?  " //
+				+ " and COMPANYID = ?  " //
+				+ " order by upper(FIRSTNAME)";
+		//
+		Object[] param = new Object[] { jobDivaSession.getTeamId(), companyId };
+		//
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<SimpleContact> contactList = jdbcTemplate.query(sql, param, new RowMapper<SimpleContact>() {
+			
+			@Override
+			public SimpleContact mapRow(ResultSet rs, int rowNum) throws SQLException {
+				SimpleContact contact= new SimpleContact();
+				contact.setId(rs.getLong("ID"));
+				contact.setFirstName(rs.getString("FIRSTNAME"));
+				contact.setLastName(rs.getString("LASTNAME"));
+				return contact;
+			}
+		});
+		
+		return contactList;
+		
 	}
 	
 	public WebhookCompany getWebhookCompany(JobDivaSession jobDivaSession, Long companyId) {

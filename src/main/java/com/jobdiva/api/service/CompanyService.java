@@ -18,6 +18,7 @@ import com.jobdiva.api.model.CompanyAddress;
 import com.jobdiva.api.model.FinancialsType;
 import com.jobdiva.api.model.Note;
 import com.jobdiva.api.model.Owner;
+import com.jobdiva.api.model.SimpleContact;
 import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 
@@ -146,6 +147,24 @@ public class CompanyService {
  		} catch (Exception e) {
  			//
  			companyNotesDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "addCompanyNotes", "Add Company Notes Failed, " + e.getMessage());
+ 			//
+ 			throw new Exception(e.getMessage());
+ 		}
+	}
+	
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+ 	public List<SimpleContact> getCompanyContacts(JobDivaSession jobDivaSession, Long companyid) throws Exception {
+ 		//
+ 		try {
+ 			List<SimpleContact> contacts = searchCompanyDao.getCompanyContacts(jobDivaSession, companyid);
+ 			//
+ 			companyNotesDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getCompanyContacts", "Get Company Contacts Successful");
+ 			//
+ 			return contacts;
+ 			//
+ 		} catch (Exception e) {
+ 			//
+ 			companyNotesDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getCompanyContacts", "Get Company Contacts Failed, " + e.getMessage());
  			//
  			throw new Exception(e.getMessage());
  		}
