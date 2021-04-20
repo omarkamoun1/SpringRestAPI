@@ -603,4 +603,21 @@ public class JobController extends AbstractJobDivaController {
 		return jobService.getAllJobUsers(jobDivaSession, jobId);
 		//
 	}
+	
+	@RequestMapping(value = "/GetJobPriority", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Get Job Priority")
+	public List<String> GetJobPriority( //
+			//
+			@ApiParam(value = "Team ID", required = true) //
+			@RequestParam(required = true) Long teamId //
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("GetJobPriority");
+		//
+		return jobService.getJobPriority(jobDivaSession, teamId);
+		//
+	}
 }

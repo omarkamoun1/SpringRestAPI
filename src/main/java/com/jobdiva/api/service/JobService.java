@@ -114,6 +114,25 @@ public class JobService {
 	}
 	
 	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+	public List<String> getJobPriority(JobDivaSession jobDivaSession, Long teamId) throws Exception {
+		//
+		try {
+			//
+			List<String> list = jobUserDao.getJobPriority(jobDivaSession, teamId);
+			//
+			jobUserDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobPriority", "Get Successful");
+			//
+			return list;
+			//
+		} catch (Exception e) {
+			//
+			jobUserDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobPriority", "Get Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
+		}
+	}
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
 	public Boolean createJobApplication(JobDivaSession jobDivaSession, Long candidateid, Long jobid, Date dateapplied, Integer resumesource, String globalid) throws Exception {
 		//
 		try {
