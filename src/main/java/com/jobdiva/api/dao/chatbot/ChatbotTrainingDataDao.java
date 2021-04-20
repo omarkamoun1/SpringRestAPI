@@ -1337,7 +1337,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				if(isRsxMonsterAlive) {
 					harvestAccount.CATTest = getCATTest(teamid, null, references).getValue();
 				} else {
-					harvestAccount.CATTest = "null";
+					harvestAccount.CATTest = null;
 				}
 				harvestAccount.hasJobBoardCriteria = hasJobBoardSearchCriteria(teamid, null, references).getValue().equals("true");
 				harvestAccount.resumeCountsToday = getResumeCountsToday(teamid, webid, accountName);
@@ -1406,7 +1406,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				if(isRsxMonsterAlive)
 					harvestAccount.CATTest = getCATTest(teamid, null, references).getValue();
 				else
-					harvestAccount.CATTest = "null";
+					harvestAccount.CATTest = null;
 				harvestAccount.hasJobBoardCriteria = hasJobBoardSearchCriteria(teamid, null, references).getValue().equals("true");
 				harvestAccount.resumeCountsToday = getResumeCountsToday(teamid, webid, accountName);
 				harvestAccount.resumeSearchsToday = getSearchCountsToday(teamid, webid, accountName);
