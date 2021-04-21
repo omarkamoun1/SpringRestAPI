@@ -12,6 +12,7 @@ import java.util.TimeZone;
 import java.util.stream.Collectors;
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.MethodInvocationRecorder.Recorded.ToCollectionConverter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -42,9 +43,14 @@ import com.jobdiva.api.model.chatbot.ChatbotVisibility;
 import com.jobdiva.api.model.chatbot.ChatbotEmailAlert;
 import com.jobdiva.api.model.proxy.ProxyParameter;
 import com.jobdiva.api.model.proxy.Response;
+import com.jobdiva.api.service.LogService;
+import com.jobdiva.log.JobDivaLog;
 
 @Component
 public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
+	
+	@Autowired
+	LogService logService;
 	
 	public SessionInfo getSession(JobDivaSession session) throws Exception {
 		SessionInfo sessionInfo = new SessionInfo();
@@ -676,7 +682,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 	public Long getSearchCountsToday(Long teamid, Long webid, String username) {
 		long resumeCounts = 0;
 		try {
-			String sql = "select sum(*) from tharvesteractivity where teamid = ? and webid=? and username=? and indate between str_to_date(?,'%Y-%m-%d %H:%i:%s') and str_to_date(?,'%Y-%m-%d %H:%i:%s')";
+			String sql = "select count(*) from tharvesteractivity where teamid = ? and webid=? and username=? and datecreated between str_to_date(?,'%Y-%m-%d %H:%i:%s') and str_to_date(?,'%Y-%m-%d %H:%i:%s')";
 			JdbcTemplate jdbcTemplate = getMinerJdbcTemplate();
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			String dateStartStr = sdf.format(new java.util.Date());
@@ -1049,29 +1055,35 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 					passCATTest = false;
 				}
 			} catch (Exception e) {
+				logService.log("debug", "SupportChatbot", teamid, 0L, null, e.getMessage());
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		tagValue.setValue(String.valueOf(passCATTest));
+		if(passCATTest!=null)
+			tagValue.setValue(String.valueOf(passCATTest));
 		tagValue.setTag(tagName);
 		tagValue.setTagType(tagType);
 
 		return tagValue;
 	}
 	
-	public Boolean isRsxMonsterAlive() {
+	public Boolean isRsxMonsterAlive(JobDivaSession jobDivaSession) {
+		Long teamid = jobDivaSession.getTeamId();
+		Long recruiterid = jobDivaSession.getRecruiterId();
 		Boolean isRsxMonsterAlive = false;
 		try {
 			String CAT_URL = "https://rsx.monster.com/query.ashx";
 			ProxyAPIDao proxyClient = new ProxyAPIDao();
 			Response catResponse = proxyClient.proxyAPI("GET", CAT_URL, null, null, null);
 			String responseBody = catResponse.getBody();
+			System.out.println(responseBody);
 			if(responseBody.indexOf("Monster")>0) {
 				isRsxMonsterAlive = true;
 			}
-		}catch(Exception e) {}
-		
+		}catch(Exception e) {
+			logService.log("debug", "SupportChatbot", teamid, recruiterid, null, e.getMessage());
+		}
 		return isRsxMonsterAlive;
 	}
 	
@@ -1287,7 +1299,9 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		Long machineNo = -1L;
 		harvestStatus.accounts = new ArrayList<ChatbotHarvestAccount>();
 		harvestStatus.machines = new ArrayList<ChatbotHarvestMachine>();
-		Boolean isRsxMonsterAlive = isRsxMonsterAlive();
+		Boolean isRsxMonsterAlive= false;
+//		isRsxMonsterAlive = isRsxMonsterAlive(jobDivaSession);
+		isRsxMonsterAlive = false;
 		for (int i = 0; i < dataList.size(); i++) {
 			Object[] data = dataList.get(i);
 			webid = (Long) data[6];
@@ -1327,10 +1341,11 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				if(isRsxMonsterAlive) {
 					harvestAccount.CATTest = getCATTest(teamid, null, references).getValue();
 				} else {
-					harvestAccount.CATTest = "null";
+					harvestAccount.CATTest = null;
 				}
 				harvestAccount.hasJobBoardCriteria = hasJobBoardSearchCriteria(teamid, null, references).getValue().equals("true");
 				harvestAccount.resumeCountsToday = getResumeCountsToday(teamid, webid, accountName);
+				harvestAccount.resumeSearchsToday = getSearchCountsToday(teamid, webid, accountName);
 			}
 			harvestStatus.accounts.add(harvestAccount);
 		}
@@ -1371,7 +1386,8 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				return data;
 			}
 		});
-		Boolean isRsxMonsterAlive = isRsxMonsterAlive();
+		Boolean isRsxMonsterAlive = false;
+//		isRsxMonsterAlive = isRsxMonsterAlive(jobDivaSession);
 		for (int i = 0; i < dataList.size(); i++) {
 			Object[] data = dataList.get(i);
 			ChatbotHarvestAccount harvestAccount = new ChatbotHarvestAccount();
@@ -1395,9 +1411,10 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				if(isRsxMonsterAlive)
 					harvestAccount.CATTest = getCATTest(teamid, null, references).getValue();
 				else
-					harvestAccount.CATTest = "null";
+					harvestAccount.CATTest = null;
 				harvestAccount.hasJobBoardCriteria = hasJobBoardSearchCriteria(teamid, null, references).getValue().equals("true");
 				harvestAccount.resumeCountsToday = getResumeCountsToday(teamid, webid, accountName);
+				harvestAccount.resumeSearchsToday = getSearchCountsToday(teamid, webid, accountName);
 			}
 			accountList.add(harvestAccount);
 		}

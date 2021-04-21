@@ -603,4 +603,45 @@ public class JobController extends AbstractJobDivaController {
 		return jobService.getAllJobUsers(jobDivaSession, jobId);
 		//
 	}
+	
+	@RequestMapping(value = "/GetJobPriority", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Get Job Priority")
+	public List<String> GetJobPriority( //
+			//
+			@ApiParam(value = "Team ID", required = true) //
+			@RequestParam(required = true) Long teamId //
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("GetJobPriority");
+		//
+		return jobService.getJobPriority(jobDivaSession, teamId);
+		//
+	}
+	
+	@RequestMapping(value = "/UpdateJobPriority", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Update Job Priority")
+	public Boolean UpdateJobPriority( //
+			//
+			@ApiParam(value = "Priority", required = true) //
+			@RequestParam(required = true) Integer priority, //
+			//
+			@ApiParam(value = "Job ID", required = true) //
+			@RequestParam(required = true) Long jobId , //
+			//
+			@ApiParam(value = "Priority Name", required = true) //
+			@RequestParam(required = true) String priorityName //
+			
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("UpdateJobPriority");
+		//
+		return jobService.updateJobPriority(jobDivaSession, priority, jobId , priorityName);
+		//
+	}
 }

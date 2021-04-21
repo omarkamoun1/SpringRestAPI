@@ -2520,4 +2520,37 @@ public class JobDao extends AbstractActivityDao {
 			throw new Exception(e.getMessage());
 		}
 	}
+	
+	public List<String>  getJobPriority(JobDivaSession jobDivaSession, Long teamId){
+		String sql = "Select Name " +
+		    	     "from tjob_priority where teamid=?";
+		Object[] params = new Object[] { teamId};
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<String> priority= jdbcTemplate.query(sql, params, new RowMapper<String>() {
+			
+			@Override
+			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getString("Name");
+			}
+		});
+		
+		return priority;
+	}
+	
+	public Boolean updateJobPriority(JobDivaSession jobDivaSession, Integer priority, Long jobId , String priorityName) throws Exception{
+		String sql = "update trfq set jobpriority=?, datelastupdated=?, sync_required=4 where teamid=? and id=?";
+		
+		Object[] params = new Object[] {priority, new Timestamp(new Date().getTime()),jobDivaSession.getTeamId(),jobId };
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		jobNoteDao.addJobNote(jobDivaSession, jobId, 5, jobDivaSession.getRecruiterId(), 0, "The Job Priority was changed to "+ priorityName);
+		//
+		jdbcTemplate.update(sql, params);
+		
+		return true;
+		
+	}
 }
