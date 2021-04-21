@@ -118,15 +118,15 @@ public class JobService {
 		//
 		try {
 			//
-			List<String> list = jobUserDao.getJobPriority(jobDivaSession, teamId);
+			List<String> list = jobDao.getJobPriority(jobDivaSession, teamId);
 			//
-			jobUserDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobPriority", "Get Successful");
+			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobPriority", "Get Successful");
 			//
 			return list;
 			//
 		} catch (Exception e) {
 			//
-			jobUserDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobPriority", "Get Failed, " + e.getMessage());
+			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobPriority", "Get Failed, " + e.getMessage());
 			//
 			throw new Exception(e.getMessage());
 			//

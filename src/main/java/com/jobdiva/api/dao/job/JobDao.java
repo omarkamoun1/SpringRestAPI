@@ -2520,4 +2520,22 @@ public class JobDao extends AbstractActivityDao {
 			throw new Exception(e.getMessage());
 		}
 	}
+	
+	public List<String>  getJobPriority(JobDivaSession jobDivaSession, Long teamId){
+		String sql = "Select Name " +
+		    	     "from tjob_priority where teamid=?";
+		Object[] params = new Object[] { teamId};
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<String> priority= jdbcTemplate.query(sql, params, new RowMapper<String>() {
+			
+			@Override
+			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getString("Name");
+			}
+		});
+		
+		return priority;
+	}
 }

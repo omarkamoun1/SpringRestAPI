@@ -2,6 +2,7 @@ package com.jobdiva.api.dao.job;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -46,23 +47,7 @@ public class JobUserDao extends AbstractJobDivaDao {
 			return users;
 	}
 	
-	public List<String>  getJobPriority(JobDivaSession jobDivaSession, Long teamId){
-		String sql = "Select Name " +
-		    	     "from tjob_priority where teamid=?";
-		Object[] params = new Object[] { teamId};
-		//
-		JdbcTemplate jdbcTemplate = getJdbcTemplate();
-		//
-		List<String> priority= jdbcTemplate.query(sql, params, new RowMapper<String>() {
-			
-			@Override
-			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-				return rs.getString("Name");
-			}
-		});
-		
-		return priority;
-	}
+	
 	
 	public void insertJobUser(long jobid, Long userId, long teamid, boolean rec_email, Boolean isLeadRecruiter, Boolean isSale, Boolean isLeadSales, Boolean isRecruiter, Integer status) {
 		String sqlInsert = "INSERT INTO TRECRUITERRFQ " //
