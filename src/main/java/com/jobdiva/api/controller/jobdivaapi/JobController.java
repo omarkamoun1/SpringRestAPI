@@ -620,4 +620,28 @@ public class JobController extends AbstractJobDivaController {
 		return jobService.getJobPriority(jobDivaSession, teamId);
 		//
 	}
+	
+	@RequestMapping(value = "/UpdateJobPriority", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Update Job Priority")
+	public Boolean UpdateJobPriority( //
+			//
+			@ApiParam(value = "Priority", required = true) //
+			@RequestParam(required = true) Integer priority, //
+			//
+			@ApiParam(value = "Job ID", required = true) //
+			@RequestParam(required = true) Long jobId , //
+			//
+			@ApiParam(value = "Priority Name", required = true) //
+			@RequestParam(required = true) String priorityName //
+			
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("UpdateJobPriority");
+		//
+		return jobService.updateJobPriority(jobDivaSession, priority, jobId , priorityName);
+		//
+	}
 }

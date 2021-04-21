@@ -2538,4 +2538,19 @@ public class JobDao extends AbstractActivityDao {
 		
 		return priority;
 	}
+	
+	public Boolean updateJobPriority(JobDivaSession jobDivaSession, Integer priority, Long jobId , String priorityName) throws Exception{
+		String sql = "update trfq set jobpriority=?, datelastupdated=?, sync_required=4 where teamid=? and id=?";
+		
+		Object[] params = new Object[] {priority, new Timestamp(new Date().getTime()),jobDivaSession.getTeamId(),jobId };
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		jobNoteDao.addJobNote(jobDivaSession, jobId, 5, jobDivaSession.getRecruiterId(), 0, "The Job Priority was changed to "+ priorityName);
+		//
+		jdbcTemplate.update(sql, params);
+		
+		return true;
+		
+	}
 }
