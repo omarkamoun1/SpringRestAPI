@@ -39,6 +39,7 @@ import com.jobdiva.api.model.chatbot.ChatbotUserData;
 import com.jobdiva.api.model.chatbot.ChatbotVMSAccount;
 import com.jobdiva.api.model.chatbot.ChatbotVMSType;
 import com.jobdiva.api.model.chatbot.ChatbotVisibility;
+import com.jobdiva.api.model.chatbot.ChatbotEmailAlert;
 import com.jobdiva.api.model.proxy.ProxyParameter;
 import com.jobdiva.api.model.proxy.Response;
 
@@ -1771,18 +1772,19 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 
 	}
 
-	public boolean emailAlert(JobDivaSession jobDivaSession, String sendTo,String cc,String from,String subject,String body){
+	public boolean emailAlert(JobDivaSession jobDivaSession, ChatbotEmailAlert email){
 
 	
-		String [] emails = sendTo.split(",");
+		String [] emails = email.sendTo.split(",");
 
 		for(int i = 0 ; i < emails.length; i++ ){
 			String to = emails[i].trim();
 			SMTPServer mailserver = new SMTPServer();
 			mailserver.setContentType(SMTPServer.CONTENT_TYPE_HTML);
 			mailserver.setHost(appProperties.getSmtpServerLocation());
+			System.out.println((email.body));
 			try{
-				mailserver.sendMail(to, from, cc, subject,body);
+				mailserver.sendMail(to, email.from, email.cc, email.subject,email.body);
 			}
 			catch(Exception e) {
 				logger.error(e.getMessage());
