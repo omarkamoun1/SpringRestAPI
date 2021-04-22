@@ -38,6 +38,7 @@ import com.jobdiva.api.model.ContactRoleType;
 import com.jobdiva.api.model.Job;
 import com.jobdiva.api.model.JobUser;
 import com.jobdiva.api.model.Skill;
+import com.jobdiva.api.model.TeamRole;
 import com.jobdiva.api.model.UserRole;
 import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.ZipInfo;
@@ -2552,5 +2553,25 @@ public class JobDao extends AbstractActivityDao {
 		
 		return true;
 		
+	}
+	
+	public List<TeamRole> getUserRoles(JobDivaSession jobDivaSession) throws Exception{
+		String sql = "select id, Name from trecruiter_roles where teamid=?";
+		
+		Object[] params = new Object[] {jobDivaSession.getTeamId()};
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<TeamRole> roles = jdbcTemplate.query(sql, params,new RowMapper<TeamRole>() {
+			
+			@Override
+			public TeamRole mapRow(ResultSet rs, int rowNum) throws SQLException {
+				TeamRole role=new TeamRole();
+				role.setId(rs.getLong("id"));
+				role.setName(rs.getString("Name"));
+				return role;
+			}
+		});
+		return roles;
 	}
 }

@@ -16,6 +16,7 @@ import com.jobdiva.api.model.ContactRoleType;
 import com.jobdiva.api.model.Job;
 import com.jobdiva.api.model.JobUserSimple;
 import com.jobdiva.api.model.Skill;
+import com.jobdiva.api.model.TeamRole;
 import com.jobdiva.api.model.UserRole;
 import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
@@ -642,6 +643,18 @@ public class JobController extends AbstractJobDivaController {
 		jobDivaSession.checkForAPIPermission("UpdateJobPriority");
 		//
 		return jobService.updateJobPriority(jobDivaSession, priority, jobId , priorityName);
+		//
+	}
+	
+	@RequestMapping(value = "/GetUserRoles", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Get User Roles")
+	public List<TeamRole> GetUserRoles() throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("GetUserRoles");
+		//
+		return jobService.getUserRoles(jobDivaSession);
 		//
 	}
 }
