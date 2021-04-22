@@ -2556,7 +2556,7 @@ public class JobDao extends AbstractActivityDao {
 	}
 	
 	public List<TeamRole> getUserRoles(JobDivaSession jobDivaSession) throws Exception{
-		String sql = "select id, Name from trecruiter_roles where teamid=?";
+		String sql = "select id, Name, Primary from trecruiter_roles where teamid=? and inactive=0";
 		
 		Object[] params = new Object[] {jobDivaSession.getTeamId()};
 		//
@@ -2569,6 +2569,7 @@ public class JobDao extends AbstractActivityDao {
 				TeamRole role=new TeamRole();
 				role.setId(rs.getLong("id"));
 				role.setName(rs.getString("Name"));
+				role.setPrimary(rs.getString("Primary"));
 				return role;
 			}
 		});
