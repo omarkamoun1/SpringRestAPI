@@ -1,6 +1,8 @@
 package com.jobdiva.api.controller.jobdivaapi;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -13,6 +15,7 @@ import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.model.ExpenseEntry;
 import com.jobdiva.api.model.TimesheetEntry;
 import com.jobdiva.api.model.UploadTimesheetAssignment;
+import com.jobdiva.api.model.WeekEndingRecord;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.service.InvoiceService;
 import com.jobdiva.api.service.TimesheetService;
@@ -1055,4 +1058,43 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 				outsideCommissionPer, overtimeRate, overtimeRatePer, doubletimeRate, doubletimeRatePer, overtimeExempt, fileNo, aDPCOCODE, aDPPAYFREQUENCY);
 		//
 	}
+
+	@RequestMapping(value = "/searchTimesheets", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Search Timesheets")
+	public List<WeekEndingRecord>   searchTimesheets( //
+			//
+			@ApiParam(required = true) //
+			@RequestParam(required = true) Long userId, //
+			//
+			@ApiParam(required = true) //
+			@RequestParam(required = true) Integer approvedStatus, //
+			//
+			@ApiParam(required = true) //
+			@RequestParam(required = true) Calendar startDate, //
+			//
+			@ApiParam(required = true) //
+			@RequestParam(required = true) Calendar endDate, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String firstname, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String lastname, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Long companyId, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Long managerId //
+			//
+	//
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		return timesheetService.searchTimesheet(jobDivaSession, userId, approvedStatus, startDate, endDate, firstname, lastname, companyId, managerId);
+		//
+	}
+	
 }
