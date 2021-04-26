@@ -15,6 +15,7 @@ import com.jobdiva.api.model.Contact;
 import com.jobdiva.api.model.ContactAddress;
 import com.jobdiva.api.model.ContactNote;
 import com.jobdiva.api.model.ContactType;
+import com.jobdiva.api.model.NoteType;
 import com.jobdiva.api.model.Owner;
 import com.jobdiva.api.model.PhoneType;
 import com.jobdiva.api.model.Userfield;
@@ -422,6 +423,18 @@ public class ContactController extends AbstractJobDivaController {
 		jobDivaSession.checkForAPIPermission("GetContactTypes");
 		//
 		return contactTypeService.getContactNotes(jobDivaSession, jobDivaSession.getTeamId(), contactId);
+		//
+	}
+	
+	@RequestMapping(value = "/GetContactNoteTypes", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Get Contact Note Types")
+	public List<NoteType> GetContactNoteTypes() throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("GetContactNoteTypes");
+		//
+		return contactNoteService.getContactNoteTypes(jobDivaSession);
 		//
 	}
 }

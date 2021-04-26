@@ -24,6 +24,7 @@ import com.jobdiva.api.model.Candidate;
 import com.jobdiva.api.model.Contact;
 import com.jobdiva.api.model.ContactNote;
 import com.jobdiva.api.model.Job;
+import com.jobdiva.api.model.NoteType;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.sql.JobDivaSqlLobValue;
 
@@ -87,6 +88,29 @@ public class ContactNoteDao extends AbstractJobDivaDao {
 			}
 		});
 		return list;
+	}
+	
+	public List<NoteType> getContactNoteTypes(JobDivaSession jobDivaSession) throws Exception{
+		
+		String sql ="select id, name, active from tActionType "
+				+ "where teamid=? and nvl(deleted,0)=0 and active>0 "
+				+ "order by active desc, UPPER(name)";
+		//
+		Object[] params = new Object[] {jobDivaSession.getTeamId()};
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<NoteType> types= jdbcTemplate.query(sql, params, new RowMapper<NoteType>() {
+			
+			@Override
+			public NoteType mapRow(ResultSet rs, int rowNum) throws SQLException {
+				NoteType noteType=new NoteType();
+				noteType.setId(rs.getLong("id"));
+				noteType.setName(rs.getString("name"));
+				return noteType;
+			}
+		});
+		return types;
 	}
 	
 	public void insertUpdateContactNote(JobDivaSession jobDivaSession, ContactNote contactNote) throws Exception {
