@@ -14,6 +14,7 @@ import com.jobdiva.api.dao.job.JobApplicationDao;
 import com.jobdiva.api.dao.job.JobDao;
 import com.jobdiva.api.dao.job.JobNoteDao;
 import com.jobdiva.api.dao.job.JobUserDao;
+import com.jobdiva.api.model.Activity;
 import com.jobdiva.api.model.Attachment;
 import com.jobdiva.api.model.ContactRoleType;
 import com.jobdiva.api.model.Job;
@@ -205,6 +206,24 @@ public class JobService {
 		} catch (Exception e) {
 			//
 			jobApplicationDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobNotes", "Get Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
+		}
+	}
+	
+	public List<Activity> getJobActivities(JobDivaSession jobDivaSession, Long jobid) throws Exception {
+		//
+		try {
+			//
+			List<Activity> activities = jobDao.getJobActivities(jobDivaSession, jobid);
+			//
+			jobApplicationDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobActivities", "Get Job Activities Successful");
+			//
+			return activities;
+		} catch (Exception e) {
+			//
+			jobApplicationDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobActivities", "Get Failed, " + e.getMessage());
 			//
 			throw new Exception(e.getMessage());
 			//
