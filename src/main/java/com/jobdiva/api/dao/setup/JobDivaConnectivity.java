@@ -59,8 +59,12 @@ public class JobDivaConnectivity {
 	public void init() {
 		//
 		//
-		String directory = Paths.get("").toAbsolutePath().toString() + File.separator;
-		PropertyConfigurator.configure(directory + "log4j.properties");
+		try {
+			String directory = Paths.get("").toAbsolutePath().toString() + File.separator;
+			PropertyConfigurator.configure(directory + "log4j.properties");
+		} catch (Exception e) {
+			logger.info("Init Error : " + e.getMessage());
+		}
 		//
 		//
 		//

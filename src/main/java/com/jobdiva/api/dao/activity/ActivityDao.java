@@ -38,7 +38,7 @@ public class ActivityDao extends AbstractActivityDao {
 				+ " LEFT JOIN TRECRUITER c ON c.ID = a.RECRUITERID " //
 				+ " where   " //
 				+ " a.ID = :id " //
-				+ " CANDIDATE_TEAMID = :teamid " //
+				+ " and CANDIDATE_TEAMID = :teamid " //
 				+ " and RECRUITER_TEAMID = :teamid ";
 		//
 		paramList.put("id", activityId);

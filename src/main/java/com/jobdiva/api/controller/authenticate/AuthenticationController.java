@@ -74,9 +74,8 @@ public class AuthenticationController {
 		//
 		//
 	}
+	//
 	
-	// No release to production
-	@ApiIgnore
 	@ApiImplicitParams({ @ApiImplicitParam(name = "password", required = true, dataType = "String", format = "password") })
 	@ApiOperation(value = "V2 Authenticate")
 	@RequestMapping(value = "/v2/authenticate", method = RequestMethod.GET)
@@ -112,8 +111,6 @@ public class AuthenticationController {
 		return response;
 	}
 	
-	// No release to production
-	@ApiIgnore
 	@ApiOperation(value = "Refresh Token")
 	@RequestMapping(value = "/v2/refreshToken", method = RequestMethod.GET)
 	public JwtV2Response refreshToken(
