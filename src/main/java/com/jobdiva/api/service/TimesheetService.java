@@ -1,6 +1,5 @@
 package com.jobdiva.api.service;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -85,8 +84,7 @@ public class TimesheetService {
 		//
 		try {
 			//
-			List<WeekEndingRecord> records = timesheetDao.searchTimesheet(jobDivaSession,userid, approvedStatus,startDate, endDate, firstname, lastname, companyid, managerid);
-				
+			List<WeekEndingRecord> records = timesheetDao.searchTimesheet(jobDivaSession, userid, approvedStatus, startDate, endDate, firstname, lastname, companyid, managerid);
 			//
 			timesheetDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "searchTimesheet", "search Successful");
 			//

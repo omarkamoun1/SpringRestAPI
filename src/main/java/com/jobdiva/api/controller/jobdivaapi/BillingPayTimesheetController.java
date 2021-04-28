@@ -1,6 +1,5 @@
 package com.jobdiva.api.controller.jobdivaapi;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -1080,10 +1079,10 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 				outsideCommissionPer, overtimeRate, overtimeRatePer, doubletimeRate, doubletimeRatePer, overtimeExempt, fileNo, aDPCOCODE, aDPPAYFREQUENCY);
 		//
 	}
-
+	
 	@RequestMapping(value = "/searchTimesheets", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Search Timesheets")
-	public List<WeekEndingRecord>   searchTimesheets( //
+	public List<WeekEndingRecord> searchTimesheets( //
 			//
 			@ApiParam(required = true) //
 			@RequestParam(required = true) Long userId, //
@@ -1108,7 +1107,7 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 			//
 			@ApiParam(required = false) //
 			@RequestParam(required = false) Long managerId //
-			//
+	//
 	//
 	//
 	) throws Exception {
@@ -1118,5 +1117,4 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		return timesheetService.searchTimesheet(jobDivaSession, userId, approvedStatus, startDate, endDate, firstname, lastname, companyId, managerId);
 		//
 	}
-	
 }
