@@ -1,5 +1,7 @@
 package com.jobdiva.api.dao.setup;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -9,8 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
+import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +33,9 @@ public class JobDivaConnectivity {
 	
 	//
 	protected final Logger					logger						= LoggerFactory.getLogger(this.getClass());
+	//
+	@Autowired
+	ServletContext							context;
 	//
 	@Autowired
 	JdbcTemplate							jdbcTemplate;
@@ -50,6 +57,10 @@ public class JobDivaConnectivity {
 	//
 	@PostConstruct
 	public void init() {
+		//
+		//
+		String directory = Paths.get("").toAbsolutePath().toString() + File.separator;
+		PropertyConfigurator.configure(directory + "log4j.properties");
 		//
 		//
 		//

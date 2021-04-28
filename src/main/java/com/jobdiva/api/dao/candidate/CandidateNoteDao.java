@@ -162,6 +162,20 @@ public class CandidateNoteDao extends AbstractJobDivaDao {
 		return noteid;
 	}
 	
+	public Boolean createCandidatesNote(JobDivaSession jobDivaSession, List<Long> candidateids, String note, Long recruiterid, String action, //
+			Date actionDate, Long link2AnOpenJob, Long link2aContact, Boolean setAsAuto, Date createDate) throws Exception {
+		//
+		for (Long candidateid : candidateids) {
+			//
+			if (candidateid != null && candidateid > 0)
+				createCandidateNote(jobDivaSession, candidateid, note, recruiterid, action, actionDate, link2AnOpenJob, link2aContact, setAsAuto, createDate);
+			//
+		}
+		//
+		return true;
+		//
+	}
+	
 	public Long createCandidateNote(JobDivaSession jobDivaSession, Long candidateid, String note, Long recruiterid, String action, //
 			Date actionDate, Long link2AnOpenJob, Long link2aContact, Boolean setAsAuto, Date createDate) throws Exception {
 		//

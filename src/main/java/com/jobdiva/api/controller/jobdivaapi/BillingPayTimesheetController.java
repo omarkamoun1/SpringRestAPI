@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,9 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.model.ExpenseEntry;
+import com.jobdiva.api.model.Timesheet;
 import com.jobdiva.api.model.TimesheetEntry;
 import com.jobdiva.api.model.UploadTimesheetAssignment;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
+import com.jobdiva.api.model.v2.billingtimesheet.UploadTimesheetDef;
 import com.jobdiva.api.service.InvoiceService;
 import com.jobdiva.api.service.TimesheetService;
 
@@ -36,31 +39,19 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 	@Autowired
 	InvoiceService		invoiceService;
 	
-	@ApiImplicitParams({ @ApiImplicitParam(name = "timesheetEntry", required = false, allowMultiple = true, dataType = "TimesheetEntry") })
 	@RequestMapping(value = "/uploadTimesheet", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Upload Timesheet")
-	public String uploadTimesheet( //
+	public Long uploadTimesheet( //
 			//
-			@ApiParam(value = "The internal JobDiva ID of the employee", required = true) //
-			@RequestParam(required = true) Long employeeid, //
-			//
-			@ApiParam(value = "The internal JobDiva ID of the job", required = false) //
-			@RequestParam(required = false) Long jobid, //
-			//
-			@ApiParam(value = "The weekending date of the timesheet Format [MM/dd/yyyy HH:mm:ss]", required = true) //
-			@RequestParam(required = true) Date weekendingdate, //
-			//
-			@ApiParam(value = "Specify if the timesheet is approved or not", required = true) //
-			@RequestParam(required = true) Boolean approved, //
-			//
-			@ApiParam(value = "Must be exactly seven (7) timesheet entries for each day of a week.", required = true, type = "TimesheetEntry", allowMultiple = true) //
-			@RequestParam(required = true) TimesheetEntry[] timesheetEntry, //
-			//
-			@ApiParam(value = "The date which the employee works", required = true) //
-			@RequestParam(required = true) String date, //
-			//
-			@ApiParam(value = "Hours worked by the employee", required = true) //
-			@RequestParam(required = true) String hours //
+			@ApiParam(value = "employeeid : The internal JobDiva ID of the employee (required)\r\n" //
+					+ "jobid : The internal JobDiva ID of the job  (not required)\r\n" //
+					+ "weekendingdate : The weekending date of the timesheet Format [yyyy-MM-dd'T'HH:mm:ss] (required) \r\n" //
+					+ "approved : Specify if the timesheet is approved or not (required) \r\n" //
+					+ "timesheetid : If specified, will update the timesheet with its ID \r\n" //
+					+ "externalId : Timesheet’s external ID \r\n" //
+					+ "timesheet : Must be exactly seven (7) timesheet entries for each day of a week (required)\r\n") //
+			@RequestBody UploadTimesheetDef uploadTimesheetDef
+	//
 	//
 	//
 	//
@@ -68,7 +59,18 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		return timesheetService.uploadTimesheet(jobDivaSession, employeeid, jobid, weekendingdate, approved, timesheetEntry, date, hours);
+		jobDivaSession.checkForAPIPermission("uploadTimesheet");
+		//
+		Long employeeid = uploadTimesheetDef.getEmployeeid();
+		Long jobid = uploadTimesheetDef.getJobid();
+		Date weekendingdate = uploadTimesheetDef.getWeekendingdate();
+		Boolean approved = uploadTimesheetDef.getApproved();
+		Timesheet[] timesheet = uploadTimesheetDef.getTimesheet();
+		Long timesheetId = uploadTimesheetDef.getTimesheetId();
+		String externalId = uploadTimesheetDef.getExternalId();
+		//
+		return timesheetService.uploadTimesheet(jobDivaSession, employeeid, jobid, weekendingdate, approved, timesheetId, externalId, timesheet);
+		//
 		//
 	}
 	
@@ -138,6 +140,8 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("uploadTimesheetAssignment");
+		//
 		return timesheetService.uploadTimesheetAssignment(jobDivaSession, employeeid, jobid, weekendingdate, payrate, overtimepayrate, doubletimepayrate, billrate, overtimebillrate, doubletimebillrate, location, title, rolenumber, timesheetid,
 				externalid, compcode, timesheetEntry, expenses, emailrecipients);
 		//
@@ -176,6 +180,8 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("addExpenseEntry");
+		//
 		return invoiceService.addExpenseEntry(jobDivaSession, employeeid, weekendingdate, invoicedate, feedback, description, expenses, emailrecipients);
 		//
 	}
@@ -198,6 +204,8 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("approveExpenseEntry");
 		//
 		return invoiceService.approveExpenseEntry(jobDivaSession, invoiceid, comments, emailrecipients);
 		//
@@ -236,6 +244,8 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("addExpenseInvoice");
+		//
 		return invoiceService.addExpenseInvoice(jobDivaSession, employeeid, weekendingdate, invoicedate, feedback, description, expenses, emailrecipients);
 		//
 	}
@@ -261,6 +271,8 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("markTimesheetPaid");
 		//
 		return timesheetService.markTimesheetPaid(jobDivaSession, employeeid, salaryrecordid, datepaid, timesheetdate);
 		//
@@ -460,6 +472,8 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("updatePayrollProfile");
+		//
 		return invoiceService.updatePayrollProfile(jobDivaSession, employeeid, salaryrecid, generationsuffix, reasonforhire, gender, companycode, country, address1, address2, address3, city, state, county, zipcode, telephone, jobtitle,
 				workercategory, manageposition, businessunit, homedepartment, codedhomedepartment, benefitseligibilityclass, naicsworkerscomp, standardhours, federalmaritalstatus, federalexemptions, workedstatetaxcode, statemaritalstatus,
 				stateexemptions, livedstatetaxcode, suisditaxcode, bankdepositdeductioncode, bankfulldepositflag, bankdepositdeductionamount, bankdeposittransitoraba, bankdepositaccountnumber, prenotificationmethod, bankdepositprenotedate,
@@ -642,6 +656,8 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("createBillingRecord");
 		//
 		return invoiceService.createBillingRecord(jobDivaSession, candidateID, assignmentID, jobID, recordID, createdByID, approved, startDate, endDate, customerRefNo, hiringManagerID, billingContactID, division, invoiceGroupIndex, invoiceGroup,
 				vMSWebsite, vMSEmployeeName, invoiceContent, expenseInvoices, enableTimesheet, allowEnterTimeOnPortal, timesheetInstruction, expenseEnabled, billRate, billRatePer, overtimeExempt, timesheetEntryFormat, frequency,
@@ -827,6 +843,8 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("updateBillingRecord");
+		//
 		return invoiceService.updateBillingRecord(jobDivaSession, allowEnterTimeOnPortal, approved, assignmentID, billingContactID, billingUnit, billRate, billRatePer, candidateID, customerRefNo, division, doubletimePer, doubletimeRate,
 				doubletimeRatePer, enableTimesheet, endDate, expenseEnabled, expenseInvoices, frequency, hiringManagerID, hoursPerDay, hoursPerHalfDay, invoiceContent, invoiceGroup, invoiceGroupIndex, jobID, overtimeByWorkingState, overtimeExempt,
 				overtimeRate, overtimeRatePer, paymentTerms, primaryRecruiterID, primaryRecruiterPercentage, primarySalesPercentage, primarySalesPersonID, recordID, secondaryRecruiterID, secondaryRecruiterPercentage, secondarySalesPercentage,
@@ -950,6 +968,8 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
+		jobDivaSession.checkForAPIPermission("UpdatePayRecord");
+		//
 		return invoiceService.UpdatePayRecord(jobDivaSession, aDPCOCODE, aDPPAYFREQUENCY, approved, assignmentID, candidateID, doubletimeRate, doubletimeRatePer, effectiveDate, endDate, fileNo, otherExpenses, otherExpensesPer, outsideCommission,
 				outsideCommissionPer, overtimeExempt, overtimeRate, overtimeRatePer, paymentTerms, payOnRemittance, perDiem, perDiemPer, recordID, salary, salaryPer, status, subcontractCompanyID, taxID);
 		//
@@ -1049,6 +1069,8 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("createPayRecord");
 		//
 		return invoiceService.createPayRecord(jobDivaSession, candidateID, assignmentID, jobID,
 				/* recordID, */ approved, createdByID, effectiveDate, endDate, status, taxID, paymentTerms, subcontractCompanyID, payOnRemittance, salary, salaryPer, perDiem, perDiemPer, otherExpenses, otherExpensesPer, outsideCommission,

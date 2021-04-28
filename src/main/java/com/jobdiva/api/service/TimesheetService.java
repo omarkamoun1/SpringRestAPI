@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.jobdiva.api.dao.timesheet.TimesheetDao;
 import com.jobdiva.api.model.ExpenseEntry;
+import com.jobdiva.api.model.Timesheet;
 import com.jobdiva.api.model.TimesheetEntry;
 import com.jobdiva.api.model.UploadTimesheetAssignment;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
@@ -17,11 +18,11 @@ public class TimesheetService {
 	@Autowired
 	TimesheetDao timesheetDao;
 	
-	public String uploadTimesheet(JobDivaSession jobDivaSession, Long employeeid, Long jobid, Date weekendingdate, Boolean approved, TimesheetEntry[] timesheetEntry, String date, String hours) throws Exception {
+	public Long uploadTimesheet(JobDivaSession jobDivaSession, Long employeeid, Long jobid, Date weekendingdate, Boolean approved, Long timesheetId, String externalId, Timesheet[] timesheetEntry) throws Exception {
 		//
 		try {
 			//
-			String result = timesheetDao.uploadTimesheet(jobDivaSession, employeeid, jobid, weekendingdate, approved, timesheetEntry, date, hours);
+			Long result = timesheetDao.uploadTimesheet(jobDivaSession, employeeid, jobid, weekendingdate, approved, timesheetId, externalId, timesheetEntry);
 			//
 			timesheetDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "uploadTimesheet", "upload Successful");
 			//

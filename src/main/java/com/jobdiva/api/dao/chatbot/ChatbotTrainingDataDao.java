@@ -6,14 +6,13 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
-import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.MethodInvocationRecorder.Recorded.ToCollectionConverter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -43,7 +42,6 @@ import com.jobdiva.api.model.chatbot.ChatbotVisibility;
 import com.jobdiva.api.model.proxy.ProxyParameter;
 import com.jobdiva.api.model.proxy.Response;
 import com.jobdiva.api.service.LogService;
-import com.jobdiva.log.JobDivaLog;
 
 @Component
 public class ChatbotTrainingDataDao extends AbstractJobDivaDao {

@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
 
 import com.axelon.mail.SMTPServer;
 import com.axelon.recruiter.RecruiterObject;
-import com.axelon.shared.Application;
 import com.axelon.util.JDLocale;
 import com.axelon.util.JDTimeZone;
 import com.axelon.util.JDUtils;
@@ -839,7 +838,7 @@ public class EventDao extends AbstractJobDivaDao {
 					MAINAPP, //
 					PN_MAIN_TASK, //
 					"", //
-					Application.getEnvironmentType().equalsIgnoreCase("integration"), //
+					appProperties.getApiServerEnvironment().equalsIgnoreCase("int"), //
 					teamId, //
 					recruiteridArray, //
 					subject, //

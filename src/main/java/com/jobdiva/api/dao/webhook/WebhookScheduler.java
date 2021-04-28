@@ -88,81 +88,86 @@ public class WebhookScheduler {
 	
 	public void reSendFaultRequests() {
 		//
-		List<WebhookRequest> globalList = new ArrayList<WebhookRequest>();
-		for (JdbcTemplate jdbcTemplate : jobDivaConnectivity.getJdbcsTemplates()) {
-			String sql = " SELECT * FROM TWEBHOOK_FAILEDREQUEST WHERE INPROGRESS IS NULL OR INPROGRESS = 0  ";
-			List<WebhookRequest> list = jdbcTemplate.query(sql, new org.springframework.jdbc.core.RowMapper<WebhookRequest>() {
-				
-				@Override
-				public WebhookRequest mapRow(ResultSet rs, int rowNum) throws SQLException {
-					//
-					WebhookRequest webhookFaultRequest = new WebhookRequest();
-					webhookFaultRequest.setFaultId(rs.getLong("ID"));
-					webhookFaultRequest.setTeamId(rs.getLong("TEAMID"));
-					webhookFaultRequest.setSyncType(rs.getString("SYNCTYPE"));
-					webhookFaultRequest.setOperation(rs.getInt("OPERATIONTYPE"));
-					webhookFaultRequest.setId(rs.getString("DATAID"));
-					return webhookFaultRequest;
-				}
-			});
-			//
-			//
-			if (list.size() > 0) {
-				//
-				String sqlBatchDelete = "UPDATE TWEBHOOK_FAILEDREQUEST SET INPROGRESS = ? WHERE ID = ? AND  TEAMID = ? ";
-				//
-				final int batchSize = 1000;
-				//
-				jdbcTemplate.execute(sqlBatchDelete, new PreparedStatementCallback<Integer>() {
+		try {
+			List<WebhookRequest> globalList = new ArrayList<WebhookRequest>();
+			for (JdbcTemplate jdbcTemplate : jobDivaConnectivity.getJdbcsTemplates()) {
+				String sql = " SELECT * FROM TWEBHOOK_LOG WHERE ( INPROGRESS IS NULL OR INPROGRESS = 0) AND ( STATUSID = 2 ) ";
+				List<WebhookRequest> list = jdbcTemplate.query(sql, new org.springframework.jdbc.core.RowMapper<WebhookRequest>() {
 					
 					@Override
-					public Integer doInPreparedStatement(PreparedStatement stmt) throws SQLException, DataAccessException {
-						Connection cxn = stmt.getConnection();
-						cxn.setAutoCommit(false);
+					public WebhookRequest mapRow(ResultSet rs, int rowNum) throws SQLException {
 						//
-						int count = 0;
-						int size = list.size();
-						//
-						for (WebhookRequest data : list) {
-							//
-							stmt.setBoolean(1, true);
-							stmt.setLong(2, data.getFaultId());
-							stmt.setLong(3, data.getTeamId());
-							//
-							stmt.addBatch();
-							//
-							++count;
-							//
-							if (count % batchSize == 0 || count == size) {
-								stmt.executeBatch();
-								stmt.clearBatch();
-							}
-						}
-						cxn.setAutoCommit(true);
-						return 0;
+						WebhookRequest webhookFaultRequest = new WebhookRequest();
+						webhookFaultRequest.setFaultId(rs.getLong("ID"));
+						webhookFaultRequest.setTeamId(rs.getLong("TEAMID"));
+						webhookFaultRequest.setSyncType(rs.getString("SYNCTYPE"));
+						webhookFaultRequest.setOperation(rs.getInt("OPERATIONTYPE"));
+						webhookFaultRequest.setId(rs.getString("DATAID"));
+						webhookFaultRequest.setJson(rs.getString("JSON"));
+						return webhookFaultRequest;
 					}
 				});
 				//
 				//
-				globalList.addAll(list);
-				//
+				if (list.size() > 0) {
+					//
+					String sqlBatchDelete = "UPDATE TWEBHOOK_LOG SET INPROGRESS = ? WHERE ID = ? AND  TEAMID = ? ";
+					//
+					final int batchSize = 1000;
+					//
+					jdbcTemplate.execute(sqlBatchDelete, new PreparedStatementCallback<Integer>() {
+						
+						@Override
+						public Integer doInPreparedStatement(PreparedStatement stmt) throws SQLException, DataAccessException {
+							Connection cxn = stmt.getConnection();
+							cxn.setAutoCommit(false);
+							//
+							int count = 0;
+							int size = list.size();
+							//
+							for (WebhookRequest data : list) {
+								//
+								stmt.setBoolean(1, true);
+								stmt.setLong(2, data.getFaultId());
+								stmt.setLong(3, data.getTeamId());
+								//
+								stmt.addBatch();
+								//
+								++count;
+								//
+								if (count % batchSize == 0 || count == size) {
+									stmt.executeBatch();
+									stmt.clearBatch();
+								}
+							}
+							cxn.setAutoCommit(true);
+							return 0;
+						}
+					});
+					//
+					//
+					globalList.addAll(list);
+					//
+				}
 			}
-		}
-		//
-		//
-		if (globalList.size() > 0) {
-			new Thread(new Runnable() {
-				
-				@Override
-				public void run() {
-					for (WebhookRequest webhookRequest : globalList) {
-						try {
-							webhookDao.syncWebhook(webhookRequest);
-						} catch (Exception e) {
+			//
+			//
+			if (globalList.size() > 0) {
+				new Thread(new Runnable() {
+					
+					@Override
+					public void run() {
+						for (WebhookRequest webhookRequest : globalList) {
+							try {
+								webhookDao.syncWebhook(webhookRequest);
+							} catch (Exception e) {
+							}
 						}
 					}
-				}
-			}).start();
+				}).start();
+			}
+		} catch (Exception e) {
+			logger.error("WebhookScheduler :: " + e.getMessage());
 		}
 	}
 }

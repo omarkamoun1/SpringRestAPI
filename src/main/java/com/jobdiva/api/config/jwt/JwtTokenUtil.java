@@ -25,9 +25,11 @@ public class JwtTokenUtil implements Serializable {
 	
 	//
 	/** Logger available to subclasses. */
-	protected final Log			logger				= LogFactory.getLog(getClass());
+	protected final Log			logger						= LogFactory.getLog(getClass());
 	//
-	public static final long	JWT_TOKEN_VALIDITY	= 24 * 60 * 60;
+	public static final long	JWT_TOKEN_VALIDITY			= 24 * 60 * 60;
+	//
+	public static final long	JWT_REFRESH_TOKEN_VALIDITY	= 30 * JWT_TOKEN_VALIDITY;
 	//
 	@Autowired
 	private Environment			env;
@@ -85,8 +87,10 @@ public class JwtTokenUtil implements Serializable {
 	// Serialization(https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-41#section-3.1)
 	// compaction of the JWT to a URL-safe string
 	private String doGenerateToken(Map<String, Object> claims, String subject) {
-		return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis())).setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000)).signWith(SignatureAlgorithm.HS512, secret)
-				.compact();
+		return Jwts.builder().setClaims(claims)//
+				.setSubject(subject)//
+				.setIssuedAt(new Date(System.currentTimeMillis()))//
+				.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000)).signWith(SignatureAlgorithm.HS512, secret).compact();
 	}
 	
 	// validate token
@@ -101,5 +105,19 @@ public class JwtTokenUtil implements Serializable {
 	
 	public void setSecret(String secret) {
 		this.secret = secret;
+	}
+	
+	public String generateRefreshToken(UserDetails userContext) {
+		String subject = userContext.getUsername();
+		if (subject == null || subject.isEmpty()) {
+			throw new IllegalArgumentException("Cannot create JWT Token without username");
+		}
+		Map<String, Object> claims = new HashMap<>();
+		//
+		return Jwts.builder().setClaims(claims)//
+				.setSubject(subject)//
+				.setIssuedAt(new Date(System.currentTimeMillis()))//
+				.setExpiration(new Date(System.currentTimeMillis() + JWT_REFRESH_TOKEN_VALIDITY * 1000)).signWith(SignatureAlgorithm.HS512, secret).compact();
+		//
 	}
 }

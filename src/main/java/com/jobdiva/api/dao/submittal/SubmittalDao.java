@@ -651,12 +651,12 @@ public class SubmittalDao extends AbstractActivityDao {
 		Long teamid = jobDivaSession.getTeamId();
 		//
 		Job job = jobDao.getJob(jobDivaSession, jobid);
-		if (job == null || job.getTeamid() != teamid) {
+		if (job == null) {
 			throw new Exception("Error: Job " + jobid + " is not found.");
 		}
 		//
 		Candidate candidate = candidateDao.getCandidate(jobDivaSession, candidateid);
-		if (candidate == null || candidate.getTeamId() != teamid) {
+		if (candidate == null) {
 			throw new Exception("Error: Candidate " + candidateid + " is not found.");
 		}
 		//

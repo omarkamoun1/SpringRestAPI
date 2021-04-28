@@ -96,6 +96,7 @@ public class WebhookService {
 						//
 						webhookDao.syncWebhook(webhookRequest);
 					} catch (Exception e) {
+						System.err.println(e);
 					}
 			}
 		};

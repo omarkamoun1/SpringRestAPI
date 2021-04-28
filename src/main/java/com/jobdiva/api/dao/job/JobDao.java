@@ -348,15 +348,15 @@ public class JobDao extends AbstractActivityDao {
 		}
 		//
 		//
-		if(ismyjob==null) ismyjob=false;
+		if (ismyjob == null)
+			ismyjob = false;
 		ArrayList<Object> paramList = new ArrayList<Object>();
 		StringBuilder sql_buff = new StringBuilder();
 		sql_buff.append("select * from trfq job1_ ");
-		if(ismyjob)
-		sql_buff.append(", TRECRUITERRFQ jobuser0_ where jobuser0_.RFQID=job1_.ID and ");
-		else 
-		  sql_buff.append(" where ");
-		
+		if (ismyjob)
+			sql_buff.append(", TRECRUITERRFQ jobuser0_ where jobuser0_.RFQID=job1_.ID and ");
+		else
+			sql_buff.append(" where ");
 		sql_buff.append(" job1_.teamid = ? ");
 		paramList.add(jobDivaSession.getTeamId());
 		//
@@ -365,7 +365,7 @@ public class JobDao extends AbstractActivityDao {
 			paramList.add(jobId);
 		}
 		//
-		if(ismyjob){
+		if (ismyjob) {
 			sql_buff.append(" and jobuser0_.RECRUITERID = ? ");
 			paramList.add(jobDivaSession.getRecruiterId());
 		}
@@ -470,8 +470,7 @@ public class JobDao extends AbstractActivityDao {
 			sql_buff.append(" and job1_.jobstatus = ? ");
 			paramList.add(status);
 		}
-		if(ismyjob) {
-			
+		if (ismyjob) {
 		}
 		/* Get default and user-defined position type */
 		HashMap<String, Integer> positionTypeIdMap = new HashMap<String, Integer>();
@@ -1770,12 +1769,13 @@ public class JobDao extends AbstractActivityDao {
 	}
 	
 	private void sendAssignNotificationInThread(JobDivaSession jobDivaSession, String description, Job job, Vector<RecruiterObject> v_assigned, String primaryRecName, String primarySaleName, String rfqno_team, String rfq_refno) throws Exception {
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		new Thread(new Runnable() {
 			
 			@Override
 			public void run() {
 				try {
-					sendAssignNotification(v_assigned, null, job, jobDivaSession.getTeamId(), primaryRecName, primarySaleName, description, rfqno_team, rfq_refno);
+					sendAssignNotification(jdbcTemplate, v_assigned, null, job, jobDivaSession.getTeamId(), primaryRecName, primarySaleName, description, rfqno_team, rfq_refno);
 				} catch (Exception e) {
 					logger.info("sendAssignNotificationInThread " + v_assigned.size() + " users. ERROR :: " + e.getMessage());
 				}
@@ -1837,7 +1837,7 @@ public class JobDao extends AbstractActivityDao {
 		List<Job> jobs = null;
 		//
 		try {
-			jobs = searchJobs(jobDivaSession, jobid, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,null);
+			jobs = searchJobs(jobDivaSession, jobid, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 		} catch (Exception e) {
 			logger.info("Error: Job " + jobid + " is not found  ERROR: " + e.getMessage());
 		}

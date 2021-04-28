@@ -114,7 +114,7 @@ public class WebhookDao extends AbstractJobDivaDao {
 	
 	private String getWebHookSQL() {
 		String sql = "SELECT ID, TEAMID, CLIENT_SECRET, CLIENT_URL, ACTIVE, " //
-				+ " ENABLE_JOB , ENABLE_CANDIDATE, ENABLE_COMPANY, ENABLE_CONTACT,  ENABLE_BILLING,  ENABLE_SALARY " //
+				+ " ENABLE_JOB , ENABLE_CANDIDATE, ENABLE_COMPANY, ENABLE_CONTACT,  ENABLE_BILLING,  ENABLE_SALARY, ENABLE_TIMESHEET, ENABLE_EXPENSE " //
 				+ " FROM TWEBHOOK_CONFIGURATION ";//
 		return sql;
 	}
@@ -133,6 +133,8 @@ public class WebhookDao extends AbstractJobDivaDao {
 		webhookInfo.setEnableContact(rs.getBoolean("ENABLE_CONTACT"));
 		webhookInfo.setEnableBilling(rs.getBoolean("ENABLE_BILLING"));
 		webhookInfo.setEnableSalary(rs.getBoolean("ENABLE_SALARY"));
+		webhookInfo.setEnableTimesheet(rs.getBoolean("ENABLE_TIMESHEET"));
+		webhookInfo.setEnableExpense(rs.getBoolean("ENABLE_EXPENSE"));
 		return webhookInfo;
 	}
 	
@@ -154,48 +156,71 @@ public class WebhookDao extends AbstractJobDivaDao {
 		return (list != null && list.size() > 0) ? list.get(0) : null;
 	}
 	
-	/**
-	 * @param webhookRequest
-	 */
-	private void afterCompletedWebhookRequest(WebhookRequest webhookRequest) {
+	private void insertWebhookLog(JdbcTemplate jdbcTemplate, WebhookRequest webhookRequest, String url, String json, Integer counter, long execTime, long webhookRequestTime, Boolean inProgress, Integer statusId, String errorMessage) {
+		//
+		String sqlInsert = "INSERT INTO TWEBHOOK_LOG (ID, TEAMID, SYNCTYPE, OPERATIONTYPE, DATAID, JSON, COUNTER, EXECTIME, WHREQUESTTIME, INPROGRESS, STATUSID, ERRORMESSAGE,  DATECREATED )" //
+				+ " VALUES " //
+				+ "(TWEBHOOK_LOG_SEQ.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,sysdate) ";
+		//
+		Object[] params = new Object[] { webhookRequest.getTeamId(), webhookRequest.getSyncType(), webhookRequest.getOperation(), webhookRequest.getId(), json, counter, execTime, webhookRequestTime, inProgress, statusId, errorMessage };
+		//
+		try {
+			jdbcTemplate.update(sqlInsert, params);
+		} catch (Exception e) {
+			logger.error("insertWebhookLog :: " + e.getMessage());
+		}
+		//
+	}
+	
+	private void updateWebhookLog(JdbcTemplate jdbcTemplate, WebhookRequest webhookRequest, Integer counter, long execTime, long webhookRequestTime, Boolean inProgress, Integer statusId, String errorMessage) {
+		//
+		String sqlInsert = "UPDATE TWEBHOOK_LOG SET " //
+				+ " EXECTIME = ?, "//
+				+ " WHREQUESTTIME = ? ,  "//
+				+ " INPROGRESS = ?, "//
+				+ " STATUSID = ? , "//
+				+ " ERRORMESSAGE = ? , " //
+				+ " DATEUPDATED = sysdate "//
+				+ "  WHERE ID = ? AND TEAMID = ? ";
+		//
+		//
+		Object[] params = new Object[] { execTime, webhookRequestTime, inProgress, statusId, errorMessage, webhookRequest.getFaultId(), webhookRequest.getTeamId() };
+		//
+		//
+		try {
+			jdbcTemplate.update(sqlInsert, params);
+		} catch (Exception e) {
+			logger.error("updateWebhookLog :: " + e.getMessage());
+		}
+	}
+	
+	private void afterCompletedWebhookRequest(WebhookRequest webhookRequest, String url, String json, Integer counter, long startTime, long beforeSendTime, long afterSendTime) {
+		//
+		long execTime = afterSendTime - startTime;
+		long webhoohReqTime = afterSendTime - beforeSendTime;
+		//
+		JdbcTemplate jdbcTemplate = this.jobDivaConnectivity.getJdbcTemplate(webhookRequest.getTeamId());
 		//
 		if (webhookRequest.getFaultId() != null) {
-			String sqlDelete = "DELETE FROM TWEBHOOK_FAILEDREQUEST WHERE ID = ? AND TEAMID = ? ";
-			JdbcTemplate jdbcTemplate = this.jobDivaConnectivity.getJdbcTemplate(webhookRequest.getTeamId());
-			Object[] params = new Object[] { webhookRequest.getFaultId(), webhookRequest.getTeamId() };
 			//
-			jdbcTemplate.update(sqlDelete, params);
-		}
-	}
-	
-	private void logFailedRequest(WebhookRequest webhookRequest) {
-		JdbcTemplate jdbcTemplate = this.jobDivaConnectivity.getJdbcTemplate(webhookRequest.getTeamId());
-		if (webhookRequest.getFaultId() == null) {
-			String sqlInsert = "INSERT INTO TWEBHOOK_FAILEDREQUEST (ID, TEAMID, SYNCTYPE, OPERATIONTYPE, DATAID, DATECREATED )" //
-					+ " VALUES " //
-					+ "(TWEBHOOK_FAILEDREQUEST_SEQ.nextval, ?, ?, ?, ?, sysdate) ";
-			//
-			Object[] params = new Object[] { webhookRequest.getTeamId(), webhookRequest.getSyncType(), webhookRequest.getOperation(), webhookRequest.getId() };
-			//
-			jdbcTemplate.update(sqlInsert, params);
+			updateWebhookLog(jdbcTemplate, webhookRequest, counter, execTime, webhoohReqTime, false, 1, null);
 			//
 		} else {
-			String sqlUpdate = "UPDATE TWEBHOOK_FAILEDREQUEST SET INPROGRESS = ? WHERE ID = ? AND  TEAMID = ? ";
 			//
-			Object[] params = new Object[] { false, webhookRequest.getFaultId(), webhookRequest.getTeamId() };
+			insertWebhookLog(jdbcTemplate, webhookRequest, url, json, counter, execTime, webhoohReqTime, false, 1, null);
 			//
-			jdbcTemplate.update(sqlUpdate, params);
 		}
+		//
 	}
 	
-	public void send(WebhookRequest webhookRequest, String json, Integer counter) {
+	public void send(WebhookRequest webhookRequest, String json, long startTime, Integer counter) {
 		WebhookInfo webhookConfiguration = getWebhookConfiguration(webhookRequest.getTeamId());
 		if (webhookConfiguration != null && webhookConfiguration.getActive() != null && webhookConfiguration.getActive()) {
 			String clientSecret = webhookConfiguration.getClientSecret();
 			String url = webhookConfiguration.getClientUrl();
 			//
 			// for test
-			// url = "http://localhost:88/api/webhook/welcome";
+			// url = "http://localhost:888/api/webhook/welcome";
 			// clientSecret = "jobdiva";
 			//
 			try {
@@ -211,6 +236,8 @@ public class WebhookDao extends AbstractJobDivaDao {
 				}) }).build();
 				//
 				//
+				long beforeSendTime = System.currentTimeMillis();
+				//
 				ResponseEntity<Boolean> postForEntity = restTemplate.postForEntity(url, json, Boolean.class, new Object[0]);
 				//
 				this.logger.info("WEBHOOK SENT :: [" + webhookRequest.getTeamId() + "] [" + url + "]" + json);
@@ -219,17 +246,19 @@ public class WebhookDao extends AbstractJobDivaDao {
 				//
 				if (HttpStatus.OK.equals(statusCode)) {
 					//
-					afterCompletedWebhookRequest(webhookRequest);
+					long afterSendTime = System.currentTimeMillis();
+					//
+					afterCompletedWebhookRequest(webhookRequest, url, json, counter, startTime, beforeSendTime, afterSendTime);
 					//
 				} else {
-					waitAndRetry(webhookRequest, json, counter + 1);
+					waitAndRetry(webhookRequest, url, json, startTime, counter + 1, statusCode + "");
 				}
 				//
 			} catch (Exception e) {
 				//
 				this.logger.error("WEBHOOK ERROR :: [" + webhookRequest.getTeamId() + "] [" + url + "] [" + json + "] " + e.getMessage());
 				//
-				waitAndRetry(webhookRequest, json, counter + 1);
+				waitAndRetry(webhookRequest, url, json, startTime, counter + 1, e.getMessage());
 				//
 			}
 		} else {
@@ -240,18 +269,32 @@ public class WebhookDao extends AbstractJobDivaDao {
 		//
 	}
 	
-	private void waitAndRetry(WebhookRequest webhookRequest, String json, Integer counter) {
+	private void waitAndRetry(WebhookRequest webhookRequest, String url, String json, long startTime, Integer counter, String errorMessage) {
 		//
 		if (counter < 5) {
 			try {
 				Thread.sleep(5 * 1000);
 				//
-				send(webhookRequest, json, counter);
+				send(webhookRequest, json, startTime, counter);
 				//
 			} catch (InterruptedException e) {
 			}
 		} else {
-			logFailedRequest(webhookRequest);
+			long nowTime = System.currentTimeMillis();
+			//
+			long execTime = nowTime - startTime;
+			long webhoohReqTime = nowTime - startTime;
+			//
+			JdbcTemplate jdbcTemplate = this.jobDivaConnectivity.getJdbcTemplate(webhookRequest.getTeamId());
+			//
+			//
+			if (webhookRequest.getFaultId() == null) {
+				insertWebhookLog(jdbcTemplate, webhookRequest, url, json, counter, execTime, webhoohReqTime, false, 2, errorMessage);
+			} else {
+				updateWebhookLog(jdbcTemplate, webhookRequest, counter, execTime, webhoohReqTime, false, 2, errorMessage);
+			}
+			//
+			//
 		}
 		//
 	}
@@ -269,9 +312,9 @@ public class WebhookDao extends AbstractJobDivaDao {
 		int updated = jdbcTemplate.update(sql, params);
 		//
 		if (updated == 0) {
-			String sqlInsert = "INSERT INTO TWEBHOOK_CONFIGURATION(ID, TEAMID, CLIENT_SECRET, CLIENT_URL, ACTIVE, ENABLE_JOB , ENABLE_CANDIDATE, ENABLE_COMPANY, ENABLE_CONTACT,  ENABLE_BILLING,  ENABLE_SALARY) " //
-					+ " values( TWEBHOOK_CONFIGURATION_SEQ.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
-			params = new Object[] { teamId, clientSecret, clientUrl, active, true, true, true, true, true, true, };
+			String sqlInsert = "INSERT INTO TWEBHOOK_CONFIGURATION(ID, TEAMID, CLIENT_SECRET, CLIENT_URL, ACTIVE, ENABLE_JOB , ENABLE_CANDIDATE, ENABLE_COMPANY, ENABLE_CONTACT,  ENABLE_BILLING, ENABLE_SALARY, ENABLE_TIMESHEET, ENABLE_EXPENSE) " //
+					+ " values( TWEBHOOK_CONFIGURATION_SEQ.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+			params = new Object[] { teamId, clientSecret, clientUrl, active, true, true, true, true, true, true, true, true };
 			jdbcTemplate.update(sqlInsert, params);
 		}
 		//
@@ -336,6 +379,10 @@ public class WebhookDao extends AbstractJobDivaDao {
 					return webhookInfo.getEnableBilling();
 				case SALARY:
 					return webhookInfo.getEnableSalary();
+				case TIMESHEET:
+					return webhookInfo.getEnableTimesheet();
+				case EXPENSE:
+					return webhookInfo.getEnableExpense();
 				default:
 					break;
 			}
@@ -344,42 +391,62 @@ public class WebhookDao extends AbstractJobDivaDao {
 	
 	public void syncWebhook(WebhookRequest webhookRequest) throws Exception {
 		//
-		WebhookSyncType webhookSyncType = WebhookSyncType.getWebhookSyncType(webhookRequest.getSyncType());
+		long startTime = System.currentTimeMillis();
 		//
-		if (!enableSyncType(webhookRequest.getTeamId(), webhookSyncType))
-			return;
+		String json = webhookRequest.getJson();
 		//
 		//
-		validParameters(webhookSyncType, webhookRequest.getOperation(), webhookRequest.getId());
-		//
-		JsonObject jsonObject = new JsonObject();
-		jsonObject.add("type", webhookSyncType.getValue());
-		jsonObject.add("operation", getOperation(webhookRequest.getOperation()));
-		jsonObject.add("id", webhookRequest.getId());
-		//
-		switch (webhookSyncType) {
-			case JOB:
-				jsonObject.add("data", webhookRequestDataDao.getJob(webhookRequest.getTeamId(), webhookRequest.getId()));
-				break;
-			case CANDIDATE:
-				jsonObject.add("data", webhookRequestDataDao.getCandidate(webhookRequest.getTeamId(), webhookRequest.getId()));
-				break;
-			case COMPANY:
-				jsonObject.add("data", webhookRequestDataDao.getCompany(webhookRequest.getTeamId(), webhookRequest.getId()));
-				break;
-			case CONTACT:
-				jsonObject.add("data", webhookRequestDataDao.getContact(webhookRequest.getTeamId(), webhookRequest.getId()));
-				break;
-			case BILLING:
-				jsonObject.add("data", webhookRequestDataDao.getBillingRecordDetail(webhookRequest.getTeamId(), webhookRequest.getId()));
-				break;
-			case SALARY:
-				jsonObject.add("data", webhookRequestDataDao.getSalaryRecordDetail(webhookRequest.getTeamId(), webhookRequest.getId()));
-				break;
-			default:
-				break;
+		if (json != null) {
+			//
+			send(webhookRequest, json, startTime, 0);
+			//
+		} else {
+			//
+			WebhookSyncType webhookSyncType = WebhookSyncType.getWebhookSyncType(webhookRequest.getSyncType());
+			//
+			//
+			if (!enableSyncType(webhookRequest.getTeamId(), webhookSyncType))
+				return;
+			//
+			//
+			validParameters(webhookSyncType, webhookRequest.getOperation(), webhookRequest.getId());
+			//
+			JsonObject jsonObject = new JsonObject();
+			jsonObject.add("type", webhookSyncType.getValue());
+			jsonObject.add("operation", getOperation(webhookRequest.getOperation()));
+			jsonObject.add("id", webhookRequest.getId());
+			//
+			//
+			switch (webhookSyncType) {
+				case JOB:
+					jsonObject.add("data", webhookRequestDataDao.getJob(webhookRequest.getTeamId(), webhookRequest.getId()));
+					break;
+				case CANDIDATE:
+					jsonObject.add("data", webhookRequestDataDao.getCandidate(webhookRequest.getTeamId(), webhookRequest.getId()));
+					break;
+				case COMPANY:
+					jsonObject.add("data", webhookRequestDataDao.getCompany(webhookRequest.getTeamId(), webhookRequest.getId()));
+					break;
+				case CONTACT:
+					jsonObject.add("data", webhookRequestDataDao.getContact(webhookRequest.getTeamId(), webhookRequest.getId()));
+					break;
+				case BILLING:
+					jsonObject.add("data", webhookRequestDataDao.getBillingRecordDetail(webhookRequest.getTeamId(), webhookRequest.getId()));
+					break;
+				case SALARY:
+					jsonObject.add("data", webhookRequestDataDao.getSalaryRecordDetail(webhookRequest.getTeamId(), webhookRequest.getId()));
+					break;
+				case TIMESHEET:
+					jsonObject.add("data", webhookRequestDataDao.getTimeSheet(webhookRequest.getTeamId(), webhookRequest.getId()));
+					break;
+				case EXPENSE:
+					jsonObject.add("data", webhookRequestDataDao.getExpenses(webhookRequest.getTeamId(), webhookRequest.getId()));
+					break;
+				default:
+					break;
+			}
+			send(webhookRequest, jsonObject.toString(), startTime, 0);
+			//
 		}
-		send(webhookRequest, jsonObject.toString(), 0);
-		//
 	}
 }

@@ -16,6 +16,7 @@ import com.jobdiva.api.service.HotlistService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * @author Joseph Chidiac
@@ -83,6 +84,27 @@ public class HotlistController extends AbstractJobDivaController {
 		jobDivaSession.checkForAPIPermission("addCandidateToHotlist");
 		//
 		return this.hotlistService.addCandidateToHotlist(jobDivaSession, hotListid, candidateId);
+	}
+	
+	// No release to production
+	@ApiIgnore
+	@ApiOperation("Add Candidates To Hotlist")
+	@RequestMapping(value = { "/addCandidatesToHotlist" }, method = { RequestMethod.POST }, produces = { "application/json" })
+	public Boolean addCandidatesToHotlist(//
+			//
+			@ApiParam(value = "Hotlist Id", required = true) //
+			@RequestParam(required = true) Long hotListid, //
+			//
+			@ApiParam(value = "Candidate Id(s)", required = true) //
+			@RequestParam(required = true) List<Long> candidateIds //
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("addCandidatesToHotlist");
+		//
+		return this.hotlistService.addCandidatesToHotlist(jobDivaSession, hotListid, candidateIds);
 	}
 	
 	@ApiOperation("Create Contact Hotlist")

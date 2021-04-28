@@ -23,6 +23,7 @@ import com.jobdiva.api.model.SocialNetworkType;
 import com.jobdiva.api.model.TitleSkillCertification;
 import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
+import com.jobdiva.api.model.v2.candidate.CreateCandidateProfileDef;
 
 @Service
 public class CandidateService {
@@ -91,6 +92,24 @@ public class CandidateService {
 		} catch (Exception e) {
 			//
 			candidateDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "createCandidate", "Create Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public Boolean createCandidates(JobDivaSession jobDivaSession, List<CreateCandidateProfileDef> createCandidateProfileDefs) throws Exception {
+		//
+		try {
+			//
+			Boolean value = candidateDao.createCandidates(jobDivaSession, createCandidateProfileDefs);
+			//
+			candidateDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "createCandidates", "Search Successful");
+			//
+			return value;
+			//
+		} catch (Exception e) {
+			//
+			candidateDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "createCandidates", "Create Failed, " + e.getMessage());
 			//
 			throw new Exception(e.getMessage());
 		}
@@ -185,6 +204,25 @@ public class CandidateService {
 		} catch (Exception e) {
 			//
 			candidateDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "createCandidateNote", "Create Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+	public Boolean createCandidatesNote(JobDivaSession jobDivaSession, List<Long> candidateids, String note, Long recruiterid, String action, Date actionDate, Long link2AnOpenJob, Long link2aContact, Boolean setAsAuto, Date createDate)
+			throws Exception {
+		//
+		try {
+			Boolean value = candidateNoteDao.createCandidatesNote(jobDivaSession, candidateids, note, recruiterid, action, actionDate, link2AnOpenJob, link2aContact, setAsAuto, createDate);
+			//
+			candidateDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "createCandidatesNote", "Create Successful");
+			//
+			return value;
+			//
+		} catch (Exception e) {
+			//
+			candidateDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "createCandidatesNote", "Create Failed, " + e.getMessage());
 			//
 			throw new Exception(e.getMessage());
 		}

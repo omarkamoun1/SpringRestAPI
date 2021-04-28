@@ -42,17 +42,25 @@ public class WebhookController extends AbstractJobDivaController {
 	@PostMapping(value = "/syncWebhook", produces = "application/json")
 	public Boolean syncWebhook(Long teamId, String syncType, Integer operation, String id) throws Exception {
 		//
+		logger.info("syncWebhook [" + teamId + "][" + syncType + "][" + operation + "][" + id + "] ");
+		//
 		return webhookService.syncWebhook(teamId, syncType, operation, id);
 		//
 	}
 	
 	@RequestMapping(value = { "/getWebhookConfiguration" }, method = { RequestMethod.GET }, produces = { "application/json" })
 	public WebhookInfo getWebhookConfiguration(Long teamId) throws Exception {
+		//
+		logger.info("syncWebhook [" + teamId + "] ");
+		//
 		return this.webhookService.getWebhookConfiguration(teamId);
 	}
 	
 	@RequestMapping(value = { "/updateWebhookConfiguration" }, method = { RequestMethod.POST }, produces = { "application/json" })
 	public Boolean updateWebhookConfiguration(Long teamId, String clientSecret, String clientUrl, Boolean active) throws Exception {
+		//
+		logger.info("syncWebhook [" + teamId + "][" + clientUrl + "][" + active + "]  ");
+		//
 		return this.webhookService.updateWebhookConfiguration(teamId, clientSecret, clientUrl, active);
 	}
 	

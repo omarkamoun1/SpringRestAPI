@@ -20,6 +20,8 @@ import com.jobdiva.api.model.SocialNetworkType;
 import com.jobdiva.api.model.TitleSkillCertification;
 import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
+import com.jobdiva.api.model.v2.candidate.CreateCandidateProfileDef;
+import com.jobdiva.api.model.v2.candidate.CreateCandidatesNoteDef;
 import com.jobdiva.api.service.CandidateService;
 
 import io.swagger.annotations.Api;
@@ -182,6 +184,53 @@ public class CandidateController extends AbstractJobDivaController {
 		//
 	}
 	
+	// No release to production
+	@ApiIgnore
+	@RequestMapping(value = "/createCandidates", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Create Candidates")
+	public Boolean createCandidates( //
+			//
+			@ApiParam("firstName : Candidate First Name \r\n " //
+					+ "lastName : Candidate Last Name \r\n" //
+					+ "email : Candidate Email \r\n" //
+					+ "alternateemail : Candidate Alternative Email \r\n" //
+					+ "address1 : Address 1 \r\n" //
+					+ "address2 : Address 2 \r\n" //
+					+ "city : Candidate City \r\n" //
+					+ "state : Candidate State \r\n" //
+					+ "zipCode : Zip Code \r\n" //
+					+ "countryid : CountryId \r\n" //
+					+ "homephone : Home Phone \r\n" //
+					+ "workphone : Work Phone \r\n" //
+					+ "cellphone : Cell Phone \r\n" //
+					+ "fax : Fax \r\n" //
+					+ "currentsalary : Current Salary \r\n" //
+					+ "currentsalaryunit : Current Salary Unit \r\n" //
+					+ "preferredsalary : Preferred Salary \r\n" //
+					+ "preferredsalaryunit : Preferred Salary Unit \r\n" //
+					+ "narrative : Narrative \r\n" //
+					+ "titleskillcertifications : • “titleskillcertification” – Titles, skills, certifications, or experiences \r\n" //
+					+ "• “years” is ignored if “startdate” is set \r\n" + "• “enddate” defaults to current date if it’s not set \r\n " //
+					+ "titleskillcertification : The name of the title, skill, or certification \r\n" //
+					+ "startdate : Start Date format(yyyy-MM-dd'T'HH:mm:ss) \r\n" //
+					+ "enddate : End Date format(yyyy-MM-dd'T'HH:mm:ss) \r\n" + "years : Years \r\n" + "resumeSource : Resume Source \r\n") //
+			//
+			@RequestBody List<CreateCandidateProfileDef> createCandidateProfileDefs
+	//
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("createCandidates");
+		//
+		//
+		//
+		return candidateService.createCandidates(jobDivaSession, createCandidateProfileDefs);
+		//
+	}
+	
+	//
 	//
 	@ApiImplicitParams({ @ApiImplicitParam(name = "phones", required = false, allowMultiple = true, dataType = "PhoneType") //
 	})
@@ -375,6 +424,44 @@ public class CandidateController extends AbstractJobDivaController {
 		jobDivaSession.checkForAPIPermission("createCandidateNote");
 		//
 		return candidateService.createCandidateNote(jobDivaSession, candidateid, note, recruiterid, action, actionDate, link2AnOpenJob, link2AContact, setAsAuto, null);
+		//
+	}
+	
+	// No release to production
+	@ApiIgnore
+	@RequestMapping(value = "/createCandidatesNote", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Create Candidate(s) Note")
+	public Boolean createCandidatesNote( //
+			//
+			@ApiParam(value = "candidateids : Candidate ID List \r\n" //
+					+ "note : Note \r\n"//
+					+ "recruiterid : Recruiter Id \r\n"//
+					+ "action : action \r\n"//
+					+ "actionDate : Action Date format(yyyy-MM-dd'T'HH:mm:ss) \r\n"//
+					+ "link2AnOpenJob : link to an open job \r\n"//
+					+ "link2AContact : Link to a contact \r\n"//
+					+ "setAsAuto : Set As Auto"//
+			) //
+			@RequestBody CreateCandidatesNoteDef createCandidatesNoteDef
+	//
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("createCandidatesNote");
+		//
+		List<Long> candidateids = createCandidatesNoteDef.getCandidateids();
+		String note = createCandidatesNoteDef.getNote();
+		Long recruiterid = createCandidatesNoteDef.getRecruiterid();
+		String action = createCandidatesNoteDef.getAction();
+		Date actionDate = createCandidatesNoteDef.getActionDate();
+		Long link2AnOpenJob = createCandidatesNoteDef.getLink2AnOpenJob();
+		Long link2AContact = createCandidatesNoteDef.getLink2AContact();
+		Boolean setAsAuto = createCandidatesNoteDef.getSetAsAuto();
+		//
+		//
+		return candidateService.createCandidatesNote(jobDivaSession, candidateids, note, recruiterid, action, actionDate, link2AnOpenJob, link2AContact, setAsAuto, null);
 		//
 	}
 	

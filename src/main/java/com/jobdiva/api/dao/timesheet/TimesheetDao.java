@@ -29,6 +29,7 @@ import com.axelon.shared.TimeSheetWeek;
 import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.dao.invoice.InvoiceDao;
 import com.jobdiva.api.model.ExpenseEntry;
+import com.jobdiva.api.model.Timesheet;
 import com.jobdiva.api.model.TimesheetEntry;
 import com.jobdiva.api.model.UploadTimesheetAssignment;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
@@ -40,15 +41,58 @@ public class TimesheetDao extends AbstractJobDivaDao {
 	@Autowired
 	InvoiceDao invoiceDao;
 	
-	public String uploadTimesheet(JobDivaSession jobDivaSession, Long employeeid, Long jobid, Date weekendingdate, Boolean approved, TimesheetEntry[] timesheetEntry, String date, String hours) throws Exception {
+	public Long uploadTimesheet(JobDivaSession jobDivaSession, Long employeeid, Long jobid, Date weekendingdate, Boolean approved, Long timesheetId, String externalId, Timesheet[] timesheetEntry) throws Exception {
+		//
 		//
 		StringBuffer message = new StringBuffer();
+		String[] timesheetDates = new String[7];
+		Double[] timesheetHours = new Double[7];
+		// should be 7
+		if (timesheetEntry == null || timesheetEntry.length != 7) {
+			message.append("Parameter Check Failed \r\n TimeSheet required and must contains 7 elements.\r\n");
+		}
+		//
+		if (employeeid == null || employeeid <= 0) {
+			message.append("Parameter Check Failed \r\n employeeid is required.\r\n");
+		}
+		//
+		if (approved == null) {
+			message.append("Parameter Check Failed \r\n approved is required.\r\n");
+		}
+		//
+		if (weekendingdate == null) {
+			message.append("Parameter Check Failed \r\n weekendingdate is required.\r\n");
+		}
+		if (timesheetId != null) {
+			if (timesheetId <= 0)
+				message.append("Invalid timesheetId(" + timesheetId + "). \r\n");
+		}
+		//
+		if (isNotEmpty(externalId))
+			externalId = externalId.trim();
+		//
+		//
+		if (message.length() > 0) {
+			throw new Exception("Parameter Check Failed \r\n " + message.toString());
+		}
+		//
+		//
 		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
 		// int billing_recid = 0;
 		String weekending = "";
 		Date timesheetdate = null;
 		Date wkDate = null;
 		try {
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(weekendingdate);
+			cal.add(Calendar.DATE, -6);
+			// startDate = sdf.parse(sdf.format(cal.getTime()));
+			for (int i = 0; i < timesheetDates.length; i++) {
+				timesheetDates[i] = sdf.format(cal.getTime());
+				timesheetHours[i] = 0.0;
+				cal.add(Calendar.DATE, 1);
+			}
+			//
 			String[] params = new String[4 + timesheetEntry.length];
 			params[0] = "" + jobDivaSession.getTeamId();
 			params[1] = "" + employeeid;
@@ -72,6 +116,7 @@ public class TimesheetDao extends AbstractJobDivaDao {
 					if (timesheetdate.getTime() > wkDate.getTime() || timesheetdate.getTime() < wkDate.getTime() - 6 * 24 * 3600 * 1000L)
 						message.append("Invalid timesheet date " + params[4 + i] + " for weekending " + weekending);
 				}
+				//
 			}
 		} catch (Exception e) {
 			message.append(e.getMessage());
@@ -82,9 +127,88 @@ public class TimesheetDao extends AbstractJobDivaDao {
 		//
 		//
 		//
+		Object retObj1 = null;
+		String bill_recid = "";
+		String pay_recid = "";
+		// Prev Timesheet in server Date ->Hours
+		HashMap<String, Double> tsMap = new HashMap<String, Double>();
+		// timesheetId or externalId
+		// boolean updateHours = true; // false if sent-in hours are the same as
+		// // existing records
+		// boolean updateExpenses = true; // false if sent-in expenses are the
+		// same
+		// as existing records
+		// Object retObj = null;
+		// If timesheetId or externalId provided, locate existing timesheet and
+		// return billrecid~payrecid
+		if (timesheetId != null || externalId != null) {
+			CandidateBillingRecord bill_rec = new CandidateBillingRecord();
+			bill_rec.mark = 35; // option code
+			bill_rec.teamID = jobDivaSession.getTeamId();
+			bill_rec.candidateID = employeeid;
+			// Use the following two fields as placeholder. Will be processed
+			// accordingly in the backend.
+			if (timesheetId != null)
+				bill_rec.rfqID = timesheetId;
+			bill_rec.customerRefNo = externalId;
+			try {
+				ServletRequestData srd = new ServletRequestData(0, null, bill_rec);
+				retObj1 = ServletTransporter.callServlet(getCandidateBillingRecordsGetServlet(), srd);
+			} catch (Exception e) {
+				e.printStackTrace();
+				message.append("Error occurs when trying to locate existing timesheet. ");
+			}
+			if (retObj1 instanceof Object[]) {
+				Object[] retObjArr = (Object[]) retObj1;
+				TimeSheetWeek tsw = retObjArr[0] instanceof TimeSheetWeek ? (TimeSheetWeek) retObjArr[0] : null;
+				// Vector<Object> exp = retObjArr[1] instanceof Vector ?
+				// (Vector<Object>) retObjArr[1] : null;
+				// Compare hours passed in with existing hours
+				if (tsw instanceof TimeSheetWeek) {
+					for (int i = 0; i < tsw.dates.length; i++) {
+						TimeSheetDay day = tsw.dates[i];
+						tsMap.put(sdf.format(day.tDate), day.hoursWorked);
+					}
+					if (timesheetDates.length == tsMap.size()) {
+						int i = 0;
+						while (i < timesheetDates.length) {
+							if (!tsMap.containsKey(timesheetDates[i]) || !tsMap.get(timesheetDates[i]).equals(timesheetHours[i])) {
+								break;
+							}
+							i++;
+						}
+						// if (i == timesheetDates.length)
+						// updateHours = false;
+					}
+				}
+				//
+				bill_recid = tsw instanceof TimeSheetWeek ? tsw.bill_recid + "" : "";
+				pay_recid = tsw instanceof TimeSheetWeek ? tsw.createdByID + "" : "";
+				// if (bill_recid.length() > 0)
+				// isUpdate = true;
+			} else if (retObj1 instanceof Exception) {
+				Exception e = (Exception) retObj1;
+				e.printStackTrace();
+				message.append("Error: exception returned when trying to locate existing timesheet. " + (e.getMessage() != null ? e.getMessage() : ""));
+			}
+		}
+		//
+		//
+		//
+		if (timesheetId != null && (bill_recid.length() == 0 || pay_recid.length() == 0))
+			message.append("Failed to locate timesheet by ID (" + timesheetId + "). ");
+		//
+		//
+		if (message.length() > 0) {
+			saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "uploadTimesheet", "Timesheet Upload Failed, " + message.toString());
+			//
+			throw new Exception("Timesheet Upload Failed : " + message.toString());
+		}
+		//
 		// build timesheet xml
 		StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><xml>");
 		xml.append("<TEAMID>" + jobDivaSession.getTeamId() + "</TEAMID>");
+		xml.append("<RECRUITERID>" + jobDivaSession.getRecruiterId() + "</RECRUITERID>");
 		xml.append("<WEBSITENAME></WEBSITENAME>");
 		xml.append("<CANDIDATE><CANDIDATENAME></CANDIDATENAME><CANDIDATEID>" + employeeid + "</CANDIDATEID><PONUMBER/>");
 		xml.append("<TIMESHEETWEEKS><TIMESHEETWEEK>");
@@ -92,7 +216,13 @@ public class TimesheetDao extends AbstractJobDivaDao {
 			xml.append("<REPLACE_PENDING>true</REPLACE_PENDING>");
 		else
 			xml.append("<SAVE_AS_PENDING>true</SAVE_AS_PENDING>");
+		//
+		xml.append("<EXTERNALID>" + externalId + "</EXTERNALID>");
+		//
 		xml.append("<WEEKENDINGDATE>" + weekending + "</WEEKENDINGDATE><TIMESHEETRECORDS>");
+		//
+		xml.append("<BILLRECID>" + bill_recid + "</BILLRECID>");
+		xml.append("<SALARYRECID>" + pay_recid + "</SALARYRECID>");
 		//
 		for (int i = 0; i < timesheetEntry.length; i++) {
 			if (timesheetEntry[i].getDate() != null)
@@ -123,12 +253,32 @@ public class TimesheetDao extends AbstractJobDivaDao {
 			status = "Error! Timesheet Not Saved.";
 		}
 		//
+		//
+		Long timeSheetId = null;
+		CandidateBillingRecord bill_rec = new CandidateBillingRecord();
+		bill_rec.mark = 34;
+		bill_rec.teamID = jobDivaSession.getTeamId();
+		bill_rec.candidateID = employeeid;
+		bill_rec.recID = isNotEmpty(bill_recid) ? Integer.parseInt(bill_recid) : 0;
+		bill_rec.startDate = sdf.parse(weekending);
+		retObj = null;
+		try {
+			ServletRequestData srd = new ServletRequestData(0, null, bill_rec);
+			retObj = ServletTransporter.callServlet(getCandidateBillingRecordsGetServlet(), srd);
+			if (retObj instanceof Long) {
+				timeSheetId = (Long) retObj;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			message.append("Error occurs when trying to retrieve TimeCard ID. ");
+		}
+		//
 		saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "uploadTimesheet", status + ", " + message.toString());
 		if (message.length() > 0) {
 			throw new Exception(message.toString());
 		}
 		//
-		return status;
+		return timeSheetId;
 	}
 	
 	public Boolean markTimesheetPaid(JobDivaSession jobDivaSession, Long employeeid, Integer salaryrecordid, Date datepaid, Date[] timesheetDates) throws Exception {
@@ -475,6 +625,9 @@ public class TimesheetDao extends AbstractJobDivaDao {
 				message.append("Error: exception returned when trying to locate existing timesheet. " + (e.getMessage() != null ? e.getMessage() : ""));
 			}
 		}
+		//
+		//
+		//
 		if (timesheetId != null && (bill_recid.length() == 0 || pay_recid.length() == 0))
 			message.append("Failed to locate timesheet by ID (" + timesheetId + "). ");
 		if (message.length() > 0) {

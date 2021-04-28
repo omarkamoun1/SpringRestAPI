@@ -213,6 +213,7 @@ public class BiDataQuery {
 			cols = new String[numberOfColumns];
 			for (int i = 0; i < numberOfColumns; i++) {
 				String colName = rsmd.getColumnName(i + 1);
+				// System.out.println(colName);
 				cols[i] = aliasToColNameMap.containsKey(colName) ? aliasToColNameMap.get(colName) : colName;
 			}
 			data.add(cols);
@@ -879,6 +880,251 @@ public class BiDataQuery {
 		return null;
 	}
 	
+	public static String[] constructDynamicParams(Connection con, String metricName, Long clientID, String fromDate, String toDate, String[] params, Vector<?> param, String[] restriction, Map<String, String> colNameToAliasMap) throws Exception {
+		String[] paramsTemp = null;
+		if (params == null)
+			params = new String[0];
+		Vector<String[]> paramsData = new Vector<String[]>(10);
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		String sql = "";
+		try {
+			if ((metricName.equals("Salary Record Detail") && params.length > 2) || (metricName.equals("Nesco Dinesol Salary Record Detail") && params.length > 2) ||
+			// metricName.equals("Salary Records Detail") &&
+					(metricName.equals("Employee Salary Records Detail") && params.length > 1) || (metricName.equals("New/Updated Salary Records") && params.length > 0) || (metricName.equals("Deleted Salary Records") && params.length > 0)) {
+				return params;
+			}
+			if (metricName.equals("Timesheet Breakdown Detail")) {
+				sql = "SELECT DISTINCT 'CostCenter-' HEADER, c.NAME FROM TBILLING_COSTCENTER c JOIN TEMPLOYEE_TIMESHEET_COSTCENTER t ON "
+						+ "c.RECRUITER_TEAMID = t.RECRUITER_TEAMID AND c.ID = t.PROJECTID WHERE t.RECRUITER_TEAMID = ? AND t.EMPLOYEEID = ? " + "AND t.TDATE BETWEEN TO_DATE(?,'mm/dd/yyyy hh24:mi:ss') AND TO_DATE(?,'mm/dd/yyyy hh24:mi:ss') "
+						+ "UNION " + "SELECT DISTINCT 'NonBillable-' HEADER, h.NAME FROM TBILLING_HOURTYPES h JOIN TEMPLOYEE_TIMESHEET t ON " + "h.RECRUITER_TEAMID = t.RECRUITER_TEAMID AND h.ID = t.PROJECTID "
+						+ "WHERE t.RECRUITER_TEAMID = ? AND t.EMPLOYEEID = ?";
+				ps = con.prepareStatement(sql);
+				ps.setLong(1, clientID);
+				ps.setString(2, params[0]);
+				ps.setString(3, fromDate);
+				ps.setString(4, toDate);
+				ps.setLong(5, clientID);
+				ps.setString(6, params[0]);
+				rs = ps.executeQuery();
+				while (rs.next()) {
+					paramsData.add(new String[] { rs.getString("HEADER"), rs.getString("NAME") });
+				}
+				ps.close();
+				rs.close();
+				// String paramMetric = "Employee Cost Centers and Non Billable
+				// Detail";
+				// String paramsSql = constructQuery(paramMetric, clientID,
+				// fromDate, toDate, params, param, restriction,
+				// colNameToAliasMap);
+				// paramsData = getQueryData(con, clientID, paramsSql, param,
+				// colNameToAliasMap);
+			} else if (metricName.equals("Salary Record Detail")) {
+				sql = "select distinct id, name from tteam_overhead_type a join temployee_overhead b " + "on a.teamid = b.recruiter_teamid and a.id = b.overheadid " + "where b.recruiter_teamid = ? and b.employeeid = ? and b.salary_recid = ? "
+						+ "order by id";
+				ps = con.prepareStatement(sql);
+				ps.setLong(1, clientID);
+				ps.setLong(2, Long.parseLong(params[0]));
+				ps.setInt(3, Integer.parseInt(params[1]));
+				rs = ps.executeQuery();
+				while (rs.next()) {
+					// paramsData.add(new String[] { rs.getString("ID")});
+					paramsData.add(new String[] { "overhead_" + rs.getString("NAME") });
+				}
+				ps.close();
+				rs.close();
+				sql = "select u.id, u.fieldname from tuserfields u " + "where u.id in (select su.userfield_id from tstartrecord_userfields su join temployee_salaryrecord s "
+						+ "	on su.teamid = s.recruiter_teamid and su.startid = s.interviewid where su.teamid = u.teamid " + "	and su.userfield_id = u.id and s.recruiter_teamid = ? and s.employeeid = ? and s.recid = ?)";
+				ps = con.prepareStatement(sql);
+				ps.setLong(1, clientID);
+				ps.setString(2, params[0]);
+				ps.setString(3, params[1]);
+				rs = ps.executeQuery();
+				while (rs.next()) {
+					paramsData.add(new String[] { "activityUdf_" + rs.getString("ID") + "_" + rs.getString("FIELDNAME") });
+				}
+				ps.close();
+				rs.close();
+			} else if (metricName.equals("Nesco Dinesol Salary Record Detail")) {
+				sql = "select id, name from tteam_overhead_type x join temployee_overhead y " + "on x.teamid = y.recruiter_teamid and x.id = y.overheadid " + "where x.teamid = 1 and y.employeeid = 1 and y.salary_recid = 1 and exists ( "
+						+ "    select 1 from temployee_billingrecord b where b.recruiter_teamid = y.recruiter_teamid and b.employeeid = y.employeeid  "
+						+ "	and b.start_date < sysdate and (b.end_date is null or b.end_date > sysdate) and b.approved=1 and (b.closed is null or b.closed = 0) "
+						+ "	 and exists (select 1 from tcustomer c where c.companyid = 6623692 and b.billing_contact = c.ID AND b.recruiter_teamid = c.teamid) " + ")";
+				ps = con.prepareStatement(sql);
+				ps.setLong(1, clientID);
+				ps.setLong(2, Long.parseLong(params[0]));
+				ps.setInt(3, Integer.parseInt(params[1]));
+				rs = ps.executeQuery();
+				while (rs.next()) {
+					// paramsData.add(new String[] { rs.getString("ID")});
+					paramsData.add(new String[] { rs.getString("NAME") });
+				}
+				ps.close();
+				rs.close();
+			} else if (metricName.equals("Salary Records Detail")) {
+				StringBuilder candidates = new StringBuilder();
+				for (int i = 0; i < params.length; i++) {
+					if (i > 0)
+						candidates.append(",");
+					candidates.append(params[i]);
+				}
+				sql = "select distinct name from tteam_overhead_type a join temployee_overhead b " + "on a.teamid = b.recruiter_teamid and a.id = b.overheadid " + "where a.teamid = ? and b.employeeid in ( "
+						+ "	(Select * from THE (Select cast(sf_inlist(?) as sf_inlist_table_type ) from dual )) " + ")";
+				ps = con.prepareStatement(sql);
+				ps.setLong(1, clientID);
+				ps.setString(2, candidates.toString());
+				rs = ps.executeQuery();
+				while (rs.next()) {
+					paramsData.add(new String[] { rs.getString("NAME") });
+				}
+				ps.close();
+				rs.close();
+			} else if (metricName.equals("Employee Salary Records Detail")) {
+				sql = "select distinct id, name from tteam_overhead_type a join temployee_overhead b " + "on a.teamid = b.recruiter_teamid and a.id = b.overheadid " + "where b.recruiter_teamid = ? and b.employeeid = ? " + "order by id";
+				ps = con.prepareStatement(sql);
+				ps.setLong(1, clientID);
+				ps.setLong(2, Long.parseLong(params[0]));
+				rs = ps.executeQuery();
+				while (rs.next()) {
+					// paramsData.add(new String[] { rs.getString("ID")});
+					paramsData.add(new String[] { rs.getString("NAME") });
+				}
+				ps.close();
+				rs.close();
+			} else if (metricName.equals("New/Updated Salary Records")) {
+				sql = "select distinct id, name from tteam_overhead_type a join temployee_overhead b " + "on a.teamid = b.recruiter_teamid and a.id = b.overheadid " + "	where a.teamid = ? and exists ( "
+						+ "	select 1 from temployee_salaryrecord s where a.teamid=s.recruiter_teamid and b.employeeid = s.employeeid and b.salary_recid = s.recid "
+						+ "	and s.datecreated between to_date(?,'mm/dd/yyyy hh24:mi:ss') and to_date(?,'mm/dd/yyyy hh24:mi:ss') " + ")";
+				ps = con.prepareStatement(sql);
+				ps.setLong(1, clientID);
+				ps.setString(2, fromDate);
+				ps.setString(3, toDate);
+				rs = ps.executeQuery();
+				while (rs.next()) {
+					// paramsData.add(new String[] { rs.getString("ID")});
+					paramsData.add(new String[] { rs.getString("NAME") });
+				}
+				ps.close();
+				rs.close();
+			} else if (metricName.equals("Deleted Salary Records")) {
+				sql = "select distinct id, name from tteam_overhead_type a join temployee_overhead b " + "on a.teamid = b.recruiter_teamid and a.id = b.overheadid " + "where a.teamid = ? and exists ( "
+						+ "	select 1 from temployee_salaryrecord s where a.teamid=s.recruiter_teamid and b.employeeid = s.employeeid and b.salary_recid = s.recid\n"
+						+ "	and s.datecreated between to_date(?,'mm/dd/yyyy hh24:mi:ss') and to_date(?,'mm/dd/yyyy hh24:mi:ss')\n" + "	and nvl(closed,0)=1" + ")";
+				ps = con.prepareStatement(sql);
+				ps.setLong(1, clientID);
+				ps.setString(2, fromDate);
+				ps.setString(3, toDate);
+				rs = ps.executeQuery();
+				while (rs.next()) {
+					// paramsData.add(new String[] { rs.getString("ID")});
+					paramsData.add(new String[] { rs.getString("NAME") });
+				}
+				ps.close();
+				rs.close();
+			} else if (metricName.equals("Billing Record Detail")) {
+				sql = "select discountid, discount_description from temployee_billingdiscount " + "where teamid = ? and employeeid = ? and recid = ? and discount_description <> 'Default Discount'";
+				ps = con.prepareStatement(sql);
+				ps.setLong(1, clientID);
+				ps.setString(2, params[0]);
+				ps.setString(3, params[1]);
+				rs = ps.executeQuery();
+				while (rs.next()) {
+					paramsData.add(new String[] { "discount_" + rs.getString("DISCOUNTID") + "_" + rs.getString("DISCOUNT_DESCRIPTION") });
+				}
+				ps.close();
+				rs.close();
+				sql = "select u.id, u.fieldname from tuserfields u " + "where u.id in (select s.userfield_id from tstartrecord_userfields s join temployee_billingrecord b "
+						+ "	on s.teamid = b.recruiter_teamid and s.startid = b.interviewid where s.teamid = u.teamid " + "	and s.userfield_id = u.id and b.recruiter_teamid = ? and b.employeeid = ? and b.recid = ?)";
+				ps = con.prepareStatement(sql);
+				ps.setLong(1, clientID);
+				ps.setString(2, params[0]);
+				ps.setString(3, params[1]);
+				rs = ps.executeQuery();
+				while (rs.next()) {
+					paramsData.add(new String[] { "activityUdf_" + rs.getString("ID") + "_" + rs.getString("FIELDNAME") });
+				}
+				ps.close();
+				rs.close();
+			} else if (metricName.equals("Employee Billing Records Detail")) {
+				sql = "select discountid, discount_description from temployee_billingdiscount " + "where teamid = ? and employeeid = ? and discount_description <> 'Default Discount'";
+				ps = con.prepareStatement(sql);
+				ps.setLong(1, clientID);
+				ps.setString(2, params[0]);
+				rs = ps.executeQuery();
+				while (rs.next()) {
+					paramsData.add(new String[] { rs.getString("DISCOUNTID") });
+					paramsData.add(new String[] { rs.getString("DISCOUNT_DESCRIPTION") });
+				}
+				ps.close();
+				rs.close();
+			} else if (metricName.equals("New/Updated Billing Records")) {
+				sql = "select distinct discountid, discount_description from temployee_billingdiscount a " + "where teamid = ? and employeeid in ( " + "   select employeeid from temployee_billingrecord b where a.teamid=b.recruiter_teamid "
+						+ "	and datecreated between to_date(?,'mm/dd/yyyy hh24:mi:ss') and to_date(?,'mm/dd/yyyy hh24:mi:ss') " + ") and discount_description <> 'Default Discount'";
+				ps = con.prepareStatement(sql);
+				ps.setLong(1, clientID);
+				ps.setString(2, fromDate);
+				ps.setString(3, toDate);
+				rs = ps.executeQuery();
+				while (rs.next()) {
+					paramsData.add(new String[] { rs.getString("DISCOUNTID") });
+					paramsData.add(new String[] { rs.getString("DISCOUNT_DESCRIPTION") });
+				}
+				ps.close();
+				rs.close();
+			} else if (metricName.equals("Rotator All Assignments - V2")) {
+				sql = "select distinct 'Candidate'||'~'||id||'~'||fieldname||'~'||fieldtypeid " + "from tuserfields where teamid = ? and fieldfor = 2 union all " + "select distinct 'Company'||'~'||id||'~'||fieldname||'~'||fieldtypeid "
+						+ "from tuserfields where teamid = ? and fieldfor = 8 union all " + "select distinct 'CandidateQual'||'~'||catid||'~'||catname from tcategories where teamid = ?";
+				ps = con.prepareStatement(sql);
+				ps.setLong(1, clientID);
+				ps.setLong(2, clientID);
+				ps.setLong(3, clientID);
+				rs = ps.executeQuery();
+				while (rs.next()) {
+					paramsData.add(new String[] { rs.getString(1) });
+				}
+				ps.close();
+				rs.close();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				ps.close();
+			} catch (Exception e) {
+			}
+			try {
+				rs.close();
+			} catch (Exception e) {
+			}
+		}
+		// Updating Params
+		// System.out.println("paramsData = " + paramsData);
+		if (paramsData != null) {
+			// System.out.println("params.length = " + params.length +
+			// "\tparamsData.size() = " + paramsData.size());
+			paramsTemp = new String[params.length + paramsData.size()];
+			// System.out.println("Created paramsTemp.size() = " +
+			// paramsTemp.length);
+			for (int i = 0; i < params.length; i++) { // adding old data
+				paramsTemp[i] = params[i];
+			}
+			for (int i = 0; i < paramsData.size(); i++) { // adding dynamic
+															// columns with [0]
+															// the header if has
+				if (paramsData.get(i).length == 1) {
+					paramsTemp[params.length + i] = paramsData.get(i)[0];
+				} else if (paramsData.get(i).length == 2) {
+					paramsTemp[params.length + i] = paramsData.get(i)[0] + paramsData.get(i)[1];
+				}
+			}
+			/*
+			 * for (String elt : paramsTemp) {
+			 * System.out.println("\tparamsTemp => " + elt); }
+			 */
+		}
+		return paramsTemp;
+	}
+	
 	public static String constructQuery(String metricName, Long clientID, String fromDate, String toDate, String[] params, Vector<Object> param, String[] restriction, Map<String, String> colNameToAliasMap) throws Exception {
 		// System.out.println("Constructing the query for " + metricName);
 		// construct query
@@ -1387,6 +1633,8 @@ public class BiDataQuery {
 			sql = JDData.newResumesDownloaded(clientID, fromDate, toDate, param);
 		} else if (metricName.equals("New Expenses")) {
 			sql = JDData.newExpenses(clientID, fromDate, toDate, param);
+		} else if (metricName.equals("Expenses By Id")) {
+			sql = JDData.expensesById(clientID, params, param);
 		} else if (metricName.equals("Candidate On-Boarding Document List")) {
 			sql = JDData.candidateOnboardingDocumentList(clientID, params, param);
 		} else if (metricName.equals("New Positions Count by Division")) {

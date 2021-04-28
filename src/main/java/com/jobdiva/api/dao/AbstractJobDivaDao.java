@@ -675,11 +675,10 @@ public class AbstractJobDivaDao {
 		return countryid;
 	}
 	
-	protected Team getTeamById(long teamId) {
+	protected Team getTeamById(JdbcTemplate jdbcTemplate, long teamId) {
 		String sql = "select * from TTEAM WHERE ID = ? ";
 		Object[] params = new Object[] { teamId };
 		//
-		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
 		List<Team> list = jdbcTemplate.query(sql, params, new TeamRowMapper());
 		//
@@ -687,13 +686,12 @@ public class AbstractJobDivaDao {
 		//
 	}
 	
-	private Integer assignCurrencySymbol(Long teamId, Hashtable<Integer, String> currencySymbolHash, Hashtable<String, Integer> currencyUnitHash) {
+	private Integer assignCurrencySymbol(JdbcTemplate jdbcTemplate, Long teamId, Hashtable<Integer, String> currencySymbolHash, Hashtable<String, Integer> currencyUnitHash) {
 		String sql = "select c.NAME, tc.CURRENCYID, tc.DEFAULTCURRENCY, c.SYMBOL " //
 				+ " from TTEAM_CURRENCY tc, TCURRENCY c " //
 				+ " where teamid = ? and tc.CURRENCYID = c.ID";
 		Object[] params = new Object[] { teamId };
 		//
-		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
 		List<Integer> list = jdbcTemplate.query(sql, params, new RowMapper<Integer>() {
 			
@@ -874,13 +872,13 @@ public class AbstractJobDivaDao {
 		}
 	}
 	
-	private String buildEmailBody(Long teamId, Job job, JDLocale regionFormat, String primaryRecName, String primarySaleName, String description, String rfqno_team, String rfq_refno) throws Exception {
+	private String buildEmailBody(JdbcTemplate jdbcTemplate, Long teamId, Job job, JDLocale regionFormat, String primaryRecName, String primarySaleName, String description, String rfqno_team, String rfq_refno) throws Exception {
 		//
 		//
 		Hashtable<Integer, String> currencySymbolHash = new Hashtable<Integer, String>();
 		Hashtable<String, Integer> currencyUnitHash = new Hashtable<String, Integer>(); // name,
 		//
-		assignCurrencySymbol(teamId, currencySymbolHash, currencyUnitHash);
+		assignCurrencySymbol(jdbcTemplate, teamId, currencySymbolHash, currencyUnitHash);
 		//
 		//
 		//
@@ -916,7 +914,6 @@ public class AbstractJobDivaDao {
 				+ " and states.countryid(+) = ? "; //
 		Object[] params = new Object[] { job.getCountry(), job.getState(), job.getCountry() };
 		//
-		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
 		List<LinkedList<String>> list = jdbcTemplate.query(sql, params, new RowMapper<LinkedList<String>>() {
 			
@@ -994,14 +991,14 @@ public class AbstractJobDivaDao {
 		return statusName;
 	}
 	
-	protected void sendAssignNotification(Vector<RecruiterObject> v_assigned, Vector<RecruiterObject> v_deassigned, Job job, long teamid, String primaryRecName, String primarySaleName, String description, String rfqno_team, String rfq_refno)
-			throws Exception {
+	protected void sendAssignNotification(JdbcTemplate jdbcTemplate, Vector<RecruiterObject> v_assigned, Vector<RecruiterObject> v_deassigned, Job job, long teamid, String primaryRecName, String primarySaleName, String description, String rfqno_team,
+			String rfq_refno) throws Exception {
 		//
 		// logger.info("........................ sendAssignNotification for " +
 		// job.getId());
 		//
 		String teamregion = "en_US";
-		Team team = getTeamById(teamid);
+		Team team = getTeamById(jdbcTemplate, teamid);
 		if (team.getRegionCode() != null && team.getRegionCode().length() > 0)
 			teamregion = team.getRegionCode();
 		//
@@ -1021,7 +1018,7 @@ public class AbstractJobDivaDao {
 			if (CompanyName.equals("") == false)
 				emailSubject += " for " + CompanyName;
 			//
-			String emailBody = buildEmailBody(teamid, job, regionFormat, primaryRecName, primarySaleName, description, rfqno_team, rfq_refno);
+			String emailBody = buildEmailBody(jdbcTemplate, teamid, job, regionFormat, primaryRecName, primarySaleName, description, rfqno_team, rfq_refno);
 			//
 			for (RecruiterObject rec : (Vector<RecruiterObject>) v_assigned) {
 				try {

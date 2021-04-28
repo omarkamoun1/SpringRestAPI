@@ -89,12 +89,9 @@ public class OnBoardController extends AbstractJobDivaController {
 	public Long uploadCandidateOnboardingDocument( //
 			//
 			@ApiParam(value = //
-			"candidateid     : Candidate internal JobDiva ID \r\n" //
-					+ "name           : Nickname of the uploaded attachment file \r\n" //
+			"onboardingId     : Onboarding Id \r\n" //
 					+ "filename       : Actual file name with file extension (.pdf, for example) \r\n" //
 					+ "filecontent    : Uploaded file in base64 binary \r\n" //
-					+ "attachmenttype : The type of the attachment \r\n" //
-					+ "description    : Additional description of the file \r\n" //
 					+ "") //
 			@RequestBody OnboardingCandidateDocument OnboardingCandidateDocument
 	//

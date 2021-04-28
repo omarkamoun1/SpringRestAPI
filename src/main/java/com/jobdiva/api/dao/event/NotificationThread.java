@@ -81,8 +81,7 @@ public class NotificationThread implements Runnable {
 			} else {
 				Object retObj = sendData(hm, "appws/servlet/SendPushServlet", loadBalanceServletLocation);
 			}
-			// Object retObj=sendData(hm, "appws/servlet/SendPushServlet",
-			// Application.isIntegration()?LOADBALANCERSERVLETLOCATION:"http://10.10.146.190:8000/");
+			//
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		}

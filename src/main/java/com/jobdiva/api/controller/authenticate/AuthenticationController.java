@@ -1,10 +1,14 @@
 package com.jobdiva.api.controller.authenticate;
 
+import javax.naming.AuthenticationException;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserCache;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +20,7 @@ import com.jobdiva.api.config.jwt.CustomAuthenticationToken;
 import com.jobdiva.api.config.jwt.JwtTokenUtil;
 import com.jobdiva.api.dao.authenticate.JobDivaAuthenticateDao;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
+import com.jobdiva.api.model.authenticate.JwtV2Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -66,6 +71,67 @@ public class AuthenticationController {
 		//
 		return token;
 		//
+		//
+		//
+	}
+	
+	// No release to production
+	@ApiIgnore
+	@ApiImplicitParams({ @ApiImplicitParam(name = "password", required = true, dataType = "String", format = "password") })
+	@ApiOperation(value = "V2 Authenticate")
+	@RequestMapping(value = "/v2/authenticate", method = RequestMethod.GET)
+	public JwtV2Response createV2AuthenticationToken(
+			//
+			@ApiParam(value = "Provided by JobDiva", required = true, type = "Long") //
+			@RequestParam(required = true) Long clientid, //
+			//
+			@ApiParam(value = "Account username (email)", required = true, type = "String") //
+			@RequestParam(required = true) String username, //
+			//
+			@ApiParam(value = "Account password", required = true, type = "string", format = "password") //
+			@RequestParam(required = true) String password) throws Exception {
+		//
+		userCache.removeUserFromCache(username);
+		//
+		JobDivaSession jobDivaSession = authenticate(clientid, username, password, true);
+		//
+		//
+		JwtV2Response response = createJwtV2ResponseBySession(jobDivaSession);
+		//
+		return response;
+		//
+		//
+		//
+	}
+	
+	private JwtV2Response createJwtV2ResponseBySession(JobDivaSession jobDivaSession) {
+		String token = jwtTokenUtil.generateToken(jobDivaSession);
+		String refreshtoken = jwtTokenUtil.generateRefreshToken(jobDivaSession);
+		//
+		JwtV2Response response = new JwtV2Response(token, refreshtoken);
+		return response;
+	}
+	
+	// No release to production
+	@ApiIgnore
+	@ApiOperation(value = "Refresh Token")
+	@RequestMapping(value = "/v2/refreshToken", method = RequestMethod.GET)
+	public JwtV2Response refreshToken(
+	//
+	) throws Exception {
+		//
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (!(authentication instanceof AnonymousAuthenticationToken)) {
+			JobDivaSession jobDivaSession = (JobDivaSession) authentication.getPrincipal();
+			if (jobDivaSession != null) {
+				//
+				JwtV2Response response = createJwtV2ResponseBySession(jobDivaSession);
+				//
+				return response;
+			}
+		}
+		//
+		throw new AuthenticationException("Token is invalid.");
 		//
 		//
 	}

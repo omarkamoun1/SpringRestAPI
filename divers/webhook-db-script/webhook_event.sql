@@ -13,8 +13,7 @@ is
   params varchar2(4000) :='teamId='||teamid||'&'||'syncType='||syncType||'&'||'operation='||operation||'&'||'id='||id;
  
 begin
-  INSERT INTO TWEBHOOK_FAILEDREQUEST (ID, TEAMID, SYNCTYPE, OPERATIONTYPE, DATAID, DATECREATED ) values (TWEBHOOK_FAILEDREQUEST_SEQ.nextval, 1, 'update', 1, 1, sysdate);
-  
+    
   select count(*) into has_webhook_api from TWEBHOOK_CONFIGURATION where TEAMID = teamid and ACTIVE = 1 and rownum=1;
   if has_webhook_api is not null and has_webhook_api >0 then
     begin
