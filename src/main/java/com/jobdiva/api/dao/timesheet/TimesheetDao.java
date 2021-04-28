@@ -978,7 +978,7 @@ public class TimesheetDao extends AbstractJobDivaDao {
 		return utsa_rsp;
 	}
 	
-	public List<WeekEndingRecord> searchTimesheet(JobDivaSession jobDivaSession, Long userid, Integer approvedStatus, Calendar startDate, Calendar endDate, String firstname, String lastname, Long companyid, Long managerid) throws Exception {
+	public List<WeekEndingRecord> searchTimesheet(JobDivaSession jobDivaSession, Long userid, Integer approvedStatus, Date startDate, Date endDate, String firstname, String lastname, Long companyid, Long managerid) throws Exception {
 		String sql = null;
 		if (managerid == null)
 			managerid = (long) -1;
@@ -1018,8 +1018,8 @@ public class TimesheetDao extends AbstractJobDivaDao {
 		paramList.add(jobDivaSession.getTeamId());
 		paramList.add(approvedStatus);
 		paramList.add(approvedStatus);
-		paramList.add(new java.sql.Date(startDate.getTimeInMillis()));
-		paramList.add(new java.sql.Date(endDate.getTimeInMillis()));
+		paramList.add(startDate);
+		paramList.add(endDate);
 		paramList.add(firstname == null ? 0 : firstname.trim().length());
 		paramList.add(firstname == null ? "" : firstname.toUpperCase() + "%");
 		paramList.add(lastname == null ? 0 : lastname.trim().length());
