@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +27,7 @@ import com.jobdiva.api.model.chatbot.ChatbotUserData;
 import com.jobdiva.api.model.chatbot.ChatbotVMSAccount;
 import com.jobdiva.api.model.chatbot.ChatbotVMSType;
 import com.jobdiva.api.model.chatbot.ChatbotVisibility;
+import com.jobdiva.api.model.chatbot.ChatbotEmailAlert;
 import com.jobdiva.api.service.ChatbotDataService;
 
 import io.swagger.annotations.ApiParam;
@@ -173,24 +176,10 @@ public class SupportChatbotController extends AbstractJobDivaController {
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		return chatbotDataService.getCandidatePackges(jobDivaSession, email);
 	}
-	@GetMapping(value = "/email-alert", produces = "application/json")
-	public Boolean emialAlert(
-		@ApiParam(value = "sendTo", required = true) //
-		@RequestParam(required = true) String sendTo ,
-
-		@ApiParam(value = "cc", required = true) //
-		@RequestParam(required = true) String cc ,
-
-		@ApiParam(value = "from", required = true) //
-		@RequestParam(required = true) String from ,
-		@ApiParam(value = "subject", required = true) //
-		@RequestParam(required = true) String subject ,
-		@ApiParam(value = "body", required = true) //
-		@RequestParam(required = true) String body )
-		
-		
+	@PostMapping(value = "/email-alert", produces = "application/json")
+	public Boolean emialAlert( @RequestBody(required = true) ChatbotEmailAlert email)
 		throws Exception {
 		JobDivaSession jobDivaSession = getJobDivaSession();
-		return chatbotDataService.emailAlert(jobDivaSession, sendTo,cc,from,subject,body);
+		return chatbotDataService.emailAlert(jobDivaSession,email);
 	}
 }

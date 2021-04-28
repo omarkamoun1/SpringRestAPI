@@ -1,6 +1,8 @@
 package com.jobdiva.api.service;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,7 @@ import com.jobdiva.api.model.ExpenseEntry;
 import com.jobdiva.api.model.Timesheet;
 import com.jobdiva.api.model.TimesheetEntry;
 import com.jobdiva.api.model.UploadTimesheetAssignment;
+import com.jobdiva.api.model.WeekEndingRecord;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 
 @Service
@@ -72,6 +75,26 @@ public class TimesheetService {
 		} catch (Exception e) {
 			//
 			timesheetDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "uploadTimesheetAssignment", "Upload Timesheet Assignment Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
+		}
+	}
+	
+	public List<WeekEndingRecord> searchTimesheet(JobDivaSession jobDivaSession, Long userid, Integer approvedStatus, Calendar startDate, Calendar endDate, String firstname, String lastname, Long companyid, Long managerid) throws Exception {
+		//
+		try {
+			//
+			List<WeekEndingRecord> records = timesheetDao.searchTimesheet(jobDivaSession,userid, approvedStatus,startDate, endDate, firstname, lastname, companyid, managerid);
+				
+			//
+			timesheetDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "searchTimesheet", "search Successful");
+			//
+			return records;
+			//
+		} catch (Exception e) {
+			//
+			timesheetDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "searchTimesheet", "search Failed, " + e.getMessage());
 			//
 			throw new Exception(e.getMessage());
 			//

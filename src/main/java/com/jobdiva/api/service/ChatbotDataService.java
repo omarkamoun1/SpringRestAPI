@@ -21,6 +21,7 @@ import com.jobdiva.api.model.chatbot.ChatbotUserData;
 import com.jobdiva.api.model.chatbot.ChatbotVMSAccount;
 import com.jobdiva.api.model.chatbot.ChatbotVMSType;
 import com.jobdiva.api.model.chatbot.ChatbotVisibility;
+import com.jobdiva.api.model.chatbot.ChatbotEmailAlert;
 
 @Service
 public class ChatbotDataService {
@@ -187,9 +188,9 @@ public class ChatbotDataService {
 		}
 	}
 
-	public boolean emailAlert(JobDivaSession jobDivaSession, String sendTo,String cc,String from,String subject,String body) throws Exception {
+	public boolean emailAlert(JobDivaSession jobDivaSession, ChatbotEmailAlert email) throws Exception {
 		try {
-			Boolean data = trainingDataDao.emailAlert(jobDivaSession, sendTo,cc,from,subject,body);
+			Boolean data = trainingDataDao.emailAlert(jobDivaSession, email);
 			return data;
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());

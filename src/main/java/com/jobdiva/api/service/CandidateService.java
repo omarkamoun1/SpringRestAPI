@@ -17,6 +17,7 @@ import com.jobdiva.api.dao.candidate.CandidateUDFDao;
 import com.jobdiva.api.dao.candidate.CandidateUserFieldsDao;
 import com.jobdiva.api.model.Candidate;
 import com.jobdiva.api.model.CandidateQual;
+import com.jobdiva.api.model.NoteType;
 import com.jobdiva.api.model.PhoneType;
 import com.jobdiva.api.model.QualificationType;
 import com.jobdiva.api.model.SocialNetworkType;
@@ -327,6 +328,26 @@ public class CandidateService {
 			candidateDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateCandidateSNLinks", "Update Failed, " + e.getMessage());
 			//
 			throw new Exception(e.getMessage());
+		}
+	}
+	
+	//
+	public List<NoteType> getCandidateNoteTypes(JobDivaSession jobDivaSession) throws Exception{
+		//
+		try {
+			//
+			List<NoteType> contactNoteTypes = candidateNoteDao.getCandidateNoteTypes(jobDivaSession);
+			//
+			candidateNoteDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getCandidateNoteTypes", "Get Candidate Note Types Successful ");
+			//
+			return contactNoteTypes;
+			//
+		} catch (Exception e) {
+			//
+			candidateNoteDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getCandidateNoteTypes", "Get Candidate Note Types Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
 		}
 	}
 }

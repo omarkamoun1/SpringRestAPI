@@ -39,5 +39,8 @@ public class ChatbotVMSAccount implements java.io.Serializable {
 	//
 	@JsonProperty(value = "status", index = 10)
 	public String status;
+	//
+	@JsonProperty(value = "machineDetail", index = 11)
+	public String machineDetail;
 
 }

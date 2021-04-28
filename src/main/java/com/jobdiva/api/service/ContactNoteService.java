@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.jobdiva.api.dao.contact.ContactNoteDao;
 import com.jobdiva.api.model.ContactNote;
+import com.jobdiva.api.model.NoteType;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 
 @Service
@@ -34,4 +35,24 @@ public class ContactNoteService {
 			//
 		}
 	}
+	
+	public List<NoteType> getContactNoteTypes(JobDivaSession jobDivaSession) throws Exception{
+		//
+		try {
+			//
+			List<NoteType> contactNoteTypes = contactNoteDao.getContactNoteTypes(jobDivaSession);
+			//
+			contactNoteDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getContactNoteTypes", "Get Contact Note Types Successful ");
+			//
+			return contactNoteTypes;
+			//
+		} catch (Exception e) {
+			//
+			contactNoteDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getContactNoteTypes", "Get Contact Note Types Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
+		}
+	}
+	
 }

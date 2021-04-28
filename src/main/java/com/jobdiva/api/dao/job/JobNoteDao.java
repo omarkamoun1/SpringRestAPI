@@ -14,6 +14,8 @@ import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.stereotype.Component;
 
 import com.jobdiva.api.dao.AbstractJobDivaDao;
+import com.jobdiva.api.model.Activity;
+import com.jobdiva.api.model.Note;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.sql.JobDivaSqlLobValue;
 
@@ -115,4 +117,33 @@ public class JobNoteDao extends AbstractJobDivaDao {
 		//
 		return true;
 	}
+	
+	public List<Note> getJobNotes(JobDivaSession jobDivaSession, Long jobId) throws Exception{
+		//
+		String sql=" select b.datecreated, b.recruiterid, c.firstname , c.lastname, b.note from trfq a, trfqnotes b, trecruiter c "
+				+ " where a.id=? and a.teamid=? and a.id = b.rfqid and b.recruiterid = c.id order by b.datecreated desc ";
+		//
+		Object[] params = new Object[] { jobId, jobDivaSession.getTeamId() };
+		//
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<Note> notes = jdbcTemplate.query(sql, params, new RowMapper<Note>() {
+			
+			@Override
+			public Note mapRow(ResultSet rs, int rowNum) throws SQLException {
+				Note noteObj = new Note();
+				//
+				noteObj.setId(jobId);
+				noteObj.setDate(rs.getDate("DATECREATED"));
+				noteObj.setContent(rs.getString("NOTE"));
+				noteObj.setRecruiterId(rs.getLong("RECRUITERID"));
+				noteObj.setRecruiterName(rs.getString("FIRSTNAME")+" "+rs.getString("LASTNAME"));
+				//
+				return noteObj;
+			}
+		});
+		return  notes;
+	}
+	
 }

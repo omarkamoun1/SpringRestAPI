@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.model.Candidate;
 import com.jobdiva.api.model.CandidateQual;
+import com.jobdiva.api.model.NoteType;
 import com.jobdiva.api.model.PhoneType;
 import com.jobdiva.api.model.QualificationType;
 import com.jobdiva.api.model.SocialNetworkType;
@@ -641,6 +642,18 @@ public class CandidateController extends AbstractJobDivaController {
 		jobDivaSession.checkForAPIPermission("updateCandidateSNLinks");
 		//
 		return candidateService.updateCandidateSNLinks(jobDivaSession, candidateid, socialnetworks);
+		//
+	}
+	//
+	@RequestMapping(value = "/GetCandidateNoteTypes", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Get Candidate Note Types")
+	public List<NoteType> GetContactNoteTypes() throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("GetCandidateNoteTypes");
+		//
+		return  candidateService.getCandidateNoteTypes(jobDivaSession);
 		//
 	}
 }

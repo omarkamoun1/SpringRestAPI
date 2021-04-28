@@ -14,11 +14,14 @@ import com.jobdiva.api.dao.job.JobApplicationDao;
 import com.jobdiva.api.dao.job.JobDao;
 import com.jobdiva.api.dao.job.JobNoteDao;
 import com.jobdiva.api.dao.job.JobUserDao;
+import com.jobdiva.api.model.Activity;
 import com.jobdiva.api.model.Attachment;
 import com.jobdiva.api.model.ContactRoleType;
 import com.jobdiva.api.model.Job;
 import com.jobdiva.api.model.JobUserSimple;
+import com.jobdiva.api.model.Note;
 import com.jobdiva.api.model.Skill;
+import com.jobdiva.api.model.TeamRole;
 import com.jobdiva.api.model.UserRole;
 import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
@@ -98,11 +101,11 @@ public class JobService {
 		//
 		try {
 			//
-			List<JobUserSimple> list = jobUserDao.getAllJobUsers(jobDivaSession, jobId);
+			List<JobUserSimple> jobUsers = jobUserDao.getAllJobUsers(jobDivaSession, jobId);
 			//
 			jobUserDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobUsers", "Get Successful");
 			//
-			return list;
+			return jobUsers;
 			//
 		} catch (Exception e) {
 			//
@@ -118,20 +121,59 @@ public class JobService {
 		//
 		try {
 			//
-			List<String> list = jobUserDao.getJobPriority(jobDivaSession, teamId);
+			List<String> jobPriority = jobDao.getJobPriority(jobDivaSession, teamId);
 			//
-			jobUserDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobPriority", "Get Successful");
+			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobPriority", "Get Successful");
 			//
-			return list;
+			return jobPriority;
 			//
 		} catch (Exception e) {
 			//
-			jobUserDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobPriority", "Get Failed, " + e.getMessage());
+			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobPriority", "Get Failed, " + e.getMessage());
 			//
 			throw new Exception(e.getMessage());
 			//
 		}
 	}
+	
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+	public Boolean updateJobPriority(JobDivaSession jobDivaSession, Integer priority, Long jobId , String priorityName) throws Exception {
+		//
+		try {
+			//
+		    Boolean result = jobDao.updateJobPriority(jobDivaSession, priority, jobId, priorityName);
+			//
+			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateJobPriority", "Update Successful");
+			//
+			return result;
+		} catch (Exception e) {
+			//
+			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateJobPriority", "Update Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
+		}
+	}
+	
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+	public List<TeamRole> getUserRoles(JobDivaSession jobDivaSession) throws Exception {
+		//
+		try {
+			//
+		    List<TeamRole> userRoles = jobDao.getUserRoles(jobDivaSession);
+			//
+			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getUserRoles", "Get Successful");
+			//
+			return userRoles;
+		} catch (Exception e) {
+			//
+			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getUserRoles", "Get Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
+		}
+	}
+	
 	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
 	public Boolean createJobApplication(JobDivaSession jobDivaSession, Long candidateid, Long jobid, Date dateapplied, Integer resumesource, String globalid) throws Exception {
 		//
@@ -145,6 +187,43 @@ public class JobService {
 		} catch (Exception e) {
 			//
 			jobApplicationDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "createJobApplication", "Create Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
+		}
+	}
+	
+
+	public List<Note> getJobNotes(JobDivaSession jobDivaSession, Long jobid) throws Exception {
+		//
+		try {
+			//
+			List<Note> notes = jobNoteDao.getJobNotes(jobDivaSession, jobid);
+			//
+			jobApplicationDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobNotes", "Get Job Notes Successful");
+			//
+			return notes;
+		} catch (Exception e) {
+			//
+			jobApplicationDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobNotes", "Get Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
+		}
+	}
+	
+	public List<Activity> getJobActivities(JobDivaSession jobDivaSession, Long jobid) throws Exception {
+		//
+		try {
+			//
+			List<Activity> activities = jobDao.getJobActivities(jobDivaSession, jobid);
+			//
+			jobApplicationDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobActivities", "Get Job Activities Successful");
+			//
+			return activities;
+		} catch (Exception e) {
+			//
+			jobApplicationDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobActivities", "Get Failed, " + e.getMessage());
 			//
 			throw new Exception(e.getMessage());
 			//
