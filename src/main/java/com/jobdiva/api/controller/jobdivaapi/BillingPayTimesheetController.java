@@ -1092,10 +1092,10 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 			@RequestParam(required = true) Integer approvedStatus, //
 			//
 			@ApiParam(required = true) //
-			@RequestParam(required = true) Calendar startDate, //
+			@RequestParam(required = true) Date startDate, //
 			//
 			@ApiParam(required = true) //
-			@RequestParam(required = true) Calendar endDate, //
+			@RequestParam(required = true) Date endDate, //
 			//
 			@ApiParam(required = false) //
 			@RequestParam(required = false) String firstname, //

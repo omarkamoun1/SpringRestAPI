@@ -81,7 +81,7 @@ public class TimesheetService {
 		}
 	}
 	
-	public List<WeekEndingRecord> searchTimesheet(JobDivaSession jobDivaSession, Long userid, Integer approvedStatus, Calendar startDate, Calendar endDate, String firstname, String lastname, Long companyid, Long managerid) throws Exception {
+	public List<WeekEndingRecord> searchTimesheet(JobDivaSession jobDivaSession, Long userid, Integer approvedStatus, Date startDate, Date endDate, String firstname, String lastname, Long companyid, Long managerid) throws Exception {
 		//
 		try {
 			//
