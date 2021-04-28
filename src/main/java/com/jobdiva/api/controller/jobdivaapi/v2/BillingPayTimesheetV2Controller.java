@@ -584,7 +584,7 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 		//
 		jobDivaSession.checkForAPIPermission("createPayRecord");
 		//
- 		Long candidateID = createPayRecordDef.getCandidateID();
+		Long candidateID = createPayRecordDef.getCandidateID();
 		Double assignmentID = createPayRecordDef.getAssignmentID();
 		Long jobID = createPayRecordDef.getJobID();
 		Boolean approved = createPayRecordDef.getApproved();
@@ -614,7 +614,7 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 		String aDPPAYFREQUENCY = createPayRecordDef.getaDPPAYFREQUENCY();
 		//
 		//
- 		return invoiceService.createPayRecord(jobDivaSession, candidateID, assignmentID, jobID,
+		return invoiceService.createPayRecord(jobDivaSession, candidateID, assignmentID, jobID,
 				/* recordID, */ approved, createdByID, effectiveDate, endDate, status, taxID, paymentTerms, subcontractCompanyID, payOnRemittance, salary, salaryPer, perDiem, perDiemPer, otherExpenses, otherExpensesPer, outsideCommission,
 				outsideCommissionPer, overtimeRate, overtimeRatePer, doubletimeRate, doubletimeRatePer, overtimeExempt, fileNo, aDPCOCODE, aDPPAYFREQUENCY);
 		//

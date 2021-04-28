@@ -21,8 +21,6 @@ import com.jobdiva.api.model.v2.event.UpdateTaskDef;
 import com.jobdiva.api.service.EventService;
 
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import springfox.documentation.annotations.ApiIgnore;
@@ -188,9 +186,6 @@ public class EventV2Controller extends AbstractJobDivaController {
 		//
 	}
 	
-	@ApiImplicitParams({ @ApiImplicitParam(name = "timezone", required = false, allowMultiple = false, dataType = "Timezone"), //
-			@ApiImplicitParam(name = "eventNotification", required = false, allowMultiple = false, dataType = "EventNotification") //
-	})
 	@RequestMapping(value = "/updateEvent", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Update Event")
 	public Boolean updateEvent( //

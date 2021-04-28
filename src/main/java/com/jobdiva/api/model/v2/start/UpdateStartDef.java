@@ -23,7 +23,6 @@ public class UpdateStartDef implements Serializable {
 	@JsonProperty(value = "startDate", required = false)
 	private Date	startDate;
 	//
-	//
 	@JsonProperty(value = "endDate", required = false)
 	private Date	endDate;
 	//

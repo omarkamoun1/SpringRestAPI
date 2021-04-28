@@ -36,6 +36,7 @@ import com.jobdiva.api.convertor.JsonToCreateEventDefConverter;
 import com.jobdiva.api.convertor.JsonToCreateJobApplicationDefConverter;
 import com.jobdiva.api.convertor.JsonToCreateJobDefConverter;
 import com.jobdiva.api.convertor.JsonToCreatePayRecordDefConverter;
+import com.jobdiva.api.convertor.JsonToCreateSubmittalDefConverter;
 import com.jobdiva.api.convertor.JsonToCreateTaskDefConverter;
 import com.jobdiva.api.convertor.JsonToEducationQualConverter;
 import com.jobdiva.api.convertor.JsonToEventNotificationConverter;
@@ -55,10 +56,14 @@ import com.jobdiva.api.convertor.JsonToSearchCompanyDefConverter;
 import com.jobdiva.api.convertor.JsonToSearchContactsDefConverter;
 import com.jobdiva.api.convertor.JsonToSearchJobDefConverter;
 import com.jobdiva.api.convertor.JsonToSearchStartDefConverter;
+import com.jobdiva.api.convertor.JsonToSearchSubmittalDefConverter;
+import com.jobdiva.api.convertor.JsonToSetStartDefConverter;
 import com.jobdiva.api.convertor.JsonToShowOnInvoiceTypeConverter;
 import com.jobdiva.api.convertor.JsonToSkillConverter;
 import com.jobdiva.api.convertor.JsonToSocialNetworkConverter;
 import com.jobdiva.api.convertor.JsonToSocialNetworkTypeConverter;
+import com.jobdiva.api.convertor.JsonToTerminateAssignmentDefConverter;
+import com.jobdiva.api.convertor.JsonToTerminateStartDefConverter;
 import com.jobdiva.api.convertor.JsonToTimeSheetEntryFormatTypeConverter;
 import com.jobdiva.api.convertor.JsonToTimesheetEntryConverter;
 import com.jobdiva.api.convertor.JsonToTimezoneConverter;
@@ -76,6 +81,7 @@ import com.jobdiva.api.convertor.JsonToUpdateJobDefConverter;
 import com.jobdiva.api.convertor.JsonToUpdatePayRecordDefConverter;
 import com.jobdiva.api.convertor.JsonToUpdatePayrollProfileDefConverter;
 import com.jobdiva.api.convertor.JsonToUpdateStartDefConverter;
+import com.jobdiva.api.convertor.JsonToUpdateSubmittalDefConverter;
 import com.jobdiva.api.convertor.JsonToUpdateTaskDefConverter;
 import com.jobdiva.api.convertor.JsonToUplaodResumeConverter;
 import com.jobdiva.api.convertor.JsonToUploadTimesheetAssignmentDefConverter;
@@ -206,6 +212,12 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
 		registry.addConverter(new JsonToCreatePayRecordDefConverter());
 		registry.addConverter(new JsonToSearchStartDefConverter());
 		registry.addConverter(new JsonToUpdateStartDefConverter());
+		registry.addConverter(new JsonToSetStartDefConverter());
+		registry.addConverter(new JsonToTerminateStartDefConverter());
+		registry.addConverter(new JsonToTerminateAssignmentDefConverter());
+		registry.addConverter(new JsonToSearchSubmittalDefConverter());
+		registry.addConverter(new JsonToCreateSubmittalDefConverter());
+		registry.addConverter(new JsonToUpdateSubmittalDefConverter());
 	}
 	
 	private ApiInfo metaData() {
