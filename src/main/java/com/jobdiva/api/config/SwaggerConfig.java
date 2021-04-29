@@ -12,6 +12,8 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
+import com.jobdiva.api.convertor.JsonToAddCandidatesToHotlistDefConverter;
+import com.jobdiva.api.convertor.JsonToAddContactToHotlistDefConverter;
 import com.jobdiva.api.convertor.JsonToAddExpenseEntryDefConverter;
 import com.jobdiva.api.convertor.JsonToAddExpenseInvoiceDefConverter;
 import com.jobdiva.api.convertor.JsonToAddJobNoteDefConverter;
@@ -26,11 +28,13 @@ import com.jobdiva.api.convertor.JsonToContactAddressConverter;
 import com.jobdiva.api.convertor.JsonToContactAttachementConverter;
 import com.jobdiva.api.convertor.JsonToContactRoleTypeConverter;
 import com.jobdiva.api.convertor.JsonToCreateBillingRecordDefConverter;
+import com.jobdiva.api.convertor.JsonToCreateCandidateHoltilstDefConverter;
 import com.jobdiva.api.convertor.JsonToCreateCandidateNoteDefConverter;
 import com.jobdiva.api.convertor.JsonToCreateCandidateProfileDefDocumentConverter;
 import com.jobdiva.api.convertor.JsonToCreateCandidatesNoteDefConverter;
 import com.jobdiva.api.convertor.JsonToCreateCompanyDefConverter;
 import com.jobdiva.api.convertor.JsonToCreateContactDefConverter;
+import com.jobdiva.api.convertor.JsonToCreateContactHotlistDefConverter;
 import com.jobdiva.api.convertor.JsonToCreateContactNoteDefConverter;
 import com.jobdiva.api.convertor.JsonToCreateEventDefConverter;
 import com.jobdiva.api.convertor.JsonToCreateJobApplicationDefConverter;
@@ -218,6 +222,10 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
 		registry.addConverter(new JsonToSearchSubmittalDefConverter());
 		registry.addConverter(new JsonToCreateSubmittalDefConverter());
 		registry.addConverter(new JsonToUpdateSubmittalDefConverter());
+		registry.addConverter(new JsonToCreateCandidateHoltilstDefConverter());
+		registry.addConverter(new JsonToAddCandidatesToHotlistDefConverter());
+		registry.addConverter(new JsonToCreateContactHotlistDefConverter());
+		registry.addConverter(new JsonToAddContactToHotlistDefConverter());
 	}
 	
 	private ApiInfo metaData() {

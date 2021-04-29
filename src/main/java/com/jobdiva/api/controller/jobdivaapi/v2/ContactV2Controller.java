@@ -31,13 +31,12 @@ import com.jobdiva.api.service.ContactTypeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import springfox.documentation.annotations.ApiIgnore;
 
 @CrossOrigin
 @RestController
 @RequestMapping("/apiv2/jobdiva/")
 @Api(value = "Contact API", description = "REST API Used For Contact")
-@ApiIgnore
+// @ApiIgnore
 public class ContactV2Controller extends AbstractJobDivaController {
 	
 	@Autowired

@@ -146,57 +146,57 @@ public class TimesheetDao extends AbstractJobDivaDao {
 		// Object retObj = null;
 		// If timesheetId or externalId provided, locate existing timesheet and
 		// return billrecid~payrecid
-		if (timesheetId != null || externalId != null) {
-			CandidateBillingRecord bill_rec = new CandidateBillingRecord();
-			bill_rec.mark = 35; // option code
-			bill_rec.teamID = jobDivaSession.getTeamId();
-			bill_rec.candidateID = employeeid;
-			// Use the following two fields as placeholder. Will be processed
-			// accordingly in the backend.
-			if (timesheetId != null)
-				bill_rec.rfqID = timesheetId;
-			bill_rec.customerRefNo = externalId;
-			try {
-				ServletRequestData srd = new ServletRequestData(0, null, bill_rec);
-				retObj1 = ServletTransporter.callServlet(getCandidateBillingRecordsGetServlet(), srd);
-			} catch (Exception e) {
-				e.printStackTrace();
-				message.append("Error occurs when trying to locate existing timesheet. ");
-			}
-			if (retObj1 instanceof Object[]) {
-				Object[] retObjArr = (Object[]) retObj1;
-				TimeSheetWeek tsw = retObjArr[0] instanceof TimeSheetWeek ? (TimeSheetWeek) retObjArr[0] : null;
-				// Vector<Object> exp = retObjArr[1] instanceof Vector ?
-				// (Vector<Object>) retObjArr[1] : null;
-				// Compare hours passed in with existing hours
-				if (tsw instanceof TimeSheetWeek) {
-					for (int i = 0; i < tsw.dates.length; i++) {
-						TimeSheetDay day = tsw.dates[i];
-						tsMap.put(sdf.format(day.tDate), day.hoursWorked);
-					}
-					if (timesheetDates.length == tsMap.size()) {
-						int i = 0;
-						while (i < timesheetDates.length) {
-							if (!tsMap.containsKey(timesheetDates[i]) || !tsMap.get(timesheetDates[i]).equals(timesheetHours[i])) {
-								break;
-							}
-							i++;
-						}
-						// if (i == timesheetDates.length)
-						// updateHours = false;
-					}
-				}
-				//
-				bill_recid = tsw instanceof TimeSheetWeek ? tsw.bill_recid + "" : "";
-				pay_recid = tsw instanceof TimeSheetWeek ? tsw.createdByID + "" : "";
-				// if (bill_recid.length() > 0)
-				// isUpdate = true;
-			} else if (retObj1 instanceof Exception) {
-				Exception e = (Exception) retObj1;
-				e.printStackTrace();
-				message.append("Error: exception returned when trying to locate existing timesheet. " + (e.getMessage() != null ? e.getMessage() : ""));
-			}
+		// if (true || timesheetId != null || externalId != null) {
+		CandidateBillingRecord bill_rec = new CandidateBillingRecord();
+		bill_rec.mark = 35; // option code
+		bill_rec.teamID = jobDivaSession.getTeamId();
+		bill_rec.candidateID = employeeid;
+		// Use the following two fields as placeholder. Will be processed
+		// accordingly in the backend.
+		if (timesheetId != null)
+			bill_rec.rfqID = timesheetId;
+		bill_rec.customerRefNo = externalId;
+		try {
+			ServletRequestData srd = new ServletRequestData(0, null, bill_rec);
+			retObj1 = ServletTransporter.callServlet(getCandidateBillingRecordsGetServlet(), srd);
+		} catch (Exception e) {
+			e.printStackTrace();
+			message.append("Error occurs when trying to locate existing timesheet. ");
 		}
+		if (retObj1 instanceof Object[]) {
+			Object[] retObjArr = (Object[]) retObj1;
+			TimeSheetWeek tsw = retObjArr[0] instanceof TimeSheetWeek ? (TimeSheetWeek) retObjArr[0] : null;
+			// Vector<Object> exp = retObjArr[1] instanceof Vector ?
+			// (Vector<Object>) retObjArr[1] : null;
+			// Compare hours passed in with existing hours
+			if (tsw instanceof TimeSheetWeek) {
+				for (int i = 0; i < tsw.dates.length; i++) {
+					TimeSheetDay day = tsw.dates[i];
+					tsMap.put(sdf.format(day.tDate), day.hoursWorked);
+				}
+				if (timesheetDates.length == tsMap.size()) {
+					int i = 0;
+					while (i < timesheetDates.length) {
+						if (!tsMap.containsKey(timesheetDates[i]) || !tsMap.get(timesheetDates[i]).equals(timesheetHours[i])) {
+							break;
+						}
+						i++;
+					}
+					// if (i == timesheetDates.length)
+					// updateHours = false;
+				}
+			}
+			//
+			bill_recid = tsw instanceof TimeSheetWeek ? tsw.bill_recid + "" : "";
+			pay_recid = tsw instanceof TimeSheetWeek ? tsw.createdByID + "" : "";
+			// if (bill_recid.length() > 0)
+			// isUpdate = true;
+		} else if (retObj1 instanceof Exception) {
+			Exception e = (Exception) retObj1;
+			e.printStackTrace();
+			message.append("Error: exception returned when trying to locate existing timesheet. " + (e.getMessage() != null ? e.getMessage() : ""));
+		}
+		// }
 		//
 		//
 		//
@@ -260,7 +260,8 @@ public class TimesheetDao extends AbstractJobDivaDao {
 		//
 		//
 		Long timeSheetId = null;
-		CandidateBillingRecord bill_rec = new CandidateBillingRecord();
+		// CandidateBillingRecord
+		bill_rec = new CandidateBillingRecord();
 		bill_rec.mark = 34;
 		bill_rec.teamID = jobDivaSession.getTeamId();
 		bill_rec.candidateID = employeeid;

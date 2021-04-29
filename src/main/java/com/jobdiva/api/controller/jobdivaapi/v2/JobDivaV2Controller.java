@@ -24,13 +24,12 @@ import com.jobdiva.api.utils.DateUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import springfox.documentation.annotations.ApiIgnore;
 
 @CrossOrigin
 @RestController
 @RequestMapping("/apiv2/jobdiva/")
 @Api(value = "JobDiva API", description = "REST API")
-@ApiIgnore
+// @ApiIgnore
 public class JobDivaV2Controller extends AbstractJobDivaController {
 	
 	//
@@ -116,7 +115,7 @@ public class JobDivaV2Controller extends AbstractJobDivaController {
 		//
 	}
 	
-	//  
+	//
 	@RequestMapping(value = "/uploadContactAttachment", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Upload Contact Attachment")
 	public Long uploadContactAttachment( //

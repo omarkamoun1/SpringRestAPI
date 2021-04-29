@@ -23,13 +23,12 @@ import com.jobdiva.api.service.EventService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import springfox.documentation.annotations.ApiIgnore;
 
 @CrossOrigin
 @RestController
 @RequestMapping("/apiv2/jobdiva/")
 @Api(value = "Event API", description = "REST API Used For Event")
-@ApiIgnore
+// @ApiIgnore
 public class EventV2Controller extends AbstractJobDivaController {
 	//
 	

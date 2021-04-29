@@ -34,13 +34,12 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import springfox.documentation.annotations.ApiIgnore;
 
 @CrossOrigin
 @RestController
 @RequestMapping("/apiv2/jobdiva/")
 @Api(value = "Billing, Pay, Timesheet API", description = "REST API Used For Billing, Pay and Timesheet")
-@ApiIgnore
+// @ApiIgnore
 public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 	//
 	

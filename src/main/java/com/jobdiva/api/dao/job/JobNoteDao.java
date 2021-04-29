@@ -14,7 +14,6 @@ import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.stereotype.Component;
 
 import com.jobdiva.api.dao.AbstractJobDivaDao;
-import com.jobdiva.api.model.Activity;
 import com.jobdiva.api.model.Note;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.sql.JobDivaSqlLobValue;

@@ -12,6 +12,8 @@ import java.util.Vector;
 
 import javax.naming.AuthenticationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -25,18 +27,21 @@ import com.jobdiva.api.model.authenticate.JobDivaSession;
 
 public class AbstractJobDivaController {
 	
+	protected final Logger							logger				= LoggerFactory.getLogger(this.getClass());
+	//
+	//
 	@Autowired
 	protected JobDivaAuthenticateDao				jobDivaAuthenticate;
 	//
 	@Autowired
 	JobDivaConnectivity								jobDivaConnectivity;
 	//
-	public static HashMap<Long, Vector<Integer>>	TEAM_ACCOUNT_MAP	= new HashMap<Long, Vector<Integer>>();	// teamid
-																												// ->
-																												// [userCount,
-																												// today(yyyyMMdd),
-																												// param,
-																												// threadshold]
+	public static HashMap<Long, Vector<Integer>>	TEAM_ACCOUNT_MAP	= new HashMap<Long, Vector<Integer>>();		// teamid
+																													// ->
+																													// [userCount,
+																													// today(yyyyMMdd),
+																													// param,
+																													// threadshold]
 	
 	protected JobDivaSession getJobDivaSession() throws Exception {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -170,6 +175,11 @@ public class AbstractJobDivaController {
 				passTest = true;
 			} else if (lastJobdivaApiCall != null && lastJobdivaApiCall.getTime() > clock.getTime() + threshold) {
 				// printLog("API call blocked due to excessive calls!!!");
+				//
+				//
+				logger.info("checkAccountAbuse :: " + teamid + " [" + lastJobdivaApiCall + "] [" + clock + "] [" + threshold + "]");
+				//
+				//
 			} else {
 				String sqlUpdate = " UPDATE tteam SET lastjobdivaapicall = lastjobdivaapicall + 1/24/60/" + param + " WHERE id = ? ";
 				jdbcTemplate.update(sqlUpdate, new Object[] { teamid });
@@ -180,5 +190,21 @@ public class AbstractJobDivaController {
 		//
 		return passTest;
 		//
+	}
+	
+	protected Integer[] intListToArray(List<Integer> paramLits) {
+		return paramLits != null ? paramLits.stream().toArray(Integer[]::new) : null;
+	}
+	
+	protected String[] strListToArray(List<String> paramLits) {
+		return paramLits != null ? paramLits.stream().toArray(String[]::new) : null;
+	}
+	
+	protected Float[] floatListToArray(List<Float> paramLits) {
+		return paramLits != null ? paramLits.stream().toArray(Float[]::new) : null;
+	}
+	
+	protected Double[] doubleListToArray(List<Double> paramLits) {
+		return paramLits != null ? paramLits.stream().toArray(Double[]::new) : null;
 	}
 }
