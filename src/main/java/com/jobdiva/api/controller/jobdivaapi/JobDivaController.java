@@ -51,20 +51,6 @@ public class JobDivaController extends AbstractJobDivaController {
 	JobDivaSessionService	jobDivaSessionService;
 	
 	@ApiIgnore
-	@CrossOrigin(origins = "*")
-	@RequestMapping(value = "/refreshToken", method = RequestMethod.GET, produces = "application/json")
-	public String refreshToken( //
-	//
-	) throws Exception {
-		//
-		//
-		JobDivaSession jobDivaSession = getJobDivaSession();
-		//
-		return jobDivaSessionService.refreshToken(jobDivaSession);
-		//
-	}
-	
-	@ApiIgnore
 	@RequestMapping(value = "/linkedInUploadResume", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Upload Resume")
 	public Long linkedInUploadResume( //

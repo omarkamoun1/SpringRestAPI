@@ -40,6 +40,7 @@ import com.jobdiva.api.model.QualificationOption;
 import com.jobdiva.api.model.SocialNetworkType;
 import com.jobdiva.api.model.TitleSkillCertification;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
+import com.jobdiva.api.model.v2.candidate.CreateCandidateProfileDef;
 import com.jobdiva.api.model.webhook.WebhookCandidate;
 import com.jobdiva.api.servlet.ServletTransporter;
 import com.jobdiva.api.sql.JobDivaSqlLobValue;
@@ -654,6 +655,51 @@ public class CandidateDao extends AbstractJobDivaDao {
 			return newPhone;
 		} else
 			return phone;
+	}
+	
+	public Boolean createCandidates(JobDivaSession jobDivaSession, List<CreateCandidateProfileDef> createCandidateProfileDefs) throws Exception {
+		//
+		StringBuffer message = new StringBuffer();
+		for (CreateCandidateProfileDef createCandidateProfileDef : createCandidateProfileDefs) {
+			String firstName = createCandidateProfileDef.getFirstName();
+			String lastName = createCandidateProfileDef.getLastName();
+			String email = createCandidateProfileDef.getEmail();
+			String alternateemail = createCandidateProfileDef.getAlternateemail();
+			String address1 = createCandidateProfileDef.getAddress1();
+			String address2 = createCandidateProfileDef.getAddress2();
+			String city = createCandidateProfileDef.getCity();
+			String state = createCandidateProfileDef.getState();
+			String zipCode = createCandidateProfileDef.getZipCode();
+			String countryid = createCandidateProfileDef.getCountryid();
+			String homephone = createCandidateProfileDef.getHomephone();
+			String workphone = createCandidateProfileDef.getWorkphone();
+			String cellphone = createCandidateProfileDef.getCellphone();
+			String fax = createCandidateProfileDef.getFax();
+			Double currentsalary = createCandidateProfileDef.getCurrentsalary();
+			String currentsalaryunit = createCandidateProfileDef.getCurrentsalaryunit();
+			Double preferredsalary = createCandidateProfileDef.getPreferredsalary();
+			String preferredsalaryunit = createCandidateProfileDef.getPreferredsalaryunit();
+			String narrative = createCandidateProfileDef.getNarrative();
+			TitleSkillCertification[] titleskillcertifications = createCandidateProfileDef.getTitleskillcertifications();
+			String titleskillcertification = createCandidateProfileDef.getTitleskillcertification();
+			Date startdate = createCandidateProfileDef.getStartdate();
+			Date enddate = createCandidateProfileDef.getEnddate();
+			Integer years = createCandidateProfileDef.getYears();
+			Integer resumeSource = createCandidateProfileDef.getResumeSource();//
+			//
+			try {
+				createCandidate(jobDivaSession, firstName, lastName, email, alternateemail, address1, address2, city, state, zipCode, countryid, homephone, workphone, cellphone, fax, currentsalary, currentsalaryunit, preferredsalary,
+						preferredsalaryunit, narrative, titleskillcertifications, titleskillcertification, startdate, enddate, years, resumeSource);
+			} catch (Exception e) {
+				message.append(e.getMessage());
+			}
+		}
+		//
+		if (message.length() > 0) {
+			throw new Exception(message.toString());
+		}
+		//
+		return true;
 	}
 	
 	public Long createCandidate(JobDivaSession jobDivaSession, String firstName, String lastName, String email, String alternateemail, String address1, String address2, String city, String state, String zipCode, String countryid, String homephone,

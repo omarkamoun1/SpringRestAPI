@@ -534,6 +534,15 @@ public class HotlistDao extends AbstractJobDivaDao {
 		//
 	}
 	
+	public Boolean addCandidatesToHotlist(JobDivaSession jobDivaSession, Long hotListid, List<Long> candidateIds) throws Exception {
+		for (Long candidateId : candidateIds) {
+			if (candidateId != null && candidateId > 0)
+				addCandidateToHotlist(jobDivaSession, hotListid, candidateId);
+		}
+		//
+		return true;
+	}
+	
 	public Boolean addCandidateToHotlist(JobDivaSession jobDivaSession, Long hotListid, Long candidateId) throws Exception {
 		//
 		//
@@ -586,9 +595,9 @@ public class HotlistDao extends AbstractJobDivaDao {
 		lr.candidateid = candidateId;
 		lr.teamid = recruiter_teamid;
 		//
-		String tomcatLocation = appProperties.getLoadBalanceServletLocation();// Application.getTomcatLocation();
+		String tomcatLocation = appProperties.getLoadBalanceServletLocation();
 		String lcienseServlet = tomcatLocation + "/category/servlet/LicenceServlet";
-		System.out.println("tomcatLocation=" + lcienseServlet);
+		//
 		lr.reqCode = 40;
 		Object reqData = new ServletRequestData(0, null, lr);
 		Object obj = ServletTransporter.callServlet(lcienseServlet, reqData);
@@ -637,12 +646,13 @@ public class HotlistDao extends AbstractJobDivaDao {
 		//
 		//
 		Object[] objArray = getDocDbId(jdbcTemplate, resumeid[0], candidateId);
-		int dbid = ((Integer) objArray[0]).intValue();
-		String global_id = (String) objArray[1];
+		int dbid = objArray[0] != null ? ((Integer) objArray[0]).intValue() : 1;
+		String global_id = objArray[1] != null ? (String) objArray[1] : null;
 		//
 		Connection docDbConnection = biDataDao.getDocDbConnection(dbid);
 		try {
-			personal[4] = getAbstract(docDbConnection, global_id, dbid);
+			if (docDbConnection != null)
+				personal[4] = getAbstract(docDbConnection, global_id, dbid);
 		} finally {
 			if (docDbConnection != null)
 				docDbConnection.close();

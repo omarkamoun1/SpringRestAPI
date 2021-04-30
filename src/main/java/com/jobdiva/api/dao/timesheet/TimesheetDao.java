@@ -4,8 +4,10 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.TimeZone;
 import java.util.Vector;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -29,8 +32,11 @@ import com.axelon.shared.TimeSheetWeek;
 import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.dao.invoice.InvoiceDao;
 import com.jobdiva.api.model.ExpenseEntry;
+import com.jobdiva.api.model.Timesheet;
+import com.jobdiva.api.model.TimesheetApproval;
 import com.jobdiva.api.model.TimesheetEntry;
 import com.jobdiva.api.model.UploadTimesheetAssignment;
+import com.jobdiva.api.model.WeekEndingRecord;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.servlet.ServletTransporter;
 
@@ -40,15 +46,58 @@ public class TimesheetDao extends AbstractJobDivaDao {
 	@Autowired
 	InvoiceDao invoiceDao;
 	
-	public String uploadTimesheet(JobDivaSession jobDivaSession, Long employeeid, Long jobid, Date weekendingdate, Boolean approved, TimesheetEntry[] timesheetEntry, String date, String hours) throws Exception {
+	public Long uploadTimesheet(JobDivaSession jobDivaSession, Long employeeid, Long jobid, Date weekendingdate, Boolean approved, Long timesheetId, String externalId, Timesheet[] timesheetEntry) throws Exception {
+		//
 		//
 		StringBuffer message = new StringBuffer();
+		String[] timesheetDates = new String[7];
+		Double[] timesheetHours = new Double[7];
+		// should be 7
+		if (timesheetEntry == null || timesheetEntry.length != 7) {
+			message.append("Parameter Check Failed \r\n TimeSheet required and must contains 7 elements.\r\n");
+		}
+		//
+		if (employeeid == null || employeeid <= 0) {
+			message.append("Parameter Check Failed \r\n employeeid is required.\r\n");
+		}
+		//
+		if (approved == null) {
+			message.append("Parameter Check Failed \r\n approved is required.\r\n");
+		}
+		//
+		if (weekendingdate == null) {
+			message.append("Parameter Check Failed \r\n weekendingdate is required.\r\n");
+		}
+		if (timesheetId != null) {
+			if (timesheetId <= 0)
+				message.append("Invalid timesheetId(" + timesheetId + "). \r\n");
+		}
+		//
+		if (isNotEmpty(externalId))
+			externalId = externalId.trim();
+		//
+		//
+		if (message.length() > 0) {
+			throw new Exception("Parameter Check Failed \r\n " + message.toString());
+		}
+		//
+		//
 		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
 		// int billing_recid = 0;
 		String weekending = "";
 		Date timesheetdate = null;
 		Date wkDate = null;
 		try {
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(weekendingdate);
+			cal.add(Calendar.DATE, -6);
+			// startDate = sdf.parse(sdf.format(cal.getTime()));
+			for (int i = 0; i < timesheetDates.length; i++) {
+				timesheetDates[i] = sdf.format(cal.getTime());
+				timesheetHours[i] = 0.0;
+				cal.add(Calendar.DATE, 1);
+			}
+			//
 			String[] params = new String[4 + timesheetEntry.length];
 			params[0] = "" + jobDivaSession.getTeamId();
 			params[1] = "" + employeeid;
@@ -72,6 +121,7 @@ public class TimesheetDao extends AbstractJobDivaDao {
 					if (timesheetdate.getTime() > wkDate.getTime() || timesheetdate.getTime() < wkDate.getTime() - 6 * 24 * 3600 * 1000L)
 						message.append("Invalid timesheet date " + params[4 + i] + " for weekending " + weekending);
 				}
+				//
 			}
 		} catch (Exception e) {
 			message.append(e.getMessage());
@@ -82,9 +132,88 @@ public class TimesheetDao extends AbstractJobDivaDao {
 		//
 		//
 		//
+		Object retObj1 = null;
+		String bill_recid = "";
+		String pay_recid = "";
+		// Prev Timesheet in server Date ->Hours
+		HashMap<String, Double> tsMap = new HashMap<String, Double>();
+		// timesheetId or externalId
+		// boolean updateHours = true; // false if sent-in hours are the same as
+		// // existing records
+		// boolean updateExpenses = true; // false if sent-in expenses are the
+		// same
+		// as existing records
+		// Object retObj = null;
+		// If timesheetId or externalId provided, locate existing timesheet and
+		// return billrecid~payrecid
+		// if (true || timesheetId != null || externalId != null) {
+		CandidateBillingRecord bill_rec = new CandidateBillingRecord();
+		bill_rec.mark = 35; // option code
+		bill_rec.teamID = jobDivaSession.getTeamId();
+		bill_rec.candidateID = employeeid;
+		// Use the following two fields as placeholder. Will be processed
+		// accordingly in the backend.
+		if (timesheetId != null)
+			bill_rec.rfqID = timesheetId;
+		bill_rec.customerRefNo = externalId;
+		try {
+			ServletRequestData srd = new ServletRequestData(0, null, bill_rec);
+			retObj1 = ServletTransporter.callServlet(getCandidateBillingRecordsGetServlet(), srd);
+		} catch (Exception e) {
+			e.printStackTrace();
+			message.append("Error occurs when trying to locate existing timesheet. ");
+		}
+		if (retObj1 instanceof Object[]) {
+			Object[] retObjArr = (Object[]) retObj1;
+			TimeSheetWeek tsw = retObjArr[0] instanceof TimeSheetWeek ? (TimeSheetWeek) retObjArr[0] : null;
+			// Vector<Object> exp = retObjArr[1] instanceof Vector ?
+			// (Vector<Object>) retObjArr[1] : null;
+			// Compare hours passed in with existing hours
+			if (tsw instanceof TimeSheetWeek) {
+				for (int i = 0; i < tsw.dates.length; i++) {
+					TimeSheetDay day = tsw.dates[i];
+					tsMap.put(sdf.format(day.tDate), day.hoursWorked);
+				}
+				if (timesheetDates.length == tsMap.size()) {
+					int i = 0;
+					while (i < timesheetDates.length) {
+						if (!tsMap.containsKey(timesheetDates[i]) || !tsMap.get(timesheetDates[i]).equals(timesheetHours[i])) {
+							break;
+						}
+						i++;
+					}
+					// if (i == timesheetDates.length)
+					// updateHours = false;
+				}
+			}
+			//
+			bill_recid = tsw instanceof TimeSheetWeek ? tsw.bill_recid + "" : "";
+			pay_recid = tsw instanceof TimeSheetWeek ? tsw.createdByID + "" : "";
+			// if (bill_recid.length() > 0)
+			// isUpdate = true;
+		} else if (retObj1 instanceof Exception) {
+			Exception e = (Exception) retObj1;
+			e.printStackTrace();
+			message.append("Error: exception returned when trying to locate existing timesheet. " + (e.getMessage() != null ? e.getMessage() : ""));
+		}
+		// }
+		//
+		//
+		//
+		if (timesheetId != null && (bill_recid.length() == 0 || pay_recid.length() == 0))
+			message.append("Failed to locate timesheet by ID (" + timesheetId + "). ");
+		//
+		//
+		if (message.length() > 0) {
+			saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "uploadTimesheet", "Timesheet Upload Failed, " + message.toString());
+			//
+			throw new Exception("Timesheet Upload Failed : " + message.toString());
+		}
+		//
 		// build timesheet xml
 		StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><xml>");
 		xml.append("<TEAMID>" + jobDivaSession.getTeamId() + "</TEAMID>");
+		xml.append("<RECRUITERID>" + jobDivaSession.getRecruiterId() + "</RECRUITERID>");
 		xml.append("<WEBSITENAME></WEBSITENAME>");
 		xml.append("<CANDIDATE><CANDIDATENAME></CANDIDATENAME><CANDIDATEID>" + employeeid + "</CANDIDATEID><PONUMBER/>");
 		xml.append("<TIMESHEETWEEKS><TIMESHEETWEEK>");
@@ -92,7 +221,13 @@ public class TimesheetDao extends AbstractJobDivaDao {
 			xml.append("<REPLACE_PENDING>true</REPLACE_PENDING>");
 		else
 			xml.append("<SAVE_AS_PENDING>true</SAVE_AS_PENDING>");
+		//
+		xml.append("<EXTERNALID>" + externalId + "</EXTERNALID>");
+		//
 		xml.append("<WEEKENDINGDATE>" + weekending + "</WEEKENDINGDATE><TIMESHEETRECORDS>");
+		//
+		xml.append("<BILLRECID>" + bill_recid + "</BILLRECID>");
+		xml.append("<SALARYRECID>" + pay_recid + "</SALARYRECID>");
 		//
 		for (int i = 0; i < timesheetEntry.length; i++) {
 			if (timesheetEntry[i].getDate() != null)
@@ -123,12 +258,33 @@ public class TimesheetDao extends AbstractJobDivaDao {
 			status = "Error! Timesheet Not Saved.";
 		}
 		//
+		//
+		Long timeSheetId = null;
+		// CandidateBillingRecord
+		bill_rec = new CandidateBillingRecord();
+		bill_rec.mark = 34;
+		bill_rec.teamID = jobDivaSession.getTeamId();
+		bill_rec.candidateID = employeeid;
+		bill_rec.recID = isNotEmpty(bill_recid) ? Integer.parseInt(bill_recid) : 0;
+		bill_rec.startDate = sdf.parse(weekending);
+		retObj = null;
+		try {
+			ServletRequestData srd = new ServletRequestData(0, null, bill_rec);
+			retObj = ServletTransporter.callServlet(getCandidateBillingRecordsGetServlet(), srd);
+			if (retObj instanceof Long) {
+				timeSheetId = (Long) retObj;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			message.append("Error occurs when trying to retrieve TimeCard ID. ");
+		}
+		//
 		saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "uploadTimesheet", status + ", " + message.toString());
 		if (message.length() > 0) {
 			throw new Exception(message.toString());
 		}
 		//
-		return status;
+		return timeSheetId;
 	}
 	
 	public Boolean markTimesheetPaid(JobDivaSession jobDivaSession, Long employeeid, Integer salaryrecordid, Date datepaid, Date[] timesheetDates) throws Exception {
@@ -475,6 +631,9 @@ public class TimesheetDao extends AbstractJobDivaDao {
 				message.append("Error: exception returned when trying to locate existing timesheet. " + (e.getMessage() != null ? e.getMessage() : ""));
 			}
 		}
+		//
+		//
+		//
 		if (timesheetId != null && (bill_recid.length() == 0 || pay_recid.length() == 0))
 			message.append("Failed to locate timesheet by ID (" + timesheetId + "). ");
 		if (message.length() > 0) {
@@ -818,5 +977,119 @@ public class TimesheetDao extends AbstractJobDivaDao {
 						+ ((utsa_rsp.getAddexpensemessage() != null && utsa_rsp.getAddexpensemessage().length() > 0) ? utsa_rsp.getAddexpensemessage() : ""));
 		//
 		return utsa_rsp;
+	}
+	
+	public List<WeekEndingRecord> searchTimesheet(JobDivaSession jobDivaSession, Long userid, Integer approvedStatus, Date startDate, Date endDate, String firstname, String lastname, Long companyid, Long managerid) throws Exception {
+		String sql = null;
+		if (managerid == null)
+			managerid = (long) -1;
+		if (companyid == null)
+			companyid = (long) -1;
+		if (managerid <= 0) { // managerId not exist
+			sql = "select /*+ ordered use_nl(t1 t4 t7 t2 t3 t5 t6 t8) index(t1 IDX_TEMPLOYEE_WED_2)  */ t1.employeeid, t1.weekendingdate, t1.billing_recid, (t2.firstname || ' ' || t2.lastname) employeename, " + " nvl(t4.approverid, 0) approverid, "
+					+ " decode(nvl(t1.approved,0),0,(t3.firstname || ' ' || t3.lastname), (t6.firstname||' '||t6.lastname)) approvername, "
+					+ " nvl(t1.approved, 0) approved, t1.approved_on, nvl(t1.hoursworked,0) hoursworked , nvl(t1.reg_hours,0) reg_hours, nvl(t1.ot_hours,0) ot_hours, nvl(t1.dt_hours,0) dt_hours, t1.datecreated, "
+					+ " nvl(t1.ignored,0) ignored, nvl(t8.billingid, 0) myitem, t5.companyname, t4.bill_rate_per, t4.timesheet_entry_format, t10.rfqtitle, t10.rfqno_team "
+					+ " from temployee_wed t1, temployee_billingrecord t4,tbilling_approver t7,tcandidate t2, trecruiter t3, tcustomer t5, trecruiter t6, " + " tbilling_approver t8,trfq t10 " + " where t1.recruiter_teamid = ?"
+					+ " and ((-100 = ? and nvl(t1.approved,0)>=0) or nvl(t1.approved, 0) = ?) " + " and t1.approved is not null " + " and (t1.weekendingdate between ? and ? ) " + " and (0 = ? or upper(t2.FIRSTNAME) like ?) "
+					+ " and (0 = ? or upper(t2.LASTNAME) like ?) " + " and t1.employeeid = t2.id  and t2.teamid = t1.recruiter_teamid " + " and t4.employeeid=t1.employeeid and t4.recruiter_teamid=t1.recruiter_teamid and t4.recid=t1.billing_recid "
+					+ " and t4.billing_contact = t5.id and t4.recruiter_teamid = t5.teamid " + " and (-1 = ? or t5.companyid = ?) "
+					+ " and t1.employeeid = t7.employeeid(+) and t1.billing_recid = t7.billingid(+) and t1.recruiter_teamid = t7.teamid(+) and t7.type(+)=1 " + " and t7.approverid = t3.id(+) and t7.teamid=t3.groupid(+) "
+					+ " and t1.approved_by = t6.id(+) and t1.recruiter_teamid = t6.groupid(+) " + " and t1.employeeid = t8.employeeid(+) and t1.billing_recid = t8.billingid(+) and t1.recruiter_teamid = t8.teamid(+) and ?=t8.approverid(+) "
+					+ " and t4.rfqid = t10.id(+) and t4.recruiter_teamid=t10.teamid(+) ";
+			sql = " select * from ( " + sql + ") order by upper(employeename), billing_recid, weekendingdate desc ";
+		} else { // managerId exist
+			sql = "select /*+ ordered use_nl(t1 t4 t7 t2 t3 t5 t6 t8 t9) index(t1 IDX_TEMPLOYEE_WED_2) */ t1.employeeid, t1.weekendingdate, t1.billing_recid, (t2.firstname || ' ' || t2.lastname) employeename, " + " nvl(t4.approverid, 0) approverid, "
+					+ " decode(nvl(t1.approved,0),0,(t3.firstname || ' ' || t3.lastname), (t6.firstname||' '||t6.lastname)) approvername, "
+					+ " nvl(t1.approved, 0) approved, t1.approved_on, nvl(t1.hoursworked,0) hoursworked , nvl(t1.reg_hours,0) reg_hours, nvl(t1.ot_hours,0) ot_hours, nvl(t1.dt_hours,0) dt_hours, t1.datecreated, "
+					+ " nvl(t1.ignored,0) ignored, nvl(t8.billingid, 0) myitem, t5.companyname, t4.bill_rate_per, t4.timesheet_entry_format, t11.rfqtitle, t11.rfqno_team  "
+					+ " from temployee_wed t1, temployee_billingrecord t4,tbilling_approver t7,tcandidate t2, trecruiter t3, tcustomer t5, trecruiter t6," + " tbilling_approver t8, tbilling_approver t9, trfq t11 "
+					+ " where t1.recruiter_teamid = ? and ((-100 = ? and nvl(t1.approved,0)>=0) or nvl(t1.approved, 0) = ?) " + " and t1.approved is not null " + " and (t1.weekendingdate between ? and ?) "
+					+ " and (0 = ? or upper(t2.FIRSTNAME) like ?) " + " and (0 = ? or upper(t2.LASTNAME) like ?) " + " and t1.employeeid = t2.id  and t2.teamid = t1.recruiter_teamid "
+					+ " and t4.employeeid=t1.employeeid and t4.recruiter_teamid=t1.recruiter_teamid and t4.recid=t1.billing_recid " + " and t4.billing_contact = t5.id and t4.recruiter_teamid = t5.teamid " + " and (-1 = ? or t5.companyid = ?) "
+					+ " and t9.approverid = ? and t1.employeeid = t9.employeeid and t1.billing_recid = t9.billingid and t1.recruiter_teamid = t9.teamid "
+					+ " and t1.employeeid = t7.employeeid(+) and t1.billing_recid = t7.billingid(+) and t1.recruiter_teamid = t7.teamid(+) and t7.type(+)=1 " + " and t7.approverid = t3.id(+) and t7.teamid=t3.groupid(+) "
+					+ " and t1.approved_by = t6.id(+) and t1.recruiter_teamid = t6.groupid(+) " + " and t1.employeeid = t8.employeeid(+) and t1.billing_recid = t8.billingid(+) and t1.recruiter_teamid = t8.teamid(+) and ?=t8.approverid(+) "
+					+ " and t4.rfqid = t11.id(+) and t4.recruiter_teamid=t11.teamid(+) ";
+			sql = " select * from ( " + sql + ") order by upper(employeename), billing_recid, weekendingdate desc ";
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy hh:mm a z");
+		ArrayList<Object> paramList = new ArrayList<Object>();
+		//
+		paramList.add(jobDivaSession.getTeamId());
+		paramList.add(approvedStatus);
+		paramList.add(approvedStatus);
+		paramList.add(startDate);
+		paramList.add(endDate);
+		paramList.add(firstname == null ? 0 : firstname.trim().length());
+		paramList.add(firstname == null ? "" : firstname.toUpperCase() + "%");
+		paramList.add(lastname == null ? 0 : lastname.trim().length());
+		paramList.add(lastname == null ? "" : lastname.toUpperCase() + "%");
+		paramList.add(companyid);
+		paramList.add(companyid);
+		if (managerid > 0)
+			paramList.add(managerid);
+		paramList.add(userid);
+		//
+		Object[] params = paramList.toArray();
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<WeekEndingRecord> records = jdbcTemplate.query(sql, params, new RowMapper<WeekEndingRecord>() {
+			
+			@Override
+			public WeekEndingRecord mapRow(ResultSet rs, int rowNum) throws SQLException {
+				TimesheetApproval vta = new TimesheetApproval();
+				vta.setEmployeeid(rs.getLong("employeeid"));
+				vta.setWeekendingDate(rs.getDate("weekendingdate"));
+				vta.setBillrecordid(rs.getLong("billing_recid"));
+				vta.setEmployeeName(rs.getString("employeename"));
+				vta.setApproved(rs.getInt("approved"));
+				if (rs.getTimestamp("approved_on") != null)
+					vta.setApprovedOn(rs.getTimestamp("approved_on"));
+				vta.setRemark(rs.getLong("approverid") + "%%" + rs.getString("approvername") + "%%" + rs.getBigDecimal("hoursworked") + "%%" + rs.getBigDecimal("reg_hours") + "%%" + rs.getBigDecimal("ot_hours") + "%%" + rs.getBigDecimal("dt_hours")
+						+ "%%" + (rs.getDate("datecreated") == null ? "" : sdf.format(rs.getTimestamp("datecreated"))));
+				vta.setBillrateper(rs.getString("bill_rate_per"));
+				vta.setEntryformat(rs.getInt("timesheet_entry_format"));
+				if (rs.getInt("ignored") == 1)
+					vta.setApproved(10);
+				vta.setApprovedBy(rs.getLong("myitem"));
+				vta.setComments(rs.getString("companyname"));
+				vta.setWorkingstate(deNull(rs.getString("rfqtitle")) + "%%" + deNull(rs.getString("rfqno_team")));
+				WeekEndingRecord wer = ConverterWeekEndingRecord(vta);
+				return wer;
+			}
+		});
+		return records;
+	}
+	
+	private static WeekEndingRecord ConverterWeekEndingRecord(TimesheetApproval week) {
+		WeekEndingRecord w = new WeekEndingRecord();
+		Calendar myCal;
+		if (week.getApproved() != null)
+			w.setApproved(week.getApproved());
+		w.setApprovedBy(week.getApprovedBy() == null ? 0 : week.getApprovedBy());
+		if (week.getApprovedOn() != null) {
+			myCal = new GregorianCalendar();
+			myCal.setTime(week.getApprovedOn());
+			w.setApprovedOn(myCal);
+		}
+		if (week.getBillrecordid() != null)
+			w.setBillrecordid(week.getBillrecordid());
+		if (week.getBillrateper() != null)
+			w.setBillrateunit(week.getBillrateper());
+		if (week.getEmployeeid() != null)
+			w.setCandidateid(week.getEmployeeid());
+		w.setComments(week.getComments() + "%%" + week.getEmployeeName());
+		if (week.getEntryformat() != null)
+			w.setEntryformat(week.getEntryformat());
+		w.setRemark(week.getRemark());
+		if (week.getWeekendingDate() != null) {
+			myCal = new GregorianCalendar();
+			myCal.setTime(week.getWeekendingDate());
+			w.setWeekendingDate(myCal);
+		}
+		w.setWorkingstate(week.getWorkingstate());
+		return w;
 	}
 }

@@ -23,7 +23,6 @@ import com.jobdiva.api.service.OnBoardService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * @author Joseph Chidiac
@@ -33,7 +32,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @RequestMapping({ "/api/onboard/" })
 @Api(value = "Onboarding API", description = "REST API Used For Onboarding")
-@ApiIgnore
+//@ApiIgnore
 public class OnBoardController extends AbstractJobDivaController {
 	
 	@Autowired
@@ -89,12 +88,9 @@ public class OnBoardController extends AbstractJobDivaController {
 	public Long uploadCandidateOnboardingDocument( //
 			//
 			@ApiParam(value = //
-			"candidateid     : Candidate internal JobDiva ID \r\n" //
-					+ "name           : Nickname of the uploaded attachment file \r\n" //
+			"onboardingId     : Onboarding Id \r\n" //
 					+ "filename       : Actual file name with file extension (.pdf, for example) \r\n" //
 					+ "filecontent    : Uploaded file in base64 binary \r\n" //
-					+ "attachmenttype : The type of the attachment \r\n" //
-					+ "description    : Additional description of the file \r\n" //
 					+ "") //
 			@RequestBody OnboardingCandidateDocument OnboardingCandidateDocument
 	//

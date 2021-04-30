@@ -20,6 +20,8 @@ public class WebhookInfo implements Serializable {
 	private Boolean	enableContact	= false;
 	private Boolean	enableBilling	= false;
 	private Boolean	enableSalary	= false;
+	private Boolean	enableTimesheet	= false;
+	private Boolean	enableExpense	= false;
 	
 	public Long getId() {
 		return this.id;
@@ -107,5 +109,21 @@ public class WebhookInfo implements Serializable {
 	
 	public void setEnableSalary(Boolean enableSalary) {
 		this.enableSalary = enableSalary;
+	}
+	
+	public Boolean getEnableTimesheet() {
+		return enableTimesheet;
+	}
+	
+	public void setEnableTimesheet(Boolean enableTimesheet) {
+		this.enableTimesheet = enableTimesheet;
+	}
+	
+	public Boolean getEnableExpense() {
+		return enableExpense;
+	}
+	
+	public void setEnableExpense(Boolean enableExpense) {
+		this.enableExpense = enableExpense;
 	}
 }

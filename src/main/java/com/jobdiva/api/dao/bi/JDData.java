@@ -1775,6 +1775,31 @@ public class JDData {
 	}
 	
 	public static String billingRecordDetail(Long clientID, String[] params, Vector<Object> param, String[] restriction) {
+		StringBuffer discountColumns = new StringBuffer();
+		StringBuffer activityUdfColumns = new StringBuffer();
+		if (params != null) {
+			String[] ary = null;
+			for (int i = 2; i < params.length; i++) {
+				ary = params[i].split("_");
+				if (ary[0].equals("discount")) {
+					discountColumns.append(", (select discount || (case when discount_unit = '%' then '' else '/' end) || discount_unit from temployee_billingdiscount d where a.recruiter_teamid = d.teamid " + //
+							"	and a.employeeid = d.employeeid and a.recid = d.recid and discountid = " + //
+							ary[1] + ") \"" + StringUtils.escapeSql(ary[2]) + "\" ");
+				} else if (ary[0].equals("activityUdf")) {
+					activityUdfColumns.append( //
+							", (select " + //
+									" case when n.fieldtypeid = 3 " + //
+									" then to_char(to_date('01-jan-1970')+to_number(t.userfield_value)/86400000,'yyyy-mm-dd')||'T00:00:00.0' " + //
+									"      when n.fieldtypeid = 4 " + //
+									" then replace(to_char(to_date('01-jan-1970')+to_number(t.userfield_value)/86400000,'yyyy-mm-dd hh24:mi:ss')||'.0',' ','T') " + //
+									" else t.userfield_value end userfield_value " + //
+									" from tstartrecord_userfields t join tuserfields n on t.teamid = n.teamid and t.userfield_id = n.id " + //
+									" join tinterviewschedule i on t.teamid = i.recruiter_teamid and t.startid = i.id " + //
+									" where t.teamid = a.recruiter_teamid and i.candidateid = a.employeeid and i.id = a.interviewid " + //
+									"and n.id=" + ary[1] + ") \"" + StringUtils.escapeSql(ary[2]) + "\"");
+				}
+			}
+		}
 		String sql = " select a.EMPLOYEEID,a.RECID,a.RFQID JOBID,a.INTERVIEWID ACTIVITYID,a.APPROVED,a.CLOSED," + //
 				"   TO_CHAR(a.START_DATE,'mm/dd/yyyy') START_DATE,TO_CHAR(a.END_DATE,'mm/dd/yyyy') END_DATE,a.ACTUALSTART,a.ACTUALEND, " + //
 				"   a.DATECREATED_REAL DATECREATED,a.DATECREATED DATEUPDATED,a.CREATED_BY,a.APPROVERID, " + //
@@ -1794,12 +1819,34 @@ public class JDData {
 				"   (select discount from temployee_billingdiscount d where a.recruiter_teamid = d.teamid " + //
 				"     and a.employeeid = d.employeeid and a.recid = d.recid and d.discountid = 0) DISCOUNT_PERCENT," + //
 				"   (select discount_unit from temployee_billingdiscount d where a.recruiter_teamid = d.teamid " + //
-				"     and a.employeeid = d.employeeid and a.recid = d.recid and d.discountid = 0) DISCOUNT_UNIT," + //
-				"   a.VMS_WEBSITE,a.PASS_THROUGH, " + //
+				"     and a.employeeid = d.employeeid and a.recid = d.recid and d.discountid = 0) DISCOUNT_UNIT " + //
+				discountColumns.toString() + //
+				"   , a.VMS_WEBSITE,a.PASS_THROUGH, " + //
 				"   a.PRISALE_COMM_PERCENT,a.SECSALE_COMM_PERCENT,a.TERSALE_COMM_PERCENT,a.PRIREC_COMM_PERCENT,a.SECREC_COMM_PERCENT,a.TERREC_COMM_PERCENT, " + //
-				"   a.PAYMENTTERMS,a.EXPENSEENABLED,a.POID,b.AMOUNT POAMOUNT,b.START_DATE PO_START_DATE,b.END_DATE PO_END_DATE,a.OVERTIMEEXEMPT,a.DIVISION,a.TIMESHEET_ENTRY_FORMAT,a.CUSTOMER_REFNO_SUB,a.TIMESHEET_INSTRUCTION " + //
-				" from temployee_billingrecord a, tpo_setting b " + //
-				" where employeeid=? and recruiter_teamid=? and recid=? and b.teamid(+)=a.recruiter_teamid and b.id(+)=a.poid " + //
+				"   a.PAYMENTTERMS,a.EXPENSEENABLED,a.POID,b.AMOUNT POAMOUNT,b.START_DATE PO_START_DATE,b.END_DATE PO_END_DATE,a.OVERTIMEEXEMPT,a.DIVISION,a.TIMESHEET_ENTRY_FORMAT,a.CUSTOMER_REFNO_SUB,a.TIMESHEET_INSTRUCTION, " + //
+				"   decode(a.ot_by_working_state,0,'Manually Distribute',1,'Auto-Calculate by Working State',2,'Auto-Calculate by Federal 40-Hour Rule', " + //
+				"	3,'Auto-Calculate by 4/10 Work Week','') OVERTIME, " + //
+				"nvl((select x.symbol from tcurrency x, tteam_currency y where y.teamid=a.recruiter_teamid " + //
+				"    and y.defaultcurrency=1 and y.currencyid=x.id), '$') || " + //
+				"nvl(round((case when a.bill_rate_per = 'D' then a.bill_rate/a.hours_per_day when a.bill_rate_per = 'Y' " + //
+				"	then a.bill_rate/e.days_per_year/a.hours_per_day else a.bill_rate end) - " + //
+				"(select sum(case when d.discount_unit='%' then (case when a.bill_rate_per='D' and a.hours_per_day <> 0 " + //
+				"    then a.bill_rate/a.hours_per_day when a.bill_rate_per='Y' and a.hours_per_day <> 0 then a.bill_rate/e.days_per_year/a.hours_per_day " + //
+				"    else a.bill_rate end)*d.discount/100 when a.bill_rate_per in ('W','B','M') then 0 when d.discount_unit='d' and a.hours_per_day <> 0 " + //
+				"    then d.discount/a.hours_per_day when d.discount_unit='y' and a.hours_per_day <> 0 then d.discount/e.days_per_year/a.hours_per_day " + //
+				"    else d.discount end) from temployee_billingdiscount d where d.teamid=a.recruiter_teamid and d.employeeid=a.employeeid " + //
+				"    and d.recid=a.recid),2),0) || decode(a.bill_rate_per,'W','/W - Flat','B','/BW - Flat','M','/M - Flat','/H') net_bill, " + //
+				"nvl((select x.symbol from tcurrency x, tteam_currency y where y.teamid=a.recruiter_teamid " + //
+				"    and y.defaultcurrency=1 and y.currencyid=x.id), '$') || " + //
+				"nvl(round((select sum(case when d.discount_unit='%' then (case when a.bill_rate_per='D' and a.hours_per_day <> 0 " + //
+				"    then a.bill_rate/a.hours_per_day when a.bill_rate_per='Y' and a.hours_per_day <> 0 then a.bill_rate/e.days_per_year/a.hours_per_day " + //
+				"    else a.bill_rate end)*d.discount/100 when a.bill_rate_per in ('W','B','M') then 0 when d.discount_unit='d' and a.hours_per_day <> 0 " + //
+				"    then d.discount/a.hours_per_day when d.discount_unit='y' and a.hours_per_day <> 0 then d.discount/e.days_per_year/a.hours_per_day " + //
+				"    else d.discount end) from temployee_billingdiscount d where d.teamid=a.recruiter_teamid and d.employeeid=a.employeeid " + //
+				"    and d.recid=a.recid),2),0) || decode(a.bill_rate_per,'W','/W - Flat','B','/BW - Flat','M','/M - Flat','/H') discount " + //
+				activityUdfColumns.toString() + //
+				" from temployee_billingrecord a, tpo_setting b, tteam_billing_variables e " + //
+				" where employeeid=? and recruiter_teamid=? and recid=? and b.teamid(+)=a.recruiter_teamid and a.recruiter_teamid=e.teamid(+) and b.id(+)=a.poid " + //
 				(restriction != null && restriction.length > 0 && restriction[0] != null ? " and a.division=? " : "");
 		param.add(new Long(params[0]));
 		param.add(clientID);
@@ -1861,10 +1908,42 @@ public class JDData {
 	}
 	
 	public static String salaryRecordDetail(Long clientID, String[] params, Vector<Object> param, String[] restriction) {
-		String sql = " select EMPLOYEEID,RECID,RFQID JOBID,INTERVIEWID ACTIVITYID,EFFECTIVE_DATE,END_DATE,APPROVED,CLOSED, " + "   DATECREATED_REAL DATECREATED,DATECREATED DATEUPDATED,CREATED_BY, "
-				+ "   STATUS,PER_DIEM,PER_DIEM_PER,OUTSIDE_COMMISSION,OUTSIDE_COMMISSION_PER,OTHER_EXPENSES,OTHER_EXPENSES_PER, " + "   INSURED,SALARY,SALARY_PER,OVERTIME_RATE1,OVERTIME_RATE1_PER,OVERTIME_RATE2,OVERTIME_RATE2_PER,OVERTIMEEXEMPT, "
-				+ "   SUBCONTRACT_COMPANYID,SUBCONTRACT_PAYONREMIT," + "   OH_W2,OH_INSURANCE,OH_VACATION,OH_CORP_INSURANCE,OH_401K,OH_C2C,OH_PERDIEM, " + "   TAXID,PAYMENTTERMS,BIRTHDAY,VISA_STATUS,SSN,VACATION,COMMENTS,ADP_FILE_NO "
-				+ " from temployee_salaryrecord a " + " where employeeid=? and recruiter_teamid=? and recid=? "
+		StringBuffer overheadColumns = new StringBuffer();
+		StringBuffer activityUdfColumns = new StringBuffer();
+		if (params != null) {
+			String[] ary = null;
+			for (int i = 2; i < params.length; i++) {
+				ary = params[i].split("_");
+				if (ary[0].equals("overhead")) {
+					overheadColumns.append(", (SELECT 1 FROM TEMPLOYEE_OVERHEAD e JOIN TTEAM_OVERHEAD_TYPE o " + //
+							"ON e.RECRUITER_TEAMID = o.TEAMID AND e.OVERHEADID=o.ID " + //
+							"WHERE a.RECRUITER_TEAMID=e.RECRUITER_TEAMID AND a.EMPLOYEEID=e.EMPLOYEEID AND a.RECID=e.SALARY_RECID " + //
+							"AND o.NAME = '" + ary[1] + "') \"" + StringUtils.escapeSql(ary[1]) + "\"");
+				} else if (ary[0].equals("activityUdf")) {
+					activityUdfColumns.append( //
+							", (select " + //
+									" case when n.fieldtypeid = 3 " + //
+									" then to_char(to_date('01-jan-1970')+to_number(t.userfield_value)/86400000,'yyyy-mm-dd')||'T00:00:00.0' " + //
+									"      when n.fieldtypeid = 4 " + //
+									" then replace(to_char(to_date('01-jan-1970')+to_number(t.userfield_value)/86400000,'yyyy-mm-dd hh24:mi:ss')||'.0',' ','T') " + //
+									" else t.userfield_value end userfield_value " + //
+									" from tstartrecord_userfields t join tuserfields n on t.teamid = n.teamid and t.userfield_id = n.id " + //
+									" join tinterviewschedule i on t.teamid = i.recruiter_teamid and t.startid = i.id " + //
+									" where t.teamid = a.recruiter_teamid and i.candidateid = a.employeeid and i.id = a.interviewid " + //
+									"and n.id=" + ary[1] + ") \"" + StringUtils.escapeSql(ary[2]) + "\"");
+				}
+			}
+		}
+		String sql = " select EMPLOYEEID,RECID,RFQID JOBID,INTERVIEWID ACTIVITYID,EFFECTIVE_DATE,END_DATE,APPROVED,CLOSED, " + //
+				"   DATECREATED_REAL DATECREATED,DATECREATED DATEUPDATED,CREATED_BY, " + //
+				"   STATUS,PER_DIEM,PER_DIEM_PER,OUTSIDE_COMMISSION,OUTSIDE_COMMISSION_PER,OTHER_EXPENSES,OTHER_EXPENSES_PER, " + //
+				"   INSURED,SALARY,SALARY_PER,OVERTIME_RATE1,OVERTIME_RATE1_PER,OVERTIME_RATE2,OVERTIME_RATE2_PER,OVERTIMEEXEMPT, " + //
+				"   SUBCONTRACT_COMPANYID,SUBCONTRACT_PAYONREMIT," + //
+				"   OH_W2,OH_INSURANCE,OH_VACATION,OH_CORP_INSURANCE,OH_401K,OH_C2C,OH_PERDIEM, " + //
+				"   TAXID,PAYMENTTERMS,BIRTHDAY,VISA_STATUS,SSN,VACATION,COMMENTS,ADP_FILE_NO, " + //
+				"   DECODE(STATUS,'1','Hourly','2','Subcontractor','3','Employee','') EMPLOYMENT_CATEGORY, " + //
+				"   DECODE(PAYMENT_FREQUENCY,'1','Bi-Weekly','2','Monthly','3','Semi Monthly','4','Weekly','') PAYMENT_FREQUENCY " + //
+				overheadColumns.toString() + activityUdfColumns.toString() + " from temployee_salaryrecord a " + " where employeeid=? and recruiter_teamid=? and recid=? "
 				+ (restriction != null && restriction.length > 0 && restriction[0] != null
 						? " and exists (select 1 from temployee_billingrecord b where b.employeeid=a.employeeid and b.recruiter_teamid=a.recruiter_teamid and b.interviewid=a.interviewid and b.division=?) "
 						: "");
@@ -2530,6 +2609,22 @@ public class JDData {
 		param.add(clientID);
 		param.add(fromDate);
 		param.add(toDate);
+		return sql;
+	}
+	
+	public static String expensesById(Long clientID, String[] params, Vector<Object> param) {
+		String sql = "SELECT e.ENTRYID EXPENSEID, d.EXPENSEID SUB_EXPENSEID, e.EMPLOYEEID, e.BILLINGID BILLING_RECID, "//
+				+ " (SELECT s.RECID FROM TEMPLOYEE_BILLINGRECORD b JOIN TEMPLOYEE_SALARYRECORD s ON b.RECRUITER_TEAMID=s.RECRUITER_TEAMID " //
+				+ "    AND b.EMPLOYEEID=s.EMPLOYEEID AND b.INTERVIEWID=s.INTERVIEWID " //
+				+ "    WHERE b.EMPLOYEEID = e.EMPLOYEEID AND b.RECRUITER_TEAMID = e.RECRUITER_TEAMID AND b.RECID = e.BILLINGID "
+				+ "    AND e.TODATE BETWEEN s.EFFECTIVE_DATE AND NVL(s.END_DATE,'31-DEC-2999') AND s.APPROVED = 1 AND NVL(s.CLOSED,0)=0) SALARY_RECID, " //
+				+ "e.WEEKENDING, d.ITEM, d.EXPENSE, d.QUANTITY " //
+				+ " FROM TEXPENSE_ENTRY e " //
+				+ " JOIN TEXPENSE_DETAIL d ON e.ENTRYID = d.ENTRYID AND e.RECRUITER_TEAMID = d.RECRUITER_TEAMID " //
+				+ " WHERE e.RECRUITER_TEAMID = ? " //
+				+ " AND e.ENTRYID = ? ";
+		param.add(clientID);
+		param.add(new Long(params[0]));
 		return sql;
 	}
 	

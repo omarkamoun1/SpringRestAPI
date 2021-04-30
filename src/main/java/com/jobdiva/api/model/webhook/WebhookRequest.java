@@ -11,6 +11,7 @@ public class WebhookRequest {
 	private String	syncType;
 	private Integer	operation;
 	private Long	faultId;
+	private String	json;
 	
 	public String getId() {
 		return id;
@@ -50,5 +51,13 @@ public class WebhookRequest {
 	
 	public void setFaultId(Long faultId) {
 		this.faultId = faultId;
+	}
+	
+	public String getJson() {
+		return json;
+	}
+	
+	public void setJson(String json) {
+		this.json = json;
 	}
 }

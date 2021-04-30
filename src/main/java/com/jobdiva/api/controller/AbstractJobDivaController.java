@@ -12,6 +12,8 @@ import java.util.Vector;
 
 import javax.naming.AuthenticationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -25,18 +27,21 @@ import com.jobdiva.api.model.authenticate.JobDivaSession;
 
 public class AbstractJobDivaController {
 	
+	protected final Logger							logger				= LoggerFactory.getLogger(this.getClass());
+	//
+	//
 	@Autowired
 	protected JobDivaAuthenticateDao				jobDivaAuthenticate;
 	//
 	@Autowired
 	JobDivaConnectivity								jobDivaConnectivity;
 	//
-	public static HashMap<Long, Vector<Integer>>	TEAM_ACCOUNT_MAP	= new HashMap<Long, Vector<Integer>>();	// teamid
-																												// ->
-																												// [userCount,
-																												// today(yyyyMMdd),
-																												// param,
-																												// threadshold]
+	public static HashMap<Long, Vector<Integer>>	TEAM_ACCOUNT_MAP	= new HashMap<Long, Vector<Integer>>();		// teamid
+																													// ->
+																													// [userCount,
+																													// today(yyyyMMdd),
+																													// param,
+																													// threadshold]
 	
 	protected JobDivaSession getJobDivaSession() throws Exception {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -44,11 +49,20 @@ public class AbstractJobDivaController {
 			JobDivaSession jobDivaSession = (JobDivaSession) authentication.getPrincipal();
 			if (jobDivaSession != null && jobDivaSession.isAccountNonExpired()) {
 				//
-				// remove temporary the checkAccountAbuse
-				// if (!checkAccountAbuse(jobDivaSession)) {
-				// throw new Error("API call blocked due to excessive
-				// calls!!!");
+				//
+				//
+				//
+				// long leader = jobDivaSession.getLeader();
+				// //
+				// if (leader != 13328 && leader != 13584 &&
+				// !checkAccountAbuse(jobDivaSession)) {
+				// throw new Exception("There are too many API requests in the
+				// queue. Please try again later...");
 				// }
+				//
+				//
+				//
+				//
 				return jobDivaSession;
 			}
 		}
@@ -74,8 +88,14 @@ public class AbstractJobDivaController {
 	}
 	
 	public void refreshTeamAccountMap(long teamid, Integer today) {
-		// Map definition: teamid -> [(int)userCount, (Date)today, (int)param,
-		// (long)threadshold]
+		// Map definition:
+		// teamid -> [
+		// __________________________(int)userCount,
+		// __________________________(Date)today,
+		// __________________________(int)param,
+		// __________________________(long)threadshold
+		// ___________]
+		//
 		if (!TEAM_ACCOUNT_MAP.containsKey(teamid)) {
 			Vector<Integer> data = new Vector<Integer>();
 			data.add(0);
@@ -109,61 +129,82 @@ public class AbstractJobDivaController {
 	}
 	
 	protected Boolean checkAccountAbuse(JobDivaSession jobDivaSession) {
-		long leader = jobDivaSession.getLeader();
+		//
 		long teamid = jobDivaSession.getTeamId();
 		//
-		if (leader != 13328 && leader != 13584) {
-			boolean passTest = false;
-			Integer today = Integer.parseInt(new SimpleDateFormat("yyyyMMdd").format(new Date()));
-			if (!TEAM_ACCOUNT_MAP.containsKey(teamid) || TEAM_ACCOUNT_MAP.get(teamid).get(1) < today) {
-				refreshTeamAccountMap(teamid, today);
-			}
-			Vector<Integer> data = TEAM_ACCOUNT_MAP.get(teamid);
-			Integer param = data.get(2);
-			Integer threshold = data.get(3);
-			//
-			String sql = "SELECT lastjobdivaapicall, sysdate clock FROM tteam WHERE id = ?";
-			Object[] params = new Object[] { teamid };
-			//
-			JdbcTemplate jdbcTemplate = jobDivaConnectivity.getJdbcTemplate(teamid);
-			//
-			List<List<Object>> list = jdbcTemplate.query(sql, params, new RowMapper<List<Object>>() {
-				
-				@Override
-				public List<Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
-					List<Object> list = new ArrayList<Object>();
-					list.add(rs.getTimestamp("lastjobdivaapicall"));
-					list.add(rs.getTimestamp("clock"));
-					return list;
-				}
-			});
-			//
-			if (list != null && list.size() > 0) {
-				Timestamp lastJobdivaApiCall = (Timestamp) list.get(0).get(0);
-				Timestamp clock = (Timestamp) list.get(0).get(1);
-				//
-				if (lastJobdivaApiCall == null) {
-					String sqlUpdate = "UPDATE tteam SET lastjobdivaapicall = sysdate WHERE id = ? ";
-					jdbcTemplate.update(sqlUpdate, new Object[] { teamid });
-					passTest = true;
-				} else if (lastJobdivaApiCall != null && lastJobdivaApiCall.getTime() < clock.getTime()) {
-					String sqlUpdate = " UPDATE tteam SET lastjobdivaapicall = greatest(sysdate, lastjobdivaapicall + 1/24/60/" + param + ") WHERE id = ? ";
-					jdbcTemplate.update(sqlUpdate, new Object[] { teamid });
-					passTest = true;
-				} else if (lastJobdivaApiCall != null && lastJobdivaApiCall.getTime() > clock.getTime() + threshold) {
-					// printLog("API call blocked due to excessive calls!!!");
-				} else {
-					String sqlUpdate = " UPDATE tteam SET lastjobdivaapicall = lastjobdivaapicall + 1/24/60/" + param + " WHERE id = ? ";
-					jdbcTemplate.update(sqlUpdate, new Object[] { teamid });
-					passTest = true;
-				}
-				//
-				return passTest;
-			} else {
-				return false;
-			}
-		} else {
-			return true;
+		boolean passTest = false;
+		//
+		Integer today = Integer.parseInt(new SimpleDateFormat("yyyyMMdd").format(new Date()));
+		//
+		if (!TEAM_ACCOUNT_MAP.containsKey(teamid) || TEAM_ACCOUNT_MAP.get(teamid).get(1) < today) {
+			refreshTeamAccountMap(teamid, today);
 		}
+		//
+		//
+		Vector<Integer> data = TEAM_ACCOUNT_MAP.get(teamid);
+		Integer param = data.get(2);
+		Integer threshold = data.get(3);
+		//
+		String sql = "SELECT lastjobdivaapicall, sysdate clock FROM tteam WHERE id = ?";
+		Object[] params = new Object[] { teamid };
+		//
+		JdbcTemplate jdbcTemplate = jobDivaConnectivity.getJdbcTemplate(teamid);
+		//
+		List<List<Object>> list = jdbcTemplate.query(sql, params, new RowMapper<List<Object>>() {
+			
+			@Override
+			public List<Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
+				List<Object> list = new ArrayList<Object>();
+				list.add(rs.getTimestamp("lastjobdivaapicall"));
+				list.add(rs.getTimestamp("clock"));
+				return list;
+			}
+		});
+		//
+		if (list != null && list.size() > 0) {
+			Timestamp lastJobdivaApiCall = (Timestamp) list.get(0).get(0);
+			Timestamp clock = (Timestamp) list.get(0).get(1);
+			//
+			if (lastJobdivaApiCall == null) {
+				String sqlUpdate = "UPDATE tteam SET lastjobdivaapicall = sysdate WHERE id = ? ";
+				jdbcTemplate.update(sqlUpdate, new Object[] { teamid });
+				passTest = true;
+			} else if (lastJobdivaApiCall != null && lastJobdivaApiCall.getTime() < clock.getTime()) {
+				String sqlUpdate = " UPDATE tteam SET lastjobdivaapicall = greatest(sysdate, lastjobdivaapicall + 1/24/60/" + param + ") WHERE id = ? ";
+				jdbcTemplate.update(sqlUpdate, new Object[] { teamid });
+				passTest = true;
+			} else if (lastJobdivaApiCall != null && lastJobdivaApiCall.getTime() > clock.getTime() + threshold) {
+				// printLog("API call blocked due to excessive calls!!!");
+				//
+				//
+				logger.info("checkAccountAbuse :: " + teamid + " [" + lastJobdivaApiCall + "] [" + clock + "] [" + threshold + "]");
+				//
+				//
+			} else {
+				String sqlUpdate = " UPDATE tteam SET lastjobdivaapicall = lastjobdivaapicall + 1/24/60/" + param + " WHERE id = ? ";
+				jdbcTemplate.update(sqlUpdate, new Object[] { teamid });
+				passTest = true;
+			}
+			//
+		}
+		//
+		return passTest;
+		//
+	}
+	
+	protected Integer[] intListToArray(List<Integer> paramLits) {
+		return paramLits != null ? paramLits.stream().toArray(Integer[]::new) : null;
+	}
+	
+	protected String[] strListToArray(List<String> paramLits) {
+		return paramLits != null ? paramLits.stream().toArray(String[]::new) : null;
+	}
+	
+	protected Float[] floatListToArray(List<Float> paramLits) {
+		return paramLits != null ? paramLits.stream().toArray(Float[]::new) : null;
+	}
+	
+	protected Double[] doubleListToArray(List<Double> paramLits) {
+		return paramLits != null ? paramLits.stream().toArray(Double[]::new) : null;
 	}
 }

@@ -262,8 +262,8 @@ public class AbstractActivityDao extends AbstractJobDivaDao {
 		});
 		Boolean insertMode = list == null || list.size() == 0;
 		if (insertMode) {
-			String sqlInsert = "INSERT INTO  TCANDIDATE_UNREACHABLE (TEAMID, CANDIDATEID, DATEAVAILABLE, DATE_CREATED) " + "VALUES " + "(?, ?, ?, ?) ";
-			params = new Object[] { teamid, candidateid, endDate, new Date() };
+			String sqlInsert = "INSERT INTO  TCANDIDATE_UNREACHABLE (TEAMID, CANDIDATEID, DATEAVAILABLE, DATE_CREATED, FLAG) " + "VALUES " + "(?, ?, ?, ?, ?) ";
+			params = new Object[] { teamid, candidateid, endDate, new Date() , 4};
 			jdbcTemplate.update(sqlInsert, params);
 		} else {
 			String sqlUpdate = "UPDATE TCANDIDATE_UNREACHABLE SET FLAG = ? , DATEAVAILABLE = ? , DATE_CREATED  = ? WHERE  TEAMID = ?  AND CANDIDATEID = ?  ";

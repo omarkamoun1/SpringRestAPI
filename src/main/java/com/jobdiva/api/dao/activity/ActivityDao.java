@@ -38,7 +38,7 @@ public class ActivityDao extends AbstractActivityDao {
 				+ " LEFT JOIN TRECRUITER c ON c.ID = a.RECRUITERID " //
 				+ " where   " //
 				+ " a.ID = :id " //
-				+ " CANDIDATE_TEAMID = :teamid " //
+				+ " and CANDIDATE_TEAMID = :teamid " //
 				+ " and RECRUITER_TEAMID = :teamid ";
 		//
 		paramList.put("id", activityId);
@@ -126,6 +126,9 @@ public class ActivityDao extends AbstractActivityDao {
 		if (activity.getRecruiterId() != null) {
 			fieldList.add("RECRUITERID");
 			paramList.add(activity.getRecruiterId());
+		} else {
+			fieldList.add("RECRUITERID");
+			paramList.add(jobDivaSession.getRecruiterId());
 		}
 		//
 		if (activity.getCandidateId() != null) {
@@ -496,6 +499,8 @@ public class ActivityDao extends AbstractActivityDao {
 			}
 			//
 			String sqlInsert = " INSERT INTO TINTERVIEWSCHEDULE (ID," + sqlInsertFields(fieldList) + ")  VALUES (" + activityId + "," + sqlInsertParams(fieldList) + ") ";
+			//
+			logger.info("ActivityDao : insertOrUpdate :: " + paramList + " /" + jobDivaSession.getRecruiterId());
 			//
 			jdbcTemplate.update(sqlInsert, paramList.toArray());
 			//

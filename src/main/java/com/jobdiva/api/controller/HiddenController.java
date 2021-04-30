@@ -22,6 +22,7 @@ import com.jobdiva.api.model.PhoneType;
 import com.jobdiva.api.model.QualificationType;
 import com.jobdiva.api.model.Skill;
 import com.jobdiva.api.model.SocialNetworkType;
+import com.jobdiva.api.model.Timesheet;
 import com.jobdiva.api.model.TimesheetEntry;
 import com.jobdiva.api.model.TitleSkillCertification;
 import com.jobdiva.api.model.UserRole;
@@ -176,6 +177,16 @@ public class HiddenController {
 	) throws Exception {
 		//
 		return new TimesheetEntry();
+		//
+	}
+	
+	@CrossOrigin(origins = "*")
+	@RequestMapping(value = "/getTimesheet", method = RequestMethod.GET, produces = "application/json")
+	public Timesheet getTimesheet(
+	//
+	) throws Exception {
+		//
+		return new Timesheet();
 		//
 	}
 	

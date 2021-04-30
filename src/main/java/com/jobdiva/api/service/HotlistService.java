@@ -58,6 +58,26 @@ public class HotlistService {
 		}
 	}
 	
+	public Boolean addCandidatesToHotlist(JobDivaSession jobDivaSession, Long hotListid, List<Long> candidateIds) throws Exception {
+		//
+		//
+		try {
+			//
+			Boolean success = hotlistDao.addCandidatesToHotlist(jobDivaSession, hotListid, candidateIds);
+			//
+			hotlistDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "addCandidatesToHotlist", "Add Successful");
+			//
+			return success;
+			//
+		} catch (Exception e) {
+			//
+			hotlistDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "addCandidatesToHotlist", "Add Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
+		}
+	}
+	
 	public Long createContactHotlist(JobDivaSession jobDivaSession, String name, Boolean active, Boolean isPrivate, String description, List<Long> sharedWithIds) throws Exception {
 		//
 		//

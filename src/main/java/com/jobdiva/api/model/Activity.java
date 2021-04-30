@@ -67,6 +67,15 @@ public class Activity implements IActivity, java.io.Serializable {
 	@JsonProperty(value = "pay rate currency/unit", index = 18)
 	private String			payRateUnits;
 	//
+	@JsonProperty(value = "job contact id", index = 19)
+	private Long			jobContactId;
+	//
+	@JsonProperty(value = "job contact name", index = 20)
+	private String			jobContactName;
+	//
+	@JsonProperty(value = "is internal", index = 21)
+	private Boolean			isInternal;
+	//
 	@JsonIgnore
 	private Long			recruiterId;
 	@JsonIgnore
@@ -933,4 +942,29 @@ public class Activity implements IActivity, java.io.Serializable {
 	public void setStrRecruiterName(String strRecruiterName) {
 		this.strRecruiterName = strRecruiterName;
 	}
+
+	public Long getJobContactId() {
+		return jobContactId;
+	}
+
+	public void setJobContactId(Long jobContactId) {
+		this.jobContactId = jobContactId;
+	}
+
+	public String getJobContactName() {
+		return jobContactName;
+	}
+
+	public void setJobContactName(String jobContactName) {
+		this.jobContactName = jobContactName;
+	}
+
+	public Boolean getIsInternal() {
+		return isInternal;
+	}
+
+	public void setIsInternal(Boolean isInternal) {
+		this.isInternal = isInternal;
+	}
+	
 }

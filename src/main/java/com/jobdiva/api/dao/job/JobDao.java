@@ -31,6 +31,7 @@ import com.jobdiva.api.dao.activity.AbstractActivityDao;
 import com.jobdiva.api.dao.company.SearchCompanyDao;
 import com.jobdiva.api.dao.contact.ContactDao;
 import com.jobdiva.api.dao.job.def.UserRoleDef;
+import com.jobdiva.api.model.Activity;
 import com.jobdiva.api.model.Attachment;
 import com.jobdiva.api.model.Company;
 import com.jobdiva.api.model.Contact;
@@ -349,15 +350,15 @@ public class JobDao extends AbstractActivityDao {
 		}
 		//
 		//
-		if(ismyjob==null) ismyjob=false;
+		if (ismyjob == null)
+			ismyjob = false;
 		ArrayList<Object> paramList = new ArrayList<Object>();
 		StringBuilder sql_buff = new StringBuilder();
 		sql_buff.append("select * from trfq job1_ ");
-		if(ismyjob)
-		sql_buff.append(", TRECRUITERRFQ jobuser0_ where jobuser0_.RFQID=job1_.ID and ");
-		else 
-		  sql_buff.append(" where ");
-		
+		if (ismyjob)
+			sql_buff.append(", TRECRUITERRFQ jobuser0_ where jobuser0_.RFQID=job1_.ID and ");
+		else
+			sql_buff.append(" where ");
 		sql_buff.append(" job1_.teamid = ? ");
 		paramList.add(jobDivaSession.getTeamId());
 		//
@@ -366,7 +367,7 @@ public class JobDao extends AbstractActivityDao {
 			paramList.add(jobId);
 		}
 		//
-		if(ismyjob){
+		if (ismyjob) {
 			sql_buff.append(" and jobuser0_.RECRUITERID = ? ");
 			paramList.add(jobDivaSession.getRecruiterId());
 		}
@@ -471,8 +472,7 @@ public class JobDao extends AbstractActivityDao {
 			sql_buff.append(" and job1_.jobstatus = ? ");
 			paramList.add(status);
 		}
-		if(ismyjob) {
-			
+		if (ismyjob) {
 		}
 		/* Get default and user-defined position type */
 		HashMap<String, Integer> positionTypeIdMap = new HashMap<String, Integer>();
@@ -1771,12 +1771,13 @@ public class JobDao extends AbstractActivityDao {
 	}
 	
 	private void sendAssignNotificationInThread(JobDivaSession jobDivaSession, String description, Job job, Vector<RecruiterObject> v_assigned, String primaryRecName, String primarySaleName, String rfqno_team, String rfq_refno) throws Exception {
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		new Thread(new Runnable() {
 			
 			@Override
 			public void run() {
 				try {
-					sendAssignNotification(v_assigned, null, job, jobDivaSession.getTeamId(), primaryRecName, primarySaleName, description, rfqno_team, rfq_refno);
+					sendAssignNotification(jdbcTemplate, v_assigned, null, job, jobDivaSession.getTeamId(), primaryRecName, primarySaleName, description, rfqno_team, rfq_refno);
 				} catch (Exception e) {
 					logger.info("sendAssignNotificationInThread " + v_assigned.size() + " users. ERROR :: " + e.getMessage());
 				}
@@ -1838,7 +1839,7 @@ public class JobDao extends AbstractActivityDao {
 		List<Job> jobs = null;
 		//
 		try {
-			jobs = searchJobs(jobDivaSession, jobid, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,null);
+			jobs = searchJobs(jobDivaSession, jobid, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 		} catch (Exception e) {
 			logger.info("Error: Job " + jobid + " is not found  ERROR: " + e.getMessage());
 		}
@@ -2520,6 +2521,50 @@ public class JobDao extends AbstractActivityDao {
 			//
 			throw new Exception(e.getMessage());
 		}
+	}
+	
+	public List<Activity> getJobActivities(JobDivaSession jobDivaSession, Long jobId) throws Exception{
+		//
+		String sql="select * from ( " +
+				"select b.id, b.candidateid, (select c.firstname||' '||c.lastname from tcandidate c where b.candidateid=c.id and c.teamid=b.recruiter_teamid), " +
+				"b.customerid, b.managerfirstname||' '||b.managerlastname, b.dateinterview, " +
+				"b.primarysalesid, (select d.firstname||' '||d.lastname from trecruiter d where d.id=b.primarysalesid and d.groupid=b.recruiter_teamid), " +
+				"b.notes, b.recruiterid, (select e.firstname||' '||e.lastname from trecruiter e where e.id=b.recruiterid and e.groupid=b.recruiter_teamid), " +
+				"b.daterejected, b.extdaterejected, b.datehired, b.datepresented, b.ROLEID " +
+				"from tinterviewschedule b where b.rfqid=? and b.recruiter_teamid=? "+
+				" ) where rownum<=200 ";
+		//
+		Object[] params = new Object[] { jobId, jobDivaSession.getTeamId() };
+		//
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<Activity> activities = jdbcTemplate.query(sql, params, new RowMapper<Activity>() {
+			
+			@Override
+			public Activity mapRow(ResultSet rs, int rowNum) throws SQLException {
+				Activity act = new Activity();
+				//
+				act.setId(rs.getLong(1));
+				act.setCandidateId(rs.getLong(2));
+				act.setCandidateName(rs.getString(3));
+				act.setCustomerId(rs.getLong(4));
+				act.setManagerName(rs.getString(5));
+				act.setDateInterview(rs.getDate(6));
+				act.setJobContactId(rs.getLong(7));
+				act.setJobContactName(rs.getString(8));
+				act.setNotes(rs.getString(9));
+				act.setRecruiterId(rs.getLong(10));
+				act.setRecruiterName(rs.getString(11));
+				act.setDateRejected((rs.getDate(13)==null)?rs.getDate(12):rs.getDate(13));
+				act.setDateHired(rs.getDate(14));
+				act.setDatePresented(rs.getDate(15));
+				act.setIsInternal(rs.getLong(16)>990);
+				//
+				return act;
+			}
+		});
+		return  activities;
 	}
 	
 	public List<String>  getJobPriority(JobDivaSession jobDivaSession, Long teamId){

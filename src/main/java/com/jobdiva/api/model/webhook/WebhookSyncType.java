@@ -14,6 +14,8 @@ public enum WebhookSyncType {
 	// WORKORDER("workorder"), //
 	BILLING("billing"), //
 	SALARY("salary"), //
+	TIMESHEET("timesheet"), //
+	EXPENSE("expense"),//
 	;
 	
 	private String value;
