@@ -351,7 +351,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		//
 		//
 		// get permission
-		sql = "select permission, firstname, lastname, leader, permission2_recruiter " //
+		sql = "select permission, firstname, lastname, leader, permission2_recruiter, permission_recruiter " //
 				+ " from trecruiter "//
 				+ " where groupid = ? and ID = ? ";
 		//
@@ -365,6 +365,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				System.out.println(recruiterid);
 				ChatbotUserData tmp = new ChatbotUserData();
 				long permission = rs.getLong(1);
+				long permission_recruiter = rs.getLong(6);
 				Boolean isTeamLeader = !((rs.getInt(4) & 16) == 0);
 				Boolean isSuperUser = !((rs.getInt(4) & 256) == 0);
 				boolean allowManagingJobBoardsCriteriaAndProfiles = false;
@@ -389,44 +390,24 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				if (isTeamLeaerOrSupperUser && 0 != (permission & (1 << (i - 1)))) {
 					allowManagingJobBoardsCriteriaOnly = true;
 				}
-				tmp.allowCreateSuppliersLogins = 0!= (permission & 64);
-				if(isTeamLeaerOrSupperUser && 0 != (permission&16) ){
-					tmp.allowViewAccessLogReport = true;
-				}
+				tmp.allowCreateSuppliersLogins = 0!= (permission_recruiter & 64);
 				String permission2 = rs.getString("permission2_recruiter");
-				// private boolean allowAssignOnboardingToNotLinkedJob;//42
-				// private boolean allowManagingOnboarding;//13
-				// private boolean allowAccessCompletedOnboarding;//6
-				// private boolean allowAccessCompletedOnboardingForHires;//7
-				// private boolean
-				// allowAccessCompletedOnboardingForPrimaryJobs;//8
-				// private boolean allowAccessCompletedOnboardingForMyJobs;//9
-				// private boolean allowAccessCompletedOnboardingForAllJobs;//10
-				// private boolean
-				// allowAccessCompletedOnboardingForDivision;//11
+	
 				System.out.println(permission);
 				System.out.println(permission2);
 				if (permission2 != null && !permission2.isEmpty()) {
-					if (permission2.charAt(42) == '1')
-						tmp.allowAssignOnboardingToNotLinkedJob = true;
-					if (permission2.charAt(13) == '1')
-						tmp.allowManagingOnboarding = true;
-					if (permission2.charAt(6) == '1')
-						tmp.allowAccessCompletedOnboarding = true;
-					if (permission2.charAt(7) == '1')
-						tmp.allowAccessCompletedOnboardingForHires = true;
-					if (permission2.charAt(8) == '1')
-						tmp.allowAccessCompletedOnboardingForPrimaryJobs = true;
-					if (permission2.charAt(9) == '1')
-						tmp.allowAccessCompletedOnboardingForMyJobs = true;
-					if (permission2.charAt(10) == '1')
-						tmp.allowAccessCompletedOnboardingForAllJobs = true;
-					if (permission2.charAt(11) == '1')
-						tmp.allowAccessCompletedOnboardingForDivision = true;
-					if (permission2.charAt(44) == '1')
-						tmp.allowOnboardCandidatesFor = true;
-					if (permission2.charAt(120) == '1')
-						tmp.allowUnassignIndividualDocuments = true;
+					while(permission2.length()<500) permission2+="0";
+					tmp.allowOnboardCandidatesFor = permission2.charAt(0) == '1';
+					tmp.allowAssignOnboardingToNotLinkedJob = permission2.charAt(42) == '1';
+					tmp.allowManagingOnboarding = permission2.charAt(13) == '1';
+					tmp.allowAccessCompletedOnboarding = permission2.charAt(6) == '1';
+					tmp.allowAccessCompletedOnboardingForHires = permission2.charAt(7) == '1';
+					tmp.allowAccessCompletedOnboardingForPrimaryJobs = permission2.charAt(8) == '1';
+					tmp.allowAccessCompletedOnboardingForMyJobs = permission2.charAt(9) == '1';
+					tmp.allowAccessCompletedOnboardingForAllJobs = permission2.charAt(10) == '1';
+					tmp.allowAccessCompletedOnboardingForDivision = permission2.charAt(11) == '1';
+					tmp.allowAssignSuppliersToJob = permission2.charAt(112) == '1';
+					tmp.allowUnassignIndividualDocuments = permission2.charAt(120) == '1';
 
 				}
 				tmp.allowManagingJobBoardsCriteriaAndProfiles = (allowManagingJobBoardsCriteriaAndProfiles);
@@ -442,6 +423,11 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		//
 		if (list.size() > 0) {
 			ChatbotUserData tmp = list.get(0);
+			data.allowAssignSuppliersToJob = tmp.allowAssignSuppliersToJob;
+			data.allowViewAccessLogReport = tmp.allowViewAccessLogReport;
+			data.allowCreateSuppliersLogins = tmp.allowCreateSuppliersLogins;
+			data.allowOnboardCandidatesFor = tmp.allowOnboardCandidatesFor;
+			data.allowUnassignIndividualDocuments = tmp.allowUnassignIndividualDocuments;
 			data.allowAssignOnboardingToNotLinkedJob = (tmp.allowAssignOnboardingToNotLinkedJob);
 			data.allowManagingOnboarding = (tmp.allowAccessCompletedOnboarding);
 			data.allowAccessCompletedOnboarding = (tmp.allowAccessCompletedOnboarding);
