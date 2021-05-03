@@ -7,22 +7,30 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 import com.jobdiva.api.dao.AbstractJobDivaDao;
+import com.jobdiva.api.dao.activity.ActivityUserFieldsDao;
+import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 
 @Component
 public class UpdateBillingRecordDao extends AbstractJobDivaDao {
+	
+	//
+	@Autowired
+	ActivityUserFieldsDao activityUserFieldsDao;
 	
 	public Boolean updateBillingRecord(JobDivaSession jobDivaSession, Boolean allowEnterTimeOnPortal, Integer approved, Double assignmentID, Long billingContactID, Integer billingUnit, Double billRate, String billRatePer, Long candidateID,
 			String customerRefNo, Long division, Double doubletimePer, Double doubletimeRate, String doubletimeRatePer, Boolean enableTimesheet, Date endDate, Boolean expenseEnabled, Integer expenseInvoices, Integer frequency, Long hiringManagerID,
 			Double hoursPerDay, Double hoursPerHalfDay, Integer invoiceContent, String invoiceGroup, Integer invoiceGroupIndex, Double jobID, Integer overtimeByWorkingState, Boolean overtimeExempt, Double overtimeRate, String overtimeRatePer,
 			String paymentTerms, Long primaryRecruiterID, Double primaryRecruiterPercentage, Double primarySalesPercentage, Long primarySalesPersonID, Integer recordID, Long secondaryRecruiterID, Double secondaryRecruiterPercentage,
 			Double secondarySalesPercentage, Long secondarySalesPersonID, Date startDate, Long tertiaryRecruiterID, Double tertiaryRecruiterPercentage, Double tertiarySalesPercentage, Long tertiarySalesPersonID, Long timesheetEntryFormat,
-			String timesheetInstruction, String vMSEmployeeName, String vMSWebsite, Integer weekEnding, String workAddress1, String workAddress2, String workCity, String workCountry, String workState, String workZipcode) throws Exception {
+			String timesheetInstruction, String vMSEmployeeName, String vMSWebsite, Integer weekEnding, String workAddress1, String workAddress2, String workCity, String workCountry, String workState, String workZipcode, Userfield[] userfields)
+			throws Exception {
 		//
 		// recid is null. Use max(recid) instead...
 		if (recordID == null) {
@@ -57,6 +65,11 @@ public class UpdateBillingRecordDao extends AbstractJobDivaDao {
 		if (approved != null) {
 			fields.add("approved");
 			paramList.add(approved);
+			//
+			if (approved.intValue() == 1) {
+				fields.add("APPROVERID");
+				paramList.add(jobDivaSession.getRecruiterId());
+			}
 		}
 		//
 		if (startDate != null) {
@@ -222,19 +235,16 @@ public class UpdateBillingRecordDao extends AbstractJobDivaDao {
 		if (workCity != null) {
 			fields.add("WORK_CITY");
 			paramList.add(workCity);
-		}
-		//
-		if (workCity != null) {
+			//
 			fields.add("WORKING_CITY");
 			paramList.add(workCity);
+			//
 		}
 		//
 		if (workState != null) {
 			fields.add("WORK_STATE");
 			paramList.add(workState);
-		}
-		//
-		if (workState != null) {
+			//
 			fields.add("WORKING_STATE");
 			paramList.add(workState);
 		}
@@ -247,9 +257,7 @@ public class UpdateBillingRecordDao extends AbstractJobDivaDao {
 		if (workCountry != null) {
 			fields.add("WORKING_COUNTRY");
 			paramList.add(workCountry);
-		}
-		//
-		if (workCountry != null) {
+			//
 			fields.add("WORK_COUNTRY");
 			paramList.add(workCountry);
 		}
@@ -319,6 +327,9 @@ public class UpdateBillingRecordDao extends AbstractJobDivaDao {
 			paramList.add(tertiaryRecruiterPercentage);
 		}
 		//
+		fields.add("CREATED_BY");
+		paramList.add(jobDivaSession.getRecruiterId());
+		//
 		if (fields.size() > 0) {
 			//
 			String sqlUpdate = " UPDATE temployee_billingrecord SET datecreated = sysdate, " + sqlUpdateFields(fields)//
@@ -333,6 +344,38 @@ public class UpdateBillingRecordDao extends AbstractJobDivaDao {
 			JdbcTemplate jdbcTemplate = getJdbcTemplate();
 			//
 			jdbcTemplate.update(sqlUpdate, parameters);
+			//
+			//
+			//
+			//
+			//
+			if (userfields != null && userfields.length > 0) {
+				//
+				Date currentTS = new Date();
+				Long startId = assignmentID != null ? assignmentID.longValue() : 0L;
+				//
+				validateUserFields(jobDivaSession, jobDivaSession.getTeamId(), userfields, UDF_FIELDFOR_ACTIVITY);
+				//
+				//
+				for (Userfield userfield : userfields) {
+					//
+					Boolean existActivityUDF = activityUserFieldsDao.existActivityUDF(jobDivaSession, startId, userfield.getUserfieldId());
+					//
+					if (isEmpty(userfield.getUserfieldValue())) {
+						if (existActivityUDF)
+							activityUserFieldsDao.deleteActivityUDF(jobDivaSession, startId, userfield.getUserfieldId());
+					} else {
+						//
+						if (existActivityUDF) {
+							activityUserFieldsDao.updateActivityUDF(startId, userfield.getUserfieldId(), jobDivaSession.getTeamId(), currentTS, userfield.getUserfieldValue());
+						} else {
+							activityUserFieldsDao.insertActivityUDF(startId, userfield.getUserfieldId(), jobDivaSession.getTeamId(), currentTS, userfield.getUserfieldValue());
+						}
+					}
+				}
+			}
+			//
+			//
 		} else {
 			throw new Exception("Empty Paramters!");
 		}

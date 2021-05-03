@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.jobdiva.api.model.Activity;
+import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.utils.DateUtils;
 
@@ -16,11 +17,15 @@ import com.jobdiva.api.utils.DateUtils;
 public class UpdateActivityDao extends AbstractActivityDao {
 	
 	@Autowired
-	ActivityDao activityDao;
+	ActivityDao				activityDao;
 	//
+	@Autowired
+	ActivityUserFieldsDao	activityUserFieldsDao;
 	
 	public Boolean updateStart(JobDivaSession jobDivaSession, Long startid, Boolean overwrite, Date startDate, Date endDate, String positiontype, Double billrate, //
-			String billratecurrency, String billrateunit, Double payrate, String payratecurrency, String payrateunit) throws Exception {
+			String billratecurrency, String billrateunit, Double payrate, String payratecurrency, String payrateunit, Userfield[] userfields) throws Exception {
+		//
+		overwrite = overwrite != null ? overwrite : false;
 		//
 		StringBuffer message = new StringBuffer();
 		if (overwrite && startDate == null && endDate != null)
@@ -243,9 +248,41 @@ public class UpdateActivityDao extends AbstractActivityDao {
 			jdbcTemplate.update(sqlUpdate, parameters);
 		}
 		//
+		//
+		if (userfields != null && userfields.length > 0) {
+			//
+			//
+			validateUserFields(jobDivaSession, jobDivaSession.getTeamId(), userfields, UDF_FIELDFOR_ACTIVITY);
+			//
+			//
+			for (Userfield userfield : userfields) {
+				//
+				Boolean existActivityUDF = activityUserFieldsDao.existActivityUDF(jobDivaSession, startid, userfield.getUserfieldId());
+				//
+				if (isEmpty(userfield.getUserfieldValue())) {
+					if (existActivityUDF)
+						activityUserFieldsDao.deleteActivityUDF(jobDivaSession, startid, userfield.getUserfieldId());
+				} else {
+					//
+					if (existActivityUDF) {
+						activityUserFieldsDao.updateActivityUDF(startid, userfield.getUserfieldId(), jobDivaSession.getTeamId(), currentTS, userfield.getUserfieldValue());
+					} else {
+						activityUserFieldsDao.insertActivityUDF(startid, userfield.getUserfieldId(), jobDivaSession.getTeamId(), currentTS, userfield.getUserfieldValue());
+					}
+				}
+			}
+		}
+		//
+		//
+		//
+		//
 		if (sync_calendar) {
 			//
-			syncCalendar(jobDivaSession.getTeamId(), activity.getId(), 0, jobDivaSession.getEnvironment(), jobDivaSession.getUserName(), jobDivaSession.getPassword());
+			try {
+				syncCalendar(jobDivaSession.getTeamId(), activity.getId(), 0, jobDivaSession.getEnvironment(), jobDivaSession.getUserName(), jobDivaSession.getPassword());
+			} catch (Exception e) {
+				logger.info("syncCalendar Error : " + e.getMessage());
+			}
 			//
 		} //
 		return true;

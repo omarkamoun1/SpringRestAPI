@@ -6,20 +6,27 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 import com.jobdiva.api.dao.AbstractJobDivaDao;
+import com.jobdiva.api.dao.activity.ActivityUserFieldsDao;
+import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 
 @Component
 public class UpdatePayRecordDao extends AbstractJobDivaDao {
 	
+	//
+	@Autowired
+	ActivityUserFieldsDao activityUserFieldsDao;
+	
 	public Boolean UpdatePayRecord(JobDivaSession jobDivaSession, String aDPCOCODE, String aDPPAYFREQUENCY, Boolean approved, Double assignmentID, Long candidateID, Double doubletimeRate, String doubletimeRatePer, Date effectiveDate, //
 			Date endDate, String fileNo, Double otherExpenses, String otherExpensesPer, Double outsideCommission, String outsideCommissionPer, Boolean overtimeExempt, Double overtimeRate, //
 			String overtimeRatePer, String paymentTerms, Boolean payOnRemittance, Double perDiem, String perDiemPer, Integer recordID, Double salary, String salaryPer, Integer status, //
-			Long subcontractCompanyID, String taxID) throws Exception {
+			Long subcontractCompanyID, String taxID, Userfield[] userfields) throws Exception {
 		//
 		if (recordID == null) {
 			String sql = " SELECT NVL(MAX(recid), -1) as RECID " //
@@ -198,6 +205,38 @@ public class UpdatePayRecordDao extends AbstractJobDivaDao {
 			//
 			jdbcTemplate.update(sqlUpdate, parameters);
 		}
+		//
+		//
+		//
+		//
+		//
+		if (userfields != null && userfields.length > 0) {
+			//
+			Date currentTS = new Date();
+			Long startId = assignmentID != null ? assignmentID.longValue() : 0L;
+			//
+			validateUserFields(jobDivaSession, jobDivaSession.getTeamId(), userfields, UDF_FIELDFOR_ACTIVITY);
+			//
+			//
+			for (Userfield userfield : userfields) {
+				//
+				Boolean existActivityUDF = activityUserFieldsDao.existActivityUDF(jobDivaSession, startId, userfield.getUserfieldId());
+				//
+				if (isEmpty(userfield.getUserfieldValue())) {
+					if (existActivityUDF)
+						activityUserFieldsDao.deleteActivityUDF(jobDivaSession, startId, userfield.getUserfieldId());
+				} else {
+					//
+					if (existActivityUDF) {
+						activityUserFieldsDao.updateActivityUDF(startId, userfield.getUserfieldId(), jobDivaSession.getTeamId(), currentTS, userfield.getUserfieldValue());
+					} else {
+						activityUserFieldsDao.insertActivityUDF(startId, userfield.getUserfieldId(), jobDivaSession.getTeamId(), currentTS, userfield.getUserfieldValue());
+					}
+				}
+			}
+		}
+		//
+		//
 		//
 		return true;
 	}

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.model.Activity;
 import com.jobdiva.api.model.Timezone;
+import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.service.ActivityService;
 
@@ -69,6 +70,8 @@ public class StartController extends AbstractJobDivaController {
 		//
 	}
 	
+	@ApiImplicitParams({ @ApiImplicitParam(name = "Userfields", required = false, allowMultiple = true, dataType = "Userfield") //
+	})
 	@RequestMapping(value = "/updateStart", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Update Start")
 	public Boolean updateStart( //
@@ -109,7 +112,10 @@ public class StartController extends AbstractJobDivaController {
 			@RequestParam(required = false) String payratecurrency, //
 			//
 			@ApiParam(value = "Pay rate unit(case sensitive), valid values can be found through “Leader Tools” → “My Team” → “Manage Rate Units” → “Pay Rate Units”.", required = false) //
-			@RequestParam(required = false) String payrateunit //
+			@RequestParam(required = false) String payrateunit, //
+			//
+			@ApiParam(required = false, type = "Userfield", allowMultiple = true) //
+			@RequestParam(required = false) Userfield[] Userfields //
 	//
 	//
 	) throws Exception {
@@ -118,7 +124,7 @@ public class StartController extends AbstractJobDivaController {
 		//
 		jobDivaSession.checkForAPIPermission("updateStart");
 		//
-		return startService.updateStart(jobDivaSession, startid, overwrite, startDate, endDate, positiontype, billrate, billratecurrency, billrateunit, payrate, payratecurrency, payrateunit);
+		return startService.updateStart(jobDivaSession, startid, overwrite, startDate, endDate, positiontype, billrate, billratecurrency, billrateunit, payrate, payratecurrency, payrateunit,Userfields);
 		//
 	}
 	

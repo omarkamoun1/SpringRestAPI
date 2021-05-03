@@ -1340,6 +1340,9 @@ public class BIDataController extends AbstractJobDivaController {
 			@ApiParam(value = "Employee Id", required = true) //
 			@RequestParam(required = true) Long employeeId, //
 			//
+			@ApiParam(value = "VMS Employee ID", required = false) //
+			@RequestParam(required = false) String vmsEmployeeID, //
+			//
 			@ApiParam(value = "Alternate Format", required = false) //
 			@RequestParam(required = false) Boolean alternateFormat //
 	//
@@ -1347,7 +1350,7 @@ public class BIDataController extends AbstractJobDivaController {
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		String[] parameters = new String[] { employeeId.toString() };
+		String[] parameters = vmsEmployeeID != null && !vmsEmployeeID.isEmpty() ? new String[] { employeeId.toString(), vmsEmployeeID } : new String[] { employeeId.toString() };
 		//
 		return biDataService.getBIData(jobDivaSession, "Employee Billing Records Detail", null, null, parameters, alternateFormat);
 		//
@@ -1407,6 +1410,9 @@ public class BIDataController extends AbstractJobDivaController {
 			@ApiParam(value = "Employee Id", required = true) //
 			@RequestParam(required = true) Long employeeId, //
 			//
+			@ApiParam(value = "VMS Employee ID", required = false) //
+			@RequestParam(required = false) String vmsEmployeeID, //
+			//
 			@ApiParam(value = "Alternate Format", required = false) //
 			@RequestParam(required = false) Boolean alternateFormat //
 	//
@@ -1414,7 +1420,7 @@ public class BIDataController extends AbstractJobDivaController {
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		String[] parameters = new String[] { employeeId.toString() };
+		String[] parameters = vmsEmployeeID != null && !vmsEmployeeID.isEmpty() ? new String[] { employeeId.toString(), vmsEmployeeID } : new String[] { employeeId.toString() };
 		//
 		return biDataService.getBIData(jobDivaSession, "Employee Salary Records Detail", null, null, parameters, alternateFormat);
 		//
@@ -1506,11 +1512,11 @@ public class BIDataController extends AbstractJobDivaController {
 	
 	@RequestMapping(value = "/TimesheetDetail", method = RequestMethod.GET, produces = "application/json")
 	public IBiData TimesheetDetail(//
-			@ApiParam(value = "Recruiter TeamI Id", required = true) //
-			@RequestParam(required = true) Long recruiterTeamId, //
+			@ApiParam(value = "Timesheet Id", required = true) //
+			@RequestParam(required = true) Long timesheetId, //
 			//
-			@ApiParam(value = "Exist Employee In Billing Record", required = false) //
-			@RequestParam(required = false) Boolean existEmployeeInBillingRecord, //
+			@ApiParam(value = "Is External", required = false) //
+			@RequestParam(required = false) Boolean isExternal, //
 			//
 			@ApiParam(value = "Alternate Format", required = false) //
 			@RequestParam(required = false) Boolean alternateFormat //
@@ -1519,7 +1525,7 @@ public class BIDataController extends AbstractJobDivaController {
 	) throws Exception {//
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
-		String[] parameters = existEmployeeInBillingRecord != null ? new String[] { recruiterTeamId.toString(), Boolean.toString(existEmployeeInBillingRecord) } : new String[] { recruiterTeamId.toString() };
+		String[] parameters = isExternal != null ? new String[] { timesheetId.toString(), Boolean.toString(isExternal) } : new String[] { timesheetId.toString() };
 		//
 		//
 		return biDataService.getBIData(jobDivaSession, "Timesheet Detail", null, null, parameters, alternateFormat);

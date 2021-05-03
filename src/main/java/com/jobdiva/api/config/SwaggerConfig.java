@@ -249,6 +249,6 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
 	
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
-		// registry.addInterceptor(new RequestInterceptor());
+		// registry.addInterceptor(new MultiTenantInterceptor());
 	}
 }

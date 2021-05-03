@@ -1174,7 +1174,7 @@ public class JobDao extends AbstractActivityDao {
 		}
 		//
 		if (companyid != null) {
-			List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, companyid, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+			List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, companyid);
 			if (companies == null || companies.size() == 0)
 				message.append("Warning: The companyid is invalid.");
 			else {
@@ -2260,7 +2260,7 @@ public class JobDao extends AbstractActivityDao {
 			// update companyid, if there is a contact, it will be updated
 			// based on contact
 			if (companyid != null) {
-				List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, companyid, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+				List<Company> companies = searchCompanyDao.searchForCompany(jobDivaSession, companyid);
 				if (companies == null || companies.size() == 0) {
 					// message.append("Warning: The companyid is invalid.");
 				} else {
@@ -2523,16 +2523,12 @@ public class JobDao extends AbstractActivityDao {
 		}
 	}
 	
-	public List<Activity> getJobActivities(JobDivaSession jobDivaSession, Long jobId) throws Exception{
+	public List<Activity> getJobActivities(JobDivaSession jobDivaSession, Long jobId) throws Exception {
 		//
-		String sql="select * from ( " +
-				"select b.id, b.candidateid, (select c.firstname||' '||c.lastname from tcandidate c where b.candidateid=c.id and c.teamid=b.recruiter_teamid), " +
-				"b.customerid, b.managerfirstname||' '||b.managerlastname, b.dateinterview, " +
-				"b.primarysalesid, (select d.firstname||' '||d.lastname from trecruiter d where d.id=b.primarysalesid and d.groupid=b.recruiter_teamid), " +
-				"b.notes, b.recruiterid, (select e.firstname||' '||e.lastname from trecruiter e where e.id=b.recruiterid and e.groupid=b.recruiter_teamid), " +
-				"b.daterejected, b.extdaterejected, b.datehired, b.datepresented, b.ROLEID " +
-				"from tinterviewschedule b where b.rfqid=? and b.recruiter_teamid=? "+
-				" ) where rownum<=200 ";
+		String sql = "select * from ( " + "select b.id, b.candidateid, (select c.firstname||' '||c.lastname from tcandidate c where b.candidateid=c.id and c.teamid=b.recruiter_teamid), "
+				+ "b.customerid, b.managerfirstname||' '||b.managerlastname, b.dateinterview, " + "b.primarysalesid, (select d.firstname||' '||d.lastname from trecruiter d where d.id=b.primarysalesid and d.groupid=b.recruiter_teamid), "
+				+ "b.notes, b.recruiterid, (select e.firstname||' '||e.lastname from trecruiter e where e.id=b.recruiterid and e.groupid=b.recruiter_teamid), " + "b.daterejected, b.extdaterejected, b.datehired, b.datepresented, b.ROLEID "
+				+ "from tinterviewschedule b where b.rfqid=? and b.recruiter_teamid=? " + " ) where rownum<=200 ";
 		//
 		Object[] params = new Object[] { jobId, jobDivaSession.getTeamId() };
 		//
@@ -2555,62 +2551,56 @@ public class JobDao extends AbstractActivityDao {
 				act.setNotes(rs.getString(9));
 				act.setRecruiterId(rs.getLong(10));
 				act.setRecruiterName(rs.getString(11));
-				act.setDateRejected((rs.getDate(13)==null)?rs.getDate(12):rs.getDate(13));
+				act.setDateRejected((rs.getDate(13) == null) ? rs.getDate(12) : rs.getDate(13));
 				act.setDateCreated(rs.getDate(14));
 				act.setDatePresented(rs.getDate(15));
-				act.setIsInternal(rs.getLong(16)>990);
+				act.setIsInternal(rs.getLong(16) > 990);
 				//
 				return act;
 			}
 		});
-		return  activities;
+		return activities;
 	}
 	
-	public List<String>  getJobPriority(JobDivaSession jobDivaSession, Long teamId){
-		String sql = "Select Name " +
-		    	     "from tjob_priority where teamid=?";
-		Object[] params = new Object[] { teamId};
+	public List<String> getJobPriority(JobDivaSession jobDivaSession, Long teamId) {
+		String sql = "Select Name " + "from tjob_priority where teamid=?";
+		Object[] params = new Object[] { teamId };
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
-		List<String> priority= jdbcTemplate.query(sql, params, new RowMapper<String>() {
+		List<String> priority = jdbcTemplate.query(sql, params, new RowMapper<String>() {
 			
 			@Override
 			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
 				return rs.getString("Name");
 			}
 		});
-		
 		return priority;
 	}
 	
-	public Boolean updateJobPriority(JobDivaSession jobDivaSession, Integer priority, Long jobId , String priorityName) throws Exception{
+	public Boolean updateJobPriority(JobDivaSession jobDivaSession, Integer priority, Long jobId, String priorityName) throws Exception {
 		String sql = "update trfq set jobpriority=?, datelastupdated=?, sync_required=4 where teamid=? and id=?";
-		
-		Object[] params = new Object[] {priority, new Timestamp(new Date().getTime()),jobDivaSession.getTeamId(),jobId };
+		Object[] params = new Object[] { priority, new Timestamp(new Date().getTime()), jobDivaSession.getTeamId(), jobId };
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
-		jobNoteDao.addJobNote(jobDivaSession, jobId, 5, jobDivaSession.getRecruiterId(), 0, "The Job Priority was changed to "+ priorityName);
+		jobNoteDao.addJobNote(jobDivaSession, jobId, 5, jobDivaSession.getRecruiterId(), 0, "The Job Priority was changed to " + priorityName);
 		//
 		jdbcTemplate.update(sql, params);
-		
 		return true;
-		
 	}
 	
-	public List<TeamRole> getUserRoles(JobDivaSession jobDivaSession) throws Exception{
+	public List<TeamRole> getUserRoles(JobDivaSession jobDivaSession) throws Exception {
 		String sql = "select id, Name, Primary from trecruiter_roles where teamid=? and inactive=0";
-		
-		Object[] params = new Object[] {jobDivaSession.getTeamId()};
+		Object[] params = new Object[] { jobDivaSession.getTeamId() };
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
-		List<TeamRole> roles = jdbcTemplate.query(sql, params,new RowMapper<TeamRole>() {
+		List<TeamRole> roles = jdbcTemplate.query(sql, params, new RowMapper<TeamRole>() {
 			
 			@Override
 			public TeamRole mapRow(ResultSet rs, int rowNum) throws SQLException {
-				TeamRole role=new TeamRole();
+				TeamRole role = new TeamRole();
 				role.setId(rs.getLong("id"));
 				role.setName(rs.getString("Name"));
 				role.setPrimary(rs.getString("Primary"));

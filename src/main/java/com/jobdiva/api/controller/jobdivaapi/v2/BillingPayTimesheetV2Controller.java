@@ -14,6 +14,7 @@ import com.jobdiva.api.model.ExpenseEntry;
 import com.jobdiva.api.model.Timesheet;
 import com.jobdiva.api.model.TimesheetEntry;
 import com.jobdiva.api.model.UploadTimesheetAssignment;
+import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.v2.billingtimesheet.AddExpenseEntryDef;
 import com.jobdiva.api.model.v2.billingtimesheet.AddExpenseInvoiceDef;
@@ -510,6 +511,7 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 		String workCountry = updateBillingRecordDef.getWorkCountry();
 		String workState = updateBillingRecordDef.getWorkState();
 		String workZipcode = updateBillingRecordDef.getWorkZipcode();
+		Userfield[] userfields = updateBillingRecordDef.getUserfields();
 		//
 		//
 		//
@@ -517,7 +519,7 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 				doubletimeRatePer, enableTimesheet, endDate, expenseEnabled, expenseInvoices, frequency, hiringManagerID, hoursPerDay, hoursPerHalfDay, invoiceContent, invoiceGroup, invoiceGroupIndex, jobID, overtimeByWorkingState, overtimeExempt,
 				overtimeRate, overtimeRatePer, paymentTerms, primaryRecruiterID, primaryRecruiterPercentage, primarySalesPercentage, primarySalesPersonID, recordID, secondaryRecruiterID, secondaryRecruiterPercentage, secondarySalesPercentage,
 				secondarySalesPersonID, startDate, tertiaryRecruiterID, tertiaryRecruiterPercentage, tertiarySalesPercentage, tertiarySalesPersonID, timesheetEntryFormat, timesheetInstruction, vMSEmployeeName, vMSWebsite, weekEnding, workAddress1,
-				workAddress2, workCity, workCountry, workState, workZipcode);
+				workAddress2, workCity, workCountry, workState, workZipcode, userfields);
 		//
 	}
 	
@@ -561,11 +563,12 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 		Integer status = updatePayRecordDef.getStatus();
 		Long subcontractCompanyID = updatePayRecordDef.getSubcontractCompanyID();
 		String taxID = updatePayRecordDef.getTaxID();
+		Userfield[] userfields = updatePayRecordDef.getUserfields();
 		//
 		//
 		//
 		return invoiceService.UpdatePayRecord(jobDivaSession, aDPCOCODE, aDPPAYFREQUENCY, approved, assignmentID, candidateID, doubletimeRate, doubletimeRatePer, effectiveDate, endDate, fileNo, otherExpenses, otherExpensesPer, outsideCommission,
-				outsideCommissionPer, overtimeExempt, overtimeRate, overtimeRatePer, paymentTerms, payOnRemittance, perDiem, perDiemPer, recordID, salary, salaryPer, status, subcontractCompanyID, taxID);
+				outsideCommissionPer, overtimeExempt, overtimeRate, overtimeRatePer, paymentTerms, payOnRemittance, perDiem, perDiemPer, recordID, salary, salaryPer, status, subcontractCompanyID, taxID, userfields);
 		//
 	}
 	

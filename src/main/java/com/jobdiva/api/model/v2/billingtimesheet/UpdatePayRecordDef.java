@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.jobdiva.api.model.Userfield;
 
 /**
  * @author Joseph Chidiac
@@ -14,111 +15,114 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class UpdatePayRecordDef implements Serializable {
 	
 	@JsonProperty(required = false)
-	private String	aDPCOCODE;
+	private String		aDPCOCODE;
 	//
 	//
 	@JsonProperty(required = false)
-	private String	aDPPAYFREQUENCY;
+	private String		aDPPAYFREQUENCY;
 	//
 	//
 	@JsonProperty(required = false)
-	private Boolean	approved;
+	private Boolean		approved;
 	//
 	//
 	@JsonProperty(required = true)
-	private Double	assignmentID;
+	private Double		assignmentID;
 	//
 	//
 	@JsonProperty(required = true)
-	private Long	candidateID;
+	private Long		candidateID;
 	//
 	//
 	@JsonProperty(required = false)
-	private Double	doubletimeRate;
+	private Double		doubletimeRate;
 	//
 	//
 	@JsonProperty(required = false)
-	private String	doubletimeRatePer;
+	private String		doubletimeRatePer;
 	//
 	//
 	@JsonProperty(required = false)
-	private Date	effectiveDate;
+	private Date		effectiveDate;
 	//
 	//
 	@JsonProperty(required = false)
-	private Date	endDate;
+	private Date		endDate;
 	//
 	//
 	@JsonProperty(required = false)
-	private String	fileNo;
+	private String		fileNo;
 	//
 	//
 	@JsonProperty(required = false)
-	private Double	otherExpenses;
+	private Double		otherExpenses;
 	//
 	//
 	@JsonProperty(required = false)
-	private String	otherExpensesPer;
+	private String		otherExpensesPer;
 	//
 	//
 	@JsonProperty(required = false)
-	private Double	outsideCommission;
+	private Double		outsideCommission;
 	//
 	//
 	@JsonProperty(required = false)
-	private String	outsideCommissionPer;
+	private String		outsideCommissionPer;
 	//
 	//
 	@JsonProperty(required = false)
-	private Boolean	overtimeExempt;
+	private Boolean		overtimeExempt;
 	//
 	//
 	@JsonProperty(required = false)
-	private Double	overtimeRate;
+	private Double		overtimeRate;
 	//
 	//
 	@JsonProperty(required = false)
-	private String	overtimeRatePer;
+	private String		overtimeRatePer;
 	//
 	//
 	@JsonProperty(required = false)
-	private String	paymentTerms;
+	private String		paymentTerms;
 	//
 	//
 	@JsonProperty(required = false)
-	private Boolean	payOnRemittance;
+	private Boolean		payOnRemittance;
 	//
 	//
 	@JsonProperty(required = false)
-	private Double	perDiem;
+	private Double		perDiem;
 	//
 	//
 	@JsonProperty(required = false)
-	private String	perDiemPer;
+	private String		perDiemPer;
 	//
 	//
 	@JsonProperty(required = false)
-	private Integer	recordID;
+	private Integer		recordID;
 	//
 	//
 	@JsonProperty(required = false)
-	private Double	salary;
+	private Double		salary;
 	//
 	//
 	@JsonProperty(required = false)
-	private String	salaryPer;
+	private String		salaryPer;
 	//
 	//
 	@JsonProperty(required = false)
-	private Integer	status;
+	private Integer		status;
 	//
 	//
 	@JsonProperty(required = false)
-	private Long	subcontractCompanyID;
+	private Long		subcontractCompanyID;
 	//
 	//
 	@JsonProperty(required = false)
-	private String	taxID;
+	private String		taxID;
+	//
+	@JsonProperty(value = "Userfields", required = false) //
+	private Userfield[]	userfields;
 	
 	public String getaDPCOCODE() {
 		return aDPCOCODE;
@@ -334,5 +338,13 @@ public class UpdatePayRecordDef implements Serializable {
 	
 	public void setTaxID(String taxID) {
 		this.taxID = taxID;
+	}
+	
+	public Userfield[] getUserfields() {
+		return userfields;
+	}
+	
+	public void setUserfields(Userfield[] userfields) {
+		this.userfields = userfields;
 	}
 }

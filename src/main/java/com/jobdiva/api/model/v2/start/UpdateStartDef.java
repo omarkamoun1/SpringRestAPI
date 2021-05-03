@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.jobdiva.api.model.Userfield;
 
 /**
  * @author Joseph Chidiac
@@ -15,38 +16,42 @@ public class UpdateStartDef implements Serializable {
 	
 	//
 	@JsonProperty(value = "startid", required = false)
-	private Long	startid;
+	private Long		startid;
 	//
 	@JsonProperty(value = "overwrite", required = false)
-	private Boolean	overwrite;
+	private Boolean		overwrite;
 	//
 	@JsonProperty(value = "startDate", required = false)
-	private Date	startDate;
+	private Date		startDate;
 	//
 	@JsonProperty(value = "endDate", required = false)
-	private Date	endDate;
+	private Date		endDate;
 	//
 	@JsonProperty(value = "positiontype", required = false)
-	private String	positiontype;
+	private String		positiontype;
 	//
 	@JsonProperty(value = "billrate", required = false)
-	private Double	billrate;
+	private Double		billrate;
 	//
 	@JsonProperty(value = "billratecurrency", required = false)
-	private String	billratecurrency;
+	private String		billratecurrency;
 	//
 	@JsonProperty(value = "billrateunit", required = false)
-	private String	billrateunit;
+	private String		billrateunit;
 	//
 	@JsonProperty(value = "payrate", required = false)
-	private Double	payrate;
+	private Double		payrate;
 	//
 	@JsonProperty(value = "payratecurrency", required = false)
-	private String	payratecurrency;
+	private String		payratecurrency;
 	//
 	@JsonProperty(value = "payrateunit", required = false)
-	private String	payrateunit;
+	private String		payrateunit;
+	//
+	@JsonProperty(value = "Userfields", required = false) //
+	private Userfield[]	userfields;
 	
+	//
 	public Long getStartid() {
 		return startid;
 	}
@@ -133,5 +138,13 @@ public class UpdateStartDef implements Serializable {
 	
 	public void setPayrateunit(String payrateunit) {
 		this.payrateunit = payrateunit;
+	}
+	
+	public Userfield[] getUserfields() {
+		return userfields;
+	}
+	
+	public void setUserfields(Userfield[] userfields) {
+		this.userfields = userfields;
 	}
 }

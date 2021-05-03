@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.model.Activity;
 import com.jobdiva.api.model.Timezone;
+import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.v2.start.SearchStartDef;
 import com.jobdiva.api.model.v2.start.SetStartDef;
@@ -91,6 +92,7 @@ public class StartV2Controller extends AbstractJobDivaController {
 					+ "payrate : Pay rate \r\n" //
 					+ "payratecurrency : Pay rate currency(case sensitive), valid values can be found through “Leader Tools” → “My Team” → “Manage Rate Units” → “Currency”. \r\n" //
 					+ "payrateunit : Pay rate unit(case sensitive), valid values can be found through “Leader Tools” → “My Team” → “Manage Rate Units” → “Pay Rate Units”. \r\n" //
+					+ "Userfields : Userfields \r\n" //
 			) //
 			@RequestBody UpdateStartDef updateStartDef //
 	// //
@@ -112,8 +114,9 @@ public class StartV2Controller extends AbstractJobDivaController {
 		Double payrate = updateStartDef.getPayrate();
 		String payratecurrency = updateStartDef.getPayratecurrency();
 		String payrateunit = updateStartDef.getPayrateunit();
+		Userfield[] Userfields = updateStartDef.getUserfields();
 		//
-		return startService.updateStart(jobDivaSession, startid, overwrite, startDate, endDate, positiontype, billrate, billratecurrency, billrateunit, payrate, payratecurrency, payrateunit);
+		return startService.updateStart(jobDivaSession, startid, overwrite, startDate, endDate, positiontype, billrate, billratecurrency, billrateunit, payrate, payratecurrency, payrateunit, Userfields);
 		//
 	}
 	

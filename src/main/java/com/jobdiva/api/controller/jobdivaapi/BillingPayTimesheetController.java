@@ -16,6 +16,7 @@ import com.jobdiva.api.model.ExpenseEntry;
 import com.jobdiva.api.model.Timesheet;
 import com.jobdiva.api.model.TimesheetEntry;
 import com.jobdiva.api.model.UploadTimesheetAssignment;
+import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.WeekEndingRecord;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.model.v2.billingtimesheet.UploadTimesheetDef;
@@ -669,6 +670,8 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		//
 	}
 	
+	@ApiImplicitParams({ @ApiImplicitParam(name = "Userfields", required = false, allowMultiple = true, dataType = "Userfield") //
+	})
 	@RequestMapping(value = "/updateBillingRecord", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Update Billing Record")
 	public Boolean updateBillingRecord( //
@@ -838,7 +841,10 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 			@RequestParam(required = false) String workState, //
 			//
 			@ApiParam(required = false) //
-			@RequestParam(required = false) String workZipcode //
+			@RequestParam(required = false) String workZipcode, //
+			//
+			@ApiParam(required = false, type = "Userfield", allowMultiple = true) //
+			@RequestParam(required = false) Userfield[] userfields //
 	//
 	//
 	) throws Exception {
@@ -851,10 +857,12 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 				doubletimeRatePer, enableTimesheet, endDate, expenseEnabled, expenseInvoices, frequency, hiringManagerID, hoursPerDay, hoursPerHalfDay, invoiceContent, invoiceGroup, invoiceGroupIndex, jobID, overtimeByWorkingState, overtimeExempt,
 				overtimeRate, overtimeRatePer, paymentTerms, primaryRecruiterID, primaryRecruiterPercentage, primarySalesPercentage, primarySalesPersonID, recordID, secondaryRecruiterID, secondaryRecruiterPercentage, secondarySalesPercentage,
 				secondarySalesPersonID, startDate, tertiaryRecruiterID, tertiaryRecruiterPercentage, tertiarySalesPercentage, tertiarySalesPersonID, timesheetEntryFormat, timesheetInstruction, vMSEmployeeName, vMSWebsite, weekEnding, workAddress1,
-				workAddress2, workCity, workCountry, workState, workZipcode);
+				workAddress2, workCity, workCountry, workState, workZipcode, userfields);
 		//
 	}
 	
+	@ApiImplicitParams({ @ApiImplicitParam(name = "Userfields", required = false, allowMultiple = true, dataType = "Userfield") //
+	})
 	@RequestMapping(value = "/UpdatePayRecord", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Update Pay Record")
 	public Boolean UpdatePayRecord( //
@@ -964,7 +972,10 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 			//
 			//
 			@ApiParam(required = false) //
-			@RequestParam(required = false) String taxID
+			@RequestParam(required = false) String taxID, //
+			//
+			@ApiParam(required = false, type = "Userfield", allowMultiple = true) //
+			@RequestParam(required = false) Userfield[] userfields //
 	//
 	) throws Exception {
 		//
@@ -973,7 +984,7 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		jobDivaSession.checkForAPIPermission("UpdatePayRecord");
 		//
 		return invoiceService.UpdatePayRecord(jobDivaSession, aDPCOCODE, aDPPAYFREQUENCY, approved, assignmentID, candidateID, doubletimeRate, doubletimeRatePer, effectiveDate, endDate, fileNo, otherExpenses, otherExpensesPer, outsideCommission,
-				outsideCommissionPer, overtimeExempt, overtimeRate, overtimeRatePer, paymentTerms, payOnRemittance, perDiem, perDiemPer, recordID, salary, salaryPer, status, subcontractCompanyID, taxID);
+				outsideCommissionPer, overtimeExempt, overtimeRate, overtimeRatePer, paymentTerms, payOnRemittance, perDiem, perDiemPer, recordID, salary, salaryPer, status, subcontractCompanyID, taxID, userfields);
 		//
 	}
 	

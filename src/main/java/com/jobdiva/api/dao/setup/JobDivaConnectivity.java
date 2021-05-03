@@ -22,6 +22,7 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Component;
 
 import com.jobdiva.api.config.AppProperties;
@@ -32,32 +33,34 @@ import com.zaxxer.hikari.HikariDataSource;
 public class JobDivaConnectivity {
 	
 	//
-	protected final Logger					logger						= LoggerFactory.getLogger(this.getClass());
+	protected final Logger							logger							= LoggerFactory.getLogger(this.getClass());
 	//
 	@Autowired
-	ServletContext							context;
+	ServletContext									context;
 	//
 	@Autowired
-	JdbcTemplate							jdbcTemplate;
+	JdbcTemplate									jdbcTemplate;
 	//
 	@Autowired
-	AppProperties							appProperties;
+	AppProperties									appProperties;
 	//
-	List<JobDivaConnection>					divaConnections				= new ArrayList<JobDivaConnection>();
+	List<JobDivaConnection>							divaConnections					= new ArrayList<JobDivaConnection>();
 	//
-	List<JdbcTemplate>						jdbcsTemplates				= Collections.synchronizedList(new ArrayList<JdbcTemplate>());
-	Map<Long, JobDivaConnection>			jobDivaConnections			= Collections.synchronizedMap(new HashMap<Long, JobDivaConnection>());
-	Map<Long, JdbcTemplate>					jdbcTemplates				= Collections.synchronizedMap(new HashMap<Long, JdbcTemplate>());
-	Map<Long, NamedParameterJdbcTemplate>	namedParameterJdbcTemplates	= Collections.synchronizedMap(new HashMap<Long, NamedParameterJdbcTemplate>());
+	List<JdbcTemplate>								jdbcsTemplates					= Collections.synchronizedList(new ArrayList<JdbcTemplate>());
+	Map<Long, JobDivaConnection>					jobDivaConnections				= Collections.synchronizedMap(new HashMap<Long, JobDivaConnection>());
+	Map<Long, JdbcTemplate>							jdbcTemplates					= Collections.synchronizedMap(new HashMap<Long, JdbcTemplate>());
+	Map<Long, NamedParameterJdbcTemplate>			namedParameterJdbcTemplates		= Collections.synchronizedMap(new HashMap<Long, NamedParameterJdbcTemplate>());
 	//
-	private JdbcTemplate					minerJdbcTemplate;
-	private JdbcTemplate					attachmentJdbcTemplate;
-	private Object							syncObj						= new Object();
+	Map<JdbcTemplate, DataSourceTransactionManager>	dataSourceTransactionManagerMap	= Collections.synchronizedMap(new HashMap<JdbcTemplate, DataSourceTransactionManager>());
+	//
+	private JdbcTemplate							minerJdbcTemplate;
+	private JdbcTemplate							attachmentJdbcTemplate;
+	private Object									syncObj							= new Object();
+	private Object									syncTransObj					= new Object();
 	
 	//
 	@PostConstruct
 	public void init() {
-		//
 		//
 		try {
 			String directory = Paths.get("").toAbsolutePath().toString() + File.separator;
@@ -124,6 +127,24 @@ public class JobDivaConnectivity {
 		//
 		logger.info("DataBase Connectivity Done.");
 		//
+		// System.out.println("## Create DataSource from dataSource1 &
+		// dataSource2");
+		// MultiRoutingDataSource dataSource = new MultiRoutingDataSource(this);
+		// Map<Object, Object> dataSourceMap = new HashMap<>();
+		// //
+		// //
+		// dataSourceMap.put(0, jdbcTemplate.getDataSource());
+		// //
+		// for (Map.Entry<Long, JdbcTemplate> entry : jdbcTemplates.entrySet())
+		// {
+		// //
+		// dataSourceMap.put(entry.getKey(), entry.getValue().getDataSource());
+		// //
+		// }
+		// dataSource.setTargetDataSources(dataSourceMap);
+		// dataSource.afterPropertiesSet();
+		// jdbcTemplate.setDataSource(dataSource);
+		//
 	}
 	
 	protected void assignTeamIds(Long mainDbId, JobDivaConnection jobDivaConnection) {
@@ -164,6 +185,11 @@ public class JobDivaConnectivity {
 				jdbcTemplates.put(teamId, jdbcTemplate);
 				namedParameterJdbcTemplates.put(teamId, namedParameterJdbcTemplate);
 			}
+			//
+			//
+			DataSourceTransactionManager dataSourceTransactionManager = new DataSourceTransactionManager(jdbcTemplate.getDataSource());
+			dataSourceTransactionManagerMap.put(jdbcTemplate, dataSourceTransactionManager);
+			//
 		}
 		//
 		//
@@ -303,5 +329,19 @@ public class JobDivaConnectivity {
 			}
 		}
 		return attachmentJdbcTemplate;
+	}
+	
+	public DataSourceTransactionManager getDataSourceTransactionManager(JdbcTemplate jdbcTemplate) {
+		synchronized (syncTransObj) {
+			//
+			DataSourceTransactionManager dataSourceTransactionManager = dataSourceTransactionManagerMap.get(jdbcTemplate);
+			//
+			if (dataSourceTransactionManager == null) {
+				dataSourceTransactionManager = new DataSourceTransactionManager(jdbcTemplate.getDataSource());
+				dataSourceTransactionManagerMap.put(jdbcTemplate, dataSourceTransactionManager);
+			}
+			//
+			return dataSourceTransactionManager;
+		}
 	}
 }

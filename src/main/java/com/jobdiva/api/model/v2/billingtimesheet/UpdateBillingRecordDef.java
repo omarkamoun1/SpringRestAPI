@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.jobdiva.api.model.Userfield;
 
 /**
  * @author Joseph Chidiac
@@ -14,169 +15,172 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class UpdateBillingRecordDef implements Serializable {
 	
 	@JsonProperty(required = false)
-	private Boolean	allowEnterTimeOnPortal;
+	private Boolean		allowEnterTimeOnPortal;
 	//
 	@JsonProperty(required = false)
-	private Integer	approved;
+	private Integer		approved;
 	//
 	@JsonProperty(required = true)
-	private Double	assignmentID;
+	private Double		assignmentID;
 	//
 	@JsonProperty(required = false)
-	private Long	billingContactID;
+	private Long		billingContactID;
 	//
 	@JsonProperty(required = false)
-	private Integer	billingUnit;
+	private Integer		billingUnit;
 	//
 	@JsonProperty(required = false)
-	private Double	billRate;
+	private Double		billRate;
 	//
 	@JsonProperty(required = false)
-	private String	billRatePer;
+	private String		billRatePer;
 	//
 	@JsonProperty(required = true)
-	private Long	candidateID;
+	private Long		candidateID;
 	//
 	@JsonProperty(required = false)
-	private String	customerRefNo;
+	private String		customerRefNo;
 	//
 	@JsonProperty(required = false)
-	private Long	division;
+	private Long		division;
 	//
 	@JsonProperty(required = false)
-	private Double	doubletimePer;
+	private Double		doubletimePer;
 	//
 	@JsonProperty(required = false)
-	private Double	doubletimeRate;
+	private Double		doubletimeRate;
 	//
 	@JsonProperty(required = false)
-	private String	doubletimeRatePer;
+	private String		doubletimeRatePer;
 	//
 	@JsonProperty(required = false)
-	private Boolean	enableTimesheet;
+	private Boolean		enableTimesheet;
 	//
 	@JsonProperty(required = false)
-	private Date	endDate;
+	private Date		endDate;
 	//
 	@JsonProperty(required = false)
-	private Boolean	expenseEnabled;
+	private Boolean		expenseEnabled;
 	//
 	@JsonProperty(required = false)
-	private Integer	expenseInvoices;
+	private Integer		expenseInvoices;
 	//
 	@JsonProperty(required = false)
-	private Integer	frequency;
+	private Integer		frequency;
 	//
 	@JsonProperty(required = false)
-	private Long	hiringManagerID;
+	private Long		hiringManagerID;
 	//
 	@JsonProperty(required = false)
-	private Double	hoursPerDay;
+	private Double		hoursPerDay;
 	//
 	@JsonProperty(required = false)
-	private Double	hoursPerHalfDay;
+	private Double		hoursPerHalfDay;
 	//
 	@JsonProperty(required = false)
-	private Integer	invoiceContent;
+	private Integer		invoiceContent;
 	//
 	@JsonProperty(required = false)
-	private String	invoiceGroup;
+	private String		invoiceGroup;
 	//
 	@JsonProperty(required = false)
-	private Integer	invoiceGroupIndex;
+	private Integer		invoiceGroupIndex;
 	//
 	@JsonProperty(required = false)
-	private Double	jobID;
+	private Double		jobID;
 	//
 	@JsonProperty(required = false)
-	private Integer	overtimeByWorkingState;
+	private Integer		overtimeByWorkingState;
 	//
 	@JsonProperty(required = false)
-	private Boolean	overtimeExempt;
+	private Boolean		overtimeExempt;
 	//
 	@JsonProperty(required = false)
-	private Double	overtimeRate;
+	private Double		overtimeRate;
 	//
 	@JsonProperty(required = false)
-	private String	overtimeRatePer;
+	private String		overtimeRatePer;
 	//
 	@JsonProperty(required = false)
-	private String	paymentTerms;
+	private String		paymentTerms;
 	//
 	@JsonProperty(required = false)
-	private Long	primaryRecruiterID;
+	private Long		primaryRecruiterID;
 	//
 	@JsonProperty(required = false)
-	private Double	primaryRecruiterPercentage;
+	private Double		primaryRecruiterPercentage;
 	//
 	@JsonProperty(required = false)
-	private Double	primarySalesPercentage;
+	private Double		primarySalesPercentage;
 	//
 	@JsonProperty(required = false)
-	private Long	primarySalesPersonID;
+	private Long		primarySalesPersonID;
 	//
 	@JsonProperty(required = false)
-	private Integer	recordID;
+	private Integer		recordID;
 	//
 	@JsonProperty(required = false)
-	private Long	secondaryRecruiterID;
+	private Long		secondaryRecruiterID;
 	//
 	@JsonProperty(required = false)
-	private Double	secondaryRecruiterPercentage;
+	private Double		secondaryRecruiterPercentage;
 	//
 	@JsonProperty(required = false)
-	private Double	secondarySalesPercentage;
+	private Double		secondarySalesPercentage;
 	//
 	@JsonProperty(required = false)
-	private Long	secondarySalesPersonID;
+	private Long		secondarySalesPersonID;
 	//
 	@JsonProperty(required = false)
-	private Date	startDate;
+	private Date		startDate;
 	//
 	@JsonProperty(required = false)
-	private Long	tertiaryRecruiterID;
+	private Long		tertiaryRecruiterID;
 	//
 	@JsonProperty(required = false)
-	private Double	tertiaryRecruiterPercentage;
+	private Double		tertiaryRecruiterPercentage;
 	//
 	@JsonProperty(required = false)
-	private Double	tertiarySalesPercentage;
+	private Double		tertiarySalesPercentage;
 	//
 	@JsonProperty(required = false)
-	private Long	tertiarySalesPersonID;
+	private Long		tertiarySalesPersonID;
 	//
 	@JsonProperty(required = false)
-	private Long	timesheetEntryFormat;
+	private Long		timesheetEntryFormat;
 	//
 	@JsonProperty(required = false)
-	private String	timesheetInstruction;
+	private String		timesheetInstruction;
 	//
 	@JsonProperty(required = false)
-	private String	vMSEmployeeName;
+	private String		vMSEmployeeName;
 	//
 	@JsonProperty(required = false)
-	private String	vMSWebsite;
+	private String		vMSWebsite;
 	//
 	@JsonProperty(required = false)
-	private Integer	weekEnding;
+	private Integer		weekEnding;
 	//
 	@JsonProperty(required = false)
-	private String	workAddress1;
+	private String		workAddress1;
 	//
 	@JsonProperty(required = false)
-	private String	workAddress2;
+	private String		workAddress2;
 	//
 	@JsonProperty(required = false)
-	private String	workCity;
+	private String		workCity;
 	//
 	@JsonProperty(required = false)
-	private String	workCountry;
+	private String		workCountry;
 	//
 	@JsonProperty(required = false)
-	private String	workState;
+	private String		workState;
 	//
 	@JsonProperty(required = false)
-	private String	workZipcode;
+	private String		workZipcode;
+	//
+	@JsonProperty(value = "Userfields", required = false) //
+	private Userfield[]	userfields;
 	
 	public Boolean getAllowEnterTimeOnPortal() {
 		return allowEnterTimeOnPortal;
@@ -616,5 +620,13 @@ public class UpdateBillingRecordDef implements Serializable {
 	
 	public void setWorkZipcode(String workZipcode) {
 		this.workZipcode = workZipcode;
+	}
+	
+	public Userfield[] getUserfields() {
+		return userfields;
+	}
+	
+	public void setUserfields(Userfield[] userfields) {
+		this.userfields = userfields;
 	}
 }
