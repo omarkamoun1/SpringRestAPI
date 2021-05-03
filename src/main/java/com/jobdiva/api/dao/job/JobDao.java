@@ -603,6 +603,7 @@ public class JobDao extends AbstractActivityDao {
 					if (jobUser.getRecruiter() && !jobUser.getLeadRecruiter())
 						jobuser += " (R)";
 					jobuser += " | " + jobUser.getRecruiterId() + " |";
+					jobuser +=  jobUser.getRoleIds().toString().replace('[', '(').replace(']', ')');
 					jobusers.add(jobuser);
 				}
 			} catch (Exception e) {
@@ -2545,14 +2546,20 @@ public class JobDao extends AbstractActivityDao {
 				act.setCandidateId(rs.getLong(2));
 				act.setCandidateName(rs.getString(3));
 				act.setCustomerId(rs.getLong(4));
+				act.setManagerName(rs.getString(5));
 				act.setDateInterview(rs.getDate(6));
 				act.setJobContactId(rs.getLong(7));
 				act.setJobContactName(rs.getString(8));
 				act.setNotes(rs.getString(9));
 				act.setRecruiterId(rs.getLong(10));
 				act.setRecruiterName(rs.getString(11));
-				act.setDateRejected((rs.getDate(13) == null) ? rs.getDate(12) : rs.getDate(13));
-				act.setDateCreated(rs.getDate(14));
+ 
+//				act.setDateRejected((rs.getDate(13) == null) ? rs.getDate(12) : rs.getDate(13));
+//				act.setDateCreated(rs.getDate(14));
+// 
+//				act.setDateRejected((rs.getDate(13)==null)?rs.getDate(12):rs.getDate(13));
+//				act.setDateHired(rs.getDate(14));
+// 
 				act.setDatePresented(rs.getDate(15));
 				act.setIsInternal(rs.getLong(16) > 990);
 				//

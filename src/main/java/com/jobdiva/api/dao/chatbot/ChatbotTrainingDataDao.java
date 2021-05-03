@@ -351,7 +351,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		//
 		//
 		// get permission
-		sql = "select permission, firstname, lastname, leader, permission2_recruiter " //
+		sql = "select permission, firstname, lastname, leader, permission2_recruiter, permission_recruiter " //
 				+ " from trecruiter "//
 				+ " where groupid = ? and ID = ? ";
 		//
@@ -365,59 +365,50 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				System.out.println(recruiterid);
 				ChatbotUserData tmp = new ChatbotUserData();
 				long permission = rs.getLong(1);
+				long permission_recruiter = rs.getLong(6);
 				Boolean isTeamLeader = !((rs.getInt(4) & 16) == 0);
 				Boolean isSuperUser = !((rs.getInt(4) & 256) == 0);
 				boolean allowManagingJobBoardsCriteriaAndProfiles = false;
+				boolean isTeamLeaerOrSupperUser= isTeamLeader || isSuperUser;
 				// if (( 0!=(leadervalue & (1<<(i-1))) || leadervalue==0) &&
 				// !(i==2 &&
 				// accessControlSet.contains("hide_VMS"))){%>true<%}else{%>false<%}
 				// String accessControlSet = "";
 				int i = 1;
-				if (isTeamLeader && 0 != (permission & (1 << (i - 1)))) {
+				if (isTeamLeaerOrSupperUser && 0 != (permission & (1 << (i - 1)))) {
 					allowManagingJobBoardsCriteriaAndProfiles = true;
 				}
 				boolean displayFourDailyEmailProfileOption = false;
+				i = 5;
+				tmp.allowViewAccessLogReport = isTeamLeaerOrSupperUser && 0 != (permission & (1 << (i - 1)));
 				i = 6;
-				if (isTeamLeader && 0 != (permission & (1 << (i - 1)))) {
+				if (isTeamLeaerOrSupperUser && 0 != (permission & (1 << (i - 1)))) {
 					displayFourDailyEmailProfileOption = true;
 				}
 				i = 7;
 				boolean allowManagingJobBoardsCriteriaOnly = false;
-				if (isTeamLeader && 0 != (permission & (1 << (i - 1)))) {
+				if (isTeamLeaerOrSupperUser && 0 != (permission & (1 << (i - 1)))) {
 					allowManagingJobBoardsCriteriaOnly = true;
 				}
+				tmp.allowCreateSuppliersLogins = 0!= (permission_recruiter & 64);
 				String permission2 = rs.getString("permission2_recruiter");
-				// private boolean allowAssignOnboardingToNotLinkedJob;//42
-				// private boolean allowManagingOnboarding;//13
-				// private boolean allowAccessCompletedOnboarding;//6
-				// private boolean allowAccessCompletedOnboardingForHires;//7
-				// private boolean
-				// allowAccessCompletedOnboardingForPrimaryJobs;//8
-				// private boolean allowAccessCompletedOnboardingForMyJobs;//9
-				// private boolean allowAccessCompletedOnboardingForAllJobs;//10
-				// private boolean
-				// allowAccessCompletedOnboardingForDivision;//11
+	
 				System.out.println(permission);
 				System.out.println(permission2);
 				if (permission2 != null && !permission2.isEmpty()) {
-					if (permission2.charAt(42) == '1')
-						tmp.allowAssignOnboardingToNotLinkedJob = true;
-					if (permission2.charAt(13) == '1')
-						tmp.allowManagingOnboarding = true;
-					if (permission2.charAt(6) == '1')
-						tmp.allowAccessCompletedOnboarding = true;
-					if (permission2.charAt(7) == '1')
-						tmp.allowAccessCompletedOnboardingForHires = true;
-					if (permission2.charAt(8) == '1')
-						tmp.allowAccessCompletedOnboardingForPrimaryJobs = true;
-					if (permission2.charAt(9) == '1')
-						tmp.allowAccessCompletedOnboardingForMyJobs = true;
-					if (permission2.charAt(10) == '1')
-						tmp.allowAccessCompletedOnboardingForAllJobs = true;
-					if (permission2.charAt(11) == '1')
-						tmp.allowAccessCompletedOnboardingForDivision = true;
-					if (permission2.charAt(120) == '1')
-						tmp.allowUnassignIndividualDocuments = true;
+					while(permission2.length()<500) permission2+="0";
+					tmp.allowOnboardCandidatesFor = permission2.charAt(0) == '1';
+					tmp.allowAssignOnboardingToNotLinkedJob = permission2.charAt(42) == '1';
+					tmp.allowManagingOnboarding = permission2.charAt(13) == '1';
+					tmp.allowAccessCompletedOnboarding = permission2.charAt(6) == '1';
+					tmp.allowAccessCompletedOnboardingForHires = permission2.charAt(7) == '1';
+					tmp.allowAccessCompletedOnboardingForPrimaryJobs = permission2.charAt(8) == '1';
+					tmp.allowAccessCompletedOnboardingForMyJobs = permission2.charAt(9) == '1';
+					tmp.allowAccessCompletedOnboardingForAllJobs = permission2.charAt(10) == '1';
+					tmp.allowAccessCompletedOnboardingForDivision = permission2.charAt(11) == '1';
+					tmp.allowAssignSuppliersToJob = permission2.charAt(112) == '1';
+					tmp.allowUnassignIndividualDocuments = permission2.charAt(120) == '1';
+
 				}
 				tmp.allowManagingJobBoardsCriteriaAndProfiles = (allowManagingJobBoardsCriteriaAndProfiles);
 				tmp.allowManagingJobBoardsCriteriaOnly = (allowManagingJobBoardsCriteriaOnly);
@@ -432,6 +423,11 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		//
 		if (list.size() > 0) {
 			ChatbotUserData tmp = list.get(0);
+			data.allowAssignSuppliersToJob = tmp.allowAssignSuppliersToJob;
+			data.allowViewAccessLogReport = tmp.allowViewAccessLogReport;
+			data.allowCreateSuppliersLogins = tmp.allowCreateSuppliersLogins;
+			data.allowOnboardCandidatesFor = tmp.allowOnboardCandidatesFor;
+			data.allowUnassignIndividualDocuments = tmp.allowUnassignIndividualDocuments;
 			data.allowAssignOnboardingToNotLinkedJob = (tmp.allowAssignOnboardingToNotLinkedJob);
 			data.allowManagingOnboarding = (tmp.allowAccessCompletedOnboarding);
 			data.allowAccessCompletedOnboarding = (tmp.allowAccessCompletedOnboarding);
@@ -453,6 +449,59 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				data.hasUnusedHirePackage = true;
 				data.unusedHirePackagesName = notUsedHirePackage.entrySet().stream().map(e -> e.getValue()).collect(Collectors.joining(", ", "", ""));
 			}
+		}
+		// get report permission
+		sql = "select count(r.id) e, p.PERMTYPE, p.permvalue from "+
+			  "	(select * from trecruiter_report_permission where teamid=?) p, "+
+			  " (select id from trecruiter where id = ?) r where r.id(+) = p.recruiterid and permtype is not null group by PERMTYPE, permvalue order by permtype";
+		params = new Object[] {teamid, recruiterid};
+		List<String[]> reportPermissions= jdbcTemplate.query(sql, params, new RowMapper<String[]>() {
+			@Override
+			public String[] mapRow(ResultSet rs, int rowNum) throws SQLException {
+				String[] list = new String[3];
+				list[0] = rs.getString(1);
+				list[1] = rs.getString(2);
+				list[2] = rs.getString(3);
+				return list;
+			}
+		});
+		for(int i=0;i<reportPermissions.size();i++) {
+			String[] permission = reportPermissions.get(i);
+			String name = permission[1];
+			Boolean value= permission[0].equals(permission[2]);
+			if(name.equals("RP001")) {
+				data.reportPermissionUserJournalOfCandiateNotes = value;
+			} 
+			else if(name.equals("RP005")) {
+				data.reportPermissionUserJournalOfContactNotes = value;
+			}
+			else if(name.equals("RP044")) {
+				data.reportPermissionUserJournalOfCompanyNotes = value;
+			}
+			else if(name.equals("RP042")) {
+				data.reportPermissionCompanyList = value;
+			}
+			else if(name.equals("RP050")) {
+				data.reportPermissionMyCompanyList = value;
+			}
+			else if(name.equals("RP034")) {
+				data.reportPermissionPhasedSubmittalMetrics = value;
+			}
+			else if(name.equals("RP014")) {
+				data.reportPermissionSubmittalMetrics = value;
+			}
+			else if(name.equals("RP013")) {
+				data.reportPermissionIncomingResumesReceivedDuringPeriod = value;
+			}
+			else if(name.equals("RP032")) {
+				data.reportPermissionEmployeeReport = value;
+			}
+			else if(name.equals("RP030")) {
+				data.reportPermissionHiresReport = value;
+			}
+			else if(name.equals("RP028")) {
+				data.reportPermissionJobActivitySummaryAndDetails = value;
+			}			
 		}
 		//
 		return data;
@@ -1482,7 +1531,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 				}
 			}
 			if (computer_name != null && ip_address != null) {
-				if (computer_name.startsWith("w10_") && ip_address.startsWith("10.10")) {
+				if (computer_name.toLowerCase().startsWith("w10_") && ip_address.startsWith("10.10")) {
 					vmsAccount.onClientMachine = false;
 				} else {
 					vmsAccount.onClientMachine = true;

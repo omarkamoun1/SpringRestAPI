@@ -186,6 +186,38 @@ public class JobService extends AbstractService {
 		}
 	}
 	
+	public Boolean assignUserToJob(JobDivaSession jobDivaSession, Long rfqid, Long recruiterid, List<Long> roleIds, Integer jobstatus) throws Exception {
+		//
+		try {
+			//
+			return inTransaction(new TransactionCallback<Boolean>() {
+				
+				@Override
+				public Boolean doInTransaction(TransactionStatus status) {
+					try {
+						//
+						Boolean result = jobUserDao.assignUserToJob(jobDivaSession, rfqid, recruiterid, roleIds, jobstatus);
+						//
+						jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "assignUserToJob", "assign Successful");
+						//
+						return result;
+						//
+					} catch (Exception e) {
+						throw new RuntimeException(e.getMessage());
+					}
+				}
+				//
+			});
+			//
+		} catch (Exception e) {
+			//
+			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "assignUserToJob", "assign Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
+		}
+	}
+	
 	public Boolean createJobApplication(JobDivaSession jobDivaSession, Long candidateid, Long jobid, Date dateapplied, Integer resumesource, String globalid) throws Exception {
 		//
 		try {

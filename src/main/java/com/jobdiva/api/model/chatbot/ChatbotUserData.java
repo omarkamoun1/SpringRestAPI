@@ -23,6 +23,11 @@ public class ChatbotUserData implements java.io.Serializable {
 	public boolean allowAccessCompletedOnboardingForAllJobs;//10
 	public boolean allowAccessCompletedOnboardingForDivision;//11
 	public boolean allowUnassignIndividualDocuments;//120
+	public boolean allowCreateSuppliersLogins; //64
+	public boolean allowViewAccessLogReport; 
+	public boolean allowOnboardCandidatesFor;//44
+	public boolean allowAssignSuppliersToJob;//112
+	
 	public boolean hasUnusedHirePackage;
 	public String unusedHirePackagesName;
 	public boolean isSuperUser;
@@ -31,6 +36,13 @@ public class ChatbotUserData implements java.io.Serializable {
 	public boolean reportPermissionUserJournalOfCompanyNotes;
 	public boolean reportPermissionCompanyList;
 	public boolean reportPermissionMyCompanyList;
+	public boolean reportPermissionSubmittalMetrics;
+	public boolean reportPermissionPhasedSubmittalMetrics;
+	public boolean reportPermissionIncomingResumesReceivedDuringPeriod;
+	public boolean reportPermissionHiresReport;
+	public boolean reportPermissionEmployeeReport;
+	public boolean reportPermissionJobActivitySummaryAndDetails;
+
 
 	
 }

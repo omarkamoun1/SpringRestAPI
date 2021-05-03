@@ -80,4 +80,69 @@ public class JobUserDao extends AbstractJobDivaDao {
 		//
 		jdbcTemplate.update(sqlInsert, params);
 	}
+	
+	public Boolean assignUserToJob(JobDivaSession jobDivaSession, Long rfqid, Long recruiterid, List<Long> roleIds, Integer jobstatus) throws Exception{
+		
+		//
+		String sqlInsert = "INSERT INTO tRecruiterRFQ (rfqid, recruiterid,teamid,recruiter,lead_recruiter,sales,lead_sales,rec_email,jobstatus) VALUES (?,?,?,?,?,?,?,?,?)";
+		//
+		Object[] params = new Object[] { rfqid, recruiterid, jobDivaSession.getTeamId(),roleIds.contains(997l)?1:0,roleIds.contains(998l)?1:0,roleIds.contains(999l)?1:0,roleIds.contains(996l)?1:0,0,jobstatus};
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		jdbcTemplate.update(sqlInsert, params);
+		//
+		long customerID = 0;
+		//
+        String sqlStr = "select id from tcustomer where teamid=? and ifrecruiterthenid=?";
+        //
+        params = new Object[] { jobDivaSession.getTeamId(), recruiterid};
+        //
+        List<Long> customerIDs = jdbcTemplate.query(sqlStr, params, new RowMapper<Long>() {
+			
+			@Override
+			public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getLong("id");
+			}
+		});
+        if (customerIDs!=null && customerIDs.size()>0) {
+          customerID = customerIDs.get(0);
+        }
+        
+        if(customerID>0){
+        	int RoleID = 950;
+	        if (roleIds.contains(996l)) RoleID = 996; //lead sales
+	        else if (roleIds.contains(999l)) RoleID = 999; //sales
+	        else if (roleIds.contains(998l)) RoleID = 998; //lead recruiter
+	        else if (roleIds.contains(997l)) RoleID = 997; //recruiter
+	        
+	        sqlInsert = "INSERT INTO trfq_customers (teamid,rfqid,customerid,roleID,showonjob) VALUES (?,?,?,?,0)";
+    	    //
+	        params = new Object[] {jobDivaSession.getTeamId(),rfqid,customerID,RoleID};
+            //
+	        jdbcTemplate.update(sqlInsert, params);
+	        //
+        }
+        
+        // Sync
+        sqlInsert = "UPDATE trfq SET sync_required=2 Where id=?";
+        params = new Object[] {rfqid};
+        jdbcTemplate.update(sqlInsert, params);
+        //
+        roleIds.remove(996l); //lead sales
+        roleIds.remove(999l); //sales
+        roleIds.remove(998l); //lead recruiter
+        roleIds.remove(997l); //recruiter
+        if(roleIds.size()>0) { // flexible user roles
+            for(int i=0; i < roleIds.size();i++) {	
+            sqlInsert = "insert into TRECRUITERRFQ_ROLES values(?,?,?,?,sysdate)";				
+			//
+			params = new Object[] {rfqid,jobDivaSession.getTeamId(),recruiterid,roleIds.get(i)};
+			//
+			jdbcTemplate.update(sqlInsert, params);
+			//
+          }
+        }
+       return true;
+	}
 }
