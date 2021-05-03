@@ -1223,6 +1223,16 @@ public class AbstractJobDivaDao {
 					jobUser.setPhone(rs.getString("WORKPHONE"));
 					jobUser.setEmail(rs.getString("EMAIL"));
 					jobUser.setRecEmailStatus(rs.getInt("REC_EMAIL_STATUS"));
+					String sql="Select c.roleId From TRECRUITERRFQ_ROLES c Where c.RFQID = ? AND c.TEAMID = ? AND c.Recruiterid = ?";
+					Object[] params = new Object[] { jobId, teamId , rs.getLong("RECRUITERID") };
+					List<Long> RolesId = jdbcTemplate.query(sql, params,  new RowMapper<Long>() {
+						
+						@Override
+						public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+							return rs.getLong("ROLEID");
+						}
+					});
+					jobUser.setRoleIds(RolesId);
 					return jobUser;
 				} catch (Exception e) {
 					logger.info("getJobUsers ERROR :: " + e.getMessage());

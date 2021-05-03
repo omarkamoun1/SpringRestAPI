@@ -1,5 +1,7 @@
 package com.jobdiva.api.model;
 
+import java.util.List;
+
 @SuppressWarnings("serial")
 public class JobUser implements java.io.Serializable {
 	
@@ -17,7 +19,18 @@ public class JobUser implements java.io.Serializable {
 	private String	phone;
 	private String	email;
 	private Integer	recEmailStatus;
+	private List<Long> roleIds;
 	
+	
+	
+	public List<Long> getRoleIds() {
+		return roleIds;
+	}
+
+	public void setRoleIds(List<Long> roleIds) {
+		this.roleIds = roleIds;
+	}
+
 	public Long getRfqId() {
 		return rfqId;
 	}

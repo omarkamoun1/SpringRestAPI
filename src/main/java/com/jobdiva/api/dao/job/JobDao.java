@@ -603,6 +603,7 @@ public class JobDao extends AbstractActivityDao {
 					if (jobUser.getRecruiter() && !jobUser.getLeadRecruiter())
 						jobuser += " (R)";
 					jobuser += " | " + jobUser.getRecruiterId() + " |";
+					jobuser += " | " + jobUser.getRoleIds().toString();
 					jobusers.add(jobuser);
 				}
 			} catch (Exception e) {
