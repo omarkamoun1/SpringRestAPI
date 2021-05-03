@@ -660,7 +660,7 @@ public class JobController extends AbstractJobDivaController {
 		//
 	}
 	
-	@RequestMapping(value = "/AssignUserToJob", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
+	@RequestMapping(value = "/AssignUserToJob", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Assign User To Job")
 	public Boolean AssignUserToJob(
 			//
