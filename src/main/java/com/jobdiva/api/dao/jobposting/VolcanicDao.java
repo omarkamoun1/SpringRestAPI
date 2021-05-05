@@ -16,7 +16,8 @@ import java.net.URLDecoder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -32,6 +33,8 @@ public class VolcanicDao {
 	@Autowired
 	JobDivaConnectivity		jobDivaConnectivity;
 	//
+	
+	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	public String request(String req, Long teamid, String rfqid, String refNo, String website, String apiKey) {
 		//
@@ -296,6 +299,9 @@ public class VolcanicDao {
 	
 	public String getLists(String website, String apiKey) {
 		
+		logger.info("VOLCANIC>GETLISTS: Website: " + website);
+		logger.info("VOLCANIC>GETLISTS: apiKey: " + apiKey);
+		
 		String reqResponse = "";
 		
 		try {
@@ -304,6 +310,7 @@ public class VolcanicDao {
 			reqResponse = "{\"response\":{\"status\":\"Exception\",\"reason\":\"" + e.getMessage() + "\"}}";
 		}
 		
+		logger.info("VOLCANIC>GETLISTS: Response: " + reqResponse);
 		return reqResponse;
 	}
 	
