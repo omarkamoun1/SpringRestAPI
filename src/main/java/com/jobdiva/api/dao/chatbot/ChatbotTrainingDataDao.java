@@ -1347,8 +1347,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		harvestStatus.accounts = new ArrayList<ChatbotHarvestAccount>();
 		harvestStatus.machines = new ArrayList<ChatbotHarvestMachine>();
 		Boolean isRsxMonsterAlive= false;
-//		isRsxMonsterAlive = isRsxMonsterAlive(jobDivaSession);
-		isRsxMonsterAlive = false;
+		isRsxMonsterAlive = isRsxMonsterAlive(jobDivaSession);
 		for (int i = 0; i < dataList.size(); i++) {
 			Object[] data = dataList.get(i);
 			webid = (Long) data[6];
@@ -1521,7 +1520,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			vmsAccount.isHalted = loginfailures != 0 && (loginfailures >= maxloginattemps);
 			vmsAccount.url = url;
 			vmsAccount.teamid = teamid;
-			vmsAccount.machineDetail = computer_name+ "(IP address:"+ip_address+")";
+			vmsAccount.machineDetail = computer_name+ " (IP address:"+ip_address+")";
 			if (datelastrun != null && !datelastrun.isEmpty()) {
 				try {
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
