@@ -1837,6 +1837,24 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		});
 		
 		candidate.activepackges = candidates.get(0).activepackges;
+
+		// has recently cancle start:
+
+		String s3 = "select rfqrefno from tinterviewschedule inner join trfq on rfqid = trfq.id where candidateid= ? and recruiter_teamid = ? and Datehired is not null and (date_ended is null or date_ended>sysdate) and (dateterminated is null or dateterminated>sysdate)order by datecreated desc";
+		jdbcTemplate = getJdbcTemplate();
+		params1 = new Object[] {candId,teamid};
+
+		candidates = jdbcTemplate.query(s3, params1, new RowMapper<ChatbotCandidatePackges>() {
+			
+			@Override
+			public ChatbotCandidatePackges mapRow(ResultSet rs, int rowNum) throws SQLException {
+				ChatbotCandidatePackges candidate = new ChatbotCandidatePackges();
+				candidate.jobReference = rs.getString(1);
+				return candidate;
+			}
+		});
+		if (candidates.size() > 0)
+			candidate.jobReference = candidates.get(0).jobReference;
 		return candidate;		
 
 	}
