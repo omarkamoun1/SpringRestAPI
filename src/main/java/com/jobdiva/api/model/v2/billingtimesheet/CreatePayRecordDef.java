@@ -59,6 +59,9 @@ public class CreatePayRecordDef implements Serializable {
 	private String	salaryPer;
 	//
 	@JsonProperty(required = false)
+	private Integer	salaryPerCurrency;
+	//
+	@JsonProperty(required = false)
 	private Double	perDiem;
 	//
 	@JsonProperty(required = false)
@@ -210,6 +213,14 @@ public class CreatePayRecordDef implements Serializable {
 	
 	public void setSalaryPer(String salaryPer) {
 		this.salaryPer = salaryPer;
+	}
+	
+	public Integer getSalaryPerCurrency() {
+		return this.salaryPerCurrency;
+	}
+	
+	public void setSalaryPerCurrency(Integer salaryPerCurrency) {
+		this.salaryPerCurrency = salaryPerCurrency;
 	}
 	
 	public Double getPerDiem() {

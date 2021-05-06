@@ -5,8 +5,11 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -24,14 +27,37 @@ public class UpdateBillingRecordDao extends AbstractJobDivaDao {
 	@Autowired
 	ActivityUserFieldsDao activityUserFieldsDao;
 	
-	public Boolean updateBillingRecord(JobDivaSession jobDivaSession, Boolean allowEnterTimeOnPortal, Integer approved, Double assignmentID, Long billingContactID, Integer billingUnit, Double billRate, String billRatePer, Long candidateID,
-			String customerRefNo, Long division, Double doubletimePer, Double doubletimeRate, String doubletimeRatePer, Boolean enableTimesheet, Date endDate, Boolean expenseEnabled, Integer expenseInvoices, Integer frequency, Long hiringManagerID,
-			Double hoursPerDay, Double hoursPerHalfDay, Integer invoiceContent, String invoiceGroup, Integer invoiceGroupIndex, Double jobID, Integer overtimeByWorkingState, Boolean overtimeExempt, Double overtimeRate, String overtimeRatePer,
-			String paymentTerms, Long primaryRecruiterID, Double primaryRecruiterPercentage, Double primarySalesPercentage, Long primarySalesPersonID, Integer recordID, Long secondaryRecruiterID, Double secondaryRecruiterPercentage,
-			Double secondarySalesPercentage, Long secondarySalesPersonID, Date startDate, Long tertiaryRecruiterID, Double tertiaryRecruiterPercentage, Double tertiarySalesPercentage, Long tertiarySalesPersonID, Long timesheetEntryFormat,
-			String timesheetInstruction, String vMSEmployeeName, String vMSWebsite, Integer weekEnding, String workAddress1, String workAddress2, String workCity, String workCountry, String workState, String workZipcode, Userfield[] userfields)
-			throws Exception {
+	private void checkRequiredFields(Double assignmentID, Long candidateID) throws Exception {
+		StringBuffer messageError = new StringBuffer();
 		//
+		//
+		if (assignmentID == null || assignmentID <= 0) {
+			messageError.append("assignmentID is required. \r\n ");
+		}
+		//
+		if (candidateID == null || candidateID <= 0) {
+			messageError.append("assignmentID is required. \r\n ");
+		}
+		//
+		if (messageError.length() > 0) {
+			throw new Exception("Parameter Check Failed \r\n" + messageError.toString());
+		}
+	}
+	
+	public Boolean updateBillingRecord(JobDivaSession jobDivaSession, Boolean allowEnterTimeOnPortal, Boolean approved, Double assignmentID, Long billingContactID, Integer billingUnit, Double billRate, Integer billRateCurrrency, String billRatePer,
+			Long candidateID, String customerRefNo, Long division, Double doubletimePer, Double doubletimeRate, String doubletimeRatePer, Boolean enableTimesheet, Date endDate, Boolean expenseEnabled, Integer expenseInvoices, Integer frequency,
+			Integer biweeklySchedule, Long hiringManagerID, Double hoursPerDay, Double hoursPerHalfDay, Integer invoiceContent, String invoiceGroup, Integer invoiceGroupIndex, Double jobID, Integer overtimeByWorkingState, Boolean overtimeExempt,
+			Double overtimeRate, String overtimeRatePer, String paymentTerms, Long primaryRecruiterID, Double primaryRecruiterPercentage, Double primarySalesPercentage, Long primarySalesPersonID, Integer recordID, Long secondaryRecruiterID,
+			Double secondaryRecruiterPercentage, Double secondarySalesPercentage, Long secondarySalesPersonID, Date startDate, Long tertiaryRecruiterID, Double tertiaryRecruiterPercentage, Double tertiarySalesPercentage, Long tertiarySalesPersonID,
+			Long timesheetEntryFormat, String timesheetInstruction, String vMSEmployeeName, String vMSWebsite, Integer weekEnding, String workAddress1, String workAddress2, String workCity, String workCountry, String workState, String workZipcode,
+			Userfield[] userfields) throws Exception {
+		//
+		//
+		//
+		checkRequiredFields(assignmentID, candidateID);
+		//
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		// recid is null. Use max(recid) instead...
 		if (recordID == null) {
 			String sql = " SELECT NVL(MAX(recid), -1) as RECID " //
@@ -43,7 +69,7 @@ public class UpdateBillingRecordDao extends AbstractJobDivaDao {
 			//
 			Object[] params = new Object[] { candidateID, jobDivaSession.getTeamId(), assignmentID };
 			//
-			List<Integer> list = getJdbcTemplate().query(sql, params, new RowMapper<Integer>() {
+			List<Integer> list = jdbcTemplate.query(sql, params, new RowMapper<Integer>() {
 				
 				@Override
 				public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -52,12 +78,197 @@ public class UpdateBillingRecordDao extends AbstractJobDivaDao {
 				}
 			});
 			//
-			if (list == null || list.size() == 0) {
-				throw new Exception("Unable to find billing record under candidate ID " + candidateID + " and assignment ID " + assignmentID);
-			} else {
+			if (list != null && list.size() > 0) {
 				recordID = list.get(0);
 			}
+			if (recordID == null || recordID < 0) {
+				throw new Exception("Unable to find billing record under candidate ID " + candidateID + " and assignment ID " + assignmentID);
+			}
 		}
+		//
+		//
+		//
+		//
+		// Check for approve / unapprove conditions
+		if (approved != null) {
+			//
+			//
+			String sql = " SELECT billing_contact, billing_unit, bill_rate,bill_rate_per, BILLRATEPER_CURRENCY, DIVISION, frequency, HOURS_PER_DAY, timesheet_entry_format, overtimeexempt, " //
+					+ " overtime_rate1, overtime_rate1_per, primary_salesperson, start_date, week_ending, WORK_STATE, approved FROM  temployee_billingrecord " //
+					+ " Where employeeid = ? and recruiter_teamid = ? and recid = ?";
+			Object[] params = new Object[] { candidateID, jobDivaSession.getTeamId(), recordID };
+			List<Map<String, Object>> list = jdbcTemplate.query(sql, params, new RowMapper<Map<String, Object>>() {
+				
+				@Override
+				public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
+					//
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("billing_contact", rs.getLong("billing_contact"));
+					map.put("billing_unit", rs.getInt("billing_unit"));
+					map.put("bill_rate", rs.getDouble("bill_rate"));
+					map.put("bill_rate_per", rs.getString("bill_rate_per"));
+					map.put("BILLRATEPER_CURRENCY", rs.getInt("BILLRATEPER_CURRENCY"));
+					map.put("DIVISION", rs.getLong("DIVISION"));
+					map.put("frequency", rs.getInt("frequency"));
+					map.put("HOURS_PER_DAY", rs.getDouble("HOURS_PER_DAY"));
+					map.put("overtime_rate1", rs.getDouble("overtime_rate1"));
+					map.put("overtime_rate1_per", rs.getString("overtime_rate1_per"));
+					map.put("primary_salesperson", rs.getLong("primary_salesperson"));
+					map.put("start_date", rs.getDate("start_date"));
+					map.put("week_ending", rs.getInt("week_ending"));
+					map.put("WORK_STATE", rs.getString("WORK_STATE"));
+					map.put("approved", rs.getBoolean("approved"));
+					map.put("timesheet_entry_format", rs.getLong("timesheet_entry_format"));
+					map.put("overtimeexempt", rs.getBoolean("overtimeexempt"));
+					return map;
+				}
+			});
+			//
+			Map<String, Object> map = list != null && list.size() > 0 ? list.get(0) : new HashMap<String, Object>();
+			//
+			Boolean dbApproved = (Boolean) map.get("approved");
+			//
+			//
+			if (!approved.equals(dbApproved)) {
+				//
+				//
+				if (approved) {
+					//
+					ArrayList<String> message = new ArrayList<String>();
+					//
+					// start date
+					Date dbstart_date = (Date) map.get("start_date");
+					if (startDate == null && dbstart_date == null) {
+						message.add("StartDate");
+					}
+					// billingcontact
+					Long dbbilling_contact = (Long) map.get("billing_contact");
+					if (billingContactID == null && (dbbilling_contact == null || dbbilling_contact <= 0)) {
+						message.add("billingContactID");
+					}
+					// division
+					Long dbDIVISION = (Long) map.get("DIVISION");
+					if (division == null && (dbDIVISION == null || dbDIVISION <= 0)) {
+						message.add("division");
+					}
+					// billRateCurrrency
+					Integer dbBILLRATEPER_CURRENCY = (Integer) map.get("BILLRATEPER_CURRENCY");
+					if (billRateCurrrency == null && (dbBILLRATEPER_CURRENCY == null || dbBILLRATEPER_CURRENCY <= 0)) {
+						message.add("billRateCurrrency");
+					}
+					// bill_rate
+					Double dbbill_rate = (Double) map.get("bill_rate");
+					if (billRate == null && (dbbill_rate == null || dbbill_rate <= 0)) {
+						message.add("billRate");
+					}
+					// bill_rate_per
+					String dbbill_rate_per = (String) map.get("bill_rate_per");
+					if (isEmpty(billRatePer) && isEmpty(dbbill_rate_per)) {
+						message.add("billRatePer");
+					}
+					//
+					Boolean dbovertimeExempt = (Boolean) map.get("overtimeexempt");
+					if (overtimeExempt == null) {
+						overtimeExempt = dbovertimeExempt;
+					}
+					overtimeExempt = overtimeExempt != null ? overtimeExempt : false;
+					//
+					if (!overtimeExempt) {
+						// overtime_rate1
+						Double dbovertime_rate1 = (Double) map.get("overtime_rate1");
+						if (overtimeRate == null && (dbovertime_rate1 == null || dbovertime_rate1 <= 0)) {
+							message.add("overtimeRate");
+						}
+						// overtime_rate1_per
+						String dbovertime_rate1_per = (String) map.get("overtime_rate1_per");
+						if (isEmpty(overtimeRatePer) && isEmpty(dbovertime_rate1_per)) {
+							message.add("overtimeRatePer");
+						}
+					}
+					//
+					// frequency
+					Integer dbfrequency = (Integer) map.get("frequency");
+					if (frequency == null && (dbfrequency == null || dbfrequency <= 0)) {
+						message.add("frequency");
+					}
+					// billing unit
+					Integer dbbilling_unit = (Integer) map.get("billing_unit");
+					if (billingUnit == null && (dbbilling_unit == null || dbbilling_unit <= 0)) {
+						message.add("billingUnit");
+					}
+					// weekending ate
+					Integer dbweek_ending = (Integer) map.get("week_ending");
+					if (weekEnding == null && (dbweek_ending == null || dbweek_ending <= 0)) {
+						message.add("weekEnding");
+					}
+					// hoursPerDay
+					Double dbHOURS_PER_DAY = (Double) map.get("HOURS_PER_DAY");
+					if (hoursPerDay == null && (dbHOURS_PER_DAY == null || dbHOURS_PER_DAY <= 0)) {
+						message.add("hoursPerDay");
+					}
+					// workState
+					String dbWORK_STATE = (String) map.get("WORK_STATE");
+					if (isEmpty(workState) && isEmpty(dbWORK_STATE)) {
+						message.add("workState");
+					}
+					// primary sales
+					Long dbprimary_salesperson = (Long) map.get("primary_salesperson");
+					if (primarySalesPersonID == null && (dbprimary_salesperson == null || dbprimary_salesperson <= 0)) {
+						message.add("primarySalesPersonID");
+					}
+					// timesheet entry format
+					Long dbtimesheet_entry_format = (Long) map.get("timesheet_entry_format");
+					if (timesheetEntryFormat == null && (dbtimesheet_entry_format == null || dbtimesheet_entry_format <= 0)) {
+						message.add("timesheetEntryFormat");
+					}
+					//
+					if (message.size() > 0) {
+						String error = StringUtils.join(message, ",");
+						throw new Exception(error + " are required to approve this billing.");
+					}
+					//
+					//
+					//
+					//
+				} else {
+					//
+					sql = "SELECT invoiceid, void FROM temployee_invoice WHERE employeeid = ? AND recruiter_teamid = ? AND billingid = ? ";
+					params = new Object[] { candidateID, jobDivaSession.getTeamId(), recordID };
+					List<List<Object>> invoices = jdbcTemplate.query(sql, params, new RowMapper<List<Object>>() {
+						
+						@Override
+						public List<Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
+							//
+							List<Object> list = new ArrayList<Object>();
+							list.add(rs.getLong("INVOICEID"));
+							list.add(rs.getBoolean("void"));
+							return list;
+						}
+					});
+					//
+					if (invoices != null && invoices.size() > 0) {
+						Long invoiceId = (Long) invoices.get(0).get(0);
+						Boolean isVoided = (Boolean) invoices.get(0).get(1);
+						if (!isVoided) {
+							throw new Exception("Invoice " + invoiceId + " need to be voided before unapprove it");
+							//
+						}
+					}
+					//
+				}
+				//
+				//
+				//
+				//
+			}
+		}
+		//
+		//
+		//
+		//
+		//
+		//
+		//
 		//
 		ArrayList<String> fields = new ArrayList<String>();
 		ArrayList<Object> paramList = new ArrayList<Object>();
@@ -66,7 +277,7 @@ public class UpdateBillingRecordDao extends AbstractJobDivaDao {
 			fields.add("approved");
 			paramList.add(approved);
 			//
-			if (approved.intValue() == 1) {
+			if (approved) {
 				fields.add("APPROVERID");
 				paramList.add(jobDivaSession.getRecruiterId());
 			}
@@ -80,6 +291,10 @@ public class UpdateBillingRecordDao extends AbstractJobDivaDao {
 		if (endDate != null) {
 			fields.add("end_date");
 			paramList.add(new Timestamp(endDate.getTime()));
+		}
+		if (primarySalesPersonID != null) {
+			fields.add("primary_salesperson");
+			paramList.add(primarySalesPersonID);
 		}
 		//
 		if (customerRefNo != null) {
@@ -155,6 +370,11 @@ public class UpdateBillingRecordDao extends AbstractJobDivaDao {
 		if (billRate != null) {
 			fields.add("bill_rate");
 			paramList.add(billRate);
+		}
+		//
+		if (billRateCurrrency != null) {
+			fields.add("BILLRATEPER_CURRENCY");
+			paramList.add(billRateCurrrency);
 		}
 		//
 		if (billRatePer != null) {
@@ -327,24 +547,23 @@ public class UpdateBillingRecordDao extends AbstractJobDivaDao {
 			paramList.add(tertiaryRecruiterPercentage);
 		}
 		//
-		fields.add("CREATED_BY");
-		paramList.add(jobDivaSession.getRecruiterId());
-		//
-		if (fields.size() > 0) {
+		if ((fields.size() > 0) || (userfields != null && userfields.length > 0)) {
 			//
-			String sqlUpdate = " UPDATE temployee_billingrecord SET datecreated = sysdate, " + sqlUpdateFields(fields)//
-					+ " Where employeeid = ? and recruiter_teamid = ? and recid = ?";
-			//
-			paramList.add(candidateID);
-			paramList.add(jobDivaSession.getTeamId());
-			paramList.add(recordID);
-			//
-			Object[] parameters = paramList.toArray();
-			//
-			JdbcTemplate jdbcTemplate = getJdbcTemplate();
-			//
-			jdbcTemplate.update(sqlUpdate, parameters);
-			//
+			if ((fields.size() > 0)) {
+				String sqlUpdate = " UPDATE temployee_billingrecord SET datecreated = sysdate, " + sqlUpdateFields(fields)//
+						+ " Where employeeid = ? and interviewid = ? and recruiter_teamid = ? and recid = ?";
+				//
+				paramList.add(candidateID);
+				paramList.add(assignmentID);
+				paramList.add(jobDivaSession.getTeamId());
+				paramList.add(recordID);
+				//
+				Object[] parameters = paramList.toArray();
+				//
+				//
+				jdbcTemplate.update(sqlUpdate, parameters);
+				//
+			}
 			//
 			//
 			//
@@ -367,9 +586,9 @@ public class UpdateBillingRecordDao extends AbstractJobDivaDao {
 					} else {
 						//
 						if (existActivityUDF) {
-							activityUserFieldsDao.updateActivityUDF(startId, userfield.getUserfieldId(), jobDivaSession.getTeamId(), currentTS, userfield.getUserfieldValue());
+							activityUserFieldsDao.updateActivityUDF(startId, userfield.getUserfieldId(), jobDivaSession.getTeamId(), currentTS, userfield.getUserfieldValue(), jobDivaSession.getRecruiterId());
 						} else {
-							activityUserFieldsDao.insertActivityUDF(startId, userfield.getUserfieldId(), jobDivaSession.getTeamId(), currentTS, userfield.getUserfieldValue());
+							activityUserFieldsDao.insertActivityUDF(startId, userfield.getUserfieldId(), jobDivaSession.getTeamId(), currentTS, userfield.getUserfieldValue(), jobDivaSession.getRecruiterId());
 						}
 					}
 				}

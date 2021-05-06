@@ -880,7 +880,7 @@ public class BiDataQuery {
 		return null;
 	}
 	
-	public static String[] constructDynamicParams(Connection con, String metricName, Long clientID, String fromDate, String toDate, String[] params, Vector<?> param, String[] restriction, Map<String, String> colNameToAliasMap) throws Exception {
+	public static String[] constructDynamicParams(Connection con, String metricName, Long clientID, String fromDate, String toDate, String[] params, Vector<Object> param, String[] restriction, Map<String, String> colNameToAliasMap) throws Exception {
 		String[] paramsTemp = null;
 		if (params == null)
 			params = new String[0];
@@ -986,8 +986,18 @@ public class BiDataQuery {
 				ps.setLong(2, Long.parseLong(params[0]));
 				rs = ps.executeQuery();
 				while (rs.next()) {
-					// paramsData.add(new String[] { rs.getString("ID")});
-					paramsData.add(new String[] { rs.getString("NAME") });
+					paramsData.add(new String[] { "overhead_" + rs.getString("NAME") });
+				}
+				ps.close();
+				rs.close();
+				sql = "select u.id, u.fieldname from tuserfields u " + "where u.id in (select s.userfield_id from tstartrecord_userfields s join temployee_billingrecord b "
+						+ "	on s.teamid = b.recruiter_teamid and s.startid = b.interviewid where s.teamid = u.teamid " + "	and s.userfield_id = u.id and b.recruiter_teamid = ? and b.employeeid = ?)";
+				ps = con.prepareStatement(sql);
+				ps.setLong(1, clientID);
+				ps.setString(2, params[0]);
+				rs = ps.executeQuery();
+				while (rs.next()) {
+					paramsData.add(new String[] { "activityUdf_" + rs.getString("ID") + "_" + rs.getString("FIELDNAME") });
 				}
 				ps.close();
 				rs.close();
@@ -1052,8 +1062,18 @@ public class BiDataQuery {
 				ps.setString(2, params[0]);
 				rs = ps.executeQuery();
 				while (rs.next()) {
-					paramsData.add(new String[] { rs.getString("DISCOUNTID") });
-					paramsData.add(new String[] { rs.getString("DISCOUNT_DESCRIPTION") });
+					paramsData.add(new String[] { "discount_" + rs.getString("DISCOUNTID") + "_" + rs.getString("DISCOUNT_DESCRIPTION") });
+				}
+				ps.close();
+				rs.close();
+				sql = "select u.id, u.fieldname from tuserfields u " + "where u.id in (select s.userfield_id from tstartrecord_userfields s join temployee_billingrecord b "
+						+ "	on s.teamid = b.recruiter_teamid and s.startid = b.interviewid where s.teamid = u.teamid " + "	and s.userfield_id = u.id and b.recruiter_teamid = ? and b.employeeid = ?)";
+				ps = con.prepareStatement(sql);
+				ps.setLong(1, clientID);
+				ps.setString(2, params[0]);
+				rs = ps.executeQuery();
+				while (rs.next()) {
+					paramsData.add(new String[] { "activityUdf_" + rs.getString("ID") + "_" + rs.getString("FIELDNAME") });
 				}
 				ps.close();
 				rs.close();
@@ -1100,11 +1120,9 @@ public class BiDataQuery {
 		// Updating Params
 		// System.out.println("paramsData = " + paramsData);
 		if (paramsData != null) {
-			// System.out.println("params.length = " + params.length +
-			// "\tparamsData.size() = " + paramsData.size());
+			System.out.println("params.length = " + params.length + "\tparamsData.size() = " + paramsData.size());
 			paramsTemp = new String[params.length + paramsData.size()];
-			// System.out.println("Created paramsTemp.size() = " +
-			// paramsTemp.length);
+			System.out.println("Created paramsTemp.size()  = " + paramsTemp.length);
 			for (int i = 0; i < params.length; i++) { // adding old data
 				paramsTemp[i] = params[i];
 			}

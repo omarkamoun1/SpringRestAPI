@@ -22,12 +22,13 @@ import com.jobdiva.api.service.SubmittalService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 @CrossOrigin
 @RestController
 @RequestMapping("/apiv2/jobdiva/")
 @Api(value = "Submittal API", description = "REST API Used For Submittal")
-// @ApiIgnore
+@ApiIgnore
 public class SubmittalV2Controller extends AbstractJobDivaController {
 	//
 	

@@ -37,10 +37,10 @@ public class CreateBillingRecordDao extends AbstractJobDivaDao {
 	
 	public Integer createBillingRecord(JobDivaSession jobDivaSession, Long candidateID, Long assignmentID, Long jobID, Integer recordID, Long createdByID, Boolean approved, Date startDate, Date endDate, String customerRefNo, Long hiringManagerID,
 			Long billingContactID, Long division, Integer invoiceGroupIndex, String invoiceGroup, String vMSWebsite, String vMSEmployeeName, Integer invoiceContent, Integer expenseInvoices, Boolean enableTimesheet, Boolean allowEnterTimeOnPortal,
-			String timesheetInstruction, Boolean expenseEnabled, Double billRate, String billRatePer, Boolean overtimeExempt, Long timesheetEntryFormat, Integer frequency, Integer overtimeByWorkingState, Double overtimeRate, String overtimeRatePer,
-			Double doubletimeRate, String doubletimePer, Integer billingUnit, Integer weekEnding, Double hoursPerDay, Double hoursPerHalfDay, String workAddress1, String workAddress2, String workCity, String workState, String workZipcode,
-			String workCountry, Integer paymentTerms, Long primarySalesPersonID, Double primarySalesPercentage, Long secondarySalesPersonID, Double secondarySalesPercentage, Long tertiarySalesPersonID, Double tertiarySalesPercentage,
-			Long primaryRecruiterID, Double primaryRecruiterPercentage, Long secondaryRecruiterID, Double secondaryRecruiterPercentage, Long tertiaryRecruiterID, Double tertiaryRecruiterPercentage) throws Exception {
+			String timesheetInstruction, Boolean expenseEnabled, Double billRate, Integer billRateCurrrency, String billRatePer, Boolean overtimeExempt, Long timesheetEntryFormat, Integer frequency, Integer overtimeByWorkingState,
+			Double overtimeRate, String overtimeRatePer, Double doubletimeRate, String doubletimePer, Integer billingUnit, Integer weekEnding, Double hoursPerDay, Double hoursPerHalfDay, String workAddress1, String workAddress2, String workCity,
+			String workState, String workZipcode, String workCountry, Integer paymentTerms, Long primarySalesPersonID, Double primarySalesPercentage, Long secondarySalesPersonID, Double secondarySalesPercentage, Long tertiarySalesPersonID,
+			Double tertiarySalesPercentage, Long primaryRecruiterID, Double primaryRecruiterPercentage, Long secondaryRecruiterID, Double secondaryRecruiterPercentage, Long tertiaryRecruiterID, Double tertiaryRecruiterPercentage) throws Exception {
 		//
 		int recID = -1;
 		// Default RFQID, START_DATE, END_DATE, PO_END_DATE,
@@ -382,6 +382,8 @@ public class CreateBillingRecordDao extends AbstractJobDivaDao {
 			billingRecordMap.put("INTERVIEWID", assignmentID);
 		if (billRate != null)
 			billingRecordMap.put("BILL_RATE", billRate);
+		if (billRateCurrrency != null)
+			billingRecordMap.put("BILLRATEPER_CURRENCY", billRateCurrrency);
 		if (isNotEmpty(billRatePer))
 			billingRecordMap.put("BILL_RATE_PER", billRatePer);
 		if (createdByID != null)

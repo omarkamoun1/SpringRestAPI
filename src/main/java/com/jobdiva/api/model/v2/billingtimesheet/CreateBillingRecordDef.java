@@ -83,6 +83,9 @@ public class CreateBillingRecordDef implements Serializable {
 	private Double	billRate;
 	//
 	@JsonProperty(required = false)
+	private Integer	billRateCurrrency;
+	//
+	@JsonProperty(required = false)
 	private String	billRatePer;
 	//
 	@JsonProperty(required = false)
@@ -360,6 +363,14 @@ public class CreateBillingRecordDef implements Serializable {
 	
 	public void setBillRate(Double billRate) {
 		this.billRate = billRate;
+	}
+	
+	public Integer getBillRateCurrrency() {
+		return this.billRateCurrrency;
+	}
+	
+	public void setBillRateCurrrency(Integer billRateCurrrency) {
+		this.billRateCurrrency = billRateCurrrency;
 	}
 	
 	public String getBillRatePer() {

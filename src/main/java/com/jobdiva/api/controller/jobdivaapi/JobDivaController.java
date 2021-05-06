@@ -20,6 +20,7 @@ import com.jobdiva.api.model.proxy.ProxyParameter;
 import com.jobdiva.api.model.proxy.Response;
 import com.jobdiva.api.service.JobDivaSessionService;
 import com.jobdiva.api.service.JobService;
+import com.jobdiva.api.service.OktaService;
 import com.jobdiva.api.service.ProxyAPIService;
 import com.jobdiva.api.service.ResumeService;
 import com.jobdiva.api.utils.DateUtils;
@@ -46,6 +47,9 @@ public class JobDivaController extends AbstractJobDivaController {
 	//
 	@Autowired
 	ProxyAPIService			proxyAPIService;
+	//
+	@Autowired
+	OktaService				oktaService;
 	//
 	@Autowired
 	JobDivaSessionService	jobDivaSessionService;
@@ -252,6 +256,7 @@ public class JobDivaController extends AbstractJobDivaController {
 		//
 	}
 	
+	@ApiIgnore
 	@ApiImplicitParams({ @ApiImplicitParam(name = "headers", required = false, allowMultiple = true, dataType = "ProxyHeader"), //
 			@ApiImplicitParam(name = "parameters", required = false, allowMultiple = true, dataType = "ProxyParameter") //
 	})
@@ -279,6 +284,20 @@ public class JobDivaController extends AbstractJobDivaController {
 	) throws Exception {
 		//
 		return proxyAPIService.proxyAPI(method, url, headers, parameters, body);
+		//
+	}
+	
+	@ApiIgnore
+	@ApiOperation(value = "Okta AccessToken Verifier")
+	@RequestMapping(value = "/oktaAccessTokenVerifier", method = RequestMethod.GET, produces = "application/json")
+	public Boolean oktaAccessTokenVerifier( //
+			//
+			String oktaDomain, String oktaAud, String oktaToken, String email //
+	//
+	) throws Exception {
+		//
+		//
+		return oktaService.oktaAccessTokenVerifier(oktaDomain, oktaAud, oktaToken, email);
 		//
 	}
 }

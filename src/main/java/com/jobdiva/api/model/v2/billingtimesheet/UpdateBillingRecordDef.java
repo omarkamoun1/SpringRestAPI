@@ -18,7 +18,7 @@ public class UpdateBillingRecordDef implements Serializable {
 	private Boolean		allowEnterTimeOnPortal;
 	//
 	@JsonProperty(required = false)
-	private Integer		approved;
+	private Boolean		approved;
 	//
 	@JsonProperty(required = true)
 	private Double		assignmentID;
@@ -31,6 +31,9 @@ public class UpdateBillingRecordDef implements Serializable {
 	//
 	@JsonProperty(required = false)
 	private Double		billRate;
+	//
+	@JsonProperty(required = false)
+	private Integer		billRateCurrrency;
 	//
 	@JsonProperty(required = false)
 	private String		billRatePer;
@@ -67,6 +70,9 @@ public class UpdateBillingRecordDef implements Serializable {
 	//
 	@JsonProperty(required = false)
 	private Integer		frequency;
+	//
+	@JsonProperty(required = false)
+	private Integer		biweeklySchedule;
 	//
 	@JsonProperty(required = false)
 	private Long		hiringManagerID;
@@ -170,7 +176,7 @@ public class UpdateBillingRecordDef implements Serializable {
 	@JsonProperty(required = false)
 	private String		workCity;
 	//
-	@JsonProperty(required = false)
+	@JsonProperty(value = "Two-letter country code", required = false)
 	private String		workCountry;
 	//
 	@JsonProperty(required = false)
@@ -190,11 +196,11 @@ public class UpdateBillingRecordDef implements Serializable {
 		this.allowEnterTimeOnPortal = allowEnterTimeOnPortal;
 	}
 	
-	public Integer getApproved() {
+	public Boolean getApproved() {
 		return approved;
 	}
 	
-	public void setApproved(Integer approved) {
+	public void setApproved(Boolean approved) {
 		this.approved = approved;
 	}
 	
@@ -228,6 +234,14 @@ public class UpdateBillingRecordDef implements Serializable {
 	
 	public void setBillRate(Double billRate) {
 		this.billRate = billRate;
+	}
+	
+	public Integer getBillRateCurrrency() {
+		return this.billRateCurrrency;
+	}
+	
+	public void setBillRateCurrrency(Integer billRateCurrrency) {
+		this.billRateCurrrency = billRateCurrrency;
 	}
 	
 	public String getBillRatePer() {
@@ -324,6 +338,14 @@ public class UpdateBillingRecordDef implements Serializable {
 	
 	public void setFrequency(Integer frequency) {
 		this.frequency = frequency;
+	}
+	
+	public Integer getBiweeklySchedule() {
+		return this.biweeklySchedule;
+	}
+	
+	public void setBiweeklySchedule(Integer biweeklySchedule) {
+		this.biweeklySchedule = biweeklySchedule;
 	}
 	
 	public Long getHiringManagerID() {

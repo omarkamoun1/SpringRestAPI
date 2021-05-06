@@ -109,6 +109,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				antMatchers("/api/controller/getCoddlers").permitAll().//
 				antMatchers("/api/controller/getConfiguration").permitAll().//
 				antMatchers("/api/jobdiva/proxyAPI").permitAll().//
+				antMatchers("/api/jobdiva/oktaAccessTokenVerifier").permitAll().//
 				//
 				antMatchers("/api/webhook/syncWebhook").permitAll().//
 				antMatchers("/api/webhook/welcome").permitAll().//

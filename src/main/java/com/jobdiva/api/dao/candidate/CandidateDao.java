@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -888,6 +889,21 @@ public class CandidateDao extends AbstractJobDivaDao {
 			//
 			String experience = "";
 			candData.exp_tag = " ";
+			//
+			if (isNotEmpty(titleskillcertification)) {
+				//
+				ArrayList<TitleSkillCertification> arraylist = titleskillcertifications != null ? new ArrayList<TitleSkillCertification>(Arrays.asList(titleskillcertifications)) : new ArrayList<TitleSkillCertification>();
+				//
+				TitleSkillCertification titleSkillCertification2 = new TitleSkillCertification();
+				titleSkillCertification2.setTitleskillcertification(titleskillcertification);
+				titleSkillCertification2.setStartDate(startdate);
+				titleSkillCertification2.setEndDate(enddate);
+				titleSkillCertification2.setYears(years);
+				arraylist.add(titleSkillCertification2);
+				//
+				//
+				titleskillcertifications = arraylist.stream().toArray(TitleSkillCertification[]::new);
+			}
 			//
 			if (titleskillcertifications != null) {
 				WorkExperience[] wrkexp = new WorkExperience[titleskillcertifications.length];

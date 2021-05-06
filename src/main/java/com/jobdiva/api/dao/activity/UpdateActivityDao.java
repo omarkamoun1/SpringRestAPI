@@ -265,9 +265,9 @@ public class UpdateActivityDao extends AbstractActivityDao {
 				} else {
 					//
 					if (existActivityUDF) {
-						activityUserFieldsDao.updateActivityUDF(startid, userfield.getUserfieldId(), jobDivaSession.getTeamId(), currentTS, userfield.getUserfieldValue());
+						activityUserFieldsDao.updateActivityUDF(startid, userfield.getUserfieldId(), jobDivaSession.getTeamId(), currentTS, userfield.getUserfieldValue(), jobDivaSession.getRecruiterId());
 					} else {
-						activityUserFieldsDao.insertActivityUDF(startid, userfield.getUserfieldId(), jobDivaSession.getTeamId(), currentTS, userfield.getUserfieldValue());
+						activityUserFieldsDao.insertActivityUDF(startid, userfield.getUserfieldId(), jobDivaSession.getTeamId(), currentTS, userfield.getUserfieldValue(), jobDivaSession.getRecruiterId());
 					}
 				}
 			}

@@ -82,55 +82,55 @@ public class AbstractJobDivaDao {
 	//
 	protected SimpleDateFormat					simpleDateFormat		= new SimpleDateFormat("MM/dd/yyyy");
 	//
-	private static final Map<String, String>	hashCountry;
+	private static final Map<String, String>	_hashCountry;
 	static {
-		hashCountry = new HashMap<String, String>();
-		hashCountry.put("aruba", "AW");
-		hashCountry.put("australia", "AU");
-		hashCountry.put("austria", "AT");
-		hashCountry.put("belarus", "BY");
-		hashCountry.put("belgium", "BE");
-		hashCountry.put("brazil", "BR");
-		hashCountry.put("canada", "CA");
-		hashCountry.put("can", "CA");
-		hashCountry.put("china", "CN");
-		hashCountry.put("ote d'ivoire", "CI");
-		hashCountry.put("denmark", "DK");
-		hashCountry.put("finland", "FI");
-		hashCountry.put("france", "FR");
-		hashCountry.put("germany", "DE");
-		hashCountry.put("greece", "GR");
-		hashCountry.put("guinea-bissau", "GW");
-		hashCountry.put("holland", "NL");
-		hashCountry.put("netherlands", "NL");
-		hashCountry.put("hong kong", "HK");
-		hashCountry.put("india", "IN");
-		hashCountry.put("ireland", "IE");
-		hashCountry.put("italy", "IT");
-		hashCountry.put("japan", "JP");
-		hashCountry.put("latvia", "LV");
-		hashCountry.put("luxemburg", "LU");
-		hashCountry.put("luxembourg", "LU");
-		hashCountry.put("malaysia", "MY");
-		hashCountry.put("mali", "ML");
-		hashCountry.put("nepal", "NP");
-		hashCountry.put("new Zealand", "NZ");
-		hashCountry.put("norway", "NO");
-		hashCountry.put("oman", "OM");
-		hashCountry.put("poland", "PL");
-		hashCountry.put("qatar", "QA");
-		hashCountry.put("russia", "RU");
-		hashCountry.put("singapore", "SG");
-		hashCountry.put("south africa", "ZA");
-		hashCountry.put("south korea", "KR");
-		hashCountry.put("spain", "ES");
-		hashCountry.put("sweden", "SE");
-		hashCountry.put("switzerland", "CH");
-		hashCountry.put("uae", "AE");
-		hashCountry.put("united kingdom", "UK");
-		hashCountry.put("united states", "US");
-		hashCountry.put("usa", "US");
-		hashCountry.put("united states of america", "US");
+		_hashCountry = new HashMap<String, String>();
+		_hashCountry.put("aruba", "AW");
+		_hashCountry.put("australia", "AU");
+		_hashCountry.put("austria", "AT");
+		_hashCountry.put("belarus", "BY");
+		_hashCountry.put("belgium", "BE");
+		_hashCountry.put("brazil", "BR");
+		_hashCountry.put("canada", "CA");
+		_hashCountry.put("can", "CA");
+		_hashCountry.put("china", "CN");
+		_hashCountry.put("ote d'ivoire", "CI");
+		_hashCountry.put("denmark", "DK");
+		_hashCountry.put("finland", "FI");
+		_hashCountry.put("france", "FR");
+		_hashCountry.put("germany", "DE");
+		_hashCountry.put("greece", "GR");
+		_hashCountry.put("guinea-bissau", "GW");
+		_hashCountry.put("holland", "NL");
+		_hashCountry.put("netherlands", "NL");
+		_hashCountry.put("hong kong", "HK");
+		_hashCountry.put("india", "IN");
+		_hashCountry.put("ireland", "IE");
+		_hashCountry.put("italy", "IT");
+		_hashCountry.put("japan", "JP");
+		_hashCountry.put("latvia", "LV");
+		_hashCountry.put("luxemburg", "LU");
+		_hashCountry.put("luxembourg", "LU");
+		_hashCountry.put("malaysia", "MY");
+		_hashCountry.put("mali", "ML");
+		_hashCountry.put("nepal", "NP");
+		_hashCountry.put("new Zealand", "NZ");
+		_hashCountry.put("norway", "NO");
+		_hashCountry.put("oman", "OM");
+		_hashCountry.put("poland", "PL");
+		_hashCountry.put("qatar", "QA");
+		_hashCountry.put("russia", "RU");
+		_hashCountry.put("singapore", "SG");
+		_hashCountry.put("south africa", "ZA");
+		_hashCountry.put("south korea", "KR");
+		_hashCountry.put("spain", "ES");
+		_hashCountry.put("sweden", "SE");
+		_hashCountry.put("switzerland", "CH");
+		_hashCountry.put("uae", "AE");
+		_hashCountry.put("united kingdom", "UK");
+		_hashCountry.put("united states", "US");
+		_hashCountry.put("usa", "US");
+		_hashCountry.put("united states of america", "US");
 	}
 	
 	public JdbcTemplate getCentralJdbcTemplate() {
@@ -660,7 +660,7 @@ public class AbstractJobDivaDao {
 		}
 	}
 	
-	protected static String getCountryID(String country) {
+	protected String getCountryID(String country) {
 		if (country == null)
 			return null;
 		//
@@ -669,7 +669,7 @@ public class AbstractJobDivaDao {
 			return country.toUpperCase();
 		String countryid = "";
 		country = country.toLowerCase();
-		countryid = hashCountry.get(country);
+		countryid = jobDivaConnectivity.getCountries().get(country);// hashCountry.get(country);
 		if (countryid == null)
 			countryid = "not found";
 		return countryid;
@@ -1223,9 +1223,9 @@ public class AbstractJobDivaDao {
 					jobUser.setPhone(rs.getString("WORKPHONE"));
 					jobUser.setEmail(rs.getString("EMAIL"));
 					jobUser.setRecEmailStatus(rs.getInt("REC_EMAIL_STATUS"));
-					String sql="Select c.roleId From TRECRUITERRFQ_ROLES c Where c.RFQID = ? AND c.TEAMID = ? AND c.Recruiterid = ?";
-					Object[] params = new Object[] { jobId, teamId , rs.getLong("RECRUITERID") };
-					List<Long> RolesId = jdbcTemplate.query(sql, params,  new RowMapper<Long>() {
+					String sql = "Select c.roleId From TRECRUITERRFQ_ROLES c Where c.RFQID = ? AND c.TEAMID = ? AND c.Recruiterid = ?";
+					Object[] params = new Object[] { jobId, teamId, rs.getLong("RECRUITERID") };
+					List<Long> RolesId = jdbcTemplate.query(sql, params, new RowMapper<Long>() {
 						
 						@Override
 						public Long mapRow(ResultSet rs, int rowNum) throws SQLException {

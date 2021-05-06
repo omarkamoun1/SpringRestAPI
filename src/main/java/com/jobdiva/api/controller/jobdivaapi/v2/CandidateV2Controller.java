@@ -41,7 +41,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @RequestMapping("/apiv2/jobdiva/")
 @Api(value = "Candidate API", description = "REST API Used For Candidate")
-// @ApiIgnore
+@ApiIgnore
 public class CandidateV2Controller extends AbstractJobDivaController {
 	
 	@Autowired

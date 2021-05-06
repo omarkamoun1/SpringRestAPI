@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -23,10 +24,32 @@ public class UpdatePayRecordDao extends AbstractJobDivaDao {
 	@Autowired
 	ActivityUserFieldsDao activityUserFieldsDao;
 	
-	public Boolean UpdatePayRecord(JobDivaSession jobDivaSession, String aDPCOCODE, String aDPPAYFREQUENCY, Boolean approved, Double assignmentID, Long candidateID, Double doubletimeRate, String doubletimeRatePer, Date effectiveDate, //
+	private void checkRequiredFields(Double assignmentID, Long candidateID) throws Exception {
+		// check Require Fields
+		StringBuffer messageError = new StringBuffer();
+		//
+		//
+		//
+		if (assignmentID == null || assignmentID <= 0) {
+			messageError.append("assignmentID is required. \r\n ");
+		}
+		//
+		if (candidateID == null || candidateID <= 0) {
+			messageError.append("candidateID is required. \r\n ");
+		}
+		//
+		if (messageError.length() > 0) {
+			throw new Exception("Parameter Check Failed \r\n" + messageError.toString());
+		}
+	}
+	
+	public Boolean updatePayRecord(JobDivaSession jobDivaSession, String aDPCOCODE, String aDPPAYFREQUENCY, Boolean approved, Double assignmentID, Long candidateID, Double doubletimeRate, String doubletimeRatePer, Date startDate, //
 			Date endDate, String fileNo, Double otherExpenses, String otherExpensesPer, Double outsideCommission, String outsideCommissionPer, Boolean overtimeExempt, Double overtimeRate, //
-			String overtimeRatePer, String paymentTerms, Boolean payOnRemittance, Double perDiem, String perDiemPer, Integer recordID, Double salary, String salaryPer, Integer status, //
+			String overtimeRatePer, String paymentTerms, Boolean payOnRemittance, Double perDiem, String perDiemPer, Integer recordID, Double salary, String salaryPer, Integer salaryPerCurrency, Integer status, //
 			Long subcontractCompanyID, String taxID, Userfield[] userfields) throws Exception {
+		//
+		checkRequiredFields(assignmentID, candidateID);
+		//
 		//
 		if (recordID == null) {
 			String sql = " SELECT NVL(MAX(recid), -1) as RECID " //
@@ -46,12 +69,112 @@ public class UpdatePayRecordDao extends AbstractJobDivaDao {
 				}
 			});
 			//
-			if (list == null || list.size() == 0) {
-				throw new Exception("Unable to find pay record under candidate ID " + candidateID + " and assignment ID " + assignmentID);
-			} else {
+			if (list != null && list.size() > 0) {
 				recordID = list.get(0);
 			}
+			if (recordID == null || recordID < 0) {
+				throw new Exception("Unable to find pay record under candidate ID " + candidateID + " and assignment ID " + assignmentID);
+			}
 		}
+		//
+		//
+		//
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		// Check for approve / unapprove conditions
+		if (approved != null) {
+			//
+			// start date
+			// employment category
+			// currency
+			// pay rate
+			String sql = " SELECT EFFECTIVE_DATE , SALARY, salary_per,SALARYPER_CURRENCY , STATUS, approved, overtimeexempt, overtime_rate1, overtime_rate1_per "//
+					+ " FROM  Temployee_salaryrecord " //
+					+ " Where employeeid = ? and recruiter_teamid = ? and recid = ?";
+			Object[] params = new Object[] { candidateID, jobDivaSession.getTeamId(), recordID };
+			List<List<Object>> list = jdbcTemplate.query(sql, params, new RowMapper<List<Object>>() {
+				
+				@Override
+				public List<Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
+					//
+					List<Object> list = new ArrayList<Object>();
+					list.add(rs.getDate("EFFECTIVE_DATE"));
+					list.add(rs.getDouble("SALARY"));
+					list.add(rs.getInt("SALARYPER_CURRENCY"));
+					list.add(rs.getInt("STATUS"));
+					list.add(rs.getBoolean("approved"));
+					list.add(rs.getString("salary_per"));
+					list.add(rs.getDouble("overtime_rate1"));
+					list.add(rs.getString("overtime_rate1_per"));
+					list.add(rs.getBoolean("overtimeexempt"));
+					return list;
+				}
+			});
+			//
+			//
+			Boolean existRecord = list != null && list.size() > 0;
+			Date dbEffectiveDate = existRecord ? (Date) list.get(0).get(0) : null;
+			Double dbSalary = existRecord ? (Double) list.get(0).get(1) : null;
+			Integer dbCurrency = existRecord ? (Integer) list.get(0).get(2) : null;
+			Integer dbCategory = existRecord ? (Integer) list.get(0).get(3) : null;
+			Boolean dbApproved = existRecord ? (Boolean) list.get(0).get(4) : false;
+			String dbsalary_per = existRecord ? (String) list.get(0).get(5) : null;
+			Double dbovertime_rate1 = existRecord ? (Double) list.get(0).get(6) : null;
+			String dbovertime_rate1_per = existRecord ? (String) list.get(0).get(7) : null;
+			Boolean dbovertimeexempt = existRecord ? (Boolean) list.get(0).get(8) : null;
+			//
+			//
+			if (!approved.equals(dbApproved)) {
+				//
+				//
+				if (approved) {
+					//
+					ArrayList<String> message = new ArrayList<String>();
+					//
+					if (startDate == null && dbEffectiveDate == null) {
+						message.add("startDate");
+					}
+					//
+					if (salary == null && dbSalary == null) {
+						message.add("salary");
+					}
+					//
+					if (isEmpty(salaryPer) && isEmpty(dbsalary_per)) {
+						message.add("salaryPer");
+					}
+					//
+					if (salaryPerCurrency == null && dbCurrency == null) {
+						message.add("salaryPerCurrency");
+					}
+					//
+					if (status == null && dbCategory == null) {
+						message.add("status");
+					}
+					//
+					if (overtimeExempt == null) {
+						overtimeExempt = dbovertimeexempt;
+					}
+					overtimeExempt = overtimeExempt != null ? overtimeExempt : false;
+					//
+					if (!overtimeExempt) {
+						// overtime_rate1
+						if (overtimeRate == null && (dbovertime_rate1 == null || dbovertime_rate1 <= 0)) {
+							message.add("overtimeRate");
+						}
+						// overtime_rate1_per
+						if (isEmpty(overtimeRatePer) && isEmpty(dbovertime_rate1_per)) {
+							message.add("overtimeRatePer");
+						}
+					}
+					if (message.size() > 0) {
+						String error = StringUtils.join(message, ",");
+						throw new Exception(error + " are required to approve this pay.");
+					}
+					//
+				}
+			}
+		}
+		//
 		ArrayList<String> fields = new ArrayList<String>();
 		ArrayList<Object> paramList = new ArrayList<Object>();
 		//
@@ -74,9 +197,9 @@ public class UpdatePayRecordDao extends AbstractJobDivaDao {
 			paramList.add(approved);
 		}
 		//
-		if (effectiveDate != null) {
+		if (startDate != null) {
 			fields.add("effective_date");
-			paramList.add(effectiveDate);
+			paramList.add(startDate);
 		}
 		//
 		if (status != null) {
@@ -97,6 +220,10 @@ public class UpdatePayRecordDao extends AbstractJobDivaDao {
 		if (salary != null) {
 			fields.add("salary");
 			paramList.add(salary);
+		}
+		if (salaryPerCurrency != null) {
+			fields.add("SALARYPER_CURRENCY");
+			paramList.add(salaryPerCurrency);
 		}
 		//
 		if (salaryPer != null) {
@@ -179,29 +306,27 @@ public class UpdatePayRecordDao extends AbstractJobDivaDao {
 			//
 			String strEndDate = endDate != null ? " END_DATE = to_date(?, 'MM/dd/yyyy'), " : "";
 			String sqlUpdate = " UPDATE temployee_salaryrecord SET datecreated = sysdate, " + strEndDate + sqlUpdateFields(fields)//
-					+ " Where employeeid = ? and recruiter_teamid = ? and recid = ?";
+					+ " Where employeeid = ?  and interviewid = ?  and recruiter_teamid = ? and recid = ?";
 			//
 			paramList.add(candidateID);
+			paramList.add(assignmentID);
 			paramList.add(jobDivaSession.getTeamId());
 			paramList.add(recordID);
 			//
 			Object[] parameters = paramList.toArray();
-			//
-			JdbcTemplate jdbcTemplate = getJdbcTemplate();
 			//
 			jdbcTemplate.update(sqlUpdate, parameters);
 		} else if (endDate != null) {
 			//
 			String sqlUpdate = " UPDATE temployee_salaryrecord SET datecreated = sysdate, END_DATE = to_date(?, 'MM/dd/yyyy') " //
-					+ " Where employeeid = ? and recruiter_teamid = ? and recid = ?";
+					+ " Where employeeid = ?  and interviewid = ?  and recruiter_teamid = ? and recid = ?";
 			//
 			paramList.add(candidateID);
+			paramList.add(assignmentID);
 			paramList.add(jobDivaSession.getTeamId());
 			paramList.add(recordID);
 			//
 			Object[] parameters = paramList.toArray();
-			//
-			JdbcTemplate jdbcTemplate = getJdbcTemplate();
 			//
 			jdbcTemplate.update(sqlUpdate, parameters);
 		}
@@ -228,9 +353,9 @@ public class UpdatePayRecordDao extends AbstractJobDivaDao {
 				} else {
 					//
 					if (existActivityUDF) {
-						activityUserFieldsDao.updateActivityUDF(startId, userfield.getUserfieldId(), jobDivaSession.getTeamId(), currentTS, userfield.getUserfieldValue());
+						activityUserFieldsDao.updateActivityUDF(startId, userfield.getUserfieldId(), jobDivaSession.getTeamId(), currentTS, userfield.getUserfieldValue(), jobDivaSession.getRecruiterId());
 					} else {
-						activityUserFieldsDao.insertActivityUDF(startId, userfield.getUserfieldId(), jobDivaSession.getTeamId(), currentTS, userfield.getUserfieldValue());
+						activityUserFieldsDao.insertActivityUDF(startId, userfield.getUserfieldId(), jobDivaSession.getTeamId(), currentTS, userfield.getUserfieldValue(), jobDivaSession.getRecruiterId());
 					}
 				}
 			}

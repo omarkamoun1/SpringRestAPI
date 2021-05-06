@@ -43,26 +43,27 @@ public class ActivityUserFieldsDao extends AbstractJobDivaDao {
 		jdbcTemplate.update(sql, params);
 	}
 	
-	public void updateActivityUDF(Long startid, Integer userfieldId, Long teamId, Date dateUpdated, String userfieldValue) {
+	public void updateActivityUDF(Long startid, Integer userfieldId, Long teamId, Date dateUpdated, String userfieldValue, Long recruiterId) {
 		String sqlUpdate = "UPDATE TSTARTRECORD_USERFIELDS SET " //
 				+ " USERFIELD_VALUE = ? , " //
-				+ " DATEUPDATED = ? " //
+				+ " DATEUPDATED = ? , " //
+				+ " RECRUITERID = ? " //
 				+ "  where STARTID = ? " //
 				+ " and USERFIELD_ID = ? " //
 				+ " and TEAMID = ? "; //
-		Object[] params = new Object[] { userfieldValue, dateUpdated, startid, userfieldId, teamId };
+		Object[] params = new Object[] { userfieldValue, dateUpdated, recruiterId, startid, userfieldId, teamId };
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		//
 		jdbcTemplate.update(sqlUpdate, params);
 	}
 	
-	public void insertActivityUDF(Long startid, Integer userfieldId, Long teamId, Date dateCreated, String userfieldValue) {
+	public void insertActivityUDF(Long startid, Integer userfieldId, Long teamId, Date dateCreated, String userfieldValue, Long recruiterId) {
 		String sqlInsert = "INSERT INTO TSTARTRECORD_USERFIELDS " //
-				+ " (STARTID, USERFIELD_ID, TEAMID, USERFIELD_VALUE, DATECREATED ) " //
+				+ " (STARTID, USERFIELD_ID, TEAMID, USERFIELD_VALUE, DATECREATED , RECRUITERID) " //
 				+ " VALUES " //
-				+ "(?, ?, ? ,? ,? ) ";//
-		Object[] params = new Object[] { startid, userfieldId, teamId, userfieldValue, dateCreated };
+				+ "(?, ?, ? ,? ,? , ?) ";//
+		Object[] params = new Object[] { startid, userfieldId, teamId, userfieldValue, dateCreated, recruiterId };
 		// ,
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
