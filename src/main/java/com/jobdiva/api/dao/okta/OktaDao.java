@@ -11,13 +11,13 @@ import com.okta.jwt.JwtVerifiers;
 @Component
 public class OktaDao extends AbstractJobDivaDao {
 	
-	public Boolean oktaAccessTokenVerifier(String oktaDomain, String oktaAud, String oktaToken, String email) throws Exception {
+	public Boolean oktaAccessTokenVerifier(String issuer, String oktaAud, String oktaToken, String email) throws Exception {
 		try {
 			//
 			AccessTokenVerifier jwtVerifier = JwtVerifiers. //
 					accessTokenVerifierBuilder() //
 					//
-					.setIssuer("https://" + oktaDomain + "/oauth2/default")//
+					.setIssuer(issuer)//
 					//
 					.setAudience(oktaAud) //
 					//
@@ -27,10 +27,14 @@ public class OktaDao extends AbstractJobDivaDao {
 			//
 			String mailFromToken = (String) jwt.getClaims().get("email");
 			//
+			logger.info(issuer + "/" + oktaAud + "/" + oktaToken + "/" + email + "/" + mailFromToken);
+			//
 			return mailFromToken != null && mailFromToken.equalsIgnoreCase(email);
 			//
 		} catch (JwtVerificationException e) {
-			throw new Exception(e.getMessage());
+			String message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+			logger.info(issuer + "/" + oktaAud + "/" + oktaToken + "/" + email + "[ERROR:" + message + "]");
+			throw new Exception(message);
 		}
 		//
 	}

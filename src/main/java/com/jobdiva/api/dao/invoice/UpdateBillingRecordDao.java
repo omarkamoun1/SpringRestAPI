@@ -218,7 +218,7 @@ public class UpdateBillingRecordDao extends AbstractJobDivaDao {
 					}
 					// timesheet entry format
 					Long dbtimesheet_entry_format = (Long) map.get("timesheet_entry_format");
-					if (timesheetEntryFormat == null && (dbtimesheet_entry_format == null || dbtimesheet_entry_format <= 0)) {
+					if (timesheetEntryFormat == null && (dbtimesheet_entry_format == null || dbtimesheet_entry_format < 0)) {
 						message.add("timesheetEntryFormat");
 					}
 					//

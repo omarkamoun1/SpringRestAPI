@@ -292,12 +292,12 @@ public class JobDivaController extends AbstractJobDivaController {
 	@RequestMapping(value = "/oktaAccessTokenVerifier", method = RequestMethod.GET, produces = "application/json")
 	public Boolean oktaAccessTokenVerifier( //
 			//
-			String oktaDomain, String oktaAud, String oktaToken, String email //
+			String issuer, String oktaAud, String oktaToken, String email //
 	//
 	) throws Exception {
 		//
 		//
-		return oktaService.oktaAccessTokenVerifier(oktaDomain, oktaAud, oktaToken, email);
+		return oktaService.oktaAccessTokenVerifier(issuer, oktaAud, oktaToken, email);
 		//
 	}
 }

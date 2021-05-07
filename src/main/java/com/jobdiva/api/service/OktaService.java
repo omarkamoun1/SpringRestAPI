@@ -15,8 +15,8 @@ public class OktaService {
 	@Autowired
 	OktaDao oktaDao;
 	
-	public Boolean oktaAccessTokenVerifier(String oktaDomain, String oktaAud, String oktaToken, String email) throws Exception {
+	public Boolean oktaAccessTokenVerifier(String issuer, String oktaAud, String oktaToken, String email) throws Exception {
 		//
-		return oktaDao.oktaAccessTokenVerifier(oktaDomain, oktaAud, oktaToken, email);
+		return oktaDao.oktaAccessTokenVerifier(issuer, oktaAud, oktaToken, email);
 	}
 }
