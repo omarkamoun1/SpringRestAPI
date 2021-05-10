@@ -124,11 +124,6 @@ public class JobUserDao extends AbstractJobDivaDao {
 	        //
         }
         
-        // Sync
-        sqlInsert = "UPDATE trfq SET sync_required=2 Where id=?";
-        params = new Object[] {rfqid};
-        jdbcTemplate.update(sqlInsert, params);
-        //
         roleIds.remove(996l); //lead sales
         roleIds.remove(999l); //sales
         roleIds.remove(998l); //lead recruiter
@@ -143,6 +138,11 @@ public class JobUserDao extends AbstractJobDivaDao {
 			//
           }
         }
+        // Sync
+        sqlInsert = "UPDATE trfq SET sync_required=2 Where id=?";
+        params = new Object[] {rfqid};
+        jdbcTemplate.update(sqlInsert, params);
+        //
        return true;
 	}
 
@@ -165,8 +165,69 @@ public class JobUserDao extends AbstractJobDivaDao {
 	    //
     	jdbcTemplate.update(sqlInsert, params);
     	//
-    	
+    	//flexible roles
+    	sqlInsert="delete from TRECRUITERRFQ_ROLES where rfqid=? and recruiterid=? and teamid=? ";
+	    //
+        params = new Object[] {jobId,recruiterid,jobDivaSession.getTeamId()};
+	    //
+    	jdbcTemplate.update(sqlInsert, params);
+    	//
     	// Sync
+        sqlInsert = "UPDATE trfq SET sync_required=2 Where id=?";
+        params = new Object[] {jobId};
+        jdbcTemplate.update(sqlInsert, params);
+        //
+        // Send Email
+		return true;
+	}
+
+
+
+	public Boolean updateUserRoleForJob(JobDivaSession jobDivaSession, Long jobId, Long recruiterid, List<Long> roleIds) throws Exception{
+	
+		String sqlUpdate = "Update tRecruiterRFQ Set recruiter=?,lead_recruiter=?,sales=?,lead_sales=? " +
+    			"Where rfqid=? and recruiterid=? and teamid=? ";
+		//
+		Object[] params = new Object[] {roleIds.contains(997l)?1:0,roleIds.contains(998l)?1:0,roleIds.contains(999l)?1:0,roleIds.contains(996l)?1:0, jobId, recruiterid, jobDivaSession.getTeamId()};
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		jdbcTemplate.update(sqlUpdate, params);
+		//
+	    //customer
+		int RoleID = 950;
+        if (roleIds.contains(996l)) RoleID = 996; //lead sales
+        else if (roleIds.contains(999l)) RoleID = 999; //sales
+        else if (roleIds.contains(998l)) RoleID = 998; //lead recruiter
+        else if (roleIds.contains(997l)) RoleID = 997; //recruiter
+		sqlUpdate="Update trfq_customers a Set roleID=? where teamid=? and rfqid=? and customerid=(select id from tcustomer x where x.teamid=a.teamid and x.ifrecruiterthenid=?) ";
+    	//
+		params = new Object[] {RoleID,jobDivaSession.getTeamId(),jobId,recruiterid};
+		//
+		jdbcTemplate.update(sqlUpdate, params);
+		//
+		//flexible Roles
+    	String sqlInsert="delete from TRECRUITERRFQ_ROLES where rfqid=? and recruiterid=? and teamid=? ";
+	    //
+        params = new Object[] {jobId,recruiterid,jobDivaSession.getTeamId()};
+	    //
+    	jdbcTemplate.update(sqlInsert, params);
+		//
+		roleIds.remove(996l); //lead sales
+        roleIds.remove(999l); //sales
+        roleIds.remove(998l); //lead recruiter
+        roleIds.remove(997l); //recruiter
+        if(roleIds.size()>0) {
+            for(int i=0; i < roleIds.size();i++) {	
+            sqlInsert = "insert into TRECRUITERRFQ_ROLES values(?,?,?,?,sysdate)";				
+			//
+			params = new Object[] {jobId,jobDivaSession.getTeamId(),recruiterid,roleIds.get(i)};
+			//
+			jdbcTemplate.update(sqlInsert, params);
+			//
+          }
+        }
+        // Sync
         sqlInsert = "UPDATE trfq SET sync_required=2 Where id=?";
         params = new Object[] {jobId};
         jdbcTemplate.update(sqlInsert, params);

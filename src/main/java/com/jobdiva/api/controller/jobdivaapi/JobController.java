@@ -710,6 +710,31 @@ public class JobController extends AbstractJobDivaController {
 		//
 	}
 	
+	@RequestMapping(value = "/UpdateUserRoleForJob", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Update User Roles For Job")
+	public Boolean updateUserRoleForJob(
+			//
+			//
+			@ApiParam(value = "Job ID", required = true) //
+			@RequestParam(required = true) Long jobId , //
+			//
+			@ApiParam(value = "Recruiter ID", required = true) //
+			@RequestParam(required = true) Long recruiterid,  //
+			//
+			@ApiParam(value = "Role IDs", required = true) //
+			@RequestParam(required = true) List<Long> roleIds  //
+			//
+			)throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("updateUserRoleForJob");
+		//
+		return jobService.updateUserRoleForJob(jobDivaSession, jobId,  recruiterid , roleIds);
+		//
+	}
+	
+	
 	@RequestMapping(value = "/GetJobNotes", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Get Job Notes")
 	public List<Note> GetJobNotes( //
