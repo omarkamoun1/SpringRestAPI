@@ -186,7 +186,7 @@ public class JobService extends AbstractService {
 		}
 	}
 	
-	public Boolean assignUserToJob(JobDivaSession jobDivaSession, Long rfqid, Long recruiterid, List<Long> roleIds, Integer jobstatus) throws Exception {
+	public Boolean assignUserToJob(JobDivaSession jobDivaSession, Long rfqid, Long recruiterid, List<Long> roleIds, List<String> flexibleRoleNames, Integer jobstatus) throws Exception {
 		//
 		try {
 			//
@@ -196,7 +196,7 @@ public class JobService extends AbstractService {
 				public Boolean doInTransaction(TransactionStatus status) {
 					try {
 						//
-						Boolean result = jobUserDao.assignUserToJob(jobDivaSession, rfqid, recruiterid, roleIds, jobstatus);
+						Boolean result = jobUserDao.assignUserToJob(jobDivaSession, rfqid, recruiterid, roleIds, flexibleRoleNames, jobstatus);
 						//
 						jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "assignUserToJob", "assign Successful");
 						//

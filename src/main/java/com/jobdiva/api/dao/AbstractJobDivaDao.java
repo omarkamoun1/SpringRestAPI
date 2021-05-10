@@ -71,6 +71,9 @@ public class AbstractJobDivaDao {
 	//
 	protected final Logger						logger					= LoggerFactory.getLogger(this.getClass());
 	//
+	public final static int EMAIL_OPTION_ASSIGN_USER=1;
+	public final static int EMAIL_OPTION_UNASSIGN_USER=2;
+	//
 	@Autowired
 	protected AppProperties						appProperties;
 	//
@@ -1294,4 +1297,20 @@ public class AbstractJobDivaDao {
 		else
 			return str;
 	}
+	
+	protected String getSeperatedTexts(String[] ArrItems,String strSep,String strExclude){
+	      System.out.println("Enter getSeperatedText");
+	      String strTexts = "";
+	      try{
+	        for (int i=0;i<ArrItems.length;i++){
+	          if (deNull(ArrItems[i]).trim().length()>0 && deNull(ArrItems[i]).trim().equals(strExclude)==false)
+	            strTexts += ArrItems[i] + strSep;
+	        }
+	        if (strTexts.equals("")==false)
+	          strTexts = strTexts.substring(0,strTexts.length()-strSep.length());
+	      } catch (Exception e) {
+	        e.printStackTrace();
+	      }
+	      return strTexts;
+	    }
 }
