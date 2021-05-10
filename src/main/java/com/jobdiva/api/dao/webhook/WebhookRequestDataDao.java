@@ -321,8 +321,27 @@ public class WebhookRequestDataDao extends AbstractJobDivaDao {
 		//
 		String[] parameters = paramLits.stream().toArray(String[]::new);
 		//
+		Vector<String[]> biDataInfo = getBiDataInfo(jobDivaSession, "Candidate Detail", parameters);
 		//
-		return outputMetric(getBiDataInfo(jobDivaSession, "Candidate Detail", parameters));
+		paramLits = new ArrayList<String>();
+		paramLits.add(strCandidateId);
+		parameters = paramLits.stream().toArray(String[]::new);
+		Vector<String[]> qualificationBiDataInfo = getBiDataInfo(jobDivaSession, "Candidate Qualifications Detail", parameters);
+		//
+		JsonArray candidateJsonArray = outputMetric(biDataInfo);
+		JsonArray qualificationJsonArray = outputMetric(qualificationBiDataInfo);
+		//
+		for (int i = 0; i < qualificationJsonArray.size(); i++) {
+			JsonObject jsonObject = qualificationJsonArray.get(i).asObject();
+			jsonObject.remove("CANDIDATEID");
+		}
+		//
+		for (int i = 0; i < candidateJsonArray.size(); i++) {
+			JsonObject jsonObject = candidateJsonArray.get(i).asObject();
+			jsonObject.add("QUALIFICATIONS", qualificationJsonArray);
+		}
+		//
+		return candidateJsonArray;
 		//
 	}
 	

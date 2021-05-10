@@ -28,13 +28,14 @@ import com.jobdiva.api.service.CompanyService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 //
 @CrossOrigin
 @RestController
 @RequestMapping("/apiv2/jobdiva/")
 @Api(value = "Company API", description = "REST API Used For Company")
-// @ApiIgnore
+@ApiIgnore
 public class CompanyV2Controller extends AbstractJobDivaController {
 	
 	//

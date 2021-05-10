@@ -20,8 +20,8 @@ public class CreatePayRecordDao extends AbstractJobDivaDao {
 	
 	public Integer createPayRecord(JobDivaSession jobDivaSession, Long candidateID, Double assignmentID, Long jobID,
 			/* Integer recordID, */ Boolean approved, Long createdByID, Date effectiveDate, Date endDate, Integer status, String taxID, String paymentTerms, Long subcontractCompanyID, Boolean payOnRemittance, Double salary, String salaryPer,
-			Double perDiem, String perDiemPer, Double otherExpenses, String otherExpensesPer, Double outsideCommission, String outsideCommissionPer, Double overtimeRate, String overtimeRatePer, Double doubletimeRate, String doubletimeRatePer,
-			Boolean overtimeExempt, String fileNo, String aDPCOCODE, String aDPPAYFREQUENCY) {
+			Integer salaryPerCurrency, Double perDiem, String perDiemPer, Double otherExpenses, String otherExpensesPer, Double outsideCommission, String outsideCommissionPer, Double overtimeRate, String overtimeRatePer, Double doubletimeRate,
+			String doubletimeRatePer, Boolean overtimeExempt, String fileNo, String aDPCOCODE, String aDPPAYFREQUENCY) {
 		//
 		HashMap<String, Object> payRecordMap = new HashMap<String, Object>();
 		// Pay Record required fields
@@ -65,6 +65,9 @@ public class CreatePayRecordDao extends AbstractJobDivaDao {
 		if (isNotEmpty(salaryPer))
 			payRecordMap.put("SALARY_PER", salaryPer.substring(0, 1).toUpperCase());
 		//
+		if (salaryPerCurrency != null) {
+			payRecordMap.put("SALARYPER_CURRENCY", salaryPerCurrency);
+		}
 		if (overtimeRate != null)
 			payRecordMap.put("OVERTIME_RATE1", overtimeRate);
 		//

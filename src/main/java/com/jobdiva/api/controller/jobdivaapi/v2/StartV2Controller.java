@@ -27,12 +27,13 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 @CrossOrigin
 @RestController
 @RequestMapping("/apiv2/jobdiva/")
 @Api(value = "Start API", description = "REST API Used For Start")
-// @ApiIgnore
+@ApiIgnore
 public class StartV2Controller extends AbstractJobDivaController {
 	//
 	

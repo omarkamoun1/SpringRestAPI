@@ -43,7 +43,7 @@ public class UpdatePayRecordDef implements Serializable {
 	//
 	//
 	@JsonProperty(required = false)
-	private Date		effectiveDate;
+	private Date		startDate;
 	//
 	//
 	@JsonProperty(required = false)
@@ -108,6 +108,10 @@ public class UpdatePayRecordDef implements Serializable {
 	//
 	@JsonProperty(required = false)
 	private String		salaryPer;
+	//
+	//
+	@JsonProperty(required = false)
+	private Integer		salaryPerCurrency;
 	//
 	//
 	@JsonProperty(required = false)
@@ -180,12 +184,12 @@ public class UpdatePayRecordDef implements Serializable {
 		this.doubletimeRatePer = doubletimeRatePer;
 	}
 	
-	public Date getEffectiveDate() {
-		return effectiveDate;
+	public Date getStartDate() {
+		return startDate;
 	}
 	
-	public void setEffectiveDate(Date effectiveDate) {
-		this.effectiveDate = effectiveDate;
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
 	}
 	
 	public Date getEndDate() {
@@ -314,6 +318,14 @@ public class UpdatePayRecordDef implements Serializable {
 	
 	public void setSalaryPer(String salaryPer) {
 		this.salaryPer = salaryPer;
+	}
+	
+	public Integer getSalaryPerCurrency() {
+		return salaryPerCurrency;
+	}
+	
+	public void setSalaryPerCurrency(Integer salaryPerCurrency) {
+		this.salaryPerCurrency = salaryPerCurrency;
 	}
 	
 	public Integer getStatus() {

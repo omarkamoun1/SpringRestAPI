@@ -351,21 +351,30 @@ public class JDData {
 	}
 	
 	public static String CandidateQualDetail(Long clientID, String[] params, Vector<Object> param) {
-		String sql = "select a.candidateid, b.catname qualname, c.dcatname qualvalue, a.datecreated dateentered " + " from tcandidate_category a, tcategories b, tcategories_detail c " + " where a.candidateid=? and a.teamid=? and a.dirty<>2 "
-				+ "   and b.teamid=a.teamid and b.catid=a.catid " + "   and c.teamid=a.teamid and c.catid=a.catid and c.dcatid=a.dcatid " + "   and (";
+		//
+		String sql = "select a.candidateid, b.catname qualname, c.dcatname qualvalue, a.datecreated dateentered " //
+				+ " from tcandidate_category a, tcategories b, tcategories_detail c " //
+				+ " where a.candidateid=? and a.teamid=? and a.dirty<>2 " //
+				+ "   and b.teamid=a.teamid and b.catid=a.catid " //
+				+ "   and c.teamid=a.teamid and c.catid=a.catid and c.dcatid=a.dcatid " //
+				+ "   and (";
+		//
 		for (int i = 1; i < params.length; i++) {
 			if (i > 1)
 				sql += " or ";
 			sql += "b.catname=?";
 		}
+		//
 		if (params.length == 1)
 			sql += "1=1";
 		sql += ") order by qualname";
-		// System.out.println(sql);
+		//
 		param.add(new Long(params[0]));
 		param.add(clientID);
+		//
 		for (int i = 1; i < params.length; i++)
 			param.add(params[i]);
+		//
 		return sql;
 	}
 	

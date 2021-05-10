@@ -559,6 +559,9 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 			@RequestParam(required = false) Double billRate, //
 			//
 			@ApiParam(required = false) //
+			@RequestParam(required = false) Integer billRateCurrrency, //
+			//
+			@ApiParam(required = false) //
 			@RequestParam(required = false) String billRatePer, //
 			//
 			@ApiParam(required = false) //
@@ -663,7 +666,7 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		jobDivaSession.checkForAPIPermission("createBillingRecord");
 		//
 		return invoiceService.createBillingRecord(jobDivaSession, candidateID, assignmentID, jobID, recordID, createdByID, approved, startDate, endDate, customerRefNo, hiringManagerID, billingContactID, division, invoiceGroupIndex, invoiceGroup,
-				vMSWebsite, vMSEmployeeName, invoiceContent, expenseInvoices, enableTimesheet, allowEnterTimeOnPortal, timesheetInstruction, expenseEnabled, billRate, billRatePer, overtimeExempt, timesheetEntryFormat, frequency,
+				vMSWebsite, vMSEmployeeName, invoiceContent, expenseInvoices, enableTimesheet, allowEnterTimeOnPortal, timesheetInstruction, expenseEnabled, billRate, billRateCurrrency, billRatePer, overtimeExempt, timesheetEntryFormat, frequency,
 				overtimeByWorkingState, overtimeRate, overtimeRatePer, doubletimeRate, doubletimePer, billingUnit, weekEnding, hoursPerDay, hoursPerHalfDay, workAddress1, workAddress2, workCity, workState, workZipcode, workCountry, paymentTerms,
 				primarySalesPersonID, primarySalesPercentage, secondarySalesPersonID, secondarySalesPercentage, tertiarySalesPersonID, tertiarySalesPercentage, primaryRecruiterID, primaryRecruiterPercentage, secondaryRecruiterID,
 				secondaryRecruiterPercentage, tertiaryRecruiterID, tertiaryRecruiterPercentage);
@@ -679,7 +682,7 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 			@RequestParam(required = false) Boolean allowEnterTimeOnPortal, //
 			//
 			@ApiParam(required = false) //
-			@RequestParam(required = false) Integer approved, //
+			@RequestParam(required = false) Boolean approved, //
 			//
 			@ApiParam(required = true) //
 			@RequestParam(required = true) Double assignmentID, //
@@ -688,13 +691,13 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 			@RequestParam(required = false) Long billingContactID, //
 			//
 			@ApiParam(required = false) //
-			@RequestParam(required = false) Double Long, //
-			//
-			@ApiParam(required = false) //
 			@RequestParam(required = false) Integer billingUnit, //
 			//
 			@ApiParam(required = false) //
 			@RequestParam(required = false) Double billRate, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Integer billRateCurrrency, //
 			//
 			@ApiParam(required = false) //
 			@RequestParam(required = false) String billRatePer, //
@@ -720,7 +723,7 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 			@ApiParam(required = false) //
 			@RequestParam(required = false) Boolean enableTimesheet, //
 			//
-			@ApiParam(required = false) //
+			@ApiParam(value = "Format [MM/dd/yyyy HH:mm:ss]", required = false) //
 			@RequestParam(required = false) Date endDate, //
 			//
 			@ApiParam(required = false) //
@@ -731,6 +734,9 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 			//
 			@ApiParam(required = false) //
 			@RequestParam(required = false) Integer frequency, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Integer biweeklySchedule, //
 			//
 			@ApiParam(required = false) //
 			@RequestParam(required = false) Long hiringManagerID, //
@@ -834,7 +840,7 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 			@ApiParam(required = false) //
 			@RequestParam(required = false) String workCity, //
 			//
-			@ApiParam(required = false) //
+			@ApiParam(value = "Two-letter country code", required = false) //
 			@RequestParam(required = false) String workCountry, //
 			//
 			@ApiParam(required = false) //
@@ -844,7 +850,7 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 			@RequestParam(required = false) String workZipcode, //
 			//
 			@ApiParam(required = false, type = "Userfield", allowMultiple = true) //
-			@RequestParam(required = false) Userfield[] userfields //
+			@RequestParam(required = false) Userfield[] Userfields //
 	//
 	//
 	) throws Exception {
@@ -853,11 +859,11 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		//
 		jobDivaSession.checkForAPIPermission("updateBillingRecord");
 		//
-		return invoiceService.updateBillingRecord(jobDivaSession, allowEnterTimeOnPortal, approved, assignmentID, billingContactID, billingUnit, billRate, billRatePer, candidateID, customerRefNo, division, doubletimePer, doubletimeRate,
-				doubletimeRatePer, enableTimesheet, endDate, expenseEnabled, expenseInvoices, frequency, hiringManagerID, hoursPerDay, hoursPerHalfDay, invoiceContent, invoiceGroup, invoiceGroupIndex, jobID, overtimeByWorkingState, overtimeExempt,
-				overtimeRate, overtimeRatePer, paymentTerms, primaryRecruiterID, primaryRecruiterPercentage, primarySalesPercentage, primarySalesPersonID, recordID, secondaryRecruiterID, secondaryRecruiterPercentage, secondarySalesPercentage,
-				secondarySalesPersonID, startDate, tertiaryRecruiterID, tertiaryRecruiterPercentage, tertiarySalesPercentage, tertiarySalesPersonID, timesheetEntryFormat, timesheetInstruction, vMSEmployeeName, vMSWebsite, weekEnding, workAddress1,
-				workAddress2, workCity, workCountry, workState, workZipcode, userfields);
+		return invoiceService.updateBillingRecord(jobDivaSession, allowEnterTimeOnPortal, approved, assignmentID, billingContactID, billingUnit, billRate, billRateCurrrency, billRatePer, candidateID, customerRefNo, division, doubletimePer,
+				doubletimeRate, doubletimeRatePer, enableTimesheet, endDate, expenseEnabled, expenseInvoices, frequency, biweeklySchedule, hiringManagerID, hoursPerDay, hoursPerHalfDay, invoiceContent, invoiceGroup, invoiceGroupIndex, jobID,
+				overtimeByWorkingState, overtimeExempt, overtimeRate, overtimeRatePer, paymentTerms, primaryRecruiterID, primaryRecruiterPercentage, primarySalesPercentage, primarySalesPersonID, recordID, secondaryRecruiterID,
+				secondaryRecruiterPercentage, secondarySalesPercentage, secondarySalesPersonID, startDate, tertiaryRecruiterID, tertiaryRecruiterPercentage, tertiarySalesPercentage, tertiarySalesPersonID, timesheetEntryFormat, timesheetInstruction,
+				vMSEmployeeName, vMSWebsite, weekEnding, workAddress1, workAddress2, workCity, workCountry, workState, workZipcode, Userfields);
 		//
 	}
 	
@@ -896,7 +902,7 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 			//
 			//
 			@ApiParam(required = false) //
-			@RequestParam(required = false) Date effectiveDate, //
+			@RequestParam(required = false) Date startDate, //
 			//
 			//
 			@ApiParam(required = false) //
@@ -958,10 +964,11 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 			@ApiParam(required = false) //
 			@RequestParam(required = false) Double salary, //
 			//
-			//
 			@ApiParam(required = false) //
 			@RequestParam(required = false) String salaryPer, //
 			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) Integer salaryPerCurrency, //
 			//
 			@ApiParam(required = false) //
 			@RequestParam(required = false) Integer status, //
@@ -975,7 +982,7 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 			@RequestParam(required = false) String taxID, //
 			//
 			@ApiParam(required = false, type = "Userfield", allowMultiple = true) //
-			@RequestParam(required = false) Userfield[] userfields //
+			@RequestParam(required = false) Userfield[] Userfields //
 	//
 	) throws Exception {
 		//
@@ -983,8 +990,8 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		//
 		jobDivaSession.checkForAPIPermission("UpdatePayRecord");
 		//
-		return invoiceService.UpdatePayRecord(jobDivaSession, aDPCOCODE, aDPPAYFREQUENCY, approved, assignmentID, candidateID, doubletimeRate, doubletimeRatePer, effectiveDate, endDate, fileNo, otherExpenses, otherExpensesPer, outsideCommission,
-				outsideCommissionPer, overtimeExempt, overtimeRate, overtimeRatePer, paymentTerms, payOnRemittance, perDiem, perDiemPer, recordID, salary, salaryPer, status, subcontractCompanyID, taxID, userfields);
+		return invoiceService.updatePayRecord(jobDivaSession, aDPCOCODE, aDPPAYFREQUENCY, approved, assignmentID, candidateID, doubletimeRate, doubletimeRatePer, startDate, endDate, fileNo, otherExpenses, otherExpensesPer, outsideCommission,
+				outsideCommissionPer, overtimeExempt, overtimeRate, overtimeRatePer, paymentTerms, payOnRemittance, perDiem, perDiemPer, recordID, salary, salaryPer, salaryPerCurrency, status, subcontractCompanyID, taxID, Userfields);
 		//
 	}
 	
@@ -1037,6 +1044,9 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 			@RequestParam(required = false) String salaryPer, //
 			//
 			@ApiParam(required = false) //
+			@RequestParam(required = false) Integer salaryPerCurrency, //
+			//
+			@ApiParam(required = false) //
 			@RequestParam(required = false) Double perDiem, //
 			//
 			@ApiParam(required = false) //
@@ -1086,8 +1096,8 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		jobDivaSession.checkForAPIPermission("createPayRecord");
 		//
 		return invoiceService.createPayRecord(jobDivaSession, candidateID, assignmentID, jobID,
-				/* recordID, */ approved, createdByID, effectiveDate, endDate, status, taxID, paymentTerms, subcontractCompanyID, payOnRemittance, salary, salaryPer, perDiem, perDiemPer, otherExpenses, otherExpensesPer, outsideCommission,
-				outsideCommissionPer, overtimeRate, overtimeRatePer, doubletimeRate, doubletimeRatePer, overtimeExempt, fileNo, aDPCOCODE, aDPPAYFREQUENCY);
+				/* recordID, */ approved, createdByID, effectiveDate, endDate, status, taxID, paymentTerms, subcontractCompanyID, payOnRemittance, salary, salaryPer, salaryPerCurrency, perDiem, perDiemPer, otherExpenses, otherExpensesPer,
+				outsideCommission, outsideCommissionPer, overtimeRate, overtimeRatePer, doubletimeRate, doubletimeRatePer, overtimeExempt, fileNo, aDPCOCODE, aDPPAYFREQUENCY);
 		//
 	}
 	

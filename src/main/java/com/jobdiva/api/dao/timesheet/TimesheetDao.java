@@ -1013,7 +1013,7 @@ public class TimesheetDao extends AbstractJobDivaDao {
 					+ " and t4.rfqid = t11.id(+) and t4.recruiter_teamid=t11.teamid(+) ";
 			sql = " select * from ( " + sql + ") order by upper(employeename), billing_recid, weekendingdate desc ";
 		}
-		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy hh:mm a z");
+		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy hh mm a z");
 		ArrayList<Object> paramList = new ArrayList<Object>();
 		//
 		paramList.add(jobDivaSession.getTeamId());
@@ -1047,15 +1047,15 @@ public class TimesheetDao extends AbstractJobDivaDao {
 				vta.setApproved(rs.getInt("approved"));
 				if (rs.getTimestamp("approved_on") != null)
 					vta.setApprovedOn(rs.getTimestamp("approved_on"));
-				vta.setRemark(rs.getLong("approverid") + "%%" + rs.getString("approvername") + "%%" + rs.getBigDecimal("hoursworked") + "%%" + rs.getBigDecimal("reg_hours") + "%%" + rs.getBigDecimal("ot_hours") + "%%" + rs.getBigDecimal("dt_hours")
-						+ "%%" + (rs.getDate("datecreated") == null ? "" : sdf.format(rs.getTimestamp("datecreated"))));
+				vta.setRemark("\""+rs.getString("approverid") + "|" + rs.getString("approvername") + "|" + rs.getBigDecimal("hoursworked") + "|" + rs.getBigDecimal("reg_hours") + "|" + rs.getBigDecimal("ot_hours") + "|" + rs.getBigDecimal("dt_hours")
+						+ "|" + (rs.getDate("datecreated") == null ? "" : sdf.format(rs.getTimestamp("datecreated"))) +"\"" );
 				vta.setBillrateper(rs.getString("bill_rate_per"));
 				vta.setEntryformat(rs.getInt("timesheet_entry_format"));
 				if (rs.getInt("ignored") == 1)
 					vta.setApproved(10);
 				vta.setApprovedBy(rs.getLong("myitem"));
 				vta.setComments(rs.getString("companyname"));
-				vta.setWorkingstate(deNull(rs.getString("rfqtitle")) + "%%" + deNull(rs.getString("rfqno_team")));
+				vta.setWorkingstate("\""+deNull(rs.getString("rfqtitle")) + "|" + deNull(rs.getString("rfqno_team"))+"\"");
 				WeekEndingRecord wer = ConverterWeekEndingRecord(vta);
 				return wer;
 			}
@@ -1080,7 +1080,7 @@ public class TimesheetDao extends AbstractJobDivaDao {
 			w.setBillrateunit(week.getBillrateper());
 		if (week.getEmployeeid() != null)
 			w.setCandidateid(week.getEmployeeid());
-		w.setComments(week.getComments() + "%%" + week.getEmployeeName());
+		w.setComments(week.getComments() + "|" + week.getEmployeeName());
 		if (week.getEntryformat() != null)
 			w.setEntryformat(week.getEntryformat());
 		w.setRemark(week.getRemark());

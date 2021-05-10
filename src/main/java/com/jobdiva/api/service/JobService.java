@@ -186,7 +186,7 @@ public class JobService extends AbstractService {
 		}
 	}
 	
-	public Boolean assignUserToJob(JobDivaSession jobDivaSession, Long rfqid, Long recruiterid, List<Long> roleIds, Integer jobstatus) throws Exception {
+	public Boolean assignUserToJob(JobDivaSession jobDivaSession, Long rfqid, Long recruiterid, List<Long> roleIds, List<String> flexibleRoleNames, Integer jobstatus) throws Exception {
 		//
 		try {
 			//
@@ -196,7 +196,7 @@ public class JobService extends AbstractService {
 				public Boolean doInTransaction(TransactionStatus status) {
 					try {
 						//
-						Boolean result = jobUserDao.assignUserToJob(jobDivaSession, rfqid, recruiterid, roleIds, jobstatus);
+						Boolean result = jobUserDao.assignUserToJob(jobDivaSession, rfqid, recruiterid, roleIds, flexibleRoleNames, jobstatus);
 						//
 						jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "assignUserToJob", "assign Successful");
 						//
@@ -360,6 +360,70 @@ public class JobService extends AbstractService {
 		} catch (Exception e) {
 			//
 			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateJob", "Update Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
+		}
+	}
+
+	public Boolean unassignUserFromJob(JobDivaSession jobDivaSession, Long jobId, Long recruiterid) throws Exception {
+		//
+		try {
+			//
+			return inTransaction(new TransactionCallback<Boolean>() {
+				
+				@Override
+				public Boolean doInTransaction(TransactionStatus status) {
+					try {
+						//
+						Boolean result = jobUserDao.unassignUserFromJob(jobDivaSession, jobId, recruiterid);
+						//
+						jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "unassignUserFromJob", "unassign Successful");
+						//
+						return result;
+						//
+					} catch (Exception e) {
+						throw new RuntimeException(e.getMessage());
+					}
+				}
+				//
+			});
+			//
+		} catch (Exception e) {
+			//
+			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "unassignUserFromJob", "unassign Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
+		}
+	}
+
+	public Boolean updateUserRoleForJob(JobDivaSession jobDivaSession, Long jobId, Long recruiterid, List<Long> roleIds) throws Exception {
+		//
+		try {
+			//
+			return inTransaction(new TransactionCallback<Boolean>() {
+				
+				@Override
+				public Boolean doInTransaction(TransactionStatus status) {
+					try {
+						//
+						Boolean result = jobUserDao.updateUserRoleForJob(jobDivaSession, jobId, recruiterid, roleIds);
+						//
+						jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateUserRoleForJob", "update Successful");
+						//
+						return result;
+						//
+					} catch (Exception e) {
+						throw new RuntimeException(e.getMessage());
+					}
+				}
+				//
+			});
+			//
+		} catch (Exception e) {
+			//
+			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateUserRoleForJob", "update Failed, " + e.getMessage());
 			//
 			throw new Exception(e.getMessage());
 			//

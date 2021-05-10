@@ -57,6 +57,12 @@ public class JobDivaConnectivity {
 	private JdbcTemplate							attachmentJdbcTemplate;
 	private Object									syncObj							= new Object();
 	private Object									syncTransObj					= new Object();
+	//
+	private Map<String, String>						countries						= new HashMap<String, String>();
+	// private Map<String, String> states = new HashMap<String, String>();
+	// private Map<String, String> stateNames = new HashMap<String, String>();
+	// private Map<String, String> statesWithoutCountry = new HashMap<String,
+	// String>();
 	
 	//
 	@PostConstruct
@@ -127,25 +133,69 @@ public class JobDivaConnectivity {
 		//
 		logger.info("DataBase Connectivity Done.");
 		//
-		// System.out.println("## Create DataSource from dataSource1 &
-		// dataSource2");
-		// MultiRoutingDataSource dataSource = new MultiRoutingDataSource(this);
-		// Map<Object, Object> dataSourceMap = new HashMap<>();
-		// //
-		// //
-		// dataSourceMap.put(0, jdbcTemplate.getDataSource());
-		// //
-		// for (Map.Entry<Long, JdbcTemplate> entry : jdbcTemplates.entrySet())
-		// {
-		// //
-		// dataSourceMap.put(entry.getKey(), entry.getValue().getDataSource());
-		// //
-		// }
-		// dataSource.setTargetDataSources(dataSourceMap);
-		// dataSource.afterPropertiesSet();
-		// jdbcTemplate.setDataSource(dataSource);
+		//
+		//
+		// initStates();
+		//
+		initCountries();
 		//
 	}
+	// private void initStates() {
+	// String sql = "SELECT * FROM tstates ";
+	// jdbcTemplate.query(sql, new RowMapper<String>() {
+	//
+	// @Override
+	// public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+	// String COUNTRYID = rs.getString("COUNTRYID");
+	// String STATE_CODE = rs.getString("STATE_CODE");
+	// String STATE_NAME = rs.getString("STATE_NAME");
+	// //
+	// stateNames.put(STATE_NAME, STATE_CODE);
+	// states.put(STATE_CODE + COUNTRYID, STATE_NAME);
+	// statesWithoutCountry.put(STATE_CODE, STATE_NAME);
+	// return null;
+	// }
+	// });
+	// }
+	
+	private void initCountries() {
+		String sql = "SELECT DISTINCT id,country FROM tCountries ORDER BY COUNTRY ";
+		jdbcTemplate.query(sql, new RowMapper<String>() {
+			
+			@Override
+			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+				String ID = rs.getString("id");
+				String COUNTRY = rs.getString("country");
+				COUNTRY = COUNTRY != null ? COUNTRY.toLowerCase() : null;
+				//
+				countries.put(COUNTRY, ID);
+				return null;
+			}
+		});
+	}
+	// public Map<String, String> getStates() {
+	// return states;
+	// }
+	//
+	// public Map<String, String> getStateNames() {
+	// return stateNames;
+	// }
+	//
+	// public Map<String, String> getStatesWithoutCountry() {
+	// return statesWithoutCountry;
+	// }
+	
+	public Map<String, String> getCountries() {
+		return countries;
+	}
+	// public String getFullStatName(String stateCode, String countryId) {
+	// //
+	// if (countryId != null) {
+	// return states.get(stateCode + countryId);
+	// } else {
+	// return statesWithoutCountry.get(stateCode);
+	// }
+	// }
 	
 	protected void assignTeamIds(Long mainDbId, JobDivaConnection jobDivaConnection) {
 		//

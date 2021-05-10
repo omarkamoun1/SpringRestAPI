@@ -35,12 +35,13 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 @CrossOrigin
 @RestController
 @RequestMapping("/apiv2/jobdiva/")
 @Api(value = "Billing, Pay, Timesheet API", description = "REST API Used For Billing, Pay and Timesheet")
-// @ApiIgnore
+@ApiIgnore
 public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 	//
 	
@@ -400,6 +401,7 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 		String timesheetInstruction = createBillingRecordDef.getTimesheetInstruction();
 		Boolean expenseEnabled = createBillingRecordDef.getExpenseEnabled();
 		Double billRate = createBillingRecordDef.getBillRate();
+		Integer billRateCurrrency = createBillingRecordDef.getBillRateCurrrency();
 		String billRatePer = createBillingRecordDef.getBillRatePer();
 		Boolean overtimeExempt = createBillingRecordDef.getOvertimeExempt();
 		Long timesheetEntryFormat = createBillingRecordDef.getTimesheetEntryFormat();
@@ -436,7 +438,7 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 		//
 		//
 		return invoiceService.createBillingRecord(jobDivaSession, candidateID, assignmentID, jobID, recordID, createdByID, approved, startDate, endDate, customerRefNo, hiringManagerID, billingContactID, division, invoiceGroupIndex, invoiceGroup,
-				vMSWebsite, vMSEmployeeName, invoiceContent, expenseInvoices, enableTimesheet, allowEnterTimeOnPortal, timesheetInstruction, expenseEnabled, billRate, billRatePer, overtimeExempt, timesheetEntryFormat, frequency,
+				vMSWebsite, vMSEmployeeName, invoiceContent, expenseInvoices, enableTimesheet, allowEnterTimeOnPortal, timesheetInstruction, expenseEnabled, billRate, billRateCurrrency, billRatePer, overtimeExempt, timesheetEntryFormat, frequency,
 				overtimeByWorkingState, overtimeRate, overtimeRatePer, doubletimeRate, doubletimePer, billingUnit, weekEnding, hoursPerDay, hoursPerHalfDay, workAddress1, workAddress2, workCity, workState, workZipcode, workCountry, paymentTerms,
 				primarySalesPersonID, primarySalesPercentage, secondarySalesPersonID, secondarySalesPercentage, tertiarySalesPersonID, tertiarySalesPercentage, primaryRecruiterID, primaryRecruiterPercentage, secondaryRecruiterID,
 				secondaryRecruiterPercentage, tertiaryRecruiterID, tertiaryRecruiterPercentage);
@@ -457,11 +459,12 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 		//
 		//
 		Boolean allowEnterTimeOnPortal = updateBillingRecordDef.getAllowEnterTimeOnPortal();
-		Integer approved = updateBillingRecordDef.getApproved();
+		Boolean approved = updateBillingRecordDef.getApproved();
 		Double assignmentID = updateBillingRecordDef.getAssignmentID();
 		Long billingContactID = updateBillingRecordDef.getBillingContactID();
 		Integer billingUnit = updateBillingRecordDef.getBillingUnit();
 		Double billRate = updateBillingRecordDef.getBillRate();
+		Integer billRateCurrrency = updateBillingRecordDef.getBillRateCurrrency();
 		String billRatePer = updateBillingRecordDef.getBillRatePer();
 		Long candidateID = updateBillingRecordDef.getCandidateID();
 		String customerRefNo = updateBillingRecordDef.getCustomerRefNo();
@@ -474,6 +477,7 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 		Boolean expenseEnabled = updateBillingRecordDef.getExpenseEnabled();
 		Integer expenseInvoices = updateBillingRecordDef.getExpenseInvoices();
 		Integer frequency = updateBillingRecordDef.getFrequency();
+		Integer biweeklySchedule = updateBillingRecordDef.getBiweeklySchedule();
 		Long hiringManagerID = updateBillingRecordDef.getHiringManagerID();
 		Double hoursPerDay = updateBillingRecordDef.getHoursPerDay();
 		Double hoursPerHalfDay = updateBillingRecordDef.getHoursPerHalfDay();
@@ -515,11 +519,11 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 		//
 		//
 		//
-		return invoiceService.updateBillingRecord(jobDivaSession, allowEnterTimeOnPortal, approved, assignmentID, billingContactID, billingUnit, billRate, billRatePer, candidateID, customerRefNo, division, doubletimePer, doubletimeRate,
-				doubletimeRatePer, enableTimesheet, endDate, expenseEnabled, expenseInvoices, frequency, hiringManagerID, hoursPerDay, hoursPerHalfDay, invoiceContent, invoiceGroup, invoiceGroupIndex, jobID, overtimeByWorkingState, overtimeExempt,
-				overtimeRate, overtimeRatePer, paymentTerms, primaryRecruiterID, primaryRecruiterPercentage, primarySalesPercentage, primarySalesPersonID, recordID, secondaryRecruiterID, secondaryRecruiterPercentage, secondarySalesPercentage,
-				secondarySalesPersonID, startDate, tertiaryRecruiterID, tertiaryRecruiterPercentage, tertiarySalesPercentage, tertiarySalesPersonID, timesheetEntryFormat, timesheetInstruction, vMSEmployeeName, vMSWebsite, weekEnding, workAddress1,
-				workAddress2, workCity, workCountry, workState, workZipcode, userfields);
+		return invoiceService.updateBillingRecord(jobDivaSession, allowEnterTimeOnPortal, approved, assignmentID, billingContactID, billingUnit, billRate, billRateCurrrency, billRatePer, candidateID, customerRefNo, division, doubletimePer,
+				doubletimeRate, doubletimeRatePer, enableTimesheet, endDate, expenseEnabled, expenseInvoices, frequency, biweeklySchedule, hiringManagerID, hoursPerDay, hoursPerHalfDay, invoiceContent, invoiceGroup, invoiceGroupIndex, jobID,
+				overtimeByWorkingState, overtimeExempt, overtimeRate, overtimeRatePer, paymentTerms, primaryRecruiterID, primaryRecruiterPercentage, primarySalesPercentage, primarySalesPersonID, recordID, secondaryRecruiterID,
+				secondaryRecruiterPercentage, secondarySalesPercentage, secondarySalesPersonID, startDate, tertiaryRecruiterID, tertiaryRecruiterPercentage, tertiarySalesPercentage, tertiarySalesPersonID, timesheetEntryFormat, timesheetInstruction,
+				vMSEmployeeName, vMSWebsite, weekEnding, workAddress1, workAddress2, workCity, workCountry, workState, workZipcode, userfields);
 		//
 	}
 	
@@ -543,7 +547,7 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 		Long candidateID = updatePayRecordDef.getCandidateID();
 		Double doubletimeRate = updatePayRecordDef.getDoubletimeRate();
 		String doubletimeRatePer = updatePayRecordDef.getDoubletimeRatePer();
-		Date effectiveDate = updatePayRecordDef.getEffectiveDate();
+		Date startDate = updatePayRecordDef.getStartDate();
 		Date endDate = updatePayRecordDef.getEndDate();
 		String fileNo = updatePayRecordDef.getFileNo();
 		Double otherExpenses = updatePayRecordDef.getOtherExpenses();
@@ -559,6 +563,7 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 		String perDiemPer = updatePayRecordDef.getPerDiemPer();
 		Integer recordID = updatePayRecordDef.getRecordID();
 		Double salary = updatePayRecordDef.getSalary();
+		Integer salaryPerCurrency = updatePayRecordDef.getSalaryPerCurrency();
 		String salaryPer = updatePayRecordDef.getSalaryPer();
 		Integer status = updatePayRecordDef.getStatus();
 		Long subcontractCompanyID = updatePayRecordDef.getSubcontractCompanyID();
@@ -567,8 +572,8 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 		//
 		//
 		//
-		return invoiceService.UpdatePayRecord(jobDivaSession, aDPCOCODE, aDPPAYFREQUENCY, approved, assignmentID, candidateID, doubletimeRate, doubletimeRatePer, effectiveDate, endDate, fileNo, otherExpenses, otherExpensesPer, outsideCommission,
-				outsideCommissionPer, overtimeExempt, overtimeRate, overtimeRatePer, paymentTerms, payOnRemittance, perDiem, perDiemPer, recordID, salary, salaryPer, status, subcontractCompanyID, taxID, userfields);
+		return invoiceService.updatePayRecord(jobDivaSession, aDPCOCODE, aDPPAYFREQUENCY, approved, assignmentID, candidateID, doubletimeRate, doubletimeRatePer, startDate, endDate, fileNo, otherExpenses, otherExpensesPer, outsideCommission,
+				outsideCommissionPer, overtimeExempt, overtimeRate, overtimeRatePer, paymentTerms, payOnRemittance, perDiem, perDiemPer, recordID, salary, salaryPer, salaryPerCurrency, status, subcontractCompanyID, taxID, userfields);
 		//
 	}
 	
@@ -600,6 +605,7 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 		Boolean payOnRemittance = createPayRecordDef.getPayOnRemittance();
 		Double salary = createPayRecordDef.getSalary();
 		String salaryPer = createPayRecordDef.getSalaryPer();
+		Integer salaryPerCurrency = createPayRecordDef.getSalaryPerCurrency();
 		Double perDiem = createPayRecordDef.getPerDiem();
 		String perDiemPer = createPayRecordDef.getPerDiemPer();
 		Double otherExpenses = createPayRecordDef.getOtherExpenses();
@@ -617,8 +623,8 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 		//
 		//
 		return invoiceService.createPayRecord(jobDivaSession, candidateID, assignmentID, jobID,
-				/* recordID, */ approved, createdByID, effectiveDate, endDate, status, taxID, paymentTerms, subcontractCompanyID, payOnRemittance, salary, salaryPer, perDiem, perDiemPer, otherExpenses, otherExpensesPer, outsideCommission,
-				outsideCommissionPer, overtimeRate, overtimeRatePer, doubletimeRate, doubletimeRatePer, overtimeExempt, fileNo, aDPCOCODE, aDPPAYFREQUENCY);
+				/* recordID, */ approved, createdByID, effectiveDate, endDate, status, taxID, paymentTerms, subcontractCompanyID, payOnRemittance, salary, salaryPer, salaryPerCurrency, perDiem, perDiemPer, otherExpenses, otherExpensesPer,
+				outsideCommission, outsideCommissionPer, overtimeRate, overtimeRatePer, doubletimeRate, doubletimeRatePer, overtimeExempt, fileNo, aDPCOCODE, aDPPAYFREQUENCY);
 		//
 	}
 }

@@ -175,10 +175,10 @@ public class InvoiceService extends AbstractService {
 	
 	public Integer createBillingRecord(JobDivaSession jobDivaSession, Long candidateID, Long assignmentID, Long jobID, Integer recordID, Long createdByID, Boolean approved, Date startDate, Date endDate, String customerRefNo, Long hiringManagerID,
 			Long billingContactID, Long division, Integer invoiceGroupIndex, String invoiceGroup, String vMSWebsite, String vMSEmployeeName, Integer invoiceContent, Integer expenseInvoices, Boolean enableTimesheet, Boolean allowEnterTimeOnPortal,
-			String timesheetInstruction, Boolean expenseEnabled, Double billRate, String billRatePer, Boolean overtimeExempt, Long timesheetEntryFormat, Integer frequency, Integer overtimeByWorkingState, Double overtimeRate, String overtimeRatePer,
-			Double doubletimeRate, String doubletimePer, Integer billingUnit, Integer weekEnding, Double hoursPerDay, Double hoursPerHalfDay, String workAddress1, String workAddress2, String workCity, String workState, String workZipcode,
-			String workCountry, Integer paymentTerms, Long primarySalesPersonID, Double primarySalesPercentage, Long secondarySalesPersonID, Double secondarySalesPercentage, Long tertiarySalesPersonID, Double tertiarySalesPercentage,
-			Long primaryRecruiterID, Double primaryRecruiterPercentage, Long secondaryRecruiterID, Double secondaryRecruiterPercentage, Long tertiaryRecruiterID, Double tertiaryRecruiterPercentage) throws Exception {
+			String timesheetInstruction, Boolean expenseEnabled, Double billRate, Integer billRateCurrrency, String billRatePer, Boolean overtimeExempt, Long timesheetEntryFormat, Integer frequency, Integer overtimeByWorkingState,
+			Double overtimeRate, String overtimeRatePer, Double doubletimeRate, String doubletimePer, Integer billingUnit, Integer weekEnding, Double hoursPerDay, Double hoursPerHalfDay, String workAddress1, String workAddress2, String workCity,
+			String workState, String workZipcode, String workCountry, Integer paymentTerms, Long primarySalesPersonID, Double primarySalesPercentage, Long secondarySalesPersonID, Double secondarySalesPercentage, Long tertiarySalesPersonID,
+			Double tertiarySalesPercentage, Long primaryRecruiterID, Double primaryRecruiterPercentage, Long secondaryRecruiterID, Double secondaryRecruiterPercentage, Long tertiaryRecruiterID, Double tertiaryRecruiterPercentage) throws Exception {
 		try {
 			//
 			return inTransaction(new TransactionCallback<Integer>() {
@@ -188,10 +188,10 @@ public class InvoiceService extends AbstractService {
 					try {
 						//
 						Integer result = createBillingRecordDao.createBillingRecord(jobDivaSession, candidateID, assignmentID, jobID, recordID, createdByID, approved, startDate, endDate, customerRefNo, hiringManagerID, billingContactID, division,
-								invoiceGroupIndex, invoiceGroup, vMSWebsite, vMSEmployeeName, invoiceContent, expenseInvoices, enableTimesheet, allowEnterTimeOnPortal, timesheetInstruction, expenseEnabled, billRate, billRatePer, overtimeExempt,
-								timesheetEntryFormat, frequency, overtimeByWorkingState, overtimeRate, overtimeRatePer, doubletimeRate, doubletimePer, billingUnit, weekEnding, hoursPerDay, hoursPerHalfDay, workAddress1, workAddress2, workCity,
-								workState, workZipcode, workCountry, paymentTerms, primarySalesPersonID, primarySalesPercentage, secondarySalesPersonID, secondarySalesPercentage, tertiarySalesPersonID, tertiarySalesPercentage, primaryRecruiterID,
-								primaryRecruiterPercentage, secondaryRecruiterID, secondaryRecruiterPercentage, tertiaryRecruiterID, tertiaryRecruiterPercentage);
+								invoiceGroupIndex, invoiceGroup, vMSWebsite, vMSEmployeeName, invoiceContent, expenseInvoices, enableTimesheet, allowEnterTimeOnPortal, timesheetInstruction, expenseEnabled, billRate, billRateCurrrency, billRatePer,
+								overtimeExempt, timesheetEntryFormat, frequency, overtimeByWorkingState, overtimeRate, overtimeRatePer, doubletimeRate, doubletimePer, billingUnit, weekEnding, hoursPerDay, hoursPerHalfDay, workAddress1, workAddress2,
+								workCity, workState, workZipcode, workCountry, paymentTerms, primarySalesPersonID, primarySalesPercentage, secondarySalesPersonID, secondarySalesPercentage, tertiarySalesPersonID, tertiarySalesPercentage,
+								primaryRecruiterID, primaryRecruiterPercentage, secondaryRecruiterID, secondaryRecruiterPercentage, tertiaryRecruiterID, tertiaryRecruiterPercentage);
 						//
 						invoiceDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "createBillingRecord", "Update Successful");
 						//
@@ -213,13 +213,13 @@ public class InvoiceService extends AbstractService {
 		}
 	}
 	
-	public Boolean updateBillingRecord(JobDivaSession jobDivaSession, Boolean allowEnterTimeOnPortal, Integer approved, Double assignmentID, Long billingContactID, Integer billingUnit, Double billRate, String billRatePer, Long candidateID,
-			String customerRefNo, Long division, Double doubletimePer, Double doubletimeRate, String doubletimeRatePer, Boolean enableTimesheet, Date endDate, Boolean expenseEnabled, Integer expenseInvoices, Integer frequency, Long hiringManagerID,
-			Double hoursPerDay, Double hoursPerHalfDay, Integer invoiceContent, String invoiceGroup, Integer invoiceGroupIndex, Double jobID, Integer overtimeByWorkingState, Boolean overtimeExempt, Double overtimeRate, String overtimeRatePer,
-			String paymentTerms, Long primaryRecruiterID, Double primaryRecruiterPercentage, Double primarySalesPercentage, Long primarySalesPersonID, Integer recordID, Long secondaryRecruiterID, Double secondaryRecruiterPercentage,
-			Double secondarySalesPercentage, Long secondarySalesPersonID, Date startDate, Long tertiaryRecruiterID, Double tertiaryRecruiterPercentage, Double tertiarySalesPercentage, Long tertiarySalesPersonID, Long timesheetEntryFormat,
-			String timesheetInstruction, String vMSEmployeeName, String vMSWebsite, Integer weekEnding, String workAddress1, String workAddress2, String workCity, String workCountry, String workState, String workZipcode, Userfield[] userfields)
-			throws Exception {
+	public Boolean updateBillingRecord(JobDivaSession jobDivaSession, Boolean allowEnterTimeOnPortal, Boolean approved, Double assignmentID, Long billingContactID, Integer billingUnit, Double billRate, Integer billRateCurrrency, String billRatePer,
+			Long candidateID, String customerRefNo, Long division, Double doubletimePer, Double doubletimeRate, String doubletimeRatePer, Boolean enableTimesheet, Date endDate, Boolean expenseEnabled, Integer expenseInvoices, Integer frequency,
+			Integer biweeklySchedule, Long hiringManagerID, Double hoursPerDay, Double hoursPerHalfDay, Integer invoiceContent, String invoiceGroup, Integer invoiceGroupIndex, Double jobID, Integer overtimeByWorkingState, Boolean overtimeExempt,
+			Double overtimeRate, String overtimeRatePer, String paymentTerms, Long primaryRecruiterID, Double primaryRecruiterPercentage, Double primarySalesPercentage, Long primarySalesPersonID, Integer recordID, Long secondaryRecruiterID,
+			Double secondaryRecruiterPercentage, Double secondarySalesPercentage, Long secondarySalesPersonID, Date startDate, Long tertiaryRecruiterID, Double tertiaryRecruiterPercentage, Double tertiarySalesPercentage, Long tertiarySalesPersonID,
+			Long timesheetEntryFormat, String timesheetInstruction, String vMSEmployeeName, String vMSWebsite, Integer weekEnding, String workAddress1, String workAddress2, String workCity, String workCountry, String workState, String workZipcode,
+			Userfield[] userfields) throws Exception {
 		//
 		try {
 			//
@@ -229,11 +229,11 @@ public class InvoiceService extends AbstractService {
 				public Boolean doInTransaction(TransactionStatus status) {
 					try {
 						//
-						Boolean success = updateBillingRecordDao.updateBillingRecord(jobDivaSession, allowEnterTimeOnPortal, approved, assignmentID, billingContactID, billingUnit, billRate, billRatePer, candidateID, customerRefNo, division,
-								doubletimePer, doubletimeRate, doubletimeRatePer, enableTimesheet, endDate, expenseEnabled, expenseInvoices, frequency, hiringManagerID, hoursPerDay, hoursPerHalfDay, invoiceContent, invoiceGroup, invoiceGroupIndex,
-								jobID, overtimeByWorkingState, overtimeExempt, overtimeRate, overtimeRatePer, paymentTerms, primaryRecruiterID, primaryRecruiterPercentage, primarySalesPercentage, primarySalesPersonID, recordID, secondaryRecruiterID,
-								secondaryRecruiterPercentage, secondarySalesPercentage, secondarySalesPersonID, startDate, tertiaryRecruiterID, tertiaryRecruiterPercentage, tertiarySalesPercentage, tertiarySalesPersonID, timesheetEntryFormat,
-								timesheetInstruction, vMSEmployeeName, vMSWebsite, weekEnding, workAddress1, workAddress2, workCity, workCountry, workState, workZipcode, userfields);
+						Boolean success = updateBillingRecordDao.updateBillingRecord(jobDivaSession, allowEnterTimeOnPortal, approved, assignmentID, billingContactID, billingUnit, billRate, billRateCurrrency, billRatePer, candidateID, customerRefNo,
+								division, doubletimePer, doubletimeRate, doubletimeRatePer, enableTimesheet, endDate, expenseEnabled, expenseInvoices, frequency, biweeklySchedule, hiringManagerID, hoursPerDay, hoursPerHalfDay, invoiceContent,
+								invoiceGroup, invoiceGroupIndex, jobID, overtimeByWorkingState, overtimeExempt, overtimeRate, overtimeRatePer, paymentTerms, primaryRecruiterID, primaryRecruiterPercentage, primarySalesPercentage, primarySalesPersonID,
+								recordID, secondaryRecruiterID, secondaryRecruiterPercentage, secondarySalesPercentage, secondarySalesPersonID, startDate, tertiaryRecruiterID, tertiaryRecruiterPercentage, tertiarySalesPercentage,
+								tertiarySalesPersonID, timesheetEntryFormat, timesheetInstruction, vMSEmployeeName, vMSWebsite, weekEnding, workAddress1, workAddress2, workCity, workCountry, workState, workZipcode, userfields);
 						//
 						invoiceDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateBillingRecord", "Update Successful");
 						//
@@ -255,9 +255,9 @@ public class InvoiceService extends AbstractService {
 		}
 	}
 	
-	public Boolean UpdatePayRecord(JobDivaSession jobDivaSession, String aDPCOCODE, String aDPPAYFREQUENCY, Boolean approved, Double assignmentID, Long candidateID, Double doubletimeRate, String doubletimeRatePer, Date effectiveDate, //
+	public Boolean updatePayRecord(JobDivaSession jobDivaSession, String aDPCOCODE, String aDPPAYFREQUENCY, Boolean approved, Double assignmentID, Long candidateID, Double doubletimeRate, String doubletimeRatePer, Date startDate, //
 			Date endDate, String fileNo, Double otherExpenses, String otherExpensesPer, Double outsideCommission, String outsideCommissionPer, Boolean overtimeExempt, Double overtimeRate, //
-			String overtimeRatePer, String paymentTerms, Boolean payOnRemittance, Double perDiem, String perDiemPer, Integer recordID, Double salary, String salaryPer, Integer status1, //
+			String overtimeRatePer, String paymentTerms, Boolean payOnRemittance, Double perDiem, String perDiemPer, Integer recordID, Double salary, String salaryPer, Integer salaryPerCurrency, Integer status1, //
 			Long subcontractCompanyID, String taxID, Userfield[] userfields) throws Exception {
 		//
 		try {
@@ -268,9 +268,9 @@ public class InvoiceService extends AbstractService {
 				public Boolean doInTransaction(TransactionStatus status) {
 					try {
 						//
-						Boolean success = updatePayRecordDao.UpdatePayRecord(jobDivaSession, aDPCOCODE, aDPPAYFREQUENCY, approved, assignmentID, candidateID, doubletimeRate, doubletimeRatePer, effectiveDate, endDate, fileNo, otherExpenses,
-								otherExpensesPer, outsideCommission, outsideCommissionPer, overtimeExempt, overtimeRate, overtimeRatePer, paymentTerms, payOnRemittance, perDiem, perDiemPer, recordID, salary, salaryPer, status1, subcontractCompanyID,
-								taxID, userfields);
+						Boolean success = updatePayRecordDao.updatePayRecord(jobDivaSession, aDPCOCODE, aDPPAYFREQUENCY, approved, assignmentID, candidateID, doubletimeRate, doubletimeRatePer, startDate, endDate, fileNo, otherExpenses,
+								otherExpensesPer, outsideCommission, outsideCommissionPer, overtimeExempt, overtimeRate, overtimeRatePer, paymentTerms, payOnRemittance, perDiem, perDiemPer, recordID, salary, salaryPer, salaryPerCurrency, status1,
+								subcontractCompanyID, taxID, userfields);
 						//
 						invoiceDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "UpdatePayRecord", "Update Successful");
 						//
@@ -294,8 +294,8 @@ public class InvoiceService extends AbstractService {
 	
 	public Integer createPayRecord(JobDivaSession jobDivaSession, Long candidateID, Double assignmentID, Long jobID,
 			/* Integer recordID, */ Boolean approved, Long createdByID, Date effectiveDate, Date endDate, Integer status1, String taxID, String paymentTerms, Long subcontractCompanyID, Boolean payOnRemittance, Double salary, String salaryPer,
-			Double perDiem, String perDiemPer, Double otherExpenses, String otherExpensesPer, Double outsideCommission, String outsideCommissionPer, Double overtimeRate, String overtimeRatePer, Double doubletimeRate, String doubletimeRatePer,
-			Boolean overtimeExempt, String fileNo, String aDPCOCODE, String aDPPAYFREQUENCY) throws Exception {
+			Integer salaryPerCurrency, Double perDiem, String perDiemPer, Double otherExpenses, String otherExpensesPer, Double outsideCommission, String outsideCommissionPer, Double overtimeRate, String overtimeRatePer, Double doubletimeRate,
+			String doubletimeRatePer, Boolean overtimeExempt, String fileNo, String aDPCOCODE, String aDPPAYFREQUENCY) throws Exception {
 		//
 		try {
 			//
@@ -306,8 +306,8 @@ public class InvoiceService extends AbstractService {
 					try {
 						//
 						Integer recordId = createPayRecordDao.createPayRecord(jobDivaSession, candidateID, assignmentID, jobID,
-								/* recordID, */ approved, createdByID, effectiveDate, endDate, status1, taxID, paymentTerms, subcontractCompanyID, payOnRemittance, salary, salaryPer, perDiem, perDiemPer, otherExpenses, otherExpensesPer,
-								outsideCommission, outsideCommissionPer, overtimeRate, overtimeRatePer, doubletimeRate, doubletimeRatePer, overtimeExempt, fileNo, aDPCOCODE, aDPPAYFREQUENCY);
+								/* recordID, */ approved, createdByID, effectiveDate, endDate, status1, taxID, paymentTerms, subcontractCompanyID, payOnRemittance, salary, salaryPer, salaryPerCurrency, perDiem, perDiemPer, otherExpenses,
+								otherExpensesPer, outsideCommission, outsideCommissionPer, overtimeRate, overtimeRatePer, doubletimeRate, doubletimeRatePer, overtimeExempt, fileNo, aDPCOCODE, aDPPAYFREQUENCY);
 						//
 						invoiceDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "CreatePayRecord", "Create Successful");
 						//
