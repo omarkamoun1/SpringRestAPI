@@ -13,6 +13,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import com.jobdiva.api.dao.event.EventDao;
 import com.jobdiva.api.model.EventNotification;
 import com.jobdiva.api.model.Timezone;
+import com.jobdiva.api.model.Event;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 
 @Service
@@ -170,5 +171,22 @@ public class EventService extends AbstractService {
 	public Boolean test(JobDivaSession jobDivaSession) throws Exception {
 		//
 		return eventDao.test(jobDivaSession);
+	}
+
+	public List<Event> searchEvents(JobDivaSession jobDivaSession, Long recruiterId, Date eventDate, Date eventEndDate) throws Exception {
+		try {
+			//
+			List<Event> events = eventDao.searchEvents(jobDivaSession, recruiterId, eventDate, eventEndDate);
+			//
+			eventDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "searchEvents", "Search Successful ");
+			//
+			return events;
+			//
+		} catch (Exception e) {
+			//
+			eventDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "searchEvents", "Search Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+		}
 	}
 }

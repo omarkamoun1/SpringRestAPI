@@ -5,16 +5,23 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
 import java.util.regex.Matcher;
 
+import org.osaf.cosmo.calendar.Instance;
+import org.osaf.cosmo.calendar.InstanceList;
+import org.osaf.cosmo.calendar.RecurrenceExpander;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -32,8 +39,27 @@ import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.dao.candidate.CandidateDao;
 import com.jobdiva.api.model.Candidate;
 import com.jobdiva.api.model.EventNotification;
+import com.jobdiva.api.model.JobUserSimple;
 import com.jobdiva.api.model.Timezone;
+import com.jobdiva.api.model.Event;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
+
+import net.fortuna.ical4j.model.DateList;
+import net.fortuna.ical4j.model.Recur;
+import net.fortuna.ical4j.model.TimeZoneRegistry;
+import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.component.VTimeZone;
+import net.fortuna.ical4j.model.property.CalScale;
+import net.fortuna.ical4j.model.property.DtEnd;
+import net.fortuna.ical4j.model.property.DtStart;
+import net.fortuna.ical4j.model.property.ExDate;
+import net.fortuna.ical4j.model.property.ProdId;
+import net.fortuna.ical4j.model.property.RRule;
+import net.fortuna.ical4j.model.property.RecurrenceId;
+import net.fortuna.ical4j.model.property.Sequence;
+import net.fortuna.ical4j.model.property.Uid;
+import net.fortuna.ical4j.model.property.Version;
 
 @Component
 public class EventDao extends AbstractJobDivaDao {
@@ -1041,4 +1067,268 @@ public class EventDao extends AbstractJobDivaDao {
 		// throw new Exception("dd");
 		//
 	}
+
+	public List<Event> searchEvents(JobDivaSession jobDivaSession, Long recruiterId, Date eventDate, Date eventEndDate) throws SQLException, Exception {
+
+		String sql = "SELECT e.ID, e.RECRUITERID, e.EVENTDATE, e.EVENTTYPE, e.PRIORITY, e.DURATION, e.REMINDER, e.REMINDER_FROM, e.REMINDER_REPEAT, e.NOTES, e.STATUS, e.RESULT, e.TITLE, "
+				+ "e.DATETYPE, e.TEAMID, e.OPTIONAL, e.PRIVATE, e.LEADTIME, e.LAGTIME, e.DATECREATED, e.ACTIVITYID, e.CANDIDATEID, e.LASTMODIFIED, e.WHOLE_DAY, e.rdate, "
+				+ "e.rrule,e.exdate,e.exrule, e.FLOATING, e.TRANSP, e.PRIVACY, e.RULE_DTSTART, e.RULE_FREQ, e.RULE_INTERVAL, e.RULE_BYDAY, e.RULE_BYMONTHDAY, e.EV_ID, "
+				+ "e.DTEND, e.LOCATION, e.STATUS_NEW, e.EXCHANGE_UID, e.REMINDER_FROM, e.REMINDER_REPEAT, e.REMINDER_LASTSENT,e.TIMEZONE, nvl(e.EVENTTYPE,-1) AS EVENTTYPE2, "
+				+ "case when e.recruiterid > 0 then (select to_char(r.FIRSTNAME)||' '||to_char(r.LASTNAME) from trecruiter r where r.id = e.recruiterid) "
+				+ "else (select to_char(nvl(re.sync_displayname,re.sync_email))||' (External)' from trecruiterevent re where re.eventid=e.id and re.isorganizer=1 ) "
+				+ "end as ownerName, (select typename from TEVENTTYPE et where et.id = e.eventtype and et.teamid = e.teamid) as eventTypeName, (select COUNT(*) from TEVENT_CONTACTS where EVENTID = e.ID) as contactNumber, "
+				+ "(select c.FIRSTNAME||' '||c.LASTNAME from tcustomer c where c.id = e.customerid and c.teamid = e.teamid) as contact_name, (select c.FIRSTNAME||' '||c.LASTNAME "
+				+ "from tcandidate c where c.id = e.candidateid and c.teamid = e.teamid) as candidate_name, nvl(e.EVENTTYPE,-1) EVENTTYPE, e.source, e.sync_defaultowner, e.globalid, e.seq, e.recur_id "
+				+ "FROM tevent e, trecruiterevent a where e.teamid=? and (e.eventdate between ? and ? ) and e.optional in (0,1,3) "
+				+ "AND e.status_new = 'ACTIVE' and a.eventid(+)=e.id and a.recruiterid(+)=? and (e.recruiterid=? or a.recruiterid=? and nvl(a.responsestatus,0) <> 2)";
+
+		Object[] params = new Object[] { jobDivaSession.getTeamId(), eventDate, eventEndDate, recruiterId, recruiterId, recruiterId };
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		List<Event> events = new ArrayList<Event>();
+		jdbcTemplate.query(sql, params, new RowMapper<Event>() {
+
+			@Override
+			public Event mapRow(ResultSet rs, int rowNum) throws SQLException {
+				Event event = new Event();
+				event.setEventId(rs.getString("ID"));
+				event.setSubject("\"" + rs.getString("TITLE") + "\"");
+				Calendar tempc = new GregorianCalendar();
+				tempc.setTimeInMillis(rs.getTimestamp("EVENTDATE").getTime());
+				event.setEventDate(tempc);
+				
+				if (rs.getDate("DTEND") != null) {
+					tempc=new GregorianCalendar();
+					tempc.setTimeInMillis(rs.getTimestamp("DTEND").getTime());
+					event.setEventEndDate(tempc);
+				}
+				
+				event.setDuration(rs.getInt("DURATION"));
+				event.setIsPrivate(rs.getInt("PRIVATE")==1);
+				event.setPriority(rs.getInt("PRIORITY"));
+				event.setCandidateId(rs.getLong("CANDIDATEID"));
+				event.setCandidateName(rs.getString("CANDIDATE_NAME"));
+				event.setOwnerName(rs.getString("OWNERNAME"));
+				event.setLeadTime(rs.getInt("LEADTIME"));
+				event.setLagTime(rs.getInt("LAGTIME"));
+				event.setIsWholeDayEvent(rs.getInt("WHOLE_DAY")==1);
+				event.setTimezone("\"" + rs.getString("TIMEZONE") + "\"");
+				event.setLocation(rs.getString("LOCATION"));
+				event.setReminder(rs.getInt("REMINDER_FROM"));
+				event.setReminderRepeat(rs.getInt("REMINDER_REPEAT"));
+				event.setDescription(rs.getString("NOTES"));
+				event.setDateType(rs.getString("DATETYPE"));
+				event.setEventType(rs.getInt("EVENTTYPE"));
+				event.setEventTypeName(rs.getString("EVENTTYPENAME"));
+				event.setContactNumber(rs.getInt("CONTACTNUMBER"));
+				event.setrDate(rs.getString("RDATE"));
+				event.setrRule(rs.getString("RRULE"));
+				event.setExDate(rs.getString("EXDATE"));
+				event.setRecruiterId(rs.getString("RECUR_ID"));
+				event.setRSeq(rs.getInt("seq"));
+				event.setActivityId(rs.getString("globalid"));
+				
+				boolean isRule = !isEmpty(rs.getString("RDATE")) || !isEmpty(rs.getString("RRULE")) || !isEmpty(rs.getString("RECUR_ID"));
+				if(!isRule || event.getRecruiterId()!=null){
+					if(rs.getTimestamp("DTEND") != null ){
+						Calendar calendar = Calendar.getInstance();
+						calendar.setTime(rs.getTimestamp("DTEND"));
+						event.setEventEndDate(calendar);
+					} else if( rs.getInt("DURATION") > -1 ){
+						Date endDate = event.getEventDate().getTime(); 
+						int DURATION = rs.getInt("DURATION");
+						if(DURATION == 0) DURATION = 45;		
+						endDate.setTime( endDate.getTime() + DURATION * 60 * 1000 );
+						Calendar calendar = Calendar.getInstance();
+						calendar.setTime(endDate);
+						event.setEventEndDate(calendar);
+					}
+				}else{
+					if( rs.getInt("DURATION") > -1 ){
+						Date endDate = event.getEventDate().getTime(); 
+						int DURATION = rs.getInt("DURATION");
+						if(DURATION == 0) DURATION = 45;		
+						endDate.setTime( endDate.getTime() + DURATION * 60 * 1000 );
+						Calendar calendar = Calendar.getInstance();
+						calendar.setTime(endDate);
+						event.setEventEndDate(calendar);
+					}
+				}
+				
+				ArrayList<JobUserSimple> attendees = new ArrayList<JobUserSimple>();
+				String sql = "select re.RECRUITERID, r.FIRSTNAME, r.LASTNAME from TRECRUITER r, TRECRUITEREVENT re where re.EVENTID = ? and re.RECRUITERID = r.id and re.teamid = ? and r.active=1 ";
+                Object[] params = new Object[] { event.getEventId(), jobDivaSession.getTeamId() };
+                jdbcTemplate.query(sql, params, new RowMapper<JobUserSimple>() {
+
+        			@Override
+        			public JobUserSimple mapRow(ResultSet rs, int rowNum) throws SQLException {
+        				JobUserSimple user = new JobUserSimple();
+                        user.setRecruiterId(rs.getLong(1));
+                        user.setFirstName(rs.getString(2));
+                        user.setLastName(rs.getString(3));
+                        attendees.add(user);
+        				return user;
+        			}
+        		});
+                
+                
+                long recid = rs.getLong("RECRUITERID");
+                try {
+					ArrayList<Event> rendered = multiplyRecurrentEvents(event, eventDate, eventEndDate, recid, jobDivaSession.getTeamId(), 
+							rs.getInt("PRIVATE") == 1 && recid != recruiterId, TimeZone.getTimeZone(event.getTimezone() == null ? "America/New_York": event.getTimezone()));
+					
+					for(Event event1 : rendered){
+						event1.setUsers(attendees.toArray(new JobUserSimple[attendees.size()]));
+						events.add(event1);
+	                }
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+             
+				return event;
+			}
+		});
+		return events;
+	}
+	
+	
+	public ArrayList<Event> multiplyRecurrentEvents(Event eventRef, Date from, Date to, Long loggedId, Long TeamId, Boolean isPrivate, TimeZone teamTimeZone) throws Exception {
+		ArrayList<Event> rendered = new ArrayList<Event>();	
+		
+		try {
+			boolean isRule = !isEmpty(eventRef.getrDate()) || !isEmpty(eventRef.getrRule()) || !isEmpty(eventRef.getRecruiterId());
+			if(!isRule){
+				rendered.add(eventRef);
+				return rendered;
+			}
+		
+		TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
+		net.fortuna.ical4j.model.TimeZone timezone = registry.getTimeZone(eventRef.getTimezone() == null? "America/New_York": eventRef.getTimezone());
+		
+		if(eventRef.getTimezone()==null||eventRef.getTimezone().length()==0){
+			throw new Exception("TimeZone must be specified for recurrence event");
+		}
+		
+		from=fnc_toLocalTime(from, TimeZone.getTimeZone(eventRef.getTimezone() == null? "America/New_York": eventRef.getTimezone()));
+		//log("multiplyRecurrentEvents", "come here after from before to: "+from );
+		to=fnc_toLocalTime(to, TimeZone.getTimeZone(eventRef.getTimezone() == null? "America/New_York": eventRef.getTimezone()));
+		//log("multiplyRecurrentEvents", "from:"+from+"  to:"+to);
+		java.util.Calendar queryFrom = java.util.Calendar.getInstance();
+		queryFrom.setTimeZone(timezone);
+		queryFrom.setTime(from);
+		queryFrom.set(java.util.Calendar.MILLISECOND, 0);
+		java.util.Calendar queryTo = java.util.Calendar.getInstance();
+		queryTo.setTimeZone(timezone);
+		queryTo.setTime(to);
+		queryTo.set(java.util.Calendar.MILLISECOND, 0);
+		Hashtable<Date, Event> overrideEvents = new Hashtable<Date, Event>();
+		List<Event> masterEventContainer = new ArrayList<Event>();
+		
+		net.fortuna.ical4j.model.Calendar calendar = getCalendar(eventRef, overrideEvents, masterEventContainer);
+		if(masterEventContainer.size()==0) return rendered;
+		Event masterEvent = masterEventContainer.get(0);
+		InstanceList insList = new RecurrenceExpander().getOcurrences(calendar, getDate(queryFrom), getDate(queryTo), timezone);
+		Set<Map.Entry<String, Instance>> set = insList.entrySet();
+		for (Map.Entry<String, Instance> entry : set){
+			Instance instance = entry.getValue();
+			Event repeatedEvent;
+			if(overrideEvents.containsKey(instance.getRid())){
+				repeatedEvent = (Event) deepClone(overrideEvents.get((java.util.Date)instance.getRid()));
+			}else{
+				repeatedEvent = (Event) deepClone(masterEvent);			
+			}
+			
+			java.util.Calendar theCalendar = java.util.Calendar.getInstance();
+			theCalendar.setTime(fnc_toServerTime(instance.getStart(), TimeZone.getTimeZone(eventRef.getTimezone() == null? "America/New_York": eventRef.getTimezone())));
+			repeatedEvent.setEventDate(theCalendar);
+			
+			theCalendar = java.util.Calendar.getInstance();
+			theCalendar.setTime(fnc_toServerTime(instance.getEnd(), TimeZone.getTimeZone(eventRef.getTimezone() == null? "America/New_York": eventRef.getTimezone())));
+			repeatedEvent.setEventEndDate(theCalendar);
+			rendered.add(repeatedEvent);
+		 }
+		}catch(Exception ex) { ex.printStackTrace(); }
+		return rendered;
+	}
+	
+	public net.fortuna.ical4j.model.Calendar getCalendar(Event event, Hashtable<Date, Event> overrideEvents, List<Event> masterEventContainer) throws SQLException, Exception{
+		String strTimeZone = (event.getTimezone() == null || event.getTimezone().equals("")) ? "America/New_York" : event.getTimezone();
+		TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
+		net.fortuna.ical4j.model.TimeZone timezone = registry.getTimeZone(strTimeZone);
+		VTimeZone tz = timezone.getVTimeZone();
+        net.fortuna.ical4j.model.Calendar calendar = new net.fortuna.ical4j.model.Calendar();
+        calendar.getProperties().add(new ProdId("-//JobDiva//Calendar//EN"));
+        calendar.getProperties().add(Version.VERSION_2_0);
+        calendar.getProperties().add(CalScale.GREGORIAN);			  
+        calendar.getProperties().add(tz.getTimeZoneId());
+        boolean isRule = !isEmpty(event.getrDate()) || !isEmpty(event.getrRule()) || !isEmpty(event.getRecruiterId());
+        if(!isRule) return calendar;
+		
+		
+        java.util.Calendar dtStart = java.util.Calendar.getInstance();
+		dtStart.setTimeZone(timezone);
+		dtStart.setTime(event.getEventDate().getTime());			  
+		dtStart.set(java.util.Calendar.MILLISECOND, 0);
+		java.util.Calendar dtEnd = java.util.Calendar.getInstance();
+		dtEnd.setTimeZone(timezone);
+		dtEnd.setTime(event.getEventEndDate().getTime());
+		dtEnd.set(java.util.Calendar.MILLISECOND, 0);
+		
+		Uid uid = new Uid(event.getActivityId());
+		Event masterEvent = null;
+		if(event.getrRule()!=null&&event.getrRule().length()>0){
+			masterEvent = event;
+			masterEventContainer.add(masterEvent);
+			Recur recur = new Recur(event.getrRule());
+			RRule rrule = new RRule(recur);
+			VEvent rcurEvent = new VEvent();
+			rcurEvent.getProperties().add(tz.getTimeZoneId());
+			rcurEvent.getProperties().add(rrule);
+			rcurEvent.getProperties().add(new DtStart(getDate(dtStart)));
+			rcurEvent.getProperties().add(new DtEnd(getDate(dtEnd)));
+			rcurEvent.getProperties().add(uid);
+			rcurEvent.getProperties().add(new Sequence(event.getRSeq()));
+			
+			if(event.getExDate()!=null&&event.getExDate().length()>0){
+				ArrayList<Date> exdateList = getDateListFromString(event.getExDate());
+				DateList datelist = new DateList();
+				for (Date date : exdateList){
+					java.util.Calendar exDate = java.util.Calendar.getInstance();
+					exDate.setTimeZone(timezone);
+					exDate.setTime(date);						  
+					datelist.add(getDate(exDate));
+				}
+				rcurEvent.getProperties().add(new ExDate(datelist));
+			}
+			calendar.getComponents().add(rcurEvent);
+		  }
+		else if(event.getRecruiterId()!=null){	
+			SimpleDateFormat rfcDateTimeFormatLocal = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+			Date recur_id_date = rfcDateTimeFormatLocal.parse(event.getRecruiterId());
+			overrideEvents.put(recur_id_date, event);
+			  VEvent subEvent = new VEvent();
+			  subEvent.getProperties().add(tz.getTimeZoneId());
+			  subEvent.getProperties().add(new DtStart(getDate(dtStart)));
+			  subEvent.getProperties().add(new DtEnd(getDate(dtEnd)));
+			  subEvent.getProperties().add(uid);
+			  subEvent.getProperties().add(new Sequence(event.getRSeq()));
+			  
+			  
+			  java.util.Calendar updateInstanceDate = java.util.Calendar.getInstance();
+			  updateInstanceDate.setTimeZone(timezone);
+			  updateInstanceDate.setTime(recur_id_date);			  
+			  updateInstanceDate.set(java.util.Calendar.MILLISECOND, 0);
+			  net.fortuna.ical4j.model.Date updateInsDate = getDate(updateInstanceDate);
+			  RecurrenceId recurId = new RecurrenceId(timezone);
+			  recurId.setDate(updateInsDate);
+			  subEvent.getProperties().add(recurId);
+			  calendar.getComponents().add(subEvent);
+		  }else{ //invalid entries. just discard
+		  
+		  }	
+        return calendar;
+    }
 }

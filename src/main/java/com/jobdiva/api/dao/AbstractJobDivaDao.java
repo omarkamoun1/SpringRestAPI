@@ -1,6 +1,10 @@
 package com.jobdiva.api.dao;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.sql.Clob;
@@ -11,7 +15,9 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
@@ -47,6 +53,8 @@ import com.jobdiva.api.model.Team;
 import com.jobdiva.api.model.Userfield;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.utils.StringUtils;
+
+import net.fortuna.ical4j.model.DateTime;
 
 public class AbstractJobDivaDao {
 	
@@ -1313,4 +1321,88 @@ public class AbstractJobDivaDao {
 	      }
 	      return strTexts;
 	    }
+	
+	public Date fnc_toLocalTime(Date inputTime, java.util.TimeZone targetTimezone){
+		try{
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+			sdf2.setTimeZone(targetTimezone);
+			Date outputDate = sdf.parse(sdf2.format(inputTime));
+			return outputDate;
+		}catch(Exception e){
+			e.printStackTrace();
+			java.util.TimeZone baseTimezone = java.util.TimeZone.getTimeZone("America/New_York");
+			return fnc_convertToTimeZone(inputTime,baseTimezone,targetTimezone);
+		}
+    }
+	
+	public Date fnc_convertToTimeZone(Date inputTime, java.util.TimeZone baseTimezone, java.util.TimeZone targetTimezone){
+        int offsetTarget = targetTimezone.getOffset(inputTime.getTime());
+        int offsetBase = baseTimezone.getOffset(inputTime.getTime());
+        int offset = offsetTarget - offsetBase;
+        return toTimezoneTime(inputTime, offset);
+    }
+
+
+    public Date fnc_toServerTime(Date inputTime,java.util.TimeZone baseTimezone){
+       
+		try{
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+			SimpleDateFormat sdf2=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+			sdf2.setTimeZone(baseTimezone);
+			Date outputDate = sdf2.parse(sdf.format(inputTime));
+			return outputDate;
+		}catch(Exception e){
+			e.printStackTrace();
+			java.util.TimeZone targetTimezone = java.util.TimeZone.getTimeZone("America/New_York");
+			return fnc_convertToTimeZone(inputTime,baseTimezone,targetTimezone);	
+		}
+    }
+	
+	public Date toTimezoneTime(Date serverTime, int millisecondsOffset) {
+		if (serverTime != null) {
+			try {
+				Calendar utcCalendar = Calendar.getInstance();
+				utcCalendar.setTime(serverTime);
+				utcCalendar.add(Calendar.MILLISECOND, millisecondsOffset);
+				return utcCalendar.getTime();
+			} catch (Exception e) {
+				e.printStackTrace();
+				return serverTime;
+			}
+		}
+		return null;
+	}
+	
+	public net.fortuna.ical4j.model.Date getDate(Calendar cal){
+		return new DateTime(cal.getTime());
+	}
+	
+	public ArrayList<Date> getDateListFromString(String datelistStr){
+		SimpleDateFormat rfcDateTimeFormatLocal = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+		ArrayList<Date> datelist = new ArrayList<Date>();
+		if(datelistStr==null || datelistStr.equals("")) return datelist;
+		String[] datelistStrArr = datelistStr.split(",");
+		for (String dateStr : datelistStrArr){
+			try{
+				Date d = rfcDateTimeFormatLocal.parse(dateStr);
+				datelist.add(d);
+			}catch(Exception e){}
+		}
+		return datelist;
+	}
+	
+	public Object deepClone(Object object) {
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		    ObjectOutputStream oos = new ObjectOutputStream(baos);
+		    oos.writeObject(object);
+		    ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		    ObjectInputStream ois = new ObjectInputStream(bais);
+		    return ois.readObject();
+		 }catch (Exception e) {
+		    e.printStackTrace();
+		    return null;
+		 }
+	}
 }
