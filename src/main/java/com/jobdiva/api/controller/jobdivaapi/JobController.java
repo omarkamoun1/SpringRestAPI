@@ -689,6 +689,27 @@ public class JobController extends AbstractJobDivaController {
 		//
 	}
 	
+	@RequestMapping(value = "/unassignUserToJob", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Unassign User To Job")
+	public Boolean unassignUserToJob(
+			//
+			//
+			@ApiParam(value = "Job ID", required = true) //
+			@RequestParam(required = true) Long jobId , //
+			//
+			@ApiParam(value = "Recruiter ID", required = true) //
+			@RequestParam(required = true) Long recruiterid  //
+			//
+			)throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("unassignUserToJob");
+		//
+		return jobService.unassignUserToJob(jobDivaSession, jobId,  recruiterid);
+		//
+	}
+	
 	@RequestMapping(value = "/GetJobNotes", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Get Job Notes")
 	public List<Note> GetJobNotes( //

@@ -145,4 +145,33 @@ public class JobUserDao extends AbstractJobDivaDao {
         }
        return true;
 	}
+
+
+
+	public Boolean unassignUserToJob(JobDivaSession jobDivaSession, Long jobId, Long recruiterid) {
+		//
+		String sqlInsert = "delete from tRecruiterRFQ where rfqid=? and recruiterid=? and teamid=? ";
+		//
+		Object[] params = new Object[] {jobId,recruiterid,jobDivaSession.getTeamId()};
+    	//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		jdbcTemplate.update(sqlInsert, params);
+		//
+		//customer
+    	sqlInsert="delete from trfq_customers a where a.teamid=? and a.rfqid=? and a.customerid=(select id from tcustomer x where x.teamid=a.teamid and x.ifrecruiterthenid=?)";
+	    //
+    	params = new Object[] {jobDivaSession.getTeamId(),jobId,recruiterid};
+	    //
+    	jdbcTemplate.update(sqlInsert, params);
+    	//
+    	
+    	// Sync
+        sqlInsert = "UPDATE trfq SET sync_required=2 Where id=?";
+        params = new Object[] {jobId};
+        jdbcTemplate.update(sqlInsert, params);
+        //
+        // Send Email
+		return true;
+	}
 }

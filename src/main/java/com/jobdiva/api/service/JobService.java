@@ -365,4 +365,9 @@ public class JobService extends AbstractService {
 			//
 		}
 	}
+
+	public Boolean unassignUserToJob(JobDivaSession jobDivaSession, Long jobId, Long recruiterid) {
+		
+		return null;
+	}
 }
