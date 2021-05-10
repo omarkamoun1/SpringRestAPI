@@ -1800,7 +1800,7 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 
 	public ChatbotCandidatePackges getCandidatePackges(JobDivaSession jobDivaSession,String email) {
 		long teamid = jobDivaSession.getTeamId();
-		String sql = "select id , firstname ,lastname from tcandidate where upper(email) = ? and teamid = ? ";
+		String sql = "select id , firstname ,lastname from tcandidate where nls_upper(email) = ? and teamid = ? ";
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
 		Object[] params = new Object[] {email.toUpperCase(),teamid};
 		List<ChatbotCandidatePackges> candidates = jdbcTemplate.query(sql, params, new RowMapper<ChatbotCandidatePackges>() {
