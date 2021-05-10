@@ -148,7 +148,7 @@ public class JobUserDao extends AbstractJobDivaDao {
 
 
 
-	public Boolean unassignUserToJob(JobDivaSession jobDivaSession, Long jobId, Long recruiterid) {
+	public Boolean unassignUserFromJob(JobDivaSession jobDivaSession, Long jobId, Long recruiterid) throws Exception{
 		//
 		String sqlInsert = "delete from tRecruiterRFQ where rfqid=? and recruiterid=? and teamid=? ";
 		//

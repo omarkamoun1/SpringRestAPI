@@ -366,8 +366,35 @@ public class JobService extends AbstractService {
 		}
 	}
 
-	public Boolean unassignUserToJob(JobDivaSession jobDivaSession, Long jobId, Long recruiterid) {
-		
-		return null;
+	public Boolean unassignUserFromJob(JobDivaSession jobDivaSession, Long jobId, Long recruiterid) throws Exception {
+		//
+		try {
+			//
+			return inTransaction(new TransactionCallback<Boolean>() {
+				
+				@Override
+				public Boolean doInTransaction(TransactionStatus status) {
+					try {
+						//
+						Boolean result = jobUserDao.unassignUserFromJob(jobDivaSession, jobId, recruiterid);
+						//
+						jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "unassignUserFromJob", "unassign Successful");
+						//
+						return result;
+						//
+					} catch (Exception e) {
+						throw new RuntimeException(e.getMessage());
+					}
+				}
+				//
+			});
+			//
+		} catch (Exception e) {
+			//
+			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "unassignUserFromJob", "unassign Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
+		}
 	}
 }
