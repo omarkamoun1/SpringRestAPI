@@ -398,13 +398,41 @@ public class JobUserDao extends AbstractJobDivaDao {
 
 
 	public Boolean unassignUserFromJob(JobDivaSession jobDivaSession, Long jobId, Long recruiterid) throws Exception{
+		
+		String recruiterEmail="";
+    	String recruiterName="";
+    	int receive_email=0;
+    	String sqlStr = "select rec_email_delete, email, firstname, lastname from trecruiter where groupid=? and id=?"; 
+    	//
+    	Object[] params = new Object[] {jobDivaSession.getTeamId(),recruiterid};
+    	//
+    	JdbcTemplate jdbcTemplate = getJdbcTemplate();
+    	//
+    	 List<List<String>> results = jdbcTemplate.query(sqlStr,params, new RowMapper<List<String>>() {
+ 			
+ 			@Override
+ 			public List<String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+ 			List<String> values= new ArrayList<>();
+ 			values.add(rs.getString (1));
+ 			values.add(rs.getString (2));
+ 			values.add(rs.getString (3));
+ 			values.add(rs.getString (4));
+ 			return values;
+ 			}
+ 		});
+        if (results!=null && results.size()>0) {
+         	List<String> values=results.get(0);
+           if (values!=null && values.size()>0) {
+         	receive_email = Integer.parseInt(values.get(0));
+         	recruiterEmail = values.get(1);
+         	recruiterName = values.get(2)+" "+values.get(3);
+           }
+          }
 		//
 		String sqlInsert = "delete from tRecruiterRFQ where rfqid=? and recruiterid=? and teamid=? ";
 		//
-		Object[] params = new Object[] {jobId,recruiterid,jobDivaSession.getTeamId()};
+		params = new Object[] {jobId,recruiterid,jobDivaSession.getTeamId()};
     	//
-		JdbcTemplate jdbcTemplate = getJdbcTemplate();
-		//
 		jdbcTemplate.update(sqlInsert, params);
 		//
 		//customer
@@ -426,7 +454,9 @@ public class JobUserDao extends AbstractJobDivaDao {
         params = new Object[] {jobId};
         jdbcTemplate.update(sqlInsert, params);
         //
-        // Send Email
+        //Send Email
+        SendEmailJobAssignment(jdbcTemplate, jobId, jobDivaSession.getTeamId(), recruiterid, "", jobDivaSession.getEnvironment().toString(), recruiterEmail, recruiterName, EMAIL_OPTION_UNASSIGN_USER, receive_email==1, jobDivaSession.getRecruiterId());
+ 
 		return true;
 	}
 
