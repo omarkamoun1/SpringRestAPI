@@ -1080,7 +1080,7 @@ public class TimesheetDao extends AbstractJobDivaDao {
 			w.setBillrateunit(week.getBillrateper());
 		if (week.getEmployeeid() != null)
 			w.setCandidateid(week.getEmployeeid());
-		w.setComments(week.getComments() + "|" + week.getEmployeeName());
+		w.setComments("\"" + week.getComments() + "|" + week.getEmployeeName() + "\"");
 		if (week.getEntryformat() != null)
 			w.setEntryformat(week.getEntryformat());
 		w.setRemark(week.getRemark());
