@@ -37,6 +37,7 @@ import com.jobdiva.api.model.Company;
 import com.jobdiva.api.model.Contact;
 import com.jobdiva.api.model.ContactRoleType;
 import com.jobdiva.api.model.Job;
+import com.jobdiva.api.model.JobStatus;
 import com.jobdiva.api.model.JobUser;
 import com.jobdiva.api.model.Skill;
 import com.jobdiva.api.model.TeamRole;
@@ -2610,5 +2611,25 @@ public class JobDao extends AbstractActivityDao {
 			}
 		});
 		return roles;
+	}
+
+	public List<JobStatus> getJobStatus(JobDivaSession jobDivaSession) {
+		String sql = "select id, name, color from trfq_statuses where (id<100 and teamid=0) or (id>=100 and teamid=?) order by id";
+		Object[] params = new Object[] { jobDivaSession.getTeamId() };
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<JobStatus> status = jdbcTemplate.query(sql, params, new RowMapper<JobStatus>() {
+			
+			@Override
+			public JobStatus mapRow(ResultSet rs, int rowNum) throws SQLException {
+				JobStatus jobStatus = new JobStatus();
+				jobStatus.setId(rs.getLong("id"));
+				jobStatus.setName(rs.getString("name"));
+				jobStatus.setColor(rs.getString("color"));
+				return jobStatus;
+			}
+		});
+		return status;
 	}
 }

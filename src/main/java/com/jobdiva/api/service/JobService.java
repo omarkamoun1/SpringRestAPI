@@ -18,6 +18,7 @@ import com.jobdiva.api.model.Activity;
 import com.jobdiva.api.model.Attachment;
 import com.jobdiva.api.model.ContactRoleType;
 import com.jobdiva.api.model.Job;
+import com.jobdiva.api.model.JobStatus;
 import com.jobdiva.api.model.JobUserSimple;
 import com.jobdiva.api.model.Note;
 import com.jobdiva.api.model.Skill;
@@ -424,6 +425,26 @@ public class JobService extends AbstractService {
 		} catch (Exception e) {
 			//
 			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateUserRoleForJob", "update Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
+		}
+	}
+
+	public List<JobStatus> getJobStatus(JobDivaSession jobDivaSession) throws Exception {
+		
+		//
+		try {
+			List<JobStatus> status = jobDao.getJobStatus(jobDivaSession);
+			//
+			//
+			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobStatus", "Get Successful");
+			//
+			return status;
+			//
+		} catch (Exception e) {
+			//
+			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "getJobStatus", "Get Failed, " + e.getMessage());
 			//
 			throw new Exception(e.getMessage());
 			//
