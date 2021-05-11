@@ -676,10 +676,6 @@ public class JobController extends AbstractJobDivaController {
 			@RequestParam(required = true) List<Long> roleIds , //
 			//
 			//
-			@ApiParam(value = "Role IDs", required = false) //
-			@RequestParam(required = false) List<String> flexibleRoleNames , //
-			//
-			//
 			@ApiParam(value = "Job Status", required = true) //
 			@RequestParam(required = true) Integer jobStatus  //
 			//
@@ -689,7 +685,7 @@ public class JobController extends AbstractJobDivaController {
 		//
 		jobDivaSession.checkForAPIPermission("AssignUserToJob");
 		//
-		return jobService.assignUserToJob(jobDivaSession, jobId,  recruiterid, roleIds, flexibleRoleNames, jobStatus);
+		return jobService.assignUserToJob(jobDivaSession, jobId,  recruiterid, roleIds, jobStatus);
 		//
 	}
 	

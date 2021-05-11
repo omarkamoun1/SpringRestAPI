@@ -91,7 +91,7 @@ public class JobUserDao extends AbstractJobDivaDao {
 		jdbcTemplate.update(sqlInsert, params);
 	}
 	
-	public Boolean assignUserToJob(JobDivaSession jobDivaSession, Long rfqid, Long recruiterid, List<Long> roleIds, List<String> flexibleRoleNames , Integer jobstatus) throws Exception{
+	public Boolean assignUserToJob(JobDivaSession jobDivaSession, Long rfqid, Long recruiterid, List<Long> roleIds , Integer jobstatus) throws Exception{
 		
 		String assignedTitle="";
 		int receive_email=0;
@@ -172,13 +172,6 @@ public class JobUserDao extends AbstractJobDivaDao {
 				assignedTitle += "Sales";
 			}
         } 
-        if(flexibleRoleNames!=null)
-        if(!flexibleRoleNames.isEmpty()) {
-        	for(int i=0;i<flexibleRoleNames.size();i++) {
-        		if(assignedTitle!="") assignedTitle+=" and ";
-                assignedTitle+=flexibleRoleNames;
-        	}
-        }
         if(customerID>0){
         	int RoleID = 950;
 	        if (roleIds.contains(996l)) RoleID = 996;   //lead sales
@@ -209,6 +202,29 @@ public class JobUserDao extends AbstractJobDivaDao {
 			//
           }
             
+        }
+        List<String> flexibleRoleNames=new ArrayList<String>();
+        if(roleIds.size()>0) {
+        	for(int j=0;j<roleIds.size();j++) {
+        	sqlStr="select name from TRECRUITER_ROLES where id=? ";
+            params = new Object[] {roleIds.get(j)};
+         	List<String> name = jdbcTemplate.query(sqlStr, params, new RowMapper<String>() {
+      			
+      			@Override
+      			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+      			return rs.getString("name");
+      			}
+      		});
+         	if(name!=null && name.size()>0)
+         	flexibleRoleNames.add(name.get(0));
+        	}
+        }
+        if(flexibleRoleNames!=null)
+        if(!flexibleRoleNames.isEmpty()) {
+        	for(int i=0;i<flexibleRoleNames.size();i++) {
+        		if(assignedTitle!="") assignedTitle+=" and ";
+                assignedTitle+=flexibleRoleNames;
+        	}
         }
         //
         // Sync
