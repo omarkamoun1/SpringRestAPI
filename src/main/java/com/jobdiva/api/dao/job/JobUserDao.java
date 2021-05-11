@@ -3,8 +3,11 @@ package com.jobdiva.api.dao.job;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -464,54 +467,168 @@ public class JobUserDao extends AbstractJobDivaDao {
 
 	public Boolean updateUserRoleForJob(JobDivaSession jobDivaSession, Long jobId, Long recruiterid, List<Long> roleIds) throws Exception{
 	
+		int receive_email=0;
+    	String recruiterEmail="";
+    	String recruiterName="";
+    	String assignedTitle="";
+    	String sqlStr = "select rec_email_delete, email, firstname, lastname from trecruiter where groupid=? and id=?";
+    	Object[] params = new Object[] {jobDivaSession.getTeamId(),recruiterid};
+    	//
+    	JdbcTemplate jdbcTemplate = getJdbcTemplate();
+    	//
+    	List<List<String>> results = jdbcTemplate.query(sqlStr,params, new RowMapper<List<String>>() {
+ 			
+ 			@Override
+ 			public List<String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+ 			List<String> values= new ArrayList<>();
+ 			values.add(rs.getString(1));
+ 			values.add(rs.getString(2));
+ 			values.add(rs.getString(3));
+ 			values.add(rs.getString(4));
+ 			return values;
+ 			}
+ 		});
+        if (results!=null && results.size()>0) {
+         	List<String> values=results.get(0);
+           if (values!=null && values.size()>0) {
+         	receive_email = Integer.parseInt(values.get(0));
+         	recruiterEmail = values.get(1);
+         	recruiterName = values.get(2)+" "+values.get(3);
+           }
+          }
+        //
+        sqlStr = "Select recruiter,lead_recruiter,sales,lead_sales from tRecruiterRFQ " +
+    			"Where rfqid=? and recruiterid=? and teamid=? ";
+		params = new Object[] {jobId, recruiterid, jobDivaSession.getTeamId()};
+		List<List<String>>roles=jdbcTemplate.query(sqlStr, params, new RowMapper<List<String>>() {
+ 			
+ 			@Override
+ 			public List<String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+ 			List<String> values= new ArrayList<>();
+ 			values.add(rs.getString(1));
+ 			values.add(rs.getString(2));
+ 			values.add(rs.getString(3));
+ 			values.add(rs.getString(4));
+ 			return values;
+ 			}
+ 		});
+		List <String> role = new ArrayList<String>();
+		if(roles!=null && roles.size()>0)
+			role=roles.get(0);
+		
+		if(role.size()>=4) {
+		if(role.get(1)=="0" && roleIds.contains(998l)) { // Primary Recruiter
+				assignedTitle+="Primary Recruiter";
+	     }
+		if(role.get(0)=="0" && roleIds.contains(997l)) { // Recruiter
+			if(assignedTitle!="") assignedTitle+=" and ";
+            assignedTitle+="Recruiter";
+		}
+		if(role.get(2)=="0" && roleIds.contains(999l)) { // Sales
+			if(assignedTitle!="") assignedTitle+=" and ";
+            assignedTitle+="Sales";
+		}
+		if(role.get(3)=="0" && roleIds.contains(996l)) { // Primary Sales
+			if(assignedTitle!="") assignedTitle+=" and ";
+            assignedTitle+="Primary Sales";
+		}
+		}
+        //
 		String sqlUpdate = "Update tRecruiterRFQ Set recruiter=?,lead_recruiter=?,sales=?,lead_sales=? " +
     			"Where rfqid=? and recruiterid=? and teamid=? ";
-		//
-		Object[] params = new Object[] {roleIds.contains(997l)?1:0,roleIds.contains(998l)?1:0,roleIds.contains(999l)?1:0,roleIds.contains(996l)?1:0, jobId, recruiterid, jobDivaSession.getTeamId()};
-		//
-		JdbcTemplate jdbcTemplate = getJdbcTemplate();
-		//
+		params = new Object[] {roleIds.contains(997l)?1:0,roleIds.contains(998l)?1:0,roleIds.contains(999l)?1:0,roleIds.contains(996l)?1:0, jobId, recruiterid, jobDivaSession.getTeamId()};
 		jdbcTemplate.update(sqlUpdate, params);
 		//
 	    //customer
 		int RoleID = 950;
-        if (roleIds.contains(996l)) RoleID = 996; //lead sales
-        else if (roleIds.contains(999l)) RoleID = 999; //sales
-        else if (roleIds.contains(998l)) RoleID = 998; //lead recruiter
-        else if (roleIds.contains(997l)) RoleID = 997; //recruiter
-		sqlUpdate="Update trfq_customers a Set roleID=? where teamid=? and rfqid=? and customerid=(select id from tcustomer x where x.teamid=a.teamid and x.ifrecruiterthenid=?) ";
+        if (roleIds.contains(996l)) RoleID = 996; //Lead Sales
+        else if (roleIds.contains(999l)) RoleID = 999; //Sales
+        else if (roleIds.contains(998l)) RoleID = 998; //Lead Recruiter
+        else if (roleIds.contains(997l)) RoleID = 997; //Recruiter
+		//
+        sqlUpdate="Update trfq_customers a Set roleID=? where teamid=? and rfqid=? and customerid=(select id from tcustomer x where x.teamid=a.teamid and x.ifrecruiterthenid=?) ";
     	//
 		params = new Object[] {RoleID,jobDivaSession.getTeamId(),jobId,recruiterid};
 		//
 		jdbcTemplate.update(sqlUpdate, params);
 		//
-		//flexible Roles
-    	String sqlInsert="delete from TRECRUITERRFQ_ROLES where rfqid=? and recruiterid=? and teamid=? ";
-	    //
-        params = new Object[] {jobId,recruiterid,jobDivaSession.getTeamId()};
-	    //
-    	jdbcTemplate.update(sqlInsert, params);
-		//
+    	Boolean leadRecruiter=false;
+        if(roleIds.contains(998l)) leadRecruiter=true;
+        //
 		roleIds.remove(996l); //lead sales
         roleIds.remove(999l); //sales
         roleIds.remove(998l); //lead recruiter
         roleIds.remove(997l); //recruiter
+        //flexible Roles
+        //
+    	String sqlInsert="delete from TRECRUITERRFQ_ROLES where rfqid=? and recruiterid=? and teamid=? ";
+        params = new Object[] {jobId,recruiterid,jobDivaSession.getTeamId()};
+    	jdbcTemplate.update(sqlInsert, params);
+		//
         if(roleIds.size()>0) {
             for(int i=0; i < roleIds.size();i++) {	
             sqlInsert = "insert into TRECRUITERRFQ_ROLES values(?,?,?,?,sysdate)";				
-			//
 			params = new Object[] {jobId,jobDivaSession.getTeamId(),recruiterid,roleIds.get(i)};
-			//
 			jdbcTemplate.update(sqlInsert, params);
-			//
           }
         }
+        //
+        if(roleIds.size()>0) {
+        sqlStr="select id from TRECRUITERRFQ_ROLES where rfqid=? and recruiterid=? and teamid=? ";
+        params = new Object[] {jobId,recruiterid,jobDivaSession.getTeamId()};
+    	List<Long> existingRoleIds = jdbcTemplate.query(sqlStr, params, new RowMapper<Long>() {
+ 			
+ 			@Override
+ 			public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+ 			return rs.getLong("id");
+ 			}
+ 		});
+    	if(existingRoleIds!=null && existingRoleIds.size()>0)
+    	roleIds.removeAll(existingRoleIds);
+        }
+        List<String> flexibleRoleNames=new ArrayList<String>();
+        if(roleIds.size()>0) {
+        	for(int j=0;j<roleIds.size();j++) {
+        	sqlStr="select name from TRECRUITERRFQ_ROLES where rfqid=? and recruiterid=? and teamid=? and id=? ";
+            params = new Object[] {jobId,recruiterid,jobDivaSession.getTeamId(),roleIds.get(j)};
+         	List<String> name = jdbcTemplate.query(sqlStr, params, new RowMapper<String>() {
+      			
+      			@Override
+      			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+      			return rs.getString("name");
+      			}
+      		});
+         	if(name!=null && name.size()>0)
+         	flexibleRoleNames.add(name.get(0));
+        	}
+        }
+        if(flexibleRoleNames!=null)
+            if(!flexibleRoleNames.isEmpty()) {
+            	for(int i=0;i<flexibleRoleNames.size();i++) {
+            		if(assignedTitle!="") assignedTitle+=" and ";
+                    assignedTitle+=flexibleRoleNames;
+            	}
+            }
         // Sync
         sqlInsert = "UPDATE trfq SET sync_required=2 Where id=?";
         params = new Object[] {jobId};
         jdbcTemplate.update(sqlInsert, params);
         //
+        //code added to choose harvest websites
+        if(leadRecruiter) {//only when assigned person is lead recruiter
+	        sqlStr = "delete from twebsites_jobs where teamid=? and rfqid=?";
+	        params = new Object[] {jobDivaSession.getTeamId(),jobId};
+	        jdbcTemplate.update(sqlStr,params);
+            //
+	        sqlStr ="insert into twebsites_jobs (rfqid,teamid,webid,username,isharvest,machine_no) ";
+	        sqlStr += " select ?, teamid, webid, username, isharvest, machine_no from twebsites_recruiters ";
+	        sqlStr += " where teamid=? and recruiterid=?";
+	        params = new Object[] {jobId,jobDivaSession.getTeamId(),recruiterid};
+	        jdbcTemplate.update(sqlStr,params);
+        }
         // Send Email
+        SendEmailJobAssignment(jdbcTemplate,jobId, jobDivaSession.getTeamId(), recruiterid, assignedTitle, jobDivaSession.getEnvironment().toString(), recruiterEmail, recruiterName, EMAIL_OPTION_ASSIGN_USER, receive_email==1, jobDivaSession.getRecruiterId());
+        //
 		return true;
 	}
 }
