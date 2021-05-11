@@ -589,8 +589,8 @@ public class JobUserDao extends AbstractJobDivaDao {
         List<String> flexibleRoleNames=new ArrayList<String>();
         if(roleIds.size()>0) {
         	for(int j=0;j<roleIds.size();j++) {
-        	sqlStr="select name from TRECRUITERRFQ_ROLES where rfqid=? and recruiterid=? and teamid=? and id=? ";
-            params = new Object[] {jobId,recruiterid,jobDivaSession.getTeamId(),roleIds.get(j)};
+        	sqlStr="select name from TRECRUITER_ROLES where id=? ";
+            params = new Object[] {roleIds.get(j)};
          	List<String> name = jdbcTemplate.query(sqlStr, params, new RowMapper<String>() {
       			
       			@Override
