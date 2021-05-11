@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jobdiva.api.controller.AbstractJobDivaController;
+import com.jobdiva.api.model.Event;
 import com.jobdiva.api.model.EventNotification;
 import com.jobdiva.api.model.Timezone;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
@@ -291,6 +292,31 @@ public class EventController extends AbstractJobDivaController {
 		jobDivaSession.checkForAPIPermission("test");
 		//
 		return eventService.test(jobDivaSession);
+		//
+	}
+	
+	@RequestMapping(value = "/searchEvents", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Search Contact Events")
+	public List<Event> searchContactEvents( //
+			//
+			@ApiParam(value = "Recruiter ID", required = true) //
+			@RequestParam(required = true) Long recruiterId, //
+			//
+			@ApiParam(value = "The event date [MM/dd/yyyy HH:mm:ss]", required = true) //
+			@RequestParam(required = true) Date eventDate, //
+			//
+			@ApiParam(value = "The event end date", required = true) //
+			@RequestParam(required = true) Date eventEndDate //
+			//
+	//
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("searchEvents");
+		//
+		return eventService.searchEvents(jobDivaSession, recruiterId, eventDate, eventEndDate);
 		//
 	}
 }
