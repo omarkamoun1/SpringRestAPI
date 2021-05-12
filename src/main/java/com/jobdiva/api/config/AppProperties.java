@@ -206,6 +206,9 @@ public class AppProperties {
 	@Value("${jobserveuk.url}")
 	private String				jobserveukUrl;
 	//
+	@Value("${irishjobs.url}")
+	private String				irishjobsUrl;
+	//
 	@Value("${api.server.environment}")
 	private String				apiServerEnvironment;
 	//
@@ -662,6 +665,10 @@ public class AppProperties {
 	
 	public String getJobserveukUrl() {
 		return this.jobserveukUrl;
+	}
+	
+	public String getIrishJobsUrl() {
+		return this.irishjobsUrl;
 	}
 	
 	public String getApiServerEnvironment() {
