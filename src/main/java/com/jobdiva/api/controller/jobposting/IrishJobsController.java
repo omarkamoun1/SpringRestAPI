@@ -10,14 +10,13 @@ import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.service.IrishJobsService;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequestMapping("/api/irishjobs/")
-@Api(value = "IRISHJOBS API", description = "REST API Used For IrishJobs")
+@ApiIgnore
 public class IrishJobsController extends AbstractJobDivaController {
 	
 	@Autowired
