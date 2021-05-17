@@ -223,7 +223,7 @@ public class JobUserDao extends AbstractJobDivaDao {
         if(!flexibleRoleNames.isEmpty()) {
         	for(int i=0;i<flexibleRoleNames.size();i++) {
         		if(assignedTitle!="") assignedTitle+=" and ";
-                assignedTitle+=flexibleRoleNames;
+                assignedTitle+=flexibleRoleNames.get(i);
         	}
         }
         //
@@ -622,7 +622,7 @@ public class JobUserDao extends AbstractJobDivaDao {
             if(!flexibleRoleNames.isEmpty()) {
             	for(int i=0;i<flexibleRoleNames.size();i++) {
             		if(assignedTitle!="") assignedTitle+=" and ";
-                    assignedTitle+=flexibleRoleNames;
+                    assignedTitle+=flexibleRoleNames.get(i);
             	}
             }
         // Sync
