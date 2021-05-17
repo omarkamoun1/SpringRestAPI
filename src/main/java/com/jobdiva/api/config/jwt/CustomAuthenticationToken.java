@@ -29,6 +29,7 @@ public class CustomAuthenticationToken extends UsernamePasswordAuthenticationTok
 	public CustomAuthenticationToken(Object principal, Object credentials, Boolean authenticateWithoutClientId) {
 		super(principal, credentials);
 		this.authenticateWithoutClientId = authenticateWithoutClientId;
+		this.checkApiPermission = false;
 		super.setAuthenticated(false);
 	}
 	
