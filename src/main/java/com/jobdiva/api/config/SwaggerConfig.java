@@ -69,6 +69,7 @@ import com.jobdiva.api.convertor.JsonToSocialNetworkTypeConverter;
 import com.jobdiva.api.convertor.JsonToTerminateAssignmentDefConverter;
 import com.jobdiva.api.convertor.JsonToTerminateStartDefConverter;
 import com.jobdiva.api.convertor.JsonToTimeSheetEntryFormatTypeConverter;
+import com.jobdiva.api.convertor.JsonToTimesheetConverter;
 import com.jobdiva.api.convertor.JsonToTimesheetEntryConverter;
 import com.jobdiva.api.convertor.JsonToTimezoneConverter;
 import com.jobdiva.api.convertor.JsonToTitleSkillCertificationConverter;
@@ -226,6 +227,7 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
 		registry.addConverter(new JsonToAddCandidatesToHotlistDefConverter());
 		registry.addConverter(new JsonToCreateContactHotlistDefConverter());
 		registry.addConverter(new JsonToAddContactToHotlistDefConverter());
+		registry.addConverter(new JsonToTimesheetConverter());
 	}
 	
 	private ApiInfo metaData() {

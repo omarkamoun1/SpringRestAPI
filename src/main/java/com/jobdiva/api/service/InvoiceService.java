@@ -66,7 +66,7 @@ public class InvoiceService extends AbstractService {
 		}
 	}
 	
-	public Boolean approveExpenseEntry(JobDivaSession jobDivaSession, Integer invoiceid, String comments, String[] emailrecipients) throws Exception {
+	public Boolean approveExpenseEntry(JobDivaSession jobDivaSession, Integer expenseId, String comments, String[] emailrecipients, Long approverId) throws Exception {
 		//
 		try {
 			//
@@ -76,7 +76,7 @@ public class InvoiceService extends AbstractService {
 				public Boolean doInTransaction(TransactionStatus status) {
 					try {
 						//
-						Boolean success = invoiceDao.approveExpenseEntry(jobDivaSession, invoiceid, comments, emailrecipients);
+						Boolean success = invoiceDao.approveExpenseEntry(jobDivaSession, expenseId, comments, emailrecipients, approverId);
 						//
 						invoiceDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "approveExpenseEntry", "Approve Successful");
 						//
@@ -98,7 +98,8 @@ public class InvoiceService extends AbstractService {
 		}
 	}
 	
-	public Integer addExpenseEntry(JobDivaSession jobDivaSession, Long employeeid, Date weekendingdate, Date invoicedate, String feedback, String description, ExpenseEntry[] expenses, String[] emailrecipients) throws Exception {
+	public Integer addExpenseEntry(JobDivaSession jobDivaSession, String employeeFirstName, String employeeLastName, Long employeeId, String vmsemployeeId, String expenseExternalId, Date weekendingDate, Date invoiceDate, String employeeComment,
+			String description, ExpenseEntry[] expenses, String[] emailRecipients, Long jobId, Long activityId) throws Exception {
 		//
 		try {
 			//
@@ -108,7 +109,8 @@ public class InvoiceService extends AbstractService {
 				public Integer doInTransaction(TransactionStatus status) {
 					try {
 						//
-						Integer id = invoiceDao.addExpenseEntry(jobDivaSession, employeeid, weekendingdate, invoicedate, feedback, description, expenses, emailrecipients);
+						Integer id = invoiceDao.addExpenseEntry(jobDivaSession, employeeFirstName, employeeLastName, employeeId, vmsemployeeId, expenseExternalId, weekendingDate, invoiceDate, employeeComment, description, expenses, emailRecipients,
+								jobId, activityId);
 						//
 						invoiceDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "addExpenseEntry", "Add Successful");
 						//

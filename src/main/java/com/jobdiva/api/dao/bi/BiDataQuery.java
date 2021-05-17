@@ -552,7 +552,8 @@ public class BiDataQuery {
 				metricName.equals("User Contact Hotlist Detail") || metricName.equals("User Candidate Hotlist Detail") || //
 				metricName.equals("Contact Hotlists Detail") || metricName.equals("Candidate Hotlists Detail") || //
 				metricName.equals("Candidate Notes List Detail") || metricName.equals("Candidate HR Detail") || //
-				metricName.equals("Candidates HR Detail") || metricName.equals("Email Detail")) { //
+				metricName.equals("Candidates HR Detail") || metricName.equals("Email Detail") || metricName.equals("SOW Detail") || //
+				metricName.equals("Expense Detail")) {
 			if (params == null || params.length < 1) {
 				return "Error: Insufficient Parameter.  Please provide record ID.";
 			} else { // check record id
@@ -1245,7 +1246,7 @@ public class BiDataQuery {
 			} else if (metricName.equals("Submittals Detail")) {
 				sql = JDData.SubmittalsDetail(clientID, params, param, colNameToAliasMap);
 			} else if (metricName.equals("Billing Record Detail")) {
-				sql = JDData.billingRecordDetail(clientID, params, param, restriction);
+				sql = JDData.billingRecordDetail(clientID, params, param, restriction, colNameToAliasMap);
 			} else if (metricName.equals("Billing Records Detail")) {
 				sql = JDData.billingRecordsDetail(clientID, params, param, restriction);
 			} else if (metricName.equals("Employee Billing Records Detail")) {
@@ -1290,6 +1291,22 @@ public class BiDataQuery {
 				sql = JDData.adpProfile(clientID, params, param, restriction);
 			} else if (metricName.equals("Candidate Attribute Detail")) {
 				sql = JDData.candidateAttributeDetail(clientID, params, param);
+			} else if (metricName.equals("Candidate Experience Detail")) {
+				sql = JDData.candidateExperienceDetail(clientID, params, param);
+			} else if (metricName.equals("Candidate Education Detail")) {
+				sql = JDData.candidateEducationDetail(clientID, params, param);
+			} else if (metricName.equals("SOW Detail")) {
+				sql = JDData.sowDetail(clientID, params, param);
+			} else if (metricName.equals("Overheads Detail")) {
+				sql = JDData.overheadsDetail(clientID, param);
+			} else if (metricName.equals("Timesheet Breakdown Detail")) {
+				sql = JDData.timesheetBreakdownDetail(clientID, fromDate, toDate, params, param, colNameToAliasMap);
+			} else if (metricName.equals("Task Detail")) {
+				sql = JDData.taskDetail(clientID, params, param);
+			} else if (metricName.equals("Event Detail")) {
+				sql = JDData.eventDetail(clientID, params, param);
+			} else if (metricName.equals("Expense Detail")) {
+				sql = JDData.expenseDetail(clientID, params, param);
 			}
 		} else if (metricName.equals("Jobs List by User by Status")) {
 			// System.out.println("BIData Metric Name: " + metricName);
@@ -1651,8 +1668,6 @@ public class BiDataQuery {
 			sql = JDData.newResumesDownloaded(clientID, fromDate, toDate, param);
 		} else if (metricName.equals("New Expenses")) {
 			sql = JDData.newExpenses(clientID, fromDate, toDate, param);
-		} else if (metricName.equals("Expenses By Id")) {
-			sql = JDData.expensesById(clientID, params, param);
 		} else if (metricName.equals("Candidate On-Boarding Document List")) {
 			sql = JDData.candidateOnboardingDocumentList(clientID, params, param);
 		} else if (metricName.equals("New Positions Count by Division")) {

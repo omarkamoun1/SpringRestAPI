@@ -1856,6 +1856,12 @@ public class JobDao extends AbstractActivityDao {
 		try {
 			Job job = jobs.get(0);
 			//
+			//
+			if (status == null) {
+				status = job.getJobStatus();
+			}
+			//
+			//
 			if (isNotEmpty(optionalref))
 				job.setRfqRefNo(optionalref);
 			//
@@ -2518,6 +2524,7 @@ public class JobDao extends AbstractActivityDao {
 			updateJob(jobDivaSession, job);
 			//
 			return true;
+			//
 		} catch (Exception e) {
 			logger.info("Error: Job " + jobid + " Exception ::  " + e.getMessage());
 			//
@@ -2612,7 +2619,7 @@ public class JobDao extends AbstractActivityDao {
 		});
 		return roles;
 	}
-
+	
 	public List<JobStatus> getJobStatus(JobDivaSession jobDivaSession) {
 		String sql = "select id, name, color from trfq_statuses where (id<100 and teamid=0) or (id>=100 and teamid=?) order by id";
 		Object[] params = new Object[] { jobDivaSession.getTeamId() };

@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,9 @@ import com.jobdiva.api.utils.StringUtils;
 
 @Component
 public class CreateCompanyDao extends AbstractJobDivaDao {
+	
+	@Autowired
+	CompanyNotesDao companyNotesDao;
 	
 	class ParentCompany {
 		
@@ -436,6 +440,8 @@ public class CreateCompanyDao extends AbstractJobDivaDao {
 		updateCompanyOwner(jobDivaSession, companyId, owners);
 		//
 		updateCacheServer(jobDivaSession, companyId, companyname, companytypes);
+		//
+		companyNotesDao.addNote(jobDivaSession, jobDivaSession.getRecruiterId(), companyId, "Company is created through API.");
 		//
 		return companyId;
 	}
