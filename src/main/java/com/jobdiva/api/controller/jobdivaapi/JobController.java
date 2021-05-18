@@ -673,6 +673,44 @@ public class JobController extends AbstractJobDivaController {
 		//
 	}
 	
+	@RequestMapping(value = "/UpdateJobStatus", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Update Job Status")
+	public Boolean UpdateJobStatus(
+			//
+			@ApiParam(value = "Job ID", required = true) //
+			@RequestParam(required = true) Long jobId , //
+			//
+			@ApiParam(value = "User ID", required = true) //
+			@RequestParam(required = true) Long userId , //
+			//
+			@ApiParam(value = "First Name", required = true) //
+			@RequestParam(required = true) String firstName , //
+			//
+			@ApiParam(value = "Last Name", required = true) //
+			@RequestParam(required = true) String lastName , //
+			//
+			@ApiParam(value = "Old Status", required = true) //
+			@RequestParam(required = true) Integer oldStatus , //
+			//
+			@ApiParam(value = "Job Status", required = true) //
+			@RequestParam(required = true) Integer jobStatus,  //
+			//
+			@ApiParam(value = "Old Status Name", required = true) //
+			@RequestParam(required = true) String oldStatusName , //
+			//
+			@ApiParam(value = "Job Status Name", required = true) //
+			@RequestParam(required = true) String jobStatusName  //
+			//
+			) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("UpdateJobStatus");
+		//
+		return jobService.updateJobStatus(jobDivaSession,jobId,userId,firstName,lastName,oldStatus,jobStatus,oldStatusName, jobStatusName);
+		//
+	}
+	
 	@RequestMapping(value = "/AssignUserToJob", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
 	@ApiOperation(value = "Assign User To Job")
 	public Boolean AssignUserToJob(

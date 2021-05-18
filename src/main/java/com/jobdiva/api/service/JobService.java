@@ -450,4 +450,36 @@ public class JobService extends AbstractService {
 			//
 		}
 	}
+
+	public Boolean updateJobStatus(JobDivaSession jobDivaSession, Long jobId, Long userId, String firstName,String lastName, Integer oldStatus, Integer jobStatus, String oldStatusName, String jobStatusName) throws Exception{
+	
+		try {
+			//
+			return inTransaction(new TransactionCallback<Boolean>() {
+				
+				@Override
+				public Boolean doInTransaction(TransactionStatus status) {
+					try {
+						//
+						Boolean result = jobDao.updateJobStatus(jobDivaSession, jobId, userId, firstName, lastName, oldStatus, jobStatus, oldStatusName, jobStatusName);
+						//
+						jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateJobStatus", "update Successful");
+						//
+						return result;
+						//
+					} catch (Exception e) {
+						throw new RuntimeException(e.getMessage());
+					}
+				}
+				//
+			});
+			//
+		} catch (Exception e) {
+			//
+			jobDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "updateJobStatus", "update Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+			//
+		}
+	}
 }

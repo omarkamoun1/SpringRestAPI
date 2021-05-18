@@ -25,7 +25,9 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import com.axelon.mail.SMTPServer;
 import com.axelon.recruiter.RecruiterObject;
+import com.axelon.shared.Application;
 import com.jobdiva.api.config.AppProperties;
 import com.jobdiva.api.dao.activity.AbstractActivityDao;
 import com.jobdiva.api.dao.company.SearchCompanyDao;
@@ -2638,5 +2640,105 @@ public class JobDao extends AbstractActivityDao {
 			}
 		});
 		return status;
+	}
+
+	public Boolean updateJobStatus(JobDivaSession jobDivaSession, Long jobId, Long userId, String firstName,String lastName, Integer oldStatus, Integer jobStatus, String oldStatusName, String jobStatusName) throws Exception {
+		
+		String sql="update trfq set jobstatus=?, datelastupdated=?, sync_required=4 where teamid=? and id=?";
+		Object[] params = new Object[] { jobStatus,new Timestamp(new Date().getTime()),jobDivaSession.getTeamId(),jobId};
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		jdbcTemplate.update(sql, params);
+		//
+		sql = "update trecruiterrfq set jobstatus=? where rfqid=?";
+		params=new Object[] {jobStatus,jobId};
+		jdbcTemplate.update(sql,params);
+		//
+		sql = "insert into trfq_statuslog (id, rfqid, prev_status, cur_status, modifier, teamid) "
+                + " values (rfq_log_seq.nextval, ?,?,?,?,?)";
+		params=new Object[] {jobId,oldStatus,jobStatus,userId,jobDivaSession.getTeamId()};
+		jdbcTemplate.update(sql,params);
+		//
+ 	    String str = "The Job Status was changed "+(oldStatus>=0?"from "+oldStatusName+" to "+jobStatusName:"");
+		jobNoteDao.addJobNote(jobDivaSession, jobId, 5, jobDivaSession.getRecruiterId(), 0, str);
+		//
+        if(jobStatus ==0)
+			updateHotlistActivate(jdbcTemplate, 1, jobId, jobDivaSession.getTeamId());
+		else if(oldStatus == 0 )
+			updateHotlistActivate(jdbcTemplate, 0, jobId, jobDivaSession.getTeamId());
+        
+        sendJobstatusNotification(jdbcTemplate, jobDivaSession.getEnvironment().toString(), jobDivaSession.getTeamId(), jobId, jobStatusName, userId, firstName, lastName, oldStatusName);
+		
+		return true;
+	}
+
+	
+	private void sendJobstatusNotification(JdbcTemplate jdbcTemplate,String env, Long teamId, Long jobId, String jobStatusName, Long userId,String firstName, String lastName, String oldStatusName) {
+		//get Job Information
+    	String companyname="", jobtitle="", refno="";
+    	String sql = "SELECT department, rfqtitle, rfqrefno, rfqno_team FROM trfq WHERE teamid = ? AND id = ? ";
+    	Object[] params = new Object[] {teamId,jobId};
+    	List<List<String>> jobdetails=jdbcTemplate.query(sql, params, new RowMapper<List<String>>() {
+			
+			@Override
+			public List<String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+				List<String> resp=new ArrayList<>();
+	 	    	resp.add(deNull(rs.getString(1)));
+	 	    	resp.add(deNull(rs.getString(2)));
+	 	    	resp.add(deNull(rs.getString(3)));
+				return resp;
+			}
+		});
+    	if(jobdetails!=null && jobdetails.size()>0) {
+    		List<String> res=jobdetails.get(0);
+    		companyname=res.get(0);
+ 	    	jobtitle=res.get(1);
+ 	    	refno=res.get(2);
+    	}
+    	
+    	final String fcompanyname=companyname;
+    	final String fjobtitle=jobtitle;
+    	final String frefno=refno;
+    	//get the job owners' preferences and mails
+ 	    sql = "SELECT rec.email, rec.leader, rec.REC_EMAIL_STATUS, recrfq.LEAD_RECRUITER + recrfq.LEAD_SALES role, rec.id as recid "
+	    		  + "FROM trecruiter rec, trecruiterrfq recrfq "
+	              + "WHERE recrfq.teamid = ? "
+	              + "AND recrfq.rfqid = ? "
+	              + "AND rec.id = recrfq.recruiterid ";
+ 	    params = new Object[] {teamId,jobId};
+ 	    
+ 	    String emailLocation="http://www"+env+"jobdiva.com";
+	    SMTPServer mailserver = new SMTPServer();
+	    mailserver.setHost(Application.getSMTPServerLocation());
+	    mailserver.setContentType(SMTPServer.CONTENT_TYPE_HTML);
+	    
+ 	    jdbcTemplate.query(sql,params, new RowMapper<Long>() {
+			
+			@Override
+			public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+				    Boolean sendEmail=true;
+				    String subject = "Job Status changed by " + firstName+" "+lastName;
+			        if (rs.getLong("leader")!=36) sendEmail=false;
+			        String Msg = "This is to inform you that the status of Job Reference # <a href='" + emailLocation + "/employers/open_rfq.jsp?rfqid=" + jobId + "'>" + frefno + "</a> (" + fjobtitle+ ")" + fcompanyname +
+			              " has just been changed by " + firstName+" "+lastName + " from " + oldStatusName + " to " +jobStatusName;
+			        String to = rs.getString(1);
+			        String from = "activity@JobDiva.com";
+			        int status=rs.getInt(3);
+			    	if(status!=1 && status!=2) sendEmail=false;
+			    	else if(status == 2 && rs.getInt(4)<1) sendEmail=false;
+			    	if(sendEmail)
+						try {
+							mailserver.sendMail(to, from, "", "", "", subject, Msg, "");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+			    	return 0l;
+			}
+ 	    });
+	}
+
+	private void updateHotlistActivate(JdbcTemplate jdbcTemplate,int status, Long jobId, Long teamId) {
+		String sql= "update tworkbench set active=? where teamid=? and rfqid=? ";
+		Object[] params = new Object[] { status,teamId,jobId};
+		jdbcTemplate.update(sql,params);
 	}
 }
