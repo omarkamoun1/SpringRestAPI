@@ -14,17 +14,29 @@ import com.jobdiva.api.model.ExpenseEntry;
 @SuppressWarnings("serial")
 public class AddExpenseEntryDef implements Serializable {
 	
-	@JsonProperty(value = "employeeid", required = true)
-	private Long			employeeid;
+	@JsonProperty(value = "employeeFirstName", required = false)
+	private String			employeeFirstName;
 	//
-	@JsonProperty(value = "weekendingdate", required = true)
-	private Date			weekendingdate;
+	@JsonProperty(value = "employeeLastName", required = false)
+	private String			employeeLastName;
 	//
-	@JsonProperty(value = "invoicedate", required = false)
-	private Date			invoicedate;
+	@JsonProperty(value = "employeeId", required = false)
+	private Long			employeeId;
 	//
-	@JsonProperty(value = "feedback", required = false)
-	private String			feedback;
+	@JsonProperty(value = "vmsEmployeeId", required = false)
+	private String			vmsEmployeeId;
+	//
+	@JsonProperty(value = "expenseExternalId", required = false)
+	private String			expenseExternalId;
+	//
+	@JsonProperty(value = "weekendingDate", required = true)
+	private Date			weekendingDate;
+	//
+	@JsonProperty(value = "invoiceDate", required = false)
+	private Date			invoiceDate;
+	//
+	@JsonProperty(value = "employeeComment", required = false)
+	private String			employeeComment;
 	//
 	@JsonProperty(value = "description", required = false)
 	private String			description;
@@ -32,39 +44,77 @@ public class AddExpenseEntryDef implements Serializable {
 	@JsonProperty(value = "expenses", required = true)
 	private ExpenseEntry[]	expenses;
 	//
-	@JsonProperty(value = "emailrecipients", required = false)
-	private String[]		emailrecipients;
+	@JsonProperty(value = "emailEecipients", required = false)
+	private String[]		emailRecipients;
+	//
+	@JsonProperty(value = "jobId", required = false)
+	private Long			jobId;
+	//
+	@JsonProperty(value = "activityId", required = false)
+	private Long			activityId;
 	
-	public Long getEmployeeid() {
-		return employeeid;
+	public String getEmployeeFirstName() {
+		return employeeFirstName;
 	}
 	
-	public void setEmployeeid(Long employeeid) {
-		this.employeeid = employeeid;
+	public void setEmployeeFirstName(String employeeFirstName) {
+		this.employeeFirstName = employeeFirstName;
 	}
 	
-	public Date getWeekendingdate() {
-		return weekendingdate;
+	public String getEmployeeLastName() {
+		return employeeLastName;
 	}
 	
-	public void setWeekendingdate(Date weekendingdate) {
-		this.weekendingdate = weekendingdate;
+	public void setEmployeeLastName(String employeeLastName) {
+		this.employeeLastName = employeeLastName;
 	}
 	
-	public Date getInvoicedate() {
-		return invoicedate;
+	public Long getEmployeeId() {
+		return employeeId;
 	}
 	
-	public void setInvoicedate(Date invoicedate) {
-		this.invoicedate = invoicedate;
+	public void setEmployeeId(Long employeeId) {
+		this.employeeId = employeeId;
 	}
 	
-	public String getFeedback() {
-		return feedback;
+	public String getVmsEmployeeId() {
+		return vmsEmployeeId;
 	}
 	
-	public void setFeedback(String feedback) {
-		this.feedback = feedback;
+	public void setVmsEmployeeId(String vmsEmployeeId) {
+		this.vmsEmployeeId = vmsEmployeeId;
+	}
+	
+	public String getExpenseExternalId() {
+		return expenseExternalId;
+	}
+	
+	public void setExpenseExternalId(String expenseExternalId) {
+		this.expenseExternalId = expenseExternalId;
+	}
+	
+	public Date getWeekendingDate() {
+		return weekendingDate;
+	}
+	
+	public void setWeekendingDate(Date weekendingDate) {
+		this.weekendingDate = weekendingDate;
+	}
+	
+	public Date getInvoiceDate() {
+		return invoiceDate;
+	}
+	
+	public void setInvoiceDate(Date invoiceDate) {
+		this.invoiceDate = invoiceDate;
+	}
+	
+	public String getEmployeeComment() {
+		return employeeComment;
+	}
+	
+	public void setEmployeeComment(String employeeComment) {
+		this.employeeComment = employeeComment;
 	}
 	
 	public String getDescription() {
@@ -83,11 +133,27 @@ public class AddExpenseEntryDef implements Serializable {
 		this.expenses = expenses;
 	}
 	
-	public String[] getEmailrecipients() {
-		return emailrecipients;
+	public String[] getEmailRecipients() {
+		return emailRecipients;
 	}
 	
-	public void setEmailrecipients(String[] emailrecipients) {
-		this.emailrecipients = emailrecipients;
+	public void setEmailRecipients(String[] emailRecipients) {
+		this.emailRecipients = emailRecipients;
+	}
+	
+	public Long getJobId() {
+		return jobId;
+	}
+	
+	public void setJobId(Long jobId) {
+		this.jobId = jobId;
+	}
+	
+	public Long getActivityId() {
+		return activityId;
+	}
+	
+	public void setActivityId(Long activityId) {
+		this.activityId = activityId;
 	}
 }

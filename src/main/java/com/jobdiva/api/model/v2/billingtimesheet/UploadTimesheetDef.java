@@ -14,11 +14,14 @@ import com.jobdiva.api.model.Timesheet;
 @SuppressWarnings("serial")
 public class UploadTimesheetDef implements Serializable {
 	
-	@JsonProperty(value = "employeeid", required = true) //
-	private Long		employeeid;
+	@JsonProperty(value = "employeeId", required = true) //
+	private Long		employeeId;
 	//
-	@JsonProperty(value = "jobid", required = false) //
-	private Long		jobid;
+	@JsonProperty(value = "vmsEmployeeId", required = false) //
+	private String		vmsEmployeeId;
+	//
+	@JsonProperty(value = "jobId", required = false) //
+	private Long		jobId;
 	//
 	@JsonProperty(value = "weekendingdate", required = true) //
 	private Date		weekendingdate;
@@ -26,29 +29,40 @@ public class UploadTimesheetDef implements Serializable {
 	@JsonProperty(value = "approved", required = true) //
 	private Boolean		approved;
 	//
-	@JsonProperty(value = "timesheetId", required = true) //
-	private Long		timesheetId;
-	//
-	@JsonProperty(value = "externalId", required = true) //
+	@JsonProperty(value = "externalId", required = false) //
 	private String		externalId;
+	//
+	@JsonProperty(value = "activityId", required = false) //
+	private Long		activityId;
+	//
+	@JsonProperty(value = "approverId", required = false) //
+	private Long		approverId;
 	//
 	@JsonProperty(value = "timesheet") //
 	private Timesheet[]	timesheet;
 	
-	public Long getEmployeeid() {
-		return employeeid;
+	public Long getEmployeeId() {
+		return employeeId;
 	}
 	
-	public void setEmployeeid(Long employeeid) {
-		this.employeeid = employeeid;
+	public void setEmployeeId(Long employeeId) {
+		this.employeeId = employeeId;
 	}
 	
-	public Long getJobid() {
-		return jobid;
+	public String getVmsEmployeeId() {
+		return vmsEmployeeId;
 	}
 	
-	public void setJobid(Long jobid) {
-		this.jobid = jobid;
+	public void setVmsEmployeeId(String vmsEmployeeId) {
+		this.vmsEmployeeId = vmsEmployeeId;
+	}
+	
+	public Long getJobId() {
+		return jobId;
+	}
+	
+	public void setJobId(Long jobId) {
+		this.jobId = jobId;
 	}
 	
 	public Date getWeekendingdate() {
@@ -67,20 +81,28 @@ public class UploadTimesheetDef implements Serializable {
 		this.approved = approved;
 	}
 	
-	public Long getTimesheetId() {
-		return timesheetId;
-	}
-	
-	public void setTimesheetId(Long timesheetId) {
-		this.timesheetId = timesheetId;
-	}
-	
 	public String getExternalId() {
 		return externalId;
 	}
 	
 	public void setExternalId(String externalId) {
 		this.externalId = externalId;
+	}
+	
+	public Long getActivityId() {
+		return activityId;
+	}
+	
+	public void setActivityId(Long activityId) {
+		this.activityId = activityId;
+	}
+	
+	public Long getApproverId() {
+		return approverId;
+	}
+	
+	public void setApproverId(Long approverId) {
+		this.approverId = approverId;
 	}
 	
 	public Timesheet[] getTimesheet() {

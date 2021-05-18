@@ -118,9 +118,17 @@ public class WebhookRequestDataDao extends AbstractJobDivaDao {
 			JdbcTemplate jdbcTemplate = getJdbcTemplate();
 			//
 			connection = jdbcTemplate.getDataSource().getConnection();
-			if (metricName.equals("Billing Record Detail") || metricName.equals("Deleted Salary Records") || metricName.equals("Employee Billing Records Detail") || metricName.equals("Employee Salary Records Detail")
-					|| metricName.equals("Nesco Dinesol Salary Record Detail") || metricName.equals("New/Updated Billing Records") || metricName.equals("New/Updated Salary Records") || metricName.equals("Rotator All Assignments - V2")
-					|| metricName.equals("Salary Record Detail") || metricName.equals("Salary Records Detail") || metricName.equals("Timesheet Breakdown Detail")) {
+			if (metricName.equals("Billing Record Detail") || //
+					metricName.equals("Deleted Salary Records") || //
+					metricName.equals("Employee Billing Records Detail") || //
+					metricName.equals("Employee Salary Records Detail") || //
+					metricName.equals("Nesco Dinesol Salary Record Detail") || //
+					metricName.equals("New/Updated Billing Records") || //
+					metricName.equals("New/Updated Salary Records") || //
+					metricName.equals("Rotator All Assignments - V2") || //
+					metricName.equals("Salary Record Detail") || //
+					metricName.equals("Salary Records Detail") || //
+					metricName.equals("Timesheet Breakdown Detail")) {
 				// System.out.println("restriction " + restriction.length + ", "
 				// + restriction[0]);
 				parameters = BiDataQuery.constructDynamicParams(connection, metricName, jobDivaSession.getTeamId(), null, null, parameters, param, restriction, colNameToAliasMap);
@@ -449,7 +457,7 @@ public class WebhookRequestDataDao extends AbstractJobDivaDao {
 		//
 		String[] parameters = new String[] { expenseId + "" };
 		//
-		return outputMetric(getBiDataInfo(jobDivaSession, "Expenses By Id", parameters));
+		return outputMetric(getBiDataInfo(jobDivaSession, "Expense Detail", parameters));
 		//
 		//
 	}

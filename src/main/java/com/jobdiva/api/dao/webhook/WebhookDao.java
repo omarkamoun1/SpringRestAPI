@@ -416,35 +416,39 @@ public class WebhookDao extends AbstractJobDivaDao {
 			jsonObject.add("operation", getOperation(webhookRequest.getOperation()));
 			jsonObject.add("id", webhookRequest.getId());
 			//
-			//
-			switch (webhookSyncType) {
-				case JOB:
-					jsonObject.add("data", webhookRequestDataDao.getJob(webhookRequest.getTeamId(), webhookRequest.getId()));
-					break;
-				case CANDIDATE:
-					jsonObject.add("data", webhookRequestDataDao.getCandidate(webhookRequest.getTeamId(), webhookRequest.getId()));
-					break;
-				case COMPANY:
-					jsonObject.add("data", webhookRequestDataDao.getCompany(webhookRequest.getTeamId(), webhookRequest.getId()));
-					break;
-				case CONTACT:
-					jsonObject.add("data", webhookRequestDataDao.getContact(webhookRequest.getTeamId(), webhookRequest.getId()));
-					break;
-				case BILLING:
-					jsonObject.add("data", webhookRequestDataDao.getBillingRecordDetail(webhookRequest.getTeamId(), webhookRequest.getId()));
-					break;
-				case SALARY:
-					jsonObject.add("data", webhookRequestDataDao.getSalaryRecordDetail(webhookRequest.getTeamId(), webhookRequest.getId()));
-					break;
-				case TIMESHEET:
-					jsonObject.add("data", webhookRequestDataDao.getTimeSheet(webhookRequest.getTeamId(), webhookRequest.getId()));
-					break;
-				case EXPENSE:
-					jsonObject.add("data", webhookRequestDataDao.getExpenses(webhookRequest.getTeamId(), webhookRequest.getId()));
-					break;
-				default:
-					break;
+			if (webhookRequest.getOperation().intValue() != 3) {
+				//
+				switch (webhookSyncType) {
+					case JOB:
+						jsonObject.add("data", webhookRequestDataDao.getJob(webhookRequest.getTeamId(), webhookRequest.getId()));
+						break;
+					case CANDIDATE:
+						jsonObject.add("data", webhookRequestDataDao.getCandidate(webhookRequest.getTeamId(), webhookRequest.getId()));
+						break;
+					case COMPANY:
+						jsonObject.add("data", webhookRequestDataDao.getCompany(webhookRequest.getTeamId(), webhookRequest.getId()));
+						break;
+					case CONTACT:
+						jsonObject.add("data", webhookRequestDataDao.getContact(webhookRequest.getTeamId(), webhookRequest.getId()));
+						break;
+					case BILLING:
+						jsonObject.add("data", webhookRequestDataDao.getBillingRecordDetail(webhookRequest.getTeamId(), webhookRequest.getId()));
+						break;
+					case SALARY:
+						jsonObject.add("data", webhookRequestDataDao.getSalaryRecordDetail(webhookRequest.getTeamId(), webhookRequest.getId()));
+						break;
+					case TIMESHEET:
+						jsonObject.add("data", webhookRequestDataDao.getTimeSheet(webhookRequest.getTeamId(), webhookRequest.getId()));
+						break;
+					case EXPENSE:
+						jsonObject.add("data", webhookRequestDataDao.getExpenses(webhookRequest.getTeamId(), webhookRequest.getId()));
+						break;
+					default:
+						break;
+				}
+				//
 			}
+			//
 			send(webhookRequest, jsonObject.toString(), startTime, 0);
 			//
 		}

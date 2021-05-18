@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.service.IrishJobsService;
-import com.jobdiva.api.model.authenticate.JobDivaSession;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -45,14 +44,12 @@ public class IrishJobsController extends AbstractJobDivaController {
 			//
 			@ApiParam(value = "teamid", required = true, type = "String") //
 			@RequestParam(required = true) String teamid //
-			//
+	//
 	//
 	) throws Exception {//
 		//
-		JobDivaSession jobDivaSession = getJobDivaSession();
-		
+		getJobDivaSession();
 		return irishJobsService.request(username, password, action, rfqid, recruiterid, teamid);
-
 	}
 	
 	@ApiOperation(value = "GetSlots")
@@ -71,24 +68,19 @@ public class IrishJobsController extends AbstractJobDivaController {
 			//
 			@ApiParam(value = "teamid", required = true, type = "String") //
 			@RequestParam(required = true) String teamid //
-			//
+	//
 	//
 	) throws Exception {//
 		//
-		JobDivaSession jobDivaSession = getJobDivaSession();
-		
+		getJobDivaSession();
 		return irishJobsService.getSlots(username, password, recruiterid, teamid);
-
 	}
 	
 	@ApiOperation(value = "GetAllLists")
 	@RequestMapping(value = "/getAllLists", method = RequestMethod.GET, produces = "application/json")
 	public String getUnitList() throws Exception {
 		//
-		JobDivaSession jobDivaSession = getJobDivaSession();
-		
+		getJobDivaSession();
 		return irishJobsService.getAllLists();
-
 	}
-	
 }

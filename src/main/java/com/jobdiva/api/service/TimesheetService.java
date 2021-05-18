@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
 
 import com.jobdiva.api.dao.timesheet.TimesheetDao;
 import com.jobdiva.api.model.ExpenseEntry;
@@ -15,16 +17,17 @@ import com.jobdiva.api.model.WeekEndingRecord;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 
 @Service
-public class TimesheetService {
+public class TimesheetService extends AbstractService {
 	
 	@Autowired
 	TimesheetDao timesheetDao;
 	
-	public Long uploadTimesheet(JobDivaSession jobDivaSession, Long employeeid, Long jobid, Date weekendingdate, Boolean approved, Long timesheetId, String externalId, Timesheet[] timesheetEntry) throws Exception {
+	public Long uploadTimesheet(JobDivaSession jobDivaSession, Long employeeid, Long jobid, Date weekendingdate, Boolean approved, String externalId, Timesheet[] timesheetEntry, String vmsemployeeid, Long activityid, Long approverid)
+			throws Exception {
 		//
 		try {
 			//
-			Long result = timesheetDao.uploadTimesheet(jobDivaSession, employeeid, jobid, weekendingdate, approved, timesheetId, externalId, timesheetEntry);
+			Long result = timesheetDao.uploadTimesheet(jobDivaSession, employeeid, jobid, weekendingdate, approved, externalId, timesheetEntry, vmsemployeeid, activityid, approverid);
 			//
 			timesheetDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "uploadTimesheet", "upload Successful");
 			//
@@ -96,6 +99,64 @@ public class TimesheetService {
 			//
 			throw new Exception(e.getMessage());
 			//
+		}
+	}
+	
+	public Boolean deleteTimesheet(JobDivaSession jobDivaSession, Long timesheetId, String externalId) throws Exception {
+		//
+		try {
+			//
+			return inTransaction(new TransactionCallback<Boolean>() {
+				
+				@Override
+				public Boolean doInTransaction(TransactionStatus status) {
+					try {
+						Boolean value = timesheetDao.deleteTimesheet(jobDivaSession, timesheetId, externalId);
+						//
+						timesheetDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "deleteTimesheet", "Delete Successful");
+						//
+						return value;
+					} catch (Exception e) {
+						throw new RuntimeException(e.getMessage());
+					}
+				}
+				//
+			});
+			//
+		} catch (Exception e) {
+			//
+			timesheetDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "deleteTimesheet", "Delete Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
+		}
+	}
+	
+	public Boolean deleteExpense(JobDivaSession jobDivaSession, Long expenseId, String externalId) throws Exception {
+		//
+		try {
+			//
+			return inTransaction(new TransactionCallback<Boolean>() {
+				
+				@Override
+				public Boolean doInTransaction(TransactionStatus status) {
+					try {
+						Boolean value = timesheetDao.deleteExpense(jobDivaSession, expenseId, externalId);
+						//
+						timesheetDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "deleteExpense", "Delete Successful");
+						//
+						return value;
+					} catch (Exception e) {
+						throw new RuntimeException(e.getMessage());
+					}
+				}
+				//
+			});
+			//
+		} catch (Exception e) {
+			//
+			timesheetDao.saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "deleteExpense", "Delete Failed, " + e.getMessage());
+			//
+			throw new Exception(e.getMessage());
 		}
 	}
 }

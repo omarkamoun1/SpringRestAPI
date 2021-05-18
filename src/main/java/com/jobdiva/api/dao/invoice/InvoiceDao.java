@@ -173,16 +173,26 @@ public class InvoiceDao extends AbstractJobDivaDao {
 		return newInvoiceId;
 	}
 	
-	public Boolean approveExpenseEntry(JobDivaSession jobDivaSession, Integer invoiceId, String comments, String[] emailRecipients) throws Exception {
+	public Boolean approveExpenseEntry(JobDivaSession jobDivaSession, Integer expenseId, String comments, String[] emailRecipients, Long approverId) throws Exception {
+		//
+		//
+		if (expenseId == null || expenseId < 1) {
+			throw new Exception("Check Parameters faield : expenseId is required");
+		}
 		//
 		StringBuffer warning = new StringBuffer();
 		Object obj;
 		Object[] params;
 		EmployeeInvoice invoice = new EmployeeInvoice();
-		invoice.setId(Long.valueOf(invoiceId));
+		invoice.setId(Long.valueOf(expenseId));
 		invoice.setRecruiterTeamid(Math.toIntExact(jobDivaSession.getTeamId()));
 		invoice.setApproved(1);
-		invoice.setApproverid(jobDivaSession.getRecruiterId());
+		//
+		if (approverId != null && approverId > 0)
+			invoice.setApproverid(approverId);
+		else
+			invoice.setApproverid(jobDivaSession.getRecruiterId());
+		//
 		invoice.setComments(comments);
 		params = new Object[3];
 		params[0] = new Integer(661);
@@ -209,7 +219,7 @@ public class InvoiceDao extends AbstractJobDivaDao {
 			reqData.add("JobDiva API Notification - Approve Expense Entry");
 			StringBuffer msg = new StringBuffer();
 			msg.append("Method: approveExpenseEntry <br/><br/>");
-			msg.append("Invoice ID: " + invoiceId + "<br/><br/>");
+			msg.append("Expense ID: " + expenseId + "<br/><br/>");
 			if (comments != null)
 				msg.append("Comments: " + comments + "<br/><br/>");
 			reqData.add(msg.toString());
@@ -328,18 +338,152 @@ public class InvoiceDao extends AbstractJobDivaDao {
 		return result;
 	}
 	
-	public Integer addExpenseEntry(JobDivaSession jobDivaSession, Long employeeId, Date weekendingDate, Date invoiceDate, String feedback, String description, ExpenseEntry[] expenses, String[] emailrecipients) throws Exception {
+	private Vector<Object> getEmployeeBillPay(long clientId, String employeeFN, String employeeLN, Long employeeId, String vmsEmployeeId, Date startDate, Long jobId, Long activityId) throws Exception {
+		/*** Get employee Bill record ID, Pay record ID, Employee ID ***/
+		//
+		Vector<Object> result = new Vector<Object>();
+		Object obj;
+		CandidateBillingRecord bill_rec = new CandidateBillingRecord();
+		bill_rec.mark = 39;
+		bill_rec.teamID = clientId;
+		bill_rec.s0 = employeeFN;
+		bill_rec.s1 = employeeLN;
+		if (employeeId != null && employeeId > 0)
+			bill_rec.setEmployeeid(employeeId);
+		bill_rec.s2 = vmsEmployeeId;
+		bill_rec.startDate = startDate;
+		if (jobId != null && jobId > 0)
+			bill_rec.rfqID = jobId;
+		if (activityId != null && activityId > 0)
+			bill_rec.m0 = activityId;
+		ServletRequestData srd = new ServletRequestData(0, null, bill_rec);
+		obj = ServletTransporter.callServlet(getCandidateBillingRecordsGetServlet(), srd);
+		//
+		//
+		if (obj instanceof String) {
+			String[] recids = ((String) obj).split("~");
+			if (recids.length == 3) {
+				result.add(Integer.parseInt(recids[0])); // Bill record ID
+				result.add(Integer.parseInt(recids[1])); // Pay record ID
+				result.add(Long.parseLong(recids[2])); // Employee ID
+			} else
+				throw new Exception("Missing billing record id or pay record id " + recids);
+		} else if (obj instanceof Exception) {
+			throw new Exception("Error: exception returned when trying to locate bill/pay rec id. " + ((Exception) obj).getMessage(), (Exception) obj);
+		}
+		return result;
+	}
+	
+	/* Helper methods */
+	@SuppressWarnings({ "unchecked", "unused" })
+	public Integer _addExpenses(long clientid, long recruiterid, Date invoiceDate, Date weekendingDate, String employeeFN, String employeeLN, Long employeeId, String vmsEmployeeId, ExpenseEntry[] expenseEntries, String feedback, String description,
+			String externalId, Long jobId, Long activityId) throws Exception {
+		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+		//
+		Object[] params;
+		Object obj = null;
+		Date startDate = null; // Earliest expense date
+		Integer billingRecId = 0;
+		Integer payRecId = 0;
+		long timecardId = 0L;
+		Integer newExpenseId = 0;
+		StringBuffer warning = new StringBuffer();
+		//
+		// Get list of valid expense categories (expense.item)
+		Set<String> validCategories = new HashSet<String>();
+		params = new Object[2];
+		params[0] = new Integer(111);
+		params[1] = new Long(clientid);
+		ServletRequestData data = new ServletRequestData(0L, params);
+		obj = ServletTransporter.callServlet(getCandidateFinancialServlet(), data);
+		if (obj instanceof Exception) {
+			throw new Exception("Exception returned while looking up expense categories. " + ((Exception) obj).getMessage(), (Exception) obj);
+		} else if (obj instanceof Vector) {
+			Vector<Object> responed_categories = (Vector<Object>) obj;
+			for (Object cat : responed_categories) {
+				BillingExpenseCategory bec = (BillingExpenseCategory) cat;
+				validCategories.add(bec.getName().trim());
+			}
+		}
+		Vector<Object> expenses = new Vector<Object>();
+		EmployeeInvoice invoice = new EmployeeInvoice();
+		invoice.setFeedback(feedback);
+		invoice.setItemdescription(description);
+		invoice.setApproverid(recruiterid);
+		invoice.setInvoicedate(invoiceDate);
+		invoice.setRemark(externalId); // Placeholder for passing in expense
+										// external ID
+		for (ExpenseEntry exp : expenseEntries) {
+			if (exp.getExpenseamount() < 0) {
+				warning.append("Invalid expense amount (" + exp.getExpenseamount() + ") for date " + sdf.format(exp.getDate().getTime()) + ". Skip. ");
+				continue;
+			}
+			if (!validCategories.contains(exp.getCategory().trim())) {
+				warning.append("Invalid expense category (" + exp.getCategory() + ") for date " + sdf.format(exp.getDate().getTime()) + ". Skip. ");
+				continue;
+			}
+			InvoiceExpense expense = new InvoiceExpense();
+			expense.setItem(exp.getCategory().trim());
+			expense.setExpense(new BigDecimal(exp.getExpenseamount()));
+			expense.setQuantity(new BigDecimal(exp.getQuantity()));
+			expense.setDateoccur(exp.getDate());
+			if (startDate == null)
+				startDate = exp.getDate();
+			else if (exp.getDate().compareTo(startDate) < 0)
+				startDate = exp.getDate();
+			expense.setComments(exp.getComments());
+			expense.setRemark(sdf.format(weekendingDate));
+			expense.setPayertype(exp.getPaybycompany() ? 1 : 0);
+			expense.setBillable(exp.getBillable() ? 1 : 0);
+			expense.setTemporaryid(0L);
+			expenses.add(expense);
+		}
+		if (expenses.isEmpty())
+			throw new Exception("No valid expense processed. Valid expenses: " + validCategories + warning.toString());
+		//
+		//
+		//
+		Vector<Object> employeeBillPayRecIds = getEmployeeBillPay(clientid, employeeFN, employeeLN, employeeId, vmsEmployeeId, startDate, jobId, activityId);
+		billingRecId = (Integer) employeeBillPayRecIds.get(0);
+		payRecId = (Integer) employeeBillPayRecIds.get(1);
+		employeeId = (Long) employeeBillPayRecIds.get(2);
+		//
+		//
+		params = new Object[5];
+		params[0] = new Integer(121);
+		params[1] = new Long(employeeId);
+		params[2] = expenses;
+		params[3] = invoice;
+		params[4] = clientid;
+		//
+		Vector<Object> responedExpenses = new Vector<Object>();
+		data = new ServletRequestData(0L, params);
+		obj = ServletTransporter.callServlet(getCandidateFinancialServlet(), data);
+		//
+		if (obj instanceof Exception)
+			throw new Exception("Exception returned while saving expenses. " + ((Exception) obj).getMessage(), (Exception) obj);
+		else if (obj instanceof Vector) {
+			responedExpenses = (Vector<Object>) obj;
+			InvoiceExpense expense = (InvoiceExpense) responedExpenses.get(0);
+			newExpenseId = expense.getInvoiceid();
+		}
+		//
+		return newExpenseId;
+	}
+	
+	public Integer addExpenseEntry(JobDivaSession jobDivaSession, String employeeFirstName, String employeeLastName, Long employeeId, String vmsemployeeId, String expenseExternalId, Date weekendingDate, Date invoiceDate, String feedback,
+			String description, ExpenseEntry[] expenses, String[] emailrecipients, Long jobId, Long activityId) throws Exception {
+		//
 		StringBuffer message = new StringBuffer();
 		StringBuffer warning = new StringBuffer();
-		Vector<Object> result = new Vector<Object>();
-		Integer newInvoiceId = 0;
+		//
+		Integer expenseId = null;
+		//
 		//
 		try {
-			result = addExpenses(jobDivaSession.getTeamId(), jobDivaSession.getRecruiterId(), invoiceDate, weekendingDate, employeeId, expenses, feedback, description, false, 0L, "");
-			if (result.size() == 2) {
-				newInvoiceId = (Integer) result.get(0);
-				warning.append(result.get(1));
-			}
+			expenseId = _addExpenses(jobDivaSession.getTeamId(), jobDivaSession.getRecruiterId(), invoiceDate, weekendingDate, employeeFirstName, employeeLastName, employeeId, vmsemployeeId, expenses, feedback, description, expenseExternalId, jobId,
+					activityId);
+			//
 		} catch (Exception e) {
 			message.append(e.getMessage());
 		}
@@ -370,7 +514,7 @@ public class InvoiceDao extends AbstractJobDivaDao {
 			throw new Exception(message.toString());
 		}
 		//
-		return newInvoiceId;
+		return expenseId;
 	}
 	
 	public Boolean updatePayrollProfile(JobDivaSession jobDivaSession, Long employeeid, Long salaryrecid, String generationsuffix, String reasonforhire, String gender, String companycode, String country, String address1, String address2,

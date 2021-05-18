@@ -60,9 +60,13 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 					+ "jobid : The internal JobDiva ID of the job  (not required)\r\n" //
 					+ "weekendingdate : The weekending date of the timesheet Format [yyyy-MM-dd'T'HH:mm:ss] (required) \r\n" //
 					+ "approved : Specify if the timesheet is approved or not (required) \r\n" //
-					+ "timesheetid : If specified, will update the timesheet with its ID \r\n" //
+					// + "timesheetid : If specified, will update the timesheet
+					// with its ID \r\n" //
 					+ "externalId : Timesheet’s external ID \r\n" //
-					+ "timesheet : Must be exactly seven (7) timesheet entries for each day of a week (required)\r\n") //
+					+ "timesheet : Must be exactly seven (7) timesheet entries for each day of a week (required)\r\n" + "vmsemployeeid \r\n" //
+					+ "activityid \r\n" //
+					+ "approverid \r\n" //
+			) //
 			@RequestBody UploadTimesheetDef uploadTimesheetDef
 	//
 	//
@@ -74,15 +78,17 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 		//
 		jobDivaSession.checkForAPIPermission("uploadTimesheet");
 		//
-		Long employeeid = uploadTimesheetDef.getEmployeeid();
-		Long jobid = uploadTimesheetDef.getJobid();
+		Long employeeid = uploadTimesheetDef.getEmployeeId();
+		Long jobid = uploadTimesheetDef.getJobId();
 		Date weekendingdate = uploadTimesheetDef.getWeekendingdate();
 		Boolean approved = uploadTimesheetDef.getApproved();
 		Timesheet[] timesheet = uploadTimesheetDef.getTimesheet();
-		Long timesheetId = uploadTimesheetDef.getTimesheetId();
 		String externalId = uploadTimesheetDef.getExternalId();
+		String vmsemployeeid = uploadTimesheetDef.getVmsEmployeeId();
+		Long activityid = uploadTimesheetDef.getActivityId();
+		Long approverid = uploadTimesheetDef.getApproverId();
 		//
-		return timesheetService.uploadTimesheet(jobDivaSession, employeeid, jobid, weekendingdate, approved, timesheetId, externalId, timesheet);
+		return timesheetService.uploadTimesheet(jobDivaSession, employeeid, jobid, weekendingdate, approved, externalId, timesheet, vmsemployeeid, activityid, approverid);
 		//
 		//
 	}
@@ -148,13 +154,20 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 	@ApiOperation(value = "Add Expense Entry")
 	public Integer addExpenseEntry( //
 			//
-			@ApiParam(value = "employeeid : The internal JobDiva ID of the invoice \r\n" //
-					+ "weekendingdate : The weekending date of the expenses \r\n" //
-					+ "invoicedate : The invoice date of the expenses \r\n" //
-					+ "feedback : Company’s feedback \r\n" //
+			@ApiParam(value = "employeeFirstName : Employee First Name \r\n " //
+					+ "employeeLastName : Employee Last Name \r\n " //
+					+ "employeeId : The internal JobDiva ID of the employee \r\n" //
+					+ "vmsemployeeId : VMS EmployeeId \r\n" //
+					+ "expenseExternalId : Expense External Id \r\n" //
+					+ "weekendingDate : The weekending date of the expenses \r\n" //
+					+ "invoiceDate : The invoice date of the expenses \r\n" //
+					+ "employeeComment : Employee Comments \r\n" //
 					+ "description : Expenses description \r\n" //
 					+ "expenses : Detailed information of each expense. Must contain at least one expense entry. \r\n"//
-					+ "emailrecipients : Email where API notification will be sent to") //
+					+ "emailRecipients : Email where API notification will be sent to \r\n" //
+					+ "jobId : Internal JobDiva JobId \r\n" //
+					+ "activityId : Internal JobDiva activityId \r\n" //
+			) //
 			@RequestBody AddExpenseEntryDef addExpenseEntryDef
 	//
 	//
@@ -165,16 +178,23 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 		//
 		jobDivaSession.checkForAPIPermission("addExpenseEntry");
 		//
-		Long employeeid = addExpenseEntryDef.getEmployeeid();
-		Date weekendingdate = addExpenseEntryDef.getWeekendingdate();
-		Date invoicedate = addExpenseEntryDef.getInvoicedate();
-		String feedback = addExpenseEntryDef.getFeedback();
+		//
+		String employeeFirstName = addExpenseEntryDef.getEmployeeFirstName();
+		String employeeLastName = addExpenseEntryDef.getEmployeeLastName();
+		Long employeeId = addExpenseEntryDef.getEmployeeId();
+		String vmsemployeeId = addExpenseEntryDef.getVmsEmployeeId();
+		String expenseExternalId = addExpenseEntryDef.getExpenseExternalId();
+		Date weekendingDate = addExpenseEntryDef.getWeekendingDate();
+		Date invoiceDate = addExpenseEntryDef.getWeekendingDate();
+		String employeeComment = addExpenseEntryDef.getEmployeeComment();
 		String description = addExpenseEntryDef.getDescription();
 		ExpenseEntry[] expenses = addExpenseEntryDef.getExpenses();
-		String[] emailrecipients = addExpenseEntryDef.getEmailrecipients();
+		String[] emailRecipients = addExpenseEntryDef.getEmailRecipients();
+		Long jobId = addExpenseEntryDef.getJobId();
+		Long activityId = addExpenseEntryDef.getActivityId();
 		//
 		//
-		return invoiceService.addExpenseEntry(jobDivaSession, employeeid, weekendingdate, invoicedate, feedback, description, expenses, emailrecipients);
+		return invoiceService.addExpenseEntry(jobDivaSession, employeeFirstName, employeeLastName, employeeId, vmsemployeeId, expenseExternalId, weekendingDate, invoiceDate, employeeComment, description, expenses, emailRecipients, jobId, activityId);
 		//
 	}
 	
@@ -182,9 +202,10 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 	@ApiOperation(value = "Approve Expense Entry")
 	public Boolean approveExpenseEntry( //
 			//
-			@ApiParam(value = "invoiceid : The internal JobDiva ID of the invoice \r\n" //
+			@ApiParam(value = "expenseId : The internal JobDiva ID of the expense \r\n" //
 					+ "comments : Additional comments \r\n" //
-					+ "emailrecipients : Email where API notification will be sent to")
+					+ "emailrecipients : Email where API notification will be sent to \r\n" //
+					+ "approverId \r\n")
 			//
 			@RequestBody ApproveExpenseEntryDef approveExpenseEntryDef
 	//
@@ -199,11 +220,12 @@ public class BillingPayTimesheetV2Controller extends AbstractJobDivaController {
 		jobDivaSession.checkForAPIPermission("approveExpenseEntry");
 		//
 		//
-		Integer invoiceid = approveExpenseEntryDef.getInvoiceid();
+		Integer expenseId = approveExpenseEntryDef.getExpenseId();
 		String comments = approveExpenseEntryDef.getComments();
 		String[] emailrecipients = approveExpenseEntryDef.getEmailrecipients();
+		Long approverId = approveExpenseEntryDef.getApproverId();
 		//
-		return invoiceService.approveExpenseEntry(jobDivaSession, invoiceid, comments, emailrecipients);
+		return invoiceService.approveExpenseEntry(jobDivaSession, expenseId, comments, emailrecipients, approverId);
 		//
 	}
 	

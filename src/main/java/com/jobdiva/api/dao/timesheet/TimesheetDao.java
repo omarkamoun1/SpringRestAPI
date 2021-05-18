@@ -46,19 +46,50 @@ public class TimesheetDao extends AbstractJobDivaDao {
 	@Autowired
 	InvoiceDao invoiceDao;
 	
-	public Long uploadTimesheet(JobDivaSession jobDivaSession, Long employeeid, Long jobid, Date weekendingdate, Boolean approved, Long timesheetId, String externalId, Timesheet[] timesheetEntry) throws Exception {
-		//
-		//
+	private Vector<Object> getEmployeeBillPay(long clientId, String employeeFN, String employeeLN, Long employeeId, String vmsEmployeeId, Date startDate, Long jobId, Long activityId) throws Exception {
+		/*** Get employee Bill record ID, Pay record ID, Employee ID ***/
+		// printLog("Locate bill/pay rec id...");
+		Vector<Object> result = new Vector<Object>();
+		Object obj;
+		CandidateBillingRecord bill_rec = new CandidateBillingRecord();
+		bill_rec.mark = 39;
+		bill_rec.teamID = clientId;
+		bill_rec.s0 = employeeFN;
+		bill_rec.s1 = employeeLN;
+		if (employeeId != null && employeeId > 0)
+			bill_rec.setEmployeeid(employeeId);
+		bill_rec.s2 = vmsEmployeeId;
+		bill_rec.startDate = startDate;
+		if (jobId != null && jobId > 0)
+			bill_rec.rfqID = jobId;
+		if (activityId != null && activityId > 0)
+			bill_rec.m0 = activityId;
+		ServletRequestData srd = new ServletRequestData(0, null, bill_rec);
+		obj = ServletTransporter.callServlet(getCandidateBillingRecordsGetServlet(), srd);
+		if (obj instanceof String) {
+			String[] recids = ((String) obj).split("~");
+			if (recids.length == 3) {
+				result.add(Integer.parseInt(recids[0])); // Bill record ID
+				result.add(Integer.parseInt(recids[1])); // Pay record ID
+				result.add(Long.parseLong(recids[2])); // Employee ID
+			} else
+				throw new Exception("Missing billing record id or pay record id " + recids);
+		} else if (obj instanceof Exception) {
+			throw new Exception("Error: exception returned when trying to locate bill/pay rec id. " + ((Exception) obj).getMessage(), (Exception) obj);
+		}
+		return result;
+	}
+	
+	public Long uploadTimesheet(JobDivaSession jobDivaSession, Long employeeId, Long jobId, Date weekendingdate, Boolean approved, String externalId, Timesheet[] timesheetEntry, String vmsEmployeeId, Long activityId, Long approverId)
+			throws Exception {
 		StringBuffer message = new StringBuffer();
-		String[] timesheetDates = new String[7];
-		Double[] timesheetHours = new Double[7];
+		//
+		if (employeeId == null || employeeId < 1) {
+			message.append("Error: Please specify a valid employeeid. ");
+		}
 		// should be 7
 		if (timesheetEntry == null || timesheetEntry.length != 7) {
 			message.append("Parameter Check Failed \r\n TimeSheet required and must contains 7 elements.\r\n");
-		}
-		//
-		if (employeeid == null || employeeid <= 0) {
-			message.append("Parameter Check Failed \r\n employeeid is required.\r\n");
 		}
 		//
 		if (approved == null) {
@@ -68,223 +99,124 @@ public class TimesheetDao extends AbstractJobDivaDao {
 		if (weekendingdate == null) {
 			message.append("Parameter Check Failed \r\n weekendingdate is required.\r\n");
 		}
-		if (timesheetId != null) {
-			if (timesheetId <= 0)
-				message.append("Invalid timesheetId(" + timesheetId + "). \r\n");
-		}
 		//
-		if (isNotEmpty(externalId))
-			externalId = externalId.trim();
-		//
-		//
-		if (message.length() > 0) {
-			throw new Exception("Parameter Check Failed \r\n " + message.toString());
-		}
-		//
+		Date startDate = timesheetEntry[0].getDate();
+		Integer billingRecId = null;
+		Integer payRecId = null;
 		//
 		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
 		// int billing_recid = 0;
 		String weekending = "";
 		Date timesheetdate = null;
-		Date wkDate = null;
 		try {
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(weekendingdate);
-			cal.add(Calendar.DATE, -6);
-			// startDate = sdf.parse(sdf.format(cal.getTime()));
-			for (int i = 0; i < timesheetDates.length; i++) {
-				timesheetDates[i] = sdf.format(cal.getTime());
-				timesheetHours[i] = 0.0;
-				cal.add(Calendar.DATE, 1);
-			}
-			//
 			String[] params = new String[4 + timesheetEntry.length];
 			params[0] = "" + jobDivaSession.getTeamId();
-			params[1] = "" + employeeid;
-			params[2] = jobid > 0 ? ("" + jobid) : "0";
-			//
+			params[1] = "" + employeeId;
+			params[2] = jobId != null ? ("" + jobId) : "0";
 			Calendar we = Calendar.getInstance();
 			we.setTime(weekendingdate);
+			//
 			we.setTimeZone(TimeZone.getDefault());
 			weekending = sdf.format(we.getTime());
-			wkDate = simpleDateFormat.parse(weekending);
+			weekendingdate = sdf.parse(weekending);
 			params[3] = weekending;
-			//
 			for (int i = 0; i < timesheetEntry.length; i++) {
-				if (timesheetEntry[i].getDate() != null) {
-					Calendar calendar = Calendar.getInstance();
-					calendar.setTime(timesheetEntry[i].getDate());
-					calendar.setTimeZone(TimeZone.getDefault());
-					params[4 + i] = sdf.format(calendar.getTime());
-					// printLog("tsdate: " + params[4+i]);
-					timesheetdate = sdf.parse(params[4 + i]);
-					if (timesheetdate.getTime() > wkDate.getTime() || timesheetdate.getTime() < wkDate.getTime() - 6 * 24 * 3600 * 1000L)
-						message.append("Invalid timesheet date " + params[4 + i] + " for weekending " + weekending);
-				}
-				//
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(timesheetEntry[i].getDate());
+				cal.setTimeZone(TimeZone.getDefault());
+				params[4 + i] = sdf.format(cal.getTime());
+				// printLog("tsdate: " + params[4+i]);
+				timesheetdate = sdf.parse(params[4 + i]);
+				if (timesheetdate.getTime() > weekendingdate.getTime() || timesheetdate.getTime() < weekendingdate.getTime() - 6 * 24 * 3600 * 1000L)
+					message.append("Invalid timesheet date " + params[4 + i] + " for weekending " + weekending);
 			}
+			//
+			Vector<Object> employeeBillPayRecIds = getEmployeeBillPay(jobDivaSession.getTeamId(), null, null, employeeId, vmsEmployeeId, startDate, jobId, activityId);
+			//
+			//
+			billingRecId = (Integer) employeeBillPayRecIds.get(0);
+			payRecId = (Integer) employeeBillPayRecIds.get(1);
+			employeeId = (Long) employeeBillPayRecIds.get(2);
+			//
+			if (billingRecId == null) {
+				throw new Exception("Unable to locate Billing Record Id");
+			}
+			//
 		} catch (Exception e) {
 			message.append(e.getMessage());
 		}
+		//
+		//
+		//
 		if (message.length() > 0) {
+			//
 			throw new Exception("Parameter Check Failed \r\n " + message.toString());
-		}
-		//
-		//
-		//
-		Object retObj1 = null;
-		String bill_recid = "";
-		String pay_recid = "";
-		// Prev Timesheet in server Date ->Hours
-		HashMap<String, Double> tsMap = new HashMap<String, Double>();
-		// timesheetId or externalId
-		// boolean updateHours = true; // false if sent-in hours are the same as
-		// // existing records
-		// boolean updateExpenses = true; // false if sent-in expenses are the
-		// same
-		// as existing records
-		// Object retObj = null;
-		// If timesheetId or externalId provided, locate existing timesheet and
-		// return billrecid~payrecid
-		// if (true || timesheetId != null || externalId != null) {
-		CandidateBillingRecord bill_rec = new CandidateBillingRecord();
-		bill_rec.mark = 35; // option code
-		bill_rec.teamID = jobDivaSession.getTeamId();
-		bill_rec.candidateID = employeeid;
-		// Use the following two fields as placeholder. Will be processed
-		// accordingly in the backend.
-		if (timesheetId != null)
-			bill_rec.rfqID = timesheetId;
-		bill_rec.customerRefNo = externalId;
-		try {
-			ServletRequestData srd = new ServletRequestData(0, null, bill_rec);
-			retObj1 = ServletTransporter.callServlet(getCandidateBillingRecordsGetServlet(), srd);
-		} catch (Exception e) {
-			e.printStackTrace();
-			message.append("Error occurs when trying to locate existing timesheet. ");
-		}
-		if (retObj1 instanceof Object[]) {
-			Object[] retObjArr = (Object[]) retObj1;
-			TimeSheetWeek tsw = retObjArr[0] instanceof TimeSheetWeek ? (TimeSheetWeek) retObjArr[0] : null;
-			// Vector<Object> exp = retObjArr[1] instanceof Vector ?
-			// (Vector<Object>) retObjArr[1] : null;
-			// Compare hours passed in with existing hours
-			if (tsw instanceof TimeSheetWeek) {
-				for (int i = 0; i < tsw.dates.length; i++) {
-					TimeSheetDay day = tsw.dates[i];
-					tsMap.put(sdf.format(day.tDate), day.hoursWorked);
-				}
-				if (timesheetDates.length == tsMap.size()) {
-					int i = 0;
-					while (i < timesheetDates.length) {
-						if (!tsMap.containsKey(timesheetDates[i]) || !tsMap.get(timesheetDates[i]).equals(timesheetHours[i])) {
-							break;
-						}
-						i++;
-					}
-					// if (i == timesheetDates.length)
-					// updateHours = false;
-				}
-			}
 			//
-			bill_recid = tsw instanceof TimeSheetWeek ? tsw.bill_recid + "" : "";
-			pay_recid = tsw instanceof TimeSheetWeek ? tsw.createdByID + "" : "";
-			// if (bill_recid.length() > 0)
-			// isUpdate = true;
-		} else if (retObj1 instanceof Exception) {
-			Exception e = (Exception) retObj1;
-			e.printStackTrace();
-			message.append("Error: exception returned when trying to locate existing timesheet. " + (e.getMessage() != null ? e.getMessage() : ""));
-		}
-		// }
-		//
-		//
-		//
-		if (timesheetId != null && (bill_recid.length() == 0 || pay_recid.length() == 0))
-			message.append("Failed to locate timesheet by ID (" + timesheetId + "). ");
-		//
-		//
-		if (message.length() > 0) {
-			saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "uploadTimesheet", "Timesheet Upload Failed, " + message.toString());
-			//
-			throw new Exception("Timesheet Upload Failed : " + message.toString());
 		}
 		//
 		// build timesheet xml
 		StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><xml>");
 		xml.append("<TEAMID>" + jobDivaSession.getTeamId() + "</TEAMID>");
-		xml.append("<RECRUITERID>" + jobDivaSession.getRecruiterId() + "</RECRUITERID>");
+		if (approverId != null)
+			xml.append("<RECRUITERID>" + approverId + "</RECRUITERID>");
 		xml.append("<WEBSITENAME></WEBSITENAME>");
-		xml.append("<CANDIDATE><CANDIDATENAME></CANDIDATENAME><CANDIDATEID>" + employeeid + "</CANDIDATEID><PONUMBER/>");
+		xml.append("<CANDIDATE><CANDIDATENAME></CANDIDATENAME><CANDIDATEID>" + employeeId + "</CANDIDATEID><PONUMBER/>");
 		xml.append("<TIMESHEETWEEKS><TIMESHEETWEEK>");
-		if (approved != null && approved)
+		if (approved)
 			xml.append("<REPLACE_PENDING>true</REPLACE_PENDING>");
 		else
 			xml.append("<SAVE_AS_PENDING>true</SAVE_AS_PENDING>");
-		//
-		xml.append("<EXTERNALID>" + externalId + "</EXTERNALID>");
-		//
+		if (billingRecId != null)
+			xml.append("<BILLRECID>" + billingRecId + "</BILLRECID>");
+		if (payRecId != null)
+			xml.append("<SALARYRECID>" + payRecId + "</SALARYRECID>");
+		if (externalId != null && !externalId.isEmpty())
+			xml.append("<EXTERNALID>" + externalId + "</EXTERNALID>");
 		xml.append("<WEEKENDINGDATE>" + weekending + "</WEEKENDINGDATE><TIMESHEETRECORDS>");
 		//
-		xml.append("<BILLRECID>" + bill_recid + "</BILLRECID>");
-		xml.append("<SALARYRECID>" + pay_recid + "</SALARYRECID>");
 		//
 		for (int i = 0; i < timesheetEntry.length; i++) {
-			if (timesheetEntry[i].getDate() != null)
-				xml.append("<TIMESHEETRECORD>" + "<DATE>" + sdf.format(new Date(timesheetEntry[i].getDate().getTime())) + "</DATE>" //
-						+ "<PROJECT/>" //
-						+ "<HOURSWORKED>" //
-						+ timesheetEntry[i].getHours() + "</HOURSWORKED><OTHOURSWORKED/><STATUS/></TIMESHEETRECORD>");
+			xml.append("<TIMESHEETRECORD><DATE>" + sdf.format(timesheetEntry[i].getDate()) + "</DATE><PROJECT/><HOURSWORKED>" + timesheetEntry[i].getHours() + "</HOURSWORKED><OTHOURSWORKED/><STATUS/></TIMESHEETRECORD>");
 		}
 		xml.append("</TIMESHEETRECORDS></TIMESHEETWEEK></TIMESHEETWEEKS></CANDIDATE></xml>");
 		Object retObj = new Object();
-		//
-		String status = null;
-		//
 		try {
+			//
 			ServletRequestData srd = new ServletRequestData(0, null, xml.toString());
 			retObj = ServletTransporter.callServlet(getSaveVMSTimesheets(), srd);
+			//
 		} catch (Exception e) {
 			message.append(e.getMessage());
 		}
 		if (retObj != null) {
 			if (retObj instanceof Exception) {
 				message.append(((Exception) retObj).getMessage());
-			} else if (message.length() == 0) {
-				status = "Timesheet Uploaded Successfully.";
+			} else {
+				// success
 			}
 		}
 		if (message.length() > 0) {
-			status = "Error! Timesheet Not Saved.";
-		}
-		//
-		//
-		Long timeSheetId = null;
-		// CandidateBillingRecord
-		bill_rec = new CandidateBillingRecord();
-		bill_rec.mark = 34;
-		bill_rec.teamID = jobDivaSession.getTeamId();
-		bill_rec.candidateID = employeeid;
-		bill_rec.recID = isNotEmpty(bill_recid) ? Integer.parseInt(bill_recid) : 0;
-		bill_rec.startDate = sdf.parse(weekending);
-		retObj = null;
-		try {
-			ServletRequestData srd = new ServletRequestData(0, null, bill_rec);
-			retObj = ServletTransporter.callServlet(getCandidateBillingRecordsGetServlet(), srd);
-			if (retObj instanceof Long) {
-				timeSheetId = (Long) retObj;
+			//
+			throw new Exception("Error! Timesheet Not Saved. \r\n " + message.toString());
+			//
+		} else {
+			String sql = "select timecardid from temployee_wed Where employeeid = ? and recruiter_teamid = ? and billing_recid = ? and weekendingdate = ? ";
+			Object[] params = new Object[] { employeeId, jobDivaSession.getTeamId(), billingRecId, sdf.parse(weekending) };
+			List<Long> list = getJdbcTemplate().query(sql, params, new RowMapper<Long>() {
+				
+				@Override
+				public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+					//
+					return rs.getLong("timecardid");
+				}
+			});
+			//
+			if (list != null && list.size() > 0) {
+				return list.get(0);
+			} else {
+				throw new Exception("Error occurs when trying to retrieve TimeCard ID. ");
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			message.append("Error occurs when trying to retrieve TimeCard ID. ");
 		}
-		//
-		saveAccessLog(jobDivaSession.getRecruiterId(), jobDivaSession.getLeader(), jobDivaSession.getTeamId(), "uploadTimesheet", status + ", " + message.toString());
-		if (message.length() > 0) {
-			throw new Exception(message.toString());
-		}
-		//
-		return timeSheetId;
 	}
 	
 	public Boolean markTimesheetPaid(JobDivaSession jobDivaSession, Long employeeid, Integer salaryrecordid, Date datepaid, Date[] timesheetDates) throws Exception {
@@ -860,7 +792,7 @@ public class TimesheetDao extends AbstractJobDivaDao {
 			// Approve Expenses
 			// printLog("Approve Expense Invoice...");
 			try {
-				invoiceDao.approveExpenseEntry(jobDivaSession, newInvoiceId, "", null);
+				invoiceDao.approveExpenseEntry(jobDivaSession, newInvoiceId, "", null, null);
 			} catch (Exception e) {
 				e.printStackTrace();
 				expense_message.append(e.getMessage());
@@ -1047,15 +979,15 @@ public class TimesheetDao extends AbstractJobDivaDao {
 				vta.setApproved(rs.getInt("approved"));
 				if (rs.getTimestamp("approved_on") != null)
 					vta.setApprovedOn(rs.getTimestamp("approved_on"));
-				vta.setRemark("\""+rs.getString("approverid") + "|" + rs.getString("approvername") + "|" + rs.getBigDecimal("hoursworked") + "|" + rs.getBigDecimal("reg_hours") + "|" + rs.getBigDecimal("ot_hours") + "|" + rs.getBigDecimal("dt_hours")
-						+ "|" + (rs.getDate("datecreated") == null ? "" : sdf.format(rs.getTimestamp("datecreated"))) +"\"" );
+				vta.setRemark("\"" + rs.getString("approverid") + "|" + rs.getString("approvername") + "|" + rs.getBigDecimal("hoursworked") + "|" + rs.getBigDecimal("reg_hours") + "|" + rs.getBigDecimal("ot_hours") + "|"
+						+ rs.getBigDecimal("dt_hours") + "|" + (rs.getDate("datecreated") == null ? "" : sdf.format(rs.getTimestamp("datecreated"))) + "\"");
 				vta.setBillrateper(rs.getString("bill_rate_per"));
 				vta.setEntryformat(rs.getInt("timesheet_entry_format"));
 				if (rs.getInt("ignored") == 1)
 					vta.setApproved(10);
 				vta.setApprovedBy(rs.getLong("myitem"));
 				vta.setComments(rs.getString("companyname"));
-				vta.setWorkingstate("\""+deNull(rs.getString("rfqtitle")) + "|" + deNull(rs.getString("rfqno_team"))+"\"");
+				vta.setWorkingstate("\"" + deNull(rs.getString("rfqtitle")) + "|" + deNull(rs.getString("rfqno_team")) + "\"");
 				WeekEndingRecord wer = ConverterWeekEndingRecord(vta);
 				return wer;
 			}
@@ -1091,5 +1023,123 @@ public class TimesheetDao extends AbstractJobDivaDao {
 		}
 		w.setWorkingstate(week.getWorkingstate());
 		return w;
+	}
+	
+	public Boolean deleteTimesheet(JobDivaSession jobDivaSession, Long timesheetId, String externalId) throws Exception {
+		//
+		String sql = "SELECT * FROM TEMPLOYEE_WED WHERE recruiter_teamid = ? ";
+		Object[] params;
+		if (isEmpty(externalId)) {
+			sql += "and ( timecardid = ? )  ";
+			params = new Object[] { jobDivaSession.getTeamId(), timesheetId };
+		} else {
+			sql += "and ( timecardid = ? or  externalid = ?)  ";
+			params = new Object[] { jobDivaSession.getTeamId(), timesheetId, externalId };
+		}
+		//
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<List<Object>> list = jdbcTemplate.query(sql, params, new RowMapper<List<Object>>() {
+			
+			@Override
+			public List<Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
+				//
+				List<Object> list = new ArrayList<Object>();
+				list.add(rs.getLong("employeeid"));
+				list.add(rs.getDate("weekendingdate"));
+				list.add(rs.getInt("billing_recid"));
+				list.add(rs.getInt("approved"));
+				return list;
+			}
+		});
+		//
+		if (list != null && list.size() > 0) {
+			List<Object> record = list.get(0);
+			//
+			Long dbemployeeid = (Long) record.get(0);
+			Date dbweekendingdate = (Date) record.get(1);
+			Integer dbbilling_recid = (Integer) record.get(2);
+			Integer dbapproved = (Integer) record.get(3);
+			dbapproved = dbapproved != null ? dbapproved : 0;
+			if (dbapproved.intValue() == 1) {
+				throw new Exception("Delete Failed, Timesheet is approved");
+			}
+			params = new Object[] { jobDivaSession.getTeamId(), dbemployeeid, dbweekendingdate, dbbilling_recid };
+			//
+			String deleteSQL = "delete from temployee_timesheet where recruiter_teamid=? and  employeeid=? and weekending = ? and billing_recid=? ";
+			jdbcTemplate.update(deleteSQL, params);
+			//
+			deleteSQL = "delete from temployee_timesheet_timeinout where recruiter_teamid=? and employeeid=? and  weekending = ? and billing_recid=?    ";
+			jdbcTemplate.update(deleteSQL, params);
+			//
+			deleteSQL = "delete from temployee_wed where recruiter_teamid=? and employeeid=? and weekendingdate = ? and billing_recid=?    ";
+			jdbcTemplate.update(deleteSQL, params);
+			//
+			deleteSQL = "delete from temployee_timesheet_costcenter where recruiter_teamid=? and employeeid=? and  weekending = ? and billing_recid = ?    ";
+			jdbcTemplate.update(deleteSQL, params);
+			//
+			deleteSQL = "delete from temployee_wed_images where recruiter_teamid = ? and employeeid = ? and weekendingdate = ? and billing_recid = ? ";
+			jdbcTemplate.update(deleteSQL, params);
+			//
+			return true;
+		} else {
+			throw new Exception("Timesheet not found");
+		}
+		//
+	}
+	
+	public Boolean deleteExpense(JobDivaSession jobDivaSession, Long expenseId, String externalId) throws Exception {
+		//
+		//
+		String sql = "SELECT * FROM texpense_entry WHERE recruiter_teamid = ?  ";
+		Object[] params;
+		if (isEmpty(externalId)) {
+			sql += "and ( entryId = ? )  ";
+			params = new Object[] { jobDivaSession.getTeamId(), expenseId };
+		} else {
+			sql += "and ( entryId = ? or  externalid = ?)  ";
+			params = new Object[] { jobDivaSession.getTeamId(), expenseId, externalId };
+		}
+		//
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<List<Object>> list = jdbcTemplate.query(sql, params, new RowMapper<List<Object>>() {
+			
+			@Override
+			public List<Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
+				//
+				List<Object> list = new ArrayList<Object>();
+				list.add(rs.getLong("entryId"));
+				list.add(rs.getDate("externalid"));
+				list.add(rs.getInt("APPROVED"));
+				return list;
+			}
+		});
+		//
+		if (list != null && list.size() > 0) {
+			List<Object> record = list.get(0);
+			//
+			Long dbentryId = (Long) record.get(0);
+			Integer dbapproved = (Integer) record.get(2);
+			dbapproved = dbapproved != null ? dbapproved : 0;
+			if (dbapproved.intValue() == 1) {
+				throw new Exception("Delete Failed, Expense is approved");
+			}
+			//
+			String deleteSQL = "delete from texpense_entry where recruiter_teamid=?  and entryId = ?  ";
+			params = new Object[] { jobDivaSession.getTeamId(), dbentryId };
+			jdbcTemplate.update(deleteSQL, params);
+			//
+			deleteSQL = "delete from texpense_detail where recruiter_teamid=? and entryid = ? ";
+			params = new Object[] { jobDivaSession.getTeamId(), dbentryId };
+			jdbcTemplate.update(deleteSQL, params);
+			//
+			return true;
+		} else {
+			throw new Exception("Timesheet not found");
+		}
+		//
 	}
 }

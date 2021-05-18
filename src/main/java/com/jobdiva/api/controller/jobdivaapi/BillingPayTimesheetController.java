@@ -43,16 +43,19 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 	InvoiceService		invoiceService;
 	
 	@RequestMapping(value = "/uploadTimesheet", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
-	@ApiOperation(value = "Upload Timesheet")
+	@ApiOperation(value = "uploadTimesheet can be used to upload a new timesheet or to update an existing one. This function will return the Timesheet ID when successful")
 	public Long uploadTimesheet( //
 			//
 			@ApiParam(value = "employeeid : The internal JobDiva ID of the employee (required)\r\n" //
 					+ "jobid : The internal JobDiva ID of the job  (not required)\r\n" //
 					+ "weekendingdate : The weekending date of the timesheet Format [yyyy-MM-dd'T'HH:mm:ss] (required) \r\n" //
 					+ "approved : Specify if the timesheet is approved or not (required) \r\n" //
-					+ "timesheetid : If specified, will update the timesheet with its ID \r\n" //
 					+ "externalId : Timesheet’s external ID \r\n" //
-					+ "timesheet : Must be exactly seven (7) timesheet entries for each day of a week (required)\r\n") //
+					+ "timesheet : Must be exactly seven (7) timesheet entries for each day of a week (required)\r\n" //
+					+ "vmsemployeeid \r\n" //
+					+ "activityid \r\n" //
+					+ "approverid \r\n" //
+			) //
 			@RequestBody UploadTimesheetDef uploadTimesheetDef
 	//
 	//
@@ -64,15 +67,18 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		//
 		jobDivaSession.checkForAPIPermission("uploadTimesheet");
 		//
-		Long employeeid = uploadTimesheetDef.getEmployeeid();
-		Long jobid = uploadTimesheetDef.getJobid();
+		Long employeeid = uploadTimesheetDef.getEmployeeId();
+		Long jobid = uploadTimesheetDef.getJobId();
 		Date weekendingdate = uploadTimesheetDef.getWeekendingdate();
 		Boolean approved = uploadTimesheetDef.getApproved();
 		Timesheet[] timesheet = uploadTimesheetDef.getTimesheet();
-		Long timesheetId = uploadTimesheetDef.getTimesheetId();
 		String externalId = uploadTimesheetDef.getExternalId();
+		String vmsemployeeid = uploadTimesheetDef.getVmsEmployeeId();
+		Long activityid = uploadTimesheetDef.getActivityId();
+		Long approverid = uploadTimesheetDef.getApproverId();
 		//
-		return timesheetService.uploadTimesheet(jobDivaSession, employeeid, jobid, weekendingdate, approved, timesheetId, externalId, timesheet);
+		//
+		return timesheetService.uploadTimesheet(jobDivaSession, employeeid, jobid, weekendingdate, approved, externalId, timesheet, vmsemployeeid, activityid, approverid);
 		//
 		//
 	}
@@ -153,20 +159,32 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 	
 	@ApiImplicitParams({ @ApiImplicitParam(name = "expenses", required = true, allowMultiple = true, dataType = "ExpenseEntry") })
 	@RequestMapping(value = "/addExpenseEntry", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
-	@ApiOperation(value = "Add Expense Entry")
+	@ApiOperation(value = "Add Expense Entry returns the Expense ID when successful")
 	public Integer addExpenseEntry( //
 			//
-			@ApiParam(value = "The internal JobDiva ID of the invoice", required = true) //
-			@RequestParam(required = true) Long employeeid, //
+			@ApiParam(value = "Employee First Name", required = false) //
+			@RequestParam(required = false) String employeeFirstName, //
+			//
+			@ApiParam(value = "Employee Last Name", required = false) //
+			@RequestParam(required = false) String employeeLastName, //
+			//
+			@ApiParam(value = "The internal JobDiva ID of the employee", required = false) //
+			@RequestParam(required = false) Long employeeId, //
+			//
+			@ApiParam(value = "VMS EmployeeId", required = false) //
+			@RequestParam(required = false) String vmsemployeeId, //
+			//
+			@ApiParam(value = "Expense External Id", required = false) //
+			@RequestParam(required = false) String expenseExternalId, //
 			//
 			@ApiParam(value = "The weekending date of the expenses Format [MM/dd/yyyy HH:mm:ss]", required = true) //
-			@RequestParam(required = true) Date weekendingdate, //
+			@RequestParam(required = true) Date weekendingDate, //
 			//
 			@ApiParam(value = "The invoice date of the expenses Format [MM/dd/yyyy HH:mm:ss]", required = false) //
-			@RequestParam(required = false) Date invoicedate, //
+			@RequestParam(required = false) Date invoiceDate, //
 			//
-			@ApiParam(value = "Company’s feedback", required = false) //
-			@RequestParam(required = false) String feedback, //
+			@ApiParam(value = "Employee Comments", required = false) //
+			@RequestParam(required = false) String employeeComment, //
 			//
 			@ApiParam(value = "Expenses description", required = false) //
 			@RequestParam(required = false) String description, //
@@ -176,7 +194,13 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 			@RequestParam(required = true) ExpenseEntry[] expenses, //
 			//
 			@ApiParam(value = "Email where API notification will be sent to", required = false) //
-			@RequestParam(required = false) String[] emailrecipients //
+			@RequestParam(required = false) String[] emailRecipients, //
+			//
+			@ApiParam(value = "Internal JobDiva JobId", required = false) //
+			@RequestParam(required = false) Long jobId,
+			//
+			@ApiParam(value = "Internal JobDiva activityId", required = false) //
+			@RequestParam(required = false) Long activityId
 	//
 	//
 	) throws Exception {
@@ -185,7 +209,7 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		//
 		jobDivaSession.checkForAPIPermission("addExpenseEntry");
 		//
-		return invoiceService.addExpenseEntry(jobDivaSession, employeeid, weekendingdate, invoicedate, feedback, description, expenses, emailrecipients);
+		return invoiceService.addExpenseEntry(jobDivaSession, employeeFirstName, employeeLastName, employeeId, vmsemployeeId, expenseExternalId, weekendingDate, invoiceDate, employeeComment, description, expenses, emailRecipients, jobId, activityId);
 		//
 	}
 	
@@ -193,14 +217,17 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 	@ApiOperation(value = "Approve Expense Entry")
 	public Boolean approveExpenseEntry( //
 			//
-			@ApiParam(value = "The internal JobDiva ID of the invoice", required = true) //
-			@RequestParam(required = true) Integer invoiceid, //
+			@ApiParam(value = "The internal JobDiva ID of the expense", required = true) //
+			@RequestParam(required = true) Integer expenseId, //
 			//
 			@ApiParam(value = "Additional comments", required = false) //
 			@RequestParam(required = false) String comments, //
 			//
 			@ApiParam(value = "Email where API notification will be sent to", required = false) //
-			@RequestParam(required = false) String[] emailrecipients //
+			@RequestParam(required = false) String[] emailrecipients, //
+			//
+			@ApiParam(value = "approverId", required = false) //
+			@RequestParam(required = true) Long approverId //
 	//
 	//
 	//
@@ -210,7 +237,7 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		//
 		jobDivaSession.checkForAPIPermission("approveExpenseEntry");
 		//
-		return invoiceService.approveExpenseEntry(jobDivaSession, invoiceid, comments, emailrecipients);
+		return invoiceService.approveExpenseEntry(jobDivaSession, expenseId, comments, emailrecipients, approverId);
 		//
 	}
 	
@@ -1136,6 +1163,49 @@ public class BillingPayTimesheetController extends AbstractJobDivaController {
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		//
 		return timesheetService.searchTimesheet(jobDivaSession, userId, approvedStatus, startDate, endDate, firstname, lastname, companyId, managerId);
+		//
+	}
+	
+	@RequestMapping(value = "/deleteTimesheet", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "deleteTimesheet can be used to delete a Timesheet if not approved")
+	public Boolean deleteTimesheet( //
+			//
+			@ApiParam(required = true) //
+			@RequestParam(required = true) Long timesheetId, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String externalId //
+	//
+	//
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("deleteTimesheet");
+		//
+		return timesheetService.deleteTimesheet(jobDivaSession, timesheetId, externalId);
+		//
+	}
+	
+	@RequestMapping(value = "/deleteExpense", method = RequestMethod.POST, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "deleteExpense can be used to delete an Expense if not approved")
+	public Boolean deleteExpense( //
+			//
+			@ApiParam(required = true) //
+			@RequestParam(required = true) Long expenseId, //
+			//
+			@ApiParam(required = false) //
+			@RequestParam(required = false) String externalId //
+	//
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("deleteExpense");
+		//
+		return timesheetService.deleteExpense(jobDivaSession, expenseId, externalId);
 		//
 	}
 }

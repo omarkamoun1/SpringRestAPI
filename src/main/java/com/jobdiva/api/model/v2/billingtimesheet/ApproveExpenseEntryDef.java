@@ -12,21 +12,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @SuppressWarnings("serial")
 public class ApproveExpenseEntryDef implements Serializable {
 	
-	@JsonProperty(value = "invoiceid", required = true)
-	private Integer		invoiceid;
+	@JsonProperty(value = "expenseId", required = true)
+	private Integer		expenseId;
 	//
 	@JsonProperty(value = "comments", required = false)
 	private String		comments;
 	//
 	@JsonProperty(value = "emailrecipients", required = false)
 	private String[]	emailrecipients;
+	//
+	@JsonProperty(value = "approverId", required = false)
+	private Long		approverId;
 	
-	public Integer getInvoiceid() {
-		return invoiceid;
+	public Integer getExpenseId() {
+		return expenseId;
 	}
 	
-	public void setInvoiceid(Integer invoiceid) {
-		this.invoiceid = invoiceid;
+	public void setExpenseId(Integer expenseId) {
+		this.expenseId = expenseId;
 	}
 	
 	public String getComments() {
@@ -43,5 +46,13 @@ public class ApproveExpenseEntryDef implements Serializable {
 	
 	public void setEmailrecipients(String[] emailrecipients) {
 		this.emailrecipients = emailrecipients;
+	}
+	
+	public Long getApproverId() {
+		return approverId;
+	}
+	
+	public void setApproverId(Long approverId) {
+		this.approverId = approverId;
 	}
 }
