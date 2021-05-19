@@ -43,6 +43,7 @@ import com.jobdiva.api.model.chatbot.ChatbotEmailAlert;
 import com.jobdiva.api.model.proxy.ProxyParameter;
 import com.jobdiva.api.model.proxy.Response;
 import com.jobdiva.api.service.LogService;
+import com.sdicons.json.validator.impl.predicates.True;
 
 @Component
 public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
@@ -1838,8 +1839,12 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		candidate.activepackges = candidates.get(0).activepackges;
 
 		// has recently cancle start:
+		//String s3 = "select rfqrefno from tinterviewschedule inner join trfq on rfqid = trfq.id where candidateid= ? and recruiter_teamid = ? and Datehired is not null and (date_ended is null or date_ended>sysdate) and (dateterminated is null or dateterminated>sysdate)order by datecreated desc";
+		String s3;
+		s3 = " select a.datecreated,  c.firstname, c.lastname ,b.rfqrefno";
+		s3+= " from tcandidatenotes a inner join trfq b on a.rfqid  = b.id inner join trecruiter c on c.id = a.recruiterid";
+		s3+= " where candidateid= ? and recruiter_teamid=? and a.type = -35 order by a.datecreated desc";
 
-		String s3 = "select rfqrefno from tinterviewschedule inner join trfq on rfqid = trfq.id where candidateid= ? and recruiter_teamid = ? and Datehired is not null and (date_ended is null or date_ended>sysdate) and (dateterminated is null or dateterminated>sysdate)order by datecreated desc";
 		jdbcTemplate = getJdbcTemplate();
 		params1 = new Object[] {candId,teamid};
 
@@ -1848,12 +1853,21 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 			@Override
 			public ChatbotCandidatePackges mapRow(ResultSet rs, int rowNum) throws SQLException {
 				ChatbotCandidatePackges candidate = new ChatbotCandidatePackges();
-				candidate.jobReference = rs.getString(1);
+				candidate.cancledOn = rs.getDate(1);
+				candidate.canceledBy = rs.getString(2) + " "+rs.getString(3) ;
+				candidate.jobReference = rs.getString(4);
 				return candidate;
 			}
 		});
-		if (candidates.size() > 0)
+		if (candidates.size() > 0){
+			candidate.hadCancelStart = true;
+			candidate.canceledBy =candidates.get(0).canceledBy;
+			candidate.cancledOn = candidates.get(0).cancledOn;
 			candidate.jobReference = candidates.get(0).jobReference;
+		}else{
+			candidate.hadCancelStart = false;
+		}
+		
 		return candidate;		
 
 	}
