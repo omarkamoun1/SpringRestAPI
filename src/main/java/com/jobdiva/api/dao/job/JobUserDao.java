@@ -370,7 +370,7 @@ public class JobUserDao extends AbstractJobDivaDao {
 							strPayRate += "/" + payUnit;
 						String TEAM_REGION_CODE = regionCode;
 						JDLocale regionFormat = new JDLocale(TEAM_REGION_CODE);
-						String emailLocation = "http://www" + env + "jobdiva.com";
+						String emailLocation = "http://www" + env + ".jobdiva.com";
 						String strJobInfo;
 						strJobInfo = "<b>Additional Job Information:</b>" + //
 						"<br><b>Title</b>: <a href='" + emailLocation + "/employers/open_rfq.jsp?rfqid=" + rfqid + "'>" + rfqtitle + "</a>" + //

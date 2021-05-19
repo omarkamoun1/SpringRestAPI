@@ -2706,7 +2706,7 @@ public class JobDao extends AbstractActivityDao {
 	              + "AND rec.id = recrfq.recruiterid ";
  	    params = new Object[] {teamId,jobId};
  	    
- 	    String emailLocation="http://www"+env+"jobdiva.com";
+ 	    String emailLocation="http://www"+env+".jobdiva.com";
 	    SMTPServer mailserver = new SMTPServer();
 	    mailserver.setHost(Application.getSMTPServerLocation());
 	    mailserver.setContentType(SMTPServer.CONTENT_TYPE_HTML);
