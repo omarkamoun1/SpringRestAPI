@@ -198,13 +198,15 @@ public class JobUserDao extends AbstractJobDivaDao {
 		List<String> flexibleRoleNames = new ArrayList<String>();
 		if (roleIds.size() > 0) {
 			for (int j = 0; j < roleIds.size(); j++) {
-				sqlStr = "select name from TRECRUITER_ROLES where id=? ";
+				sqlStr = "select name, primary from TRECRUITER_ROLES where id=? ";
 				params = new Object[] { roleIds.get(j) };
 				List<String> name = jdbcTemplate.query(sqlStr, params, new RowMapper<String>() {
 					
 					@Override
 					public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-						return rs.getString("name");
+						if(rs.getString("primary").equals("1"))
+						return "Primary " + rs.getString("name");
+						else return rs.getString("name");
 					}
 				});
 				if (name != null && name.size() > 0)
@@ -216,7 +218,7 @@ public class JobUserDao extends AbstractJobDivaDao {
 				for (int i = 0; i < flexibleRoleNames.size(); i++) {
 					if (assignedTitle != "")
 						assignedTitle += " and ";
-					assignedTitle += flexibleRoleNames;
+					assignedTitle += flexibleRoleNames.get(i);
 				}
 			}
 		//
@@ -267,6 +269,12 @@ public class JobUserDao extends AbstractJobDivaDao {
 				+ "where rfq.customerid=cus.id(+) and rfq.id=? and rfq.teamid=?  and countries.id(+)=rfq.countryid and states.state_code(+)=rfq.state and states.countryid(+)=rfq.countryid  and currency.id(+)=rfq.billrate_currency ";
 		//
 		Object[] params = new Object[] { rfqid, teamId };
+		//
+		SMTPServer smtp_server = new SMTPServer();
+		smtp_server.setHost(appProperties.getSmtpServerLocation());
+		smtp_server.setIgnoreSPF(true);
+		smtp_server.setContentType(SMTPServer.CONTENT_TYPE_HTML);
+		//
 		jdbcTemplate.query(sqlStr, params, new RowMapper<String>() {
 			
 			@Override
@@ -393,10 +401,6 @@ public class JobUserDao extends AbstractJobDivaDao {
 							"<br><br>" + strJobInfo;
 						}
 						emailBody = "<div style='font-family:arial;font-size:13px;'>" + emailBody + "</div>";
-						SMTPServer smtp_server = new SMTPServer();
-						smtp_server.setHost(appProperties.getSmtpServerLocation());
-						smtp_server.setIgnoreSPF(true);
-						smtp_server.setContentType(SMTPServer.CONTENT_TYPE_HTML);
 						smtp_server.sendMail(recruiterEmail, "JobAssignment@jobdiva.com", emailSubject, emailBody);
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -500,7 +504,7 @@ public class JobUserDao extends AbstractJobDivaDao {
 			}
 		}
 		//
-		sqlStr = "Select recruiter,lead_recruiter,sales,lead_sales from tRecruiterRFQ " + "Where rfqid=? and recruiterid=? and teamid=? ";
+		sqlStr = "Select recruiter,lead_recruiter,sales,lead_sales from tRecruiterRFQ Where rfqid=? and recruiterid=? and teamid=? ";
 		params = new Object[] { jobId, recruiterid, jobDivaSession.getTeamId() };
 		List<List<String>> roles = jdbcTemplate.query(sqlStr, params, new RowMapper<List<String>>() {
 			
@@ -518,21 +522,20 @@ public class JobUserDao extends AbstractJobDivaDao {
 		if (roles != null && roles.size() > 0)
 			role = roles.get(0);
 		if (role.size() >= 4) {
-			if (role.get(1) == "0" && roleIds.contains(998l)) { // Primary
-																// Recruiter
+			if (role.get(1).equals("0") && roleIds.contains(998l)) { // Primary Recruiter
 				assignedTitle += "Primary Recruiter";
 			}
-			if (role.get(0) == "0" && roleIds.contains(997l)) { // Recruiter
+			if (role.get(0).equals("0") && roleIds.contains(997l)) { // Recruiter
 				if (assignedTitle != "")
 					assignedTitle += " and ";
 				assignedTitle += "Recruiter";
 			}
-			if (role.get(2) == "0" && roleIds.contains(999l)) { // Sales
+			if (role.get(2).equals("0") && roleIds.contains(999l)) { // Sales
 				if (assignedTitle != "")
 					assignedTitle += " and ";
 				assignedTitle += "Sales";
 			}
-			if (role.get(3) == "0" && roleIds.contains(996l)) { // Primary Sales
+			if (role.get(3).equals("0") && roleIds.contains(996l)) { // Primary Sales
 				if (assignedTitle != "")
 					assignedTitle += " and ";
 				assignedTitle += "Primary Sales";
@@ -570,6 +573,23 @@ public class JobUserDao extends AbstractJobDivaDao {
 		roleIds.remove(997l); // recruiter
 		// flexible Roles
 		//
+		List<Long> newRoleIds=roleIds;
+		List<Long> existingRoleIds=new ArrayList<Long>();
+		
+		if (roleIds.size() > 0) {
+			sqlStr = "select ROLEID from TRECRUITERRFQ_ROLES where rfqid=? and recruiterid=? and teamid=? ";
+			params = new Object[] { jobId, recruiterid, jobDivaSession.getTeamId() };
+			existingRoleIds = jdbcTemplate.query(sqlStr, params, new RowMapper<Long>() {
+				
+				@Override
+				public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+					return rs.getLong("ROLEID");
+				}
+			});
+			if (existingRoleIds != null && existingRoleIds.size() > 0)
+				newRoleIds.removeAll(existingRoleIds);
+		}
+		//
 		String sqlInsert = "delete from TRECRUITERRFQ_ROLES where rfqid=? and recruiterid=? and teamid=? ";
 		params = new Object[] { jobId, recruiterid, jobDivaSession.getTeamId() };
 		jdbcTemplate.update(sqlInsert, params);
@@ -582,29 +602,18 @@ public class JobUserDao extends AbstractJobDivaDao {
 			}
 		}
 		//
-		if (roleIds.size() > 0) {
-			sqlStr = "select id from TRECRUITERRFQ_ROLES where rfqid=? and recruiterid=? and teamid=? ";
-			params = new Object[] { jobId, recruiterid, jobDivaSession.getTeamId() };
-			List<Long> existingRoleIds = jdbcTemplate.query(sqlStr, params, new RowMapper<Long>() {
-				
-				@Override
-				public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-					return rs.getLong("id");
-				}
-			});
-			if (existingRoleIds != null && existingRoleIds.size() > 0)
-				roleIds.removeAll(existingRoleIds);
-		}
 		List<String> flexibleRoleNames = new ArrayList<String>();
-		if (roleIds.size() > 0) {
-			for (int j = 0; j < roleIds.size(); j++) {
-				sqlStr = "select name from TRECRUITER_ROLES where id=? ";
-				params = new Object[] { roleIds.get(j) };
+		if (newRoleIds.size() > 0) {
+			for (int j = 0; j < newRoleIds.size(); j++) {
+				sqlStr = "select name, primary from TRECRUITER_ROLES where id=? ";
+				params = new Object[] { newRoleIds.get(j) };
 				List<String> name = jdbcTemplate.query(sqlStr, params, new RowMapper<String>() {
 					
 					@Override
 					public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-						return rs.getString("name");
+						if(rs.getString("primary").equals("1"))
+						return "Primary " + rs.getString("name");
+						else return rs.getString("name");
 					}
 				});
 				if (name != null && name.size() > 0)
@@ -616,7 +625,7 @@ public class JobUserDao extends AbstractJobDivaDao {
 				for (int i = 0; i < flexibleRoleNames.size(); i++) {
 					if (assignedTitle != "")
 						assignedTitle += " and ";
-					assignedTitle += flexibleRoleNames;
+					assignedTitle += flexibleRoleNames.get(i);
 				}
 			}
 		// Sync
@@ -637,8 +646,7 @@ public class JobUserDao extends AbstractJobDivaDao {
 			jdbcTemplate.update(sqlStr, params);
 		}
 		// Send Email
-		SendEmailJobAssignment(jdbcTemplate, jobId, jobDivaSession.getTeamId(), recruiterid, assignedTitle, jobDivaSession.getEnvironment().toString(), recruiterEmail, recruiterName, EMAIL_OPTION_ASSIGN_USER, receive_email == 1,
-				jobDivaSession.getRecruiterId());
+		SendEmailJobAssignment(jdbcTemplate, jobId, jobDivaSession.getTeamId(), recruiterid, assignedTitle, jobDivaSession.getEnvironment().toString(), recruiterEmail, recruiterName, EMAIL_OPTION_ASSIGN_USER, receive_email == 1,jobDivaSession.getRecruiterId());
 		//
 		return true;
 	}
