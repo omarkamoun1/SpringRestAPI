@@ -20,6 +20,7 @@ import com.jobdiva.api.model.chatbot.ChatbotHarvestAccount;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestMachineStatus;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestStatus;
 import com.jobdiva.api.model.chatbot.ChatbotQuestion;
+import com.jobdiva.api.model.chatbot.ChatbotRecruiterInfo;
 import com.jobdiva.api.model.chatbot.ChatbotSocialQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotTag;
 import com.jobdiva.api.model.chatbot.ChatbotTagValue;
@@ -181,5 +182,17 @@ public class SupportChatbotController extends AbstractJobDivaController {
 		throws Exception {
 		JobDivaSession jobDivaSession = getJobDivaSession();
 		return chatbotDataService.emailAlert(jobDivaSession,email);
+	}
+	@GetMapping(value = "/recruiter-data", produces = "application/json")
+	public ChatbotUserData getRecruiterIdData(@ApiParam(value = "recruiterid", required = true)
+	@RequestParam(required = true) long recruiterid)  throws Exception {
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		return chatbotDataService.getRecruiterData(jobDivaSession,recruiterid);
+	}
+
+	@GetMapping(value = "/recruiter-list", produces = "application/json")
+	public List<ChatbotRecruiterInfo> getRecruiterList() throws Exception {
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		return chatbotDataService.getRecruiterList(jobDivaSession);
 	}
 }

@@ -32,6 +32,7 @@ import com.jobdiva.api.model.chatbot.ChatbotHarvestMachineStatus;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestStatus;
 import com.jobdiva.api.model.chatbot.ChatbotQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotRecruiterData;
+import com.jobdiva.api.model.chatbot.ChatbotRecruiterInfo;
 import com.jobdiva.api.model.chatbot.ChatbotSocialQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotTag;
 import com.jobdiva.api.model.chatbot.ChatbotTagValue;
@@ -509,6 +510,214 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		//
 	}
 	
+	public ChatbotUserData getRecruiterData(JobDivaSession jobDivaSession, long recruiterid){
+		long teamid = jobDivaSession.getTeamId();
+		//
+		ChatbotUserData data = new ChatbotUserData();
+		//
+		String sql = "select company " //
+				+ " from tteam "//
+				+ " where id = ? ";
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		Object[] params = new Object[] { teamid };
+		//
+		List<ChatbotUserData> list = jdbcTemplate.query(sql, params, new RowMapper<ChatbotUserData>() {
+			
+			@Override
+			public ChatbotUserData mapRow(ResultSet rs, int rowNum) throws SQLException {
+				ChatbotUserData tmp = new ChatbotUserData();
+				tmp.companyName = rs.getString("company");
+				return tmp;
+			}
+		});
+		//
+		if (list.size() > 0) {
+			data.companyName = list.get(0).companyName;
+		}
+		//
+		sql = "select t2.apache_location, t2.environment_type "//
+				+ " from tmaindb_teamid t1, tmaindbs t2 "//
+				+ " where t1.maindbid = t2.id and t1.teamid = ? ";
+		//
+		jdbcTemplate = getCentralJdbcTemplate();
+		params = new Object[] { teamid };
+		//
+		list = jdbcTemplate.query(sql, params, new RowMapper<ChatbotUserData>() {
+			
+			@Override
+			public ChatbotUserData mapRow(ResultSet rs, int rowNum) throws SQLException {
+				ChatbotUserData tmp = new ChatbotUserData();
+				tmp.apacheLocation = rs.getString(1);
+				tmp.envType = rs.getString(2);
+				return tmp;
+			}
+		});
+		//
+		if (list.size() > 0) {
+			data.apacheLocation = (list.get(0).apacheLocation);
+			data.envType = (list.get(0).envType);
+		}
+		//
+		//
+		// get permission
+		sql = "select permission, firstname, lastname, leader, permission2_recruiter, permission_recruiter " //
+				+ " from trecruiter "//
+				+ " where groupid = ? and ID = ? ";
+		//
+		jdbcTemplate = getJdbcTemplate();
+		params = new Object[] { teamid, recruiterid };
+		//
+		list = jdbcTemplate.query(sql, params, new RowMapper<ChatbotUserData>() {
+			
+			@Override
+			public ChatbotUserData mapRow(ResultSet rs, int rowNum) throws SQLException {
+				System.out.println(recruiterid);
+				ChatbotUserData tmp = new ChatbotUserData();
+				long permission = rs.getLong(1);
+				long permission_recruiter = rs.getLong(6);
+				Boolean isTeamLeader = !((rs.getInt(4) & 16) == 0);
+				Boolean isSuperUser = !((rs.getInt(4) & 256) == 0);
+				boolean allowManagingJobBoardsCriteriaAndProfiles = false;
+				boolean isTeamLeaerOrSupperUser= isTeamLeader || isSuperUser;
+				// if (( 0!=(leadervalue & (1<<(i-1))) || leadervalue==0) &&
+				// !(i==2 &&
+				// accessControlSet.contains("hide_VMS"))){%>true<%}else{%>false<%}
+				// String accessControlSet = "";
+				int i = 1;
+				if (isTeamLeaerOrSupperUser && 0 != (permission & (1 << (i - 1)))) {
+					allowManagingJobBoardsCriteriaAndProfiles = true;
+				}
+				boolean displayFourDailyEmailProfileOption = false;
+				i = 5;
+				tmp.allowViewAccessLogReport = isTeamLeaerOrSupperUser && 0 != (permission & (1 << (i - 1)));
+				i = 6;
+				if (isTeamLeaerOrSupperUser && 0 != (permission & (1 << (i - 1)))) {
+					displayFourDailyEmailProfileOption = true;
+				}
+				i = 7;
+				boolean allowManagingJobBoardsCriteriaOnly = false;
+				if (isTeamLeaerOrSupperUser && 0 != (permission & (1 << (i - 1)))) {
+					allowManagingJobBoardsCriteriaOnly = true;
+				}
+				tmp.allowCreateSuppliersLogins = 0!= (permission_recruiter & 64);
+				String permission2 = rs.getString("permission2_recruiter");
+	
+				System.out.println(permission);
+				System.out.println(permission2);
+				if (permission2 != null && !permission2.isEmpty()) {
+					while(permission2.length()<500) permission2+="0";
+					tmp.allowOnboardCandidatesFor = permission2.charAt(0) == '1';
+					tmp.allowAssignOnboardingToNotLinkedJob = permission2.charAt(42) == '1';
+					tmp.allowManagingOnboarding = permission2.charAt(13) == '1';
+					tmp.allowAccessCompletedOnboarding = permission2.charAt(6) == '1';
+					tmp.allowAccessCompletedOnboardingForHires = permission2.charAt(7) == '1';
+					tmp.allowAccessCompletedOnboardingForPrimaryJobs = permission2.charAt(8) == '1';
+					tmp.allowAccessCompletedOnboardingForMyJobs = permission2.charAt(9) == '1';
+					tmp.allowAccessCompletedOnboardingForAllJobs = permission2.charAt(10) == '1';
+					tmp.allowAccessCompletedOnboardingForDivision = permission2.charAt(11) == '1';
+					tmp.allowAssignSuppliersToJob = permission2.charAt(112) == '1';
+					tmp.allowUnassignIndividualDocuments = permission2.charAt(120) == '1';
+
+				}
+				tmp.allowManagingJobBoardsCriteriaAndProfiles = (allowManagingJobBoardsCriteriaAndProfiles);
+				tmp.allowManagingJobBoardsCriteriaOnly = (allowManagingJobBoardsCriteriaOnly);
+				tmp.displayTheFourDailyEmailProfileOption = (displayFourDailyEmailProfileOption);
+				tmp.firstname = (rs.getString("firstname"));
+				tmp.lastname = (rs.getString("lastname"));
+				tmp.isTeamLeader = (isTeamLeader);
+				tmp.isSuperUser = isSuperUser;
+				return tmp;
+			}
+		});
+		//
+		if (list.size() > 0) {
+			ChatbotUserData tmp = list.get(0);
+			data.allowAssignSuppliersToJob = tmp.allowAssignSuppliersToJob;
+			data.allowViewAccessLogReport = tmp.allowViewAccessLogReport;
+			data.allowCreateSuppliersLogins = tmp.allowCreateSuppliersLogins;
+			data.allowOnboardCandidatesFor = tmp.allowOnboardCandidatesFor;
+			data.allowUnassignIndividualDocuments = tmp.allowUnassignIndividualDocuments;
+			data.allowAssignOnboardingToNotLinkedJob = (tmp.allowAssignOnboardingToNotLinkedJob);
+			data.allowManagingOnboarding = (tmp.allowAccessCompletedOnboarding);
+			data.allowAccessCompletedOnboarding = (tmp.allowAccessCompletedOnboarding);
+			data.allowAccessCompletedOnboardingForHires = (tmp.allowAccessCompletedOnboardingForHires);
+			data.allowAccessCompletedOnboardingForPrimaryJobs = (tmp.allowAccessCompletedOnboardingForPrimaryJobs);
+			data.allowAccessCompletedOnboardingForMyJobs = (tmp.allowAccessCompletedOnboardingForMyJobs);
+			data.allowAccessCompletedOnboardingForAllJobs = (tmp.allowAccessCompletedOnboardingForAllJobs);
+			data.allowAccessCompletedOnboardingForDivision = (tmp.allowAccessCompletedOnboardingForDivision);
+			data.allowUnassignIndividualDocuments = (tmp.allowUnassignIndividualDocuments);
+			data.allowManagingJobBoardsCriteriaAndProfiles = (tmp.allowManagingJobBoardsCriteriaAndProfiles);
+			data.allowManagingJobBoardsCriteriaOnly = (tmp.allowManagingJobBoardsCriteriaOnly);
+			data.displayTheFourDailyEmailProfileOption = (tmp.displayTheFourDailyEmailProfileOption);
+			data.firstname = (tmp.firstname);
+			data.lastname = (tmp.lastname);
+			data.isTeamLeader = (tmp.isTeamLeader);
+			data.isSuperUser = tmp.isSuperUser;
+			HashMap<Long, String> notUsedHirePackage = getNotUsedHirePackages(teamid);
+			if (notUsedHirePackage.size() > 0) {
+				data.hasUnusedHirePackage = true;
+				data.unusedHirePackagesName = notUsedHirePackage.entrySet().stream().map(e -> e.getValue()).collect(Collectors.joining(", ", "", ""));
+			}
+		}
+		// get report permission
+		sql = "select count(r.id) e, p.PERMTYPE, p.permvalue from "+
+			  "	(select * from trecruiter_report_permission where teamid=?) p, "+
+			  " (select id from trecruiter where id = ?) r where r.id(+) = p.recruiterid and permtype is not null group by PERMTYPE, permvalue order by permtype";
+		params = new Object[] {teamid, recruiterid};
+		List<String[]> reportPermissions= jdbcTemplate.query(sql, params, new RowMapper<String[]>() {
+			@Override
+			public String[] mapRow(ResultSet rs, int rowNum) throws SQLException {
+				String[] list = new String[3];
+				list[0] = rs.getString(1);
+				list[1] = rs.getString(2);
+				list[2] = rs.getString(3);
+				return list;
+			}
+		});
+		for(int i=0;i<reportPermissions.size();i++) {
+			String[] permission = reportPermissions.get(i);
+			String name = permission[1];
+			Boolean value= permission[0].equals(permission[2]);
+			if(name.equals("RP001")) {
+				data.reportPermissionUserJournalOfCandiateNotes = value;
+			} 
+			else if(name.equals("RP005")) {
+				data.reportPermissionUserJournalOfContactNotes = value;
+			}
+			else if(name.equals("RP044")) {
+				data.reportPermissionUserJournalOfCompanyNotes = value;
+			}
+			else if(name.equals("RP042")) {
+				data.reportPermissionCompanyList = value;
+			}
+			else if(name.equals("RP050")) {
+				data.reportPermissionMyCompanyList = value;
+			}
+			else if(name.equals("RP034")) {
+				data.reportPermissionPhasedSubmittalMetrics = value;
+			}
+			else if(name.equals("RP014")) {
+				data.reportPermissionSubmittalMetrics = value;
+			}
+			else if(name.equals("RP013")) {
+				data.reportPermissionIncomingResumesReceivedDuringPeriod = value;
+			}
+			else if(name.equals("RP032")) {
+				data.reportPermissionEmployeeReport = value;
+			}
+			else if(name.equals("RP030")) {
+				data.reportPermissionHiresReport = value;
+			}
+			else if(name.equals("RP028")) {
+				data.reportPermissionJobActivitySummaryAndDetails = value;
+			}			
+		}
+		//
+		return data;
+
+	}
+
 	public ChatbotVisibility checkChatbotVisibility(JobDivaSession jobDivaSession) {
 		//
 		long teamid = jobDivaSession.getTeamId();
@@ -1896,5 +2105,29 @@ public class ChatbotTrainingDataDao extends AbstractJobDivaDao {
 		return true;
 
 		
+	}
+
+	public List<ChatbotRecruiterInfo> getRecruiterList(JobDivaSession jobDivaSession){
+		long teamid = jobDivaSession.getTeamId();
+		String sql = "select id, firstname, lastname, email " //
+		+ " from trecruiter "//
+		+ " where groupid = ? and active = 1 ";
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		Object[] params = new Object[] { teamid };
+		//
+		List<ChatbotRecruiterInfo> list = jdbcTemplate.query(sql, params, new RowMapper<ChatbotRecruiterInfo>() {
+			
+			@Override
+			public ChatbotRecruiterInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
+				ChatbotRecruiterInfo data = new ChatbotRecruiterInfo();
+				data.id= rs.getLong("id");
+				data.name = rs.getString("firstname") + " " + rs.getString("lastname");
+				data.email = rs.getString("email");
+				return data;
+			}
+		});
+
+		return list;
 	}
 }
