@@ -110,7 +110,7 @@ public class IrishJobsDao {
 
 		int webid = 102;
 		
-		String[] data = new String[16];
+		String[] data = new String[17];
 		
 		if (action.equals("post") || action.equals("update")) {
 			String sql = "select param, value " //
@@ -192,7 +192,7 @@ public class IrishJobsDao {
 			
 			String[] elements = {"uuid", "jobtitle", "jobcategory", "employmenttype", "streetlocationtype", "streetlocationdesc", "remunerationtype", 
 									"fromamount", "toamount", "desiredSkills", "jobdescription", "advertunittype", "addjobCategory", "employername", 
-									"ben", "applyurl"}; //16
+									"ben", "applyurl", "hideSal"}; //17
 
 			
 			if (action.equals("update") && isInList(list,elements[0]) == -1) return "{\"response\":{\"status\":\"Fail\",\"reason\":\"UUID Field Missing in Database\"}}";
@@ -214,7 +214,7 @@ public class IrishJobsDao {
 				return "{\"response\":{\"status\":\"Fail\",\"reason\":\"Required Field(s) Missing in Database: " + missingFields + ".\"}}";
 			}
 			
-			for (int i = 12; i < 16; i++) {
+			for (int i = 12; i < 17; i++) {
 				if (isInList(list,elements[i]) != -1) data[i] = (String) list.get(isInList(list,elements[i])).get(1);
 				else data[i] = "";
 			}
@@ -282,6 +282,7 @@ public class IrishJobsDao {
                 
                 xmlMessage += "\"remuneration\":{" + "\"type\":" + data[6];
                 if (data[7] != "" || data[8] != "") xmlMessage += ",\"fromAmount\":" + data[7] + ",\"toAmount\":" + data[8];
+                if (data[16] != "") xmlMessage += ",\"hideAmount\":" + data[16];
                 xmlMessage += "},";
                 		
                 xmlMessage += "\"desiredSkills\":[";
