@@ -34,6 +34,7 @@ import com.jobdiva.api.dao.company.SearchCompanyDao;
 import com.jobdiva.api.dao.contact.ContactDao;
 import com.jobdiva.api.dao.job.def.UserRoleDef;
 import com.jobdiva.api.model.Activity;
+import com.jobdiva.api.model.Applicant;
 import com.jobdiva.api.model.Attachment;
 import com.jobdiva.api.model.Company;
 import com.jobdiva.api.model.Contact;
@@ -2740,5 +2741,46 @@ public class JobDao extends AbstractActivityDao {
 		String sql= "update tworkbench set active=? where teamid=? and rfqid=? ";
 		Object[] params = new Object[] { status,teamId,jobId};
 		jdbcTemplate.update(sql,params);
+	}
+
+	public List<Applicant> getJobApplicants(JobDivaSession jobDivaSession, Long jobId) throws Exception{
+		
+		String sql = "select a.candidateid, a.dateapplied, a.matched, "
+        		+ " a.resume_source_name, c.firstname, c.lastname, c.email, "
+        		+ " nvl((select 'This candidate was rejected on '||r.daterejected||' for '||nvl(s.reason,'no reason')||' by '||(select firstname||' '||lastname from trecruiter where groupid=r.recruiter_teamid and id=r.recruiterid) "
+        			+ " from trejection_reasons s, trejection r "
+        			+ " where r.candidateid=c.id and r.rfqid=a.rfqid "
+        			+ " and r.recruiter_teamid=a.teamid and r.recruiter_teamid=s.teamid(+) and r.rejectreason=s.id(+))"
+        			+ " ,'') rejected, "
+        		+ " case when not exists (select 1 from tinterviewschedule i where i.candidateid=a.candidateid and i.recruiter_teamid=a.teamid and i.rfqid=a.rfqid) then 0 " + 
+        		"                              when (select min(nvl(roleid,0)) from tinterviewschedule i where i.candidateid=a.candidateid and i.recruiter_teamid=a.teamid and i.rfqid=a.rfqid) < 900 then 2 " + 
+        		"                              else 1 end status "
+        		+ " from tCandidate_ApplyForJob a, tcandidate c "
+        		+ " where a.teamid=? and a.rfqid=? and a.candidateid=c.id and c.teamid=a.teamid "
+        		+ " order by a.matched desc, a.dateapplied ";
+		//
+		Object[] params = new Object[] {jobDivaSession.getTeamId(),jobId};
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<Applicant> applicants= jdbcTemplate.query(sql,params, new RowMapper<Applicant>() {
+				
+				@Override
+				public Applicant mapRow(ResultSet rs, int rowNum) throws SQLException {
+					    Applicant n=new Applicant();
+					    n.setId(rs.getLong(1));
+			            n.setDateApplied(trimDate(rs.getString(2)));
+			            n.setMatched(rs.getBoolean(3));
+			            n.setResumeSource(rs.getString(4));
+			            n.setFirstName(rs.getString(5));
+			            n.setLastName(rs.getString(6));
+			            n.setEmail(rs.getString(7));
+			            n.setRejected(rs.getString(8));
+			            n.setStatus(rs.getInt(9));
+				    	return n;
+				}
+	 	    });
+
+		return applicants;
 	}
 }

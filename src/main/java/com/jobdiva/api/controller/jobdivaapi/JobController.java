@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jobdiva.api.controller.AbstractJobDivaController;
 import com.jobdiva.api.model.Activity;
+import com.jobdiva.api.model.Applicant;
 import com.jobdiva.api.model.Attachment;
 import com.jobdiva.api.model.ContactRoleType;
 import com.jobdiva.api.model.Job;
@@ -800,6 +801,23 @@ public class JobController extends AbstractJobDivaController {
 		jobDivaSession.checkForAPIPermission("GetJobNotes");
 		//
 		return jobService.getJobNotes(jobDivaSession, jobId);
+		//
+	}
+	
+	@RequestMapping(value = "/GetJobApplicants", method = RequestMethod.GET, produces = "application/json; charset=UTF-8")
+	@ApiOperation(value = "Get Job Applicants")
+	public List<Applicant> GetJobApplicants( //
+			//
+			@ApiParam(value = "Job ID", required = true) //
+			@RequestParam(required = true) Long jobId //
+	//
+	) throws Exception {
+		//
+		JobDivaSession jobDivaSession = getJobDivaSession();
+		//
+		jobDivaSession.checkForAPIPermission("GetJobApplicants");
+		//
+		return jobService.getJobApplicants(jobDivaSession, jobId);
 		//
 	}
 	

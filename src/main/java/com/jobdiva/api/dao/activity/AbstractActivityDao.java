@@ -126,6 +126,12 @@ public class AbstractActivityDao extends AbstractJobDivaDao {
 		return "";
 	}
 	
+	public String trimDate(String s) {
+		if(s!=null && s.length()>=20)
+			return s.substring(0, 19);
+		else return "";
+	}
+	
 	public String getPhoneType(char id) {
 		switch (id) {
 			case '0':
