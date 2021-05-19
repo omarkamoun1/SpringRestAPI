@@ -29,6 +29,9 @@ public class UploadTimesheetDef implements Serializable {
 	@JsonProperty(value = "approved", required = true) //
 	private Boolean		approved;
 	//
+	// @JsonProperty(value = "timesheetId", required = true) //
+	// private Long timesheetId;
+	//
 	@JsonProperty(value = "externalId", required = false) //
 	private String		externalId;
 	//
@@ -80,6 +83,13 @@ public class UploadTimesheetDef implements Serializable {
 	public void setApproved(Boolean approved) {
 		this.approved = approved;
 	}
+	// public Long getTimesheetId() {
+	// return timesheetId;
+	// }
+	//
+	// public void setTimesheetId(Long timesheetId) {
+	// this.timesheetId = timesheetId;
+	// }
 	
 	public String getExternalId() {
 		return externalId;

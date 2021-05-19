@@ -214,7 +214,13 @@ public class WebhookDao extends AbstractJobDivaDao {
 	}
 	
 	public void send(WebhookRequest webhookRequest, String json, long startTime, Integer counter) {
-		WebhookInfo webhookConfiguration = getWebhookConfiguration(webhookRequest.getTeamId());
+		//
+		WebhookInfo webhookConfiguration = null;
+		//
+		synchronized (this.syncObj) {
+			webhookConfiguration = webHooksMap.get(webhookRequest.getTeamId());
+		}
+		//
 		if (webhookConfiguration != null && webhookConfiguration.getActive() != null && webhookConfiguration.getActive()) {
 			String clientSecret = webhookConfiguration.getClientSecret();
 			String url = webhookConfiguration.getClientUrl();
@@ -318,6 +324,8 @@ public class WebhookDao extends AbstractJobDivaDao {
 			jdbcTemplate.update(sqlInsert, params);
 		}
 		//
+		refresh(teamId);
+		//
 		return true;
 	}
 	
@@ -329,6 +337,9 @@ public class WebhookDao extends AbstractJobDivaDao {
 		Object[] params = { teamId };
 		//
 		jdbcTemplate.update(sql, params);
+		//
+		//
+		refresh(teamId);
 		//
 		return true;
 	}

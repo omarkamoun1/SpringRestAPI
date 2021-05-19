@@ -42,8 +42,8 @@ public class WebhookService {
 		return this.webhookDao.deleteWebhookConfiguration(teamId);
 	}
 	
-	private String getSyncItem(Long teamId, Integer operation, String id, String syncType) {
-		return teamId + id + operation + syncType;
+	private String getSyncItem(Long teamId, String id, String syncType) {
+		return teamId + id + syncType;
 	}
 	
 	protected boolean canExecute(Long teamId, String id, String syncType, Integer operation) {
@@ -51,7 +51,7 @@ public class WebhookService {
 		//
 		synchronized (synObj) {
 			//
-			String syncIem = getSyncItem(teamId, operation, id, syncType);
+			String syncIem = getSyncItem(teamId, id, syncType);
 			//
 			Boolean value = syncList.contains(syncIem);
 			//
@@ -68,7 +68,7 @@ public class WebhookService {
 	public Boolean syncWebhook(Long teamId, String syncType, Integer operation, String id) throws Exception {
 		//
 		//
-		String syncIem = getSyncItem(teamId, operation, id, syncType);
+		String syncIem = getSyncItem(teamId, id, syncType);
 		//
 		synchronized (synObj) {
 			if (!syncList.contains(syncIem)) {

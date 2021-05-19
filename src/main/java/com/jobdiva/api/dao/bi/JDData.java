@@ -2144,8 +2144,7 @@ public class JDData {
 		}
 		String sql = "select a.timecardid timesheetid, a.externalid, a.employeeid, a.billing_recid, s.RECID SALARY_RECID, a.weekendingdate, " //
 				+ "case when b.projectid >= 0 then 'Billable' else to_char(c.name) end hourtype, NVL(br.BILLRATE_NAME,'Regular Hours') HOURS_DESCRIPTION, " //
-				+ "b.TDATE, b.reghours reg_hours, b.othours ot_hours, b.dthours dt_hours " //
-				+ "b.TDATE, b.reghours reg_hours, b.othours ot_hours, b.dthours dt_hours, br.interviewid, br.rfqid jobid, a.externalid, br.vmsemployeeid " //
+ 				+ "b.TDATE, b.reghours reg_hours, b.othours ot_hours, b.dthours dt_hours, br.interviewid startid, br.rfqid jobid, a.externalid, br.vmsemployeeid " //
 				+ "FROM TEMPLOYEE_WED a JOIN TEMPLOYEE_TIMESHEET b ON b.employeeid=a.employeeid and b.recruiter_teamid=a.recruiter_teamid and b.billing_recid=a.billing_recid and b.weekending = a.weekendingdate " //
 				+ "LEFT JOIN TBILLING_HOURTYPES c ON b.RECRUITER_TEAMID = c.RECRUITER_TEAMID AND b.PROJECTID = c.ID " //
 				+ "LEFT JOIN TEMPLOYEE_BILLINGRECORD br ON a.RECRUITER_TEAMID = br.RECRUITER_TEAMID AND a.EMPLOYEEID = br.EMPLOYEEID AND a.BILLING_RECID = br.RECID " //

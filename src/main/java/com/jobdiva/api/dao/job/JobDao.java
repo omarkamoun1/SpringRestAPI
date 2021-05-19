@@ -2080,6 +2080,16 @@ public class JobDao extends AbstractActivityDao {
 					if (cid == null || cid.size() == 0)
 						throw new Exception("Error: Recruiter(" + localUuserRole.getUserId() + ") is not found. Failed in job user update. \r\n");
 					//
+					//
+					//
+					//
+					//
+					//
+					//
+					//
+					//
+					//
+					
 					Boolean sale = false;
 					Boolean leadSale = false;
 					Boolean recruiter = false;

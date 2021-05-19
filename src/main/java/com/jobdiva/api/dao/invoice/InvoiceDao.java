@@ -448,6 +448,7 @@ public class InvoiceDao extends AbstractJobDivaDao {
 		payRecId = (Integer) employeeBillPayRecIds.get(1);
 		employeeId = (Long) employeeBillPayRecIds.get(2);
 		//
+		invoice.setBillingRecordid(billingRecId);
 		//
 		params = new Object[5];
 		params[0] = new Integer(121);

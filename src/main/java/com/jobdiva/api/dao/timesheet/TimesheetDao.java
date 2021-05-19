@@ -31,6 +31,7 @@ import com.axelon.shared.TimeSheetDay;
 import com.axelon.shared.TimeSheetWeek;
 import com.jobdiva.api.dao.AbstractJobDivaDao;
 import com.jobdiva.api.dao.invoice.InvoiceDao;
+import com.jobdiva.api.model.ExpenseCategory;
 import com.jobdiva.api.model.ExpenseEntry;
 import com.jobdiva.api.model.Timesheet;
 import com.jobdiva.api.model.TimesheetApproval;
@@ -191,7 +192,8 @@ public class TimesheetDao extends AbstractJobDivaDao {
 		if (retObj != null) {
 			if (retObj instanceof Exception) {
 				message.append(((Exception) retObj).getMessage());
-			} else {
+			} else if (retObj instanceof Long) {
+				return (Long) retObj;
 				// success
 			}
 		}
@@ -200,22 +202,37 @@ public class TimesheetDao extends AbstractJobDivaDao {
 			throw new Exception("Error! Timesheet Not Saved. \r\n " + message.toString());
 			//
 		} else {
-			String sql = "select timecardid from temployee_wed Where employeeid = ? and recruiter_teamid = ? and billing_recid = ? and weekendingdate = ? ";
-			Object[] params = new Object[] { employeeId, jobDivaSession.getTeamId(), billingRecId, sdf.parse(weekending) };
-			List<Long> list = getJdbcTemplate().query(sql, params, new RowMapper<Long>() {
-				
-				@Override
-				public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+			Long timecardId = 0L;
+			CandidateBillingRecord bill_rec = new CandidateBillingRecord();
+			bill_rec.mark = 34;
+			bill_rec.teamID = jobDivaSession.getTeamId();
+			bill_rec.candidateID = employeeId;
+			bill_rec.recID = billingRecId;
+			bill_rec.startDate = weekendingdate;
+			retObj = null;
+			try {
+				//
+				ServletRequestData srd = new ServletRequestData(0, null, bill_rec);
+				retObj = ServletTransporter.callServlet(getCandidateBillingRecordsGetServlet(), srd);
+				//
+				if (retObj instanceof Long) {
+					timecardId = (Long) retObj;
+					return timecardId;
 					//
-					return rs.getLong("timecardid");
+				} else if (retObj instanceof Exception) {
+					Exception e = (Exception) retObj;
+					e.printStackTrace();
+					throw new Exception("Error occurs when trying to retrieve TimeCard ID. " + e.getMessage());
+				} else {
+					throw new Exception("Error occurs when trying to retrieve TimeCard ID. " + retObj);
 				}
-			});
-			//
-			if (list != null && list.size() > 0) {
-				return list.get(0);
-			} else {
-				throw new Exception("Error occurs when trying to retrieve TimeCard ID. ");
+				//
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new Exception("Error occurs when trying to retrieve TimeCard ID. " + e.getMessage());
 			}
+			//
+			//
 		}
 	}
 	
@@ -1141,5 +1158,34 @@ public class TimesheetDao extends AbstractJobDivaDao {
 			throw new Exception("Timesheet not found");
 		}
 		//
+	}
+	
+	public List<ExpenseCategory> getExpenseCategories(JobDivaSession jobDivaSession) {
+		String sql = "select  id ,name, setting, rate, unit " //
+				+ " from tbilling_expense_category "//
+				+ " where recruiter_teamid = ? " //
+				+ " order by name";
+		Object[] params = new Object[] { jobDivaSession.getTeamId() };
+		//
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		List<ExpenseCategory> list = jdbcTemplate.query(sql, params, new RowMapper<ExpenseCategory>() {
+			
+			@Override
+			public ExpenseCategory mapRow(ResultSet rs, int rowNum) throws SQLException {
+				//
+				ExpenseCategory expenseCategory = new ExpenseCategory();
+				//
+				expenseCategory.setId(rs.getLong("id"));
+				expenseCategory.setName(rs.getString("name"));
+				expenseCategory.setRate(rs.getLong("rate"));
+				expenseCategory.setUnit(rs.getString("unit"));
+				//
+				return expenseCategory;
+			}
+		});
+		//
+		return list;
 	}
 }

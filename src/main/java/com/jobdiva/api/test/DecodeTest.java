@@ -24,6 +24,8 @@ public class DecodeTest {
  		
  		url = "http://10.50.129.4:88/api/jobdiva/updateJob?jobid=330553&users=%7B%0A%20%20%22action%22%3A%201%2C%0A%20%20%22role%22%3A%20%22Sales%22%2C%0A%20%20%22userId%22%3A%20125009%0A%7D"; 
  		
+ 		url = "{ \"activityId\": 504371, \"approved\": true, \"approverId\": 125009, \"employeeId\": 916352170460, \"externalId\": \"\", \"jobId\": 332482, \"timesheet\": [ { \"date\": \"2021-05-03T11:28:41.404Z\", \"hours\": 8 }, { \"date\": \"2021-05-04T11:28:41.404Z\", \"hours\": 8 }, { \"date\": \"2021-05-05T11:28:41.404Z\", \"hours\": 8 }, { \"date\": \"2021-05-06T11:28:41.404Z\", \"hours\": 8 }, { \"date\": \"2021-05-07T11:28:41.404Z\", \"hours\": 8 }, { \"date\": \"2021-05-08T11:28:41.404Z\", \"hours\": 8 }, { \"date\": \"2021-05-09T11:28:41.404Z\", \"hours\": 8 } ], \"vmsEmployeeId\": \"$@ 1 yr22tyy uy3ye4ry78yuyr H iui\", \"weekendingdate\": \"2021-05-09T11:28:41.404Z\"}" ;
+ 		
  		url = UriUtils.decode(url, "UTF-8");
 		System.out.println(url);
 	}

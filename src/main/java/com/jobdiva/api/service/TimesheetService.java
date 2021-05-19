@@ -9,6 +9,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
 import com.jobdiva.api.dao.timesheet.TimesheetDao;
+import com.jobdiva.api.model.ExpenseCategory;
 import com.jobdiva.api.model.ExpenseEntry;
 import com.jobdiva.api.model.Timesheet;
 import com.jobdiva.api.model.TimesheetEntry;
@@ -158,5 +159,10 @@ public class TimesheetService extends AbstractService {
 			//
 			throw new Exception(e.getMessage());
 		}
+	}
+	
+	public List<ExpenseCategory> getExpenseCategories(JobDivaSession jobDivaSession) throws Exception {
+		//
+		return timesheetDao.getExpenseCategories(jobDivaSession);
 	}
 }

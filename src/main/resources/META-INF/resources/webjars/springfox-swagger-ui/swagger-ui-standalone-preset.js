@@ -7155,8 +7155,15 @@
                         }), f.push(c.default.createElement("label", {
                             className: "select-label",
                             htmlFor: "select"
-                        }
+                        } 
                          ))
+						 // , f.push(c.default.createElement("span", null, "Select a version"))
+						 , f.push( c.default.createElement("select",{
+                                            id: "select",
+                                            disabled: s,
+                                            onChange: this.onUrlSelect,
+                                            value:l[this.state.selectedIndex].url
+                                        }, d) )
                     } else p = this.downloadUrl, f.push(c.default.createElement("input", {
                         className: "download-url-input",
                         type: "text",

@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class CreatePayRecordDef implements Serializable {
 	
 	@JsonProperty(required = true)
-	Long			candidateID;
+	private Long			candidateID;
 	//
 	@JsonProperty(required = false)
 	private Double	assignmentID;

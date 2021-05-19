@@ -42,6 +42,8 @@ import com.jobdiva.api.convertor.JsonToCreateJobDefConverter;
 import com.jobdiva.api.convertor.JsonToCreatePayRecordDefConverter;
 import com.jobdiva.api.convertor.JsonToCreateSubmittalDefConverter;
 import com.jobdiva.api.convertor.JsonToCreateTaskDefConverter;
+import com.jobdiva.api.convertor.JsonToDeleteExpenseDefConverter;
+import com.jobdiva.api.convertor.JsonToDeleteTimesheetDefConverter;
 import com.jobdiva.api.convertor.JsonToEducationQualConverter;
 import com.jobdiva.api.convertor.JsonToEventNotificationConverter;
 import com.jobdiva.api.convertor.JsonToExpenseEntryConverter;
@@ -110,16 +112,32 @@ import springfox.documentation.spring.web.plugins.Docket;
 public class SwaggerConfig extends WebMvcConfigurationSupport {
 	
 	@Bean
-	public Docket productApi() {
+	public Docket productApiV1() {
 		return new Docket(DocumentationType.SWAGGER_2) //
 				//
+				.groupName("Version 1") //
 				.select() //
-				.apis(RequestHandlerSelectors.basePackage("com.jobdiva.api.controller")) //
+				.apis(RequestHandlerSelectors.basePackage("com.jobdiva.api.controller.v1")) //
 				.paths(regex("/api.*")) //
 				.build() //
 				.securitySchemes(Arrays.asList(apiKey()))//
 				.securityContexts(Arrays.asList(securityContext())) //
-				.apiInfo(metaData());
+				.apiInfo(metaDataV1());
+	}
+	
+	@Bean
+	public Docket productApiV2() {
+		return new Docket(DocumentationType.SWAGGER_2) //
+				//
+				.groupName("Version 2 Beta") //
+				.select() //
+				.apis(RequestHandlerSelectors.basePackage("com.jobdiva.api.controller.v2"))
+				//
+				.paths(regex("/apiv2.*")) //
+				.build() //
+				.securitySchemes(Arrays.asList(apiKey()))//
+				.securityContexts(Arrays.asList(securityContext())) //
+				.apiInfo(metaDataV2());
 	}
 	
 	private ApiKey apiKey() {
@@ -228,13 +246,23 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
 		registry.addConverter(new JsonToCreateContactHotlistDefConverter());
 		registry.addConverter(new JsonToAddContactToHotlistDefConverter());
 		registry.addConverter(new JsonToTimesheetConverter());
+		registry.addConverter(new JsonToDeleteTimesheetDefConverter());
+		registry.addConverter(new JsonToDeleteExpenseDefConverter());
 	}
 	
-	private ApiInfo metaData() {
-		return new ApiInfoBuilder()
+	private ApiInfo metaDataV1() {
+		return new ApiInfoBuilder()//
 				// .title("JobDiva REST API") //
 				// .description("HTTP-based RESTful APIs For JobDiva") //
 				// .version("1.0.0") //
+				.build();
+	}
+	
+	private ApiInfo metaDataV2() {
+		return new ApiInfoBuilder()//
+				// .title("JobDiva REST API") //
+				// .description("HTTP-based RESTful APIs For JobDiva") //
+				// .version("2.0.0") //
 				.build();
 	}
 	

@@ -31,7 +31,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	private static final String[]		AUTH_WHITELIST	= {
 			// -- swagger ui //
-			// "/doc/api" //
+			"/doc/api",															//
 			"/v2/api-docs",														//
 			"/swagger-resources",												//
 			"/swagger-resources/**",											//
@@ -43,7 +43,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			"/logo/logo.png",													//
 			"/webjars/**",														//
 			"/swagger*",														//
-			"/csrf"																//
+			"/csrf*"															//
 			// other public endpoints of your API may be appended to this array
 	};
 	//
@@ -113,6 +113,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				//
 				antMatchers("/api/webhook/syncWebhook").permitAll().//
 				antMatchers("/api/webhook/welcome").permitAll().//
+				antMatchers("/csrf").permitAll().//
 				//
 				antMatchers(AUTH_WHITELIST).permitAll().
 				// antMatchers("/api/bi/*").hasRole("BAR").
