@@ -14,6 +14,7 @@ import com.jobdiva.api.model.chatbot.ChatbotHarvestAccount;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestMachineStatus;
 import com.jobdiva.api.model.chatbot.ChatbotHarvestStatus;
 import com.jobdiva.api.model.chatbot.ChatbotQuestion;
+import com.jobdiva.api.model.chatbot.ChatbotRecruiterInfo;
 import com.jobdiva.api.model.chatbot.ChatbotSocialQuestion;
 import com.jobdiva.api.model.chatbot.ChatbotTag;
 import com.jobdiva.api.model.chatbot.ChatbotTagValue;
@@ -83,6 +84,24 @@ public class ChatbotDataService {
 	public ChatbotUserData getUserData(JobDivaSession jobDivaSession) throws Exception {
 		try {
 			ChatbotUserData data = trainingDataDao.getUserData(jobDivaSession);
+			return data;
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+	public ChatbotUserData getRecruiterData(JobDivaSession jobDivaSession,long recruiterid) throws Exception {
+		try {
+			ChatbotUserData data = trainingDataDao.getRecruiterData(jobDivaSession,recruiterid);
+			return data;
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+
+	public List<ChatbotRecruiterInfo> getRecruiterList(JobDivaSession jobDivaSession) throws Exception {
+		try {
+			List<ChatbotRecruiterInfo> data = trainingDataDao.getRecruiterList(jobDivaSession);
 			return data;
 		} catch (Exception e) {
 			throw new Exception(e.getMessage());
