@@ -54,4 +54,22 @@ public class NotificationController extends AbstractJobDivaController{
  	} //
 	
 	
+	@ApiOperation(value = "Unregister Notification")
+ 	@RequestMapping(value = "/unregisterNotification", method = RequestMethod.POST, produces = "application/json")
+ 	public Boolean unregisterNotification( //
+ 			//
+ 			@ApiParam(value = "Device Id", required = true) //
+ 			@RequestParam(required = true) String deviceId  //
+ 			//
+ 	) throws Exception {
+ 		//
+ 		JobDivaSession jobDivaSession = getJobDivaSession();
+ 		//
+ 		jobDivaSession.checkForAPIPermission("unregisterNotification");
+ 		//
+ 		return notificationService.unregisterNotification(jobDivaSession, deviceId);
+ 		//
+ 	} //
+	
+	
 }

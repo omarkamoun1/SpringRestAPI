@@ -1,5 +1,7 @@
 package com.jobdiva.api.dao.notification;
 
+import java.util.ArrayList;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +39,37 @@ public class NotificationDao extends AbstractJobDivaDao  {
 			
 			return false;
 		}
+	}
+
+	public Boolean unregisterNotification(JobDivaSession jobDivaSession, String deviceId) throws Exception {
+		
+		String sql_stmt = "delete from trecruiter_devicetoken where recruiterid=? ";
+		if(deviceId!=null && deviceId.trim().length()>0){
+			sql_stmt+=" and deviceid=? ";
+		}
+		//
+		ArrayList<Object> paramList = new ArrayList<Object>();
+		//
+		paramList.add(jobDivaSession.getRecruiterId());
+		//
+		if(deviceId!=null && deviceId.trim().length()>0){
+			paramList.add(deviceId);
+		}
+		//
+		Object[] params = paramList.toArray();
+		//
+		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		//
+		int res=jdbcTemplate.update(sql_stmt,params);
+		
+		if (res>0) {
+			
+			return true;
+			
+		}else{
+			
+			return false;
+		} 
 	}
 
 }
