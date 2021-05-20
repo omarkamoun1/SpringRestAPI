@@ -1,5 +1,7 @@
 package com.jobdiva.api.controller.v1.jobdivaapi;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jobdiva.api.controller.AbstractJobDivaController;
+import com.jobdiva.api.model.Notification;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
 import com.jobdiva.api.service.NotificationService;
 
@@ -71,5 +74,16 @@ public class NotificationController extends AbstractJobDivaController{
  		//
  	} //
 	
+	@ApiOperation(value = "Get User Notifications")
+ 	@RequestMapping(value = "/GetUserNotifications", method = RequestMethod.GET, produces = "application/json")
+ 	public List<Notification> getUserNotifications() throws Exception {
+ 		//
+ 		JobDivaSession jobDivaSession = getJobDivaSession();
+ 		//
+ 		jobDivaSession.checkForAPIPermission("getUserNotifications");
+ 		//
+ 		return notificationService.getUserNotifications(jobDivaSession);
+ 		//
+ 	} //
 	
 }
