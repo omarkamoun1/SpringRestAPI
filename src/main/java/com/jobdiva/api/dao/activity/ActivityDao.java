@@ -12,10 +12,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import com.jobdiva.api.dao.candidate.CandidateDao;
-import com.jobdiva.api.dao.job.JobDao;
 import com.jobdiva.api.model.Activity;
 import com.jobdiva.api.model.authenticate.JobDivaSession;
+import com.jobdiva.api.dao.candidate.CandidateDao;
+import com.jobdiva.api.dao.job.JobDao;
 
 @Component
 public class ActivityDao extends AbstractActivityDao {

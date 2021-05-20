@@ -117,7 +117,7 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
 				//
 				.groupName("Version 1") //
 				.select() //
-				.apis(RequestHandlerSelectors.basePackage("com.jobdiva.api.controller.v1")) //
+				.apis(RequestHandlerSelectors.basePackage("com.jobdiva.api")) //
 				.paths(regex("/api.*")) //
 				.build() //
 				.securitySchemes(Arrays.asList(apiKey()))//
@@ -131,7 +131,7 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
 				//
 				.groupName("Version 2 Beta") //
 				.select() //
-				.apis(RequestHandlerSelectors.basePackage("com.jobdiva.api.controller.v2"))
+				.apis(RequestHandlerSelectors.basePackage("com.jobdiva.api.controller.v2"))//
 				//
 				.paths(regex("/apiv2.*")) //
 				.build() //

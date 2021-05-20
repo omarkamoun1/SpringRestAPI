@@ -42,12 +42,19 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.Ordering;
 
 import springfox.documentation.RequestHandler;
+import springfox.documentation.spi.service.DocumentationPlugin;
 import springfox.documentation.spi.service.RequestHandlerCombiner;
 
 class DefaultRequestHandlerCombiner implements RequestHandlerCombiner {
 	
 	private static final Logger							LOGGER		= LoggerFactory.getLogger(DefaultRequestHandlerCombiner.class);
 	private static final PathAndParametersEquivalence	EQUIVALENCE	= new PathAndParametersEquivalence();
+	DocumentationPlugin									plugin;
+	
+	public DefaultRequestHandlerCombiner(DocumentationPlugin plugin) {
+		super();
+		this.plugin = plugin;
+	}
 	
 	public List<RequestHandler> combine(List<RequestHandler> source) {
 		List<RequestHandler> combined = new ArrayList<RequestHandler>();
@@ -57,7 +64,10 @@ class DefaultRequestHandlerCombiner implements RequestHandlerCombiner {
 			LOGGER.debug("Adding key: {}, {}", patternsCondition(each).toString(), each.toString());
 			byPath.put(patternsCondition(each).toString(), each);
 		}
+		Boolean v1 = (plugin.getGroupName().equalsIgnoreCase("Version 1"));
 		for (String key : byPath.keySet()) {
+			if (v1 && key.toLowerCase().contains("v2"))
+				continue;
 			combined.addAll(combined(byPath.get(key)));
 		}
 		LOGGER.debug("Combined number of request handlers {}", combined.size());

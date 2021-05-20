@@ -22,14 +22,23 @@ import com.jobdiva.api.utils.StringUtils;
 public class JobUserDao extends AbstractJobDivaDao {
 	
 	public List<JobUserSimple> getAllJobUsers(JobDivaSession jobDivaSession, Long jobId) {
-		String sql = "Select ID,NVL(T1.Recruiterid,0) as rfqRecruiter,a.Firstname,a.Lastname,a.email," + //
-				"a.rec_email, a.workphone, a.leader, NVL(T1.lead_recruiter,0), NVL(T1.sales,0), " + //
-				"NVL(T1.lead_sales,0),NVL(T1.recruiter,0),  nvl(a.user_options, 0), a.active  " + //
-				" From tRecruiter a," + //
-				" (select * From trecruiterrfq where rfqid= ? ) T1" + //
-				" Where Groupid= ? and active=1 and id<>688 and bitand(leader, 4096+16384+2097152+32768)=0 " + //
-				"   And T1.RecruiterId(+)=ID " + //
-				" Order by upper(Lastname),upper(Firstname)"; //
+		// String sql = "Select ID,NVL(T1.Recruiterid,0) as
+		// rfqRecruiter,a.Firstname,a.Lastname,a.email," + //
+		// "a.rec_email, a.workphone, a.leader, NVL(T1.lead_recruiter,0),
+		// NVL(T1.sales,0), " + //
+		// "NVL(T1.lead_sales,0),NVL(T1.recruiter,0), nvl(a.user_options, 0),
+		// a.active " + //
+		// " From tRecruiter a," + //
+		// " (select * From trecruiterrfq where rfqid= ? ) T1" + //
+		// " Where Groupid= ? and active=1 and id<>688 and bitand(leader,
+		// 4096+16384+2097152+32768)=0 " + //
+		// " And T1.RecruiterId(+)=ID " + //
+		// " Order by upper(Lastname),upper(Firstname)"; //
+		//
+		//
+		//
+		String sql = "select c.ID, c.Firstname, c.Lastname, b.recruiterid, b.lead_recruiter, b.sales, b.lead_sales, b.recruiter "
+				+ " from trfq a, trecruiterrfq b, trecruiter c where a.id=? and a.teamid=? and a.teamid = b.teamid and a.id = b.rfqid and b.recruiterid=c.id ";
 		Object[] params = new Object[] { jobId, jobDivaSession.getTeamId() };
 		//
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
@@ -247,7 +256,7 @@ public class JobUserDao extends AbstractJobDivaDao {
 	private void SendEmailJobAssignment(JdbcTemplate jdbcTemplate, Long rfqid, Long teamId, Long recruiterid, String assignedTitle, String env, String recruiterEmail, String recruiterName, int email_option, boolean sendEmail, long recruiterId2)
 			throws Exception {
 		// contract=0---not specified 1--direct placement 2--contract 3--right
-			// to hire, 4--full time
+		// to hire, 4--full time
 		String sqlStr = "select rfq.rfqno_team,rfq.rfqrefno,rfq.rfqtitle,rfq.department,rfq.city,decode(countries.defaultdisplay,1,states.state_name, states.state_abbr) as jobstate, countries.country as countryname,rfq.jobdescription,"
 				+ "cus.firstname,cus.lastname,rfq.billratemin," + "rfq.billratemax,"
 				+ "decode(rfq.billrateper,'h','hour','d','day','y','year',(select x.name from trateunits x where rfq.billrateper=x.unitid and x.teamid=rfq.teamid and x.ratetype=1 and x.deleted=0 )) as billUnit, " + // "ASCII(rfq.billrateper)
